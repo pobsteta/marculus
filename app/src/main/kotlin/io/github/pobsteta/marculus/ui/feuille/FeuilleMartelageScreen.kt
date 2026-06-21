@@ -315,23 +315,43 @@ private fun TriangleAlerte(signe: String) {
 
 @Composable
 private fun SaisieHauteurDialog(onAnnuler: () -> Unit, onValider: (String) -> Unit) {
-    var texte by remember { mutableStateOf("") }
+    var hauteur by remember { mutableStateOf("") }
+    var decoupe by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onAnnuler,
         title = { Text("Hauteur de la dernière tige") },
         text = {
-            Column {
-                Text("Format : hauteur, puis « - », puis découpe. Ex. 27-6AB4CD")
-                Box(Modifier.height(8.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
-                    value = texte,
-                    onValueChange = { texte = it },
+                    value = hauteur,
+                    onValueChange = { hauteur = it },
+                    label = { Text("Hauteur (m)") },
+                    placeholder = { Text("ex. 27") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = decoupe,
+                    onValueChange = { decoupe = it },
+                    label = { Text("Découpe / qualités bois") },
+                    placeholder = { Text("ex. 6AB4CD") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                Text(
+                    "La découpe associe longueurs et qualités bois (ex. 6 m de AB, 4 m de CD).",
+                    style = MaterialTheme.typography.bodySmall,
+                )
             }
         },
-        confirmButton = { TextButton(onClick = { onValider(texte) }) { Text("Valider") } },
+        confirmButton = {
+            TextButton(onClick = {
+                val h = hauteur.trim()
+                val d = decoupe.trim()
+                onValider(if (d.isNotBlank()) "$h-$d" else h)
+            }) { Text("Valider") }
+        },
         dismissButton = { TextButton(onClick = onAnnuler) { Text("Annuler") } },
     )
 }
