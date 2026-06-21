@@ -18,6 +18,9 @@ class MarculusApplication : Application() {
         val base = File(cacheDir, "osmdroid").apply { mkdirs() }
         config.osmdroidBasePath = base
         config.osmdroidTileCache = File(base, "tiles").apply { mkdirs() }
+        // Diagnostic temporaire du chargement des tuiles.
+        config.isDebugMode = true
+        config.isDebugMapTileDownloader = true
     }
 
     private val data by lazy { MarculusData.creer(this) }

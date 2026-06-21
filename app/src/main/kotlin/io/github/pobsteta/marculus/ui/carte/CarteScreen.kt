@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -74,7 +75,22 @@ fun CarteScreen(
         onDispose { mapView.onPause() }
     }
 
+    fun recadrer() {
+        val points = journal.filter { it.action == ActionTige.PLUS && it.position != null }
+            .map { GeoPoint(it.position!!.latitude, it.position!!.longitude) }
+        when {
+            points.size == 1 -> {
+                mapView.controller.setZoom(17.0)
+                mapView.controller.animateTo(points.first())
+            }
+            points.size > 1 -> mapView.zoomToBoundingBox(BoundingBox.fromGeoPoints(points), true, 80)
+        }
+    }
+
     Scaffold(
+        floatingActionButton = {
+            ExtendedFloatingActionButton(onClick = { recadrer() }) { Text("Recentrer") }
+        },
         topBar = {
             TopAppBar(
                 title = { Text(contexte?.nom ?: "Carte") },
@@ -129,7 +145,11 @@ fun CarteScreen(
                         Marker(map).apply {
                             position = gp
                             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                            icon = marqueur(context, couleurs[t.essence] ?: 0xFF888888.toInt())
+                            icon = marqueur(
+                                context,
+                                couleurs[t.essence] ?: 0xFF888888.toInt(),
+                                tailleMarqueur(ctx.axe.min, ctx.axe.max, t.classe),
+                            )
                             title = "${t.essence} ${t.classe}"
                         },
                     )
@@ -149,9 +169,15 @@ fun CarteScreen(
     }
 }
 
+/** Diamètre (px) de la pastille, proportionnel à la classe dans l'étendue de l'axe. */
+private fun tailleMarqueur(min: Int, max: Int, classe: Int): Int {
+    val etendue = (max - min).coerceAtLeast(1)
+    val fraction = ((classe - min).toFloat() / etendue).coerceIn(0f, 1f)
+    return (24 + 40 * fraction).toInt() // 24 px (petite classe) → 64 px (grande classe)
+}
+
 /** Pastille circulaire colorée (couleur de l'essence) servant d'icône de marqueur. */
-private fun marqueur(context: Context, couleur: Int): Drawable {
-    val taille = 36
+private fun marqueur(context: Context, couleur: Int, taille: Int): Drawable {
     val bmp = Bitmap.createBitmap(taille, taille, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bmp)
     val rayon = taille / 2f - 3f

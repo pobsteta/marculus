@@ -76,7 +76,10 @@ fun ListeContextesScreen(
                 val ctx = repository.contexte(id) ?: return@launch
                 val journal = repository.journalInstantane(id)
                 val csv = ExportCsv.contexteCsv(ctx, journal)
-                context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray(Charsets.UTF_8)) }
+                context.contentResolver.openOutputStream(uri)?.use {
+                    // BOM UTF-8 pour qu'Excel détecte l'encodage et affiche correctement les accents.
+                    it.write("﻿$csv".toByteArray(Charsets.UTF_8))
+                }
                 repository.marquerExporte(id)
             }
         }
