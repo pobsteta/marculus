@@ -66,10 +66,13 @@ private val LARGEUR_CELLULE = 140.dp
 private val HAUTEUR_CELLULE = 144.dp
 
 private sealed interface Saisie {
-    data class Hauteur(val essence: String, val classe: Int) : Saisie
-    data class Qualite(val essence: String, val classe: Int) : Saisie
+    data class Hauteur(val uuid: String) : Saisie
+    data class Qualite(val uuid: String) : Saisie
     data class Avis(val essence: String, val classe: Int) : Saisie
 }
+
+/** Dernière tige saisie (la seule annotable par H/Q) : son uuid et sa cellule. */
+private data class DerniereSaisie(val uuid: String, val essence: String, val classe: Int)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +88,7 @@ fun FeuilleMartelageScreen(
     val totaux by repository.totaux(contexteId).collectAsStateWithLifecycle(emptyMap())
     val configs by repository.configs(contexteId).collectAsStateWithLifecycle(emptyMap())
     var saisie by remember { mutableStateOf<Saisie?>(null) }
+    var derniereSaisie by remember { mutableStateOf<DerniereSaisie?>(null) }
     var menuReset by remember { mutableStateOf(false) }
     var confirmerReset by remember { mutableStateOf(false) }
 
@@ -143,6 +147,7 @@ fun FeuilleMartelageScreen(
                         val cle = CompteurCle(e.nom, classe)
                         val total = totaux[cle] ?: 0
                         val cfg = configs[cle]
+                        val estDerniere = derniereSaisie?.let { it.essence == e.nom && it.classe == classe } ?: false
                         CelluleCompteur(
                             libelle = "${e.nom} $classe",
                             total = total,
@@ -150,17 +155,22 @@ fun FeuilleMartelageScreen(
                             texte = Color(e.couleurTexteArgb),
                             alerteMoins = cfg?.alerteMoins(total) ?: false,
                             alertePlus = cfg?.alertePlus(total) ?: false,
+                            hqActif = estDerniere,
                             onPlus = {
-                                scope.launch { repository.ajouterTige(contexteId, e.nom, classe, quantite = ctx.increment) }
+                                scope.launch {
+                                    val uuid = repository.ajouterTige(contexteId, e.nom, classe, quantite = ctx.increment)
+                                    derniereSaisie = DerniereSaisie(uuid, e.nom, classe)
+                                }
                             },
                             onMoins = {
                                 if (total > 0) {
                                     val q = minOf(ctx.increment, total) // jamais en dessous de zéro
                                     scope.launch { repository.annulerTige(contexteId, e.nom, classe, quantite = q) }
+                                    derniereSaisie = null // un − ferme la saisie en cours
                                 }
                             },
-                            onHauteur = { saisie = Saisie.Hauteur(e.nom, classe) },
-                            onQualite = { saisie = Saisie.Qualite(e.nom, classe) },
+                            onHauteur = { derniereSaisie?.let { saisie = Saisie.Hauteur(it.uuid) } },
+                            onQualite = { derniereSaisie?.let { saisie = Saisie.Qualite(it.uuid) } },
                             onAvis = { saisie = Saisie.Avis(e.nom, classe) },
                         )
                     }
@@ -188,7 +198,7 @@ fun FeuilleMartelageScreen(
         is Saisie.Hauteur -> SaisieHauteurDialog(
             onAnnuler = { saisie = null },
             onValider = { texte ->
-                scope.launch { repository.annoterDerniere(contexteId, s.essence, s.classe, hauteurTexte = texte, qualiteArbre = null) }
+                scope.launch { repository.annoterHauteur(s.uuid, texte) }
                 saisie = null
             },
         )
@@ -196,7 +206,7 @@ fun FeuilleMartelageScreen(
         is Saisie.Qualite -> ChoixQualiteDialog(
             onAnnuler = { saisie = null },
             onChoisir = { qualite ->
-                scope.launch { repository.annoterDerniere(contexteId, s.essence, s.classe, hauteurTexte = null, qualiteArbre = qualite) }
+                scope.launch { repository.annoterQualite(s.uuid, qualite) }
                 saisie = null
             },
         )
@@ -221,6 +231,7 @@ private fun CelluleCompteur(
     texte: Color,
     alerteMoins: Boolean,
     alertePlus: Boolean,
+    hqActif: Boolean,
     onPlus: () -> Unit,
     onMoins: () -> Unit,
     onHauteur: () -> Unit,
@@ -228,6 +239,7 @@ private fun CelluleCompteur(
     onAvis: () -> Unit,
 ) {
     var menu by remember { mutableStateOf(false) }
+    val couleurHQ = texte.copy(alpha = if (hqActif) 1f else 0.38f)
     Card(
         modifier = Modifier.width(LARGEUR_CELLULE).height(HAUTEUR_CELLULE).padding(2.dp),
         colors = CardDefaults.cardColors(containerColor = fond),
@@ -235,8 +247,8 @@ private fun CelluleCompteur(
         Column(Modifier.fillMaxSize().padding(4.dp)) {
             // Haut : H — libellé (essence + classe) — Q.
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onHauteur, modifier = Modifier.size(32.dp)) {
-                    Text("H", color = texte, style = MaterialTheme.typography.titleMedium)
+                IconButton(onClick = onHauteur, enabled = hqActif, modifier = Modifier.size(32.dp)) {
+                    Text("H", color = couleurHQ, style = MaterialTheme.typography.titleMedium)
                 }
                 Text(
                     libelle,
@@ -247,8 +259,8 @@ private fun CelluleCompteur(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f).padding(horizontal = 2.dp),
                 )
-                IconButton(onClick = onQualite, modifier = Modifier.size(32.dp)) {
-                    Text("Q", color = texte, style = MaterialTheme.typography.titleMedium)
+                IconButton(onClick = onQualite, enabled = hqActif, modifier = Modifier.size(32.dp)) {
+                    Text("Q", color = couleurHQ, style = MaterialTheme.typography.titleMedium)
                 }
             }
             // Centre : la valeur encadrée des alertes (⚠− à gauche, ⚠+ à droite), menu ⋮ en coin.

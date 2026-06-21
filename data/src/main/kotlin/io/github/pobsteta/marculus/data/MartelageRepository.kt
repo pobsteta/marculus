@@ -197,6 +197,12 @@ class MartelageRepository(
         )
     }
 
+    /** Annote une tige précise (par uuid) : la hauteur. */
+    suspend fun annoterHauteur(uuid: String, hauteurTexte: String?) = tigeDao.majHauteur(uuid, hauteurTexte)
+
+    /** Annote une tige précise (par uuid) : la qualité arbre. */
+    suspend fun annoterQualite(uuid: String, qualiteArbre: String?) = tigeDao.majQualite(uuid, qualiteArbre)
+
     /** Annote la dernière tige PLUS d'une cellule (hauteur et/ou qualité arbre). */
     suspend fun annoterDerniere(
         contexteId: String,

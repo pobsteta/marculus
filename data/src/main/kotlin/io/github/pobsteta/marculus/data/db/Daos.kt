@@ -45,6 +45,12 @@ interface TigeDao {
     @Query("UPDATE tige SET hauteurTexte = :hauteur, qualiteArbre = :qualite WHERE uuid = :uuid")
     suspend fun annoter(uuid: String, hauteur: String?, qualite: String?)
 
+    @Query("UPDATE tige SET hauteurTexte = :hauteur WHERE uuid = :uuid")
+    suspend fun majHauteur(uuid: String, hauteur: String?)
+
+    @Query("UPDATE tige SET qualiteArbre = :qualite WHERE uuid = :uuid")
+    suspend fun majQualite(uuid: String, qualite: String?)
+
     @Query("DELETE FROM tige WHERE contexteId = :contexteId")
     suspend fun supprimerParContexte(contexteId: String)
 }
