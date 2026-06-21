@@ -324,9 +324,10 @@ private fun SaisieHauteurDialog(onAnnuler: () -> Unit, onValider: (String) -> Un
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = hauteur,
-                    onValueChange = { hauteur = it },
+                    // Chiffres + un séparateur décimal (virgule ou point) : accepte 27, 27.5 ou 27,5.
+                    onValueChange = { v -> hauteur = v.filter { it.isDigit() || it == '.' || it == ',' } },
                     label = { Text("Hauteur (m)") },
-                    placeholder = { Text("ex. 27") },
+                    placeholder = { Text("ex. 27,5") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
