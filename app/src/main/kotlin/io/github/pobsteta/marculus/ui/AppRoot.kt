@@ -18,11 +18,13 @@ import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.ui.contextes.CreationContexteScreen
 import io.github.pobsteta.marculus.ui.contextes.ListeContextesScreen
 import io.github.pobsteta.marculus.ui.feuille.FeuilleMartelageScreen
+import io.github.pobsteta.marculus.ui.parametres.ParametresScreen
 
 /** Navigation minimale entre les écrans de la v1. */
 sealed interface Route {
     data object Liste : Route
     data object Creation : Route
+    data object Parametres : Route
     data class Edition(val contexteId: String) : Route
     data class Feuille(val contexteId: String) : Route
 }
@@ -32,6 +34,7 @@ private val RouteSaver = listSaver<Route, String>(
         when (route) {
             Route.Liste -> listOf("liste")
             Route.Creation -> listOf("creation")
+            Route.Parametres -> listOf("parametres")
             is Route.Edition -> listOf("edition", route.contexteId)
             is Route.Feuille -> listOf("feuille", route.contexteId)
         }
@@ -39,6 +42,7 @@ private val RouteSaver = listSaver<Route, String>(
     restore = { l ->
         when (l[0]) {
             "creation" -> Route.Creation
+            "parametres" -> Route.Parametres
             "edition" -> Route.Edition(l[1])
             "feuille" -> Route.Feuille(l[1])
             else -> Route.Liste
@@ -62,6 +66,7 @@ fun AppRoot(repository: MartelageRepository) {
             onCreer = { route = Route.Creation },
             onOuvrir = { id -> route = Route.Feuille(id) },
             onModifier = { id -> route = Route.Edition(id) },
+            onParametres = { route = Route.Parametres },
         )
 
         Route.Creation -> CreationContexteScreen(
@@ -70,6 +75,8 @@ fun AppRoot(repository: MartelageRepository) {
             onAnnuler = { route = Route.Liste },
             onEnregistre = { id -> route = Route.Feuille(id) },
         )
+
+        Route.Parametres -> ParametresScreen(onRetour = { route = Route.Liste })
 
         is Route.Edition -> {
             val contexte by produceState<Contexte?>(initialValue = null, r.contexteId) {

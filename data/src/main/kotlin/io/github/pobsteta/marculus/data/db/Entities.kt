@@ -15,6 +15,7 @@ data class ContexteEntity(
     val essences: String,        // encodé : nom US fond US texte, enregistrements séparés par RS
     val commentaire: String?,
     val increment: Int,
+    val exporte: Boolean,
     val dateCreation: Long,
     val operateur: String?,
 )

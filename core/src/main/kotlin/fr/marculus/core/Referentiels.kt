@@ -19,6 +19,21 @@ object Referentiels {
     const val COULEUR_FOND_DEFAUT: Int = 0xFF1FA0EC.toInt()
     const val COULEUR_TEXTE_DEFAUT: Int = 0xFFFFFFFF.toInt()
 
+    /** Fond par défaut distinct par essence (assez foncé pour un texte blanc), cyclé au besoin. */
+    val COULEURS_ESSENCES_DEFAUT: List<Int> = listOf(
+        0xFF6D4C41, // brun
+        0xFFEF6C00, // orange
+        0xFF2E7D32, // vert
+        0xFF00838F, // cyan foncé
+        0xFF1565C0, // bleu
+        0xFF6A1B9A, // violet
+        0xFFC62828, // rouge
+        0xFF455A64, // gris-bleu
+    ).map { it.toInt() }
+
+    fun couleurFondDefaut(index: Int): Int =
+        COULEURS_ESSENCES_DEFAUT[(if (index < 0) 0 else index) % COULEURS_ESSENCES_DEFAUT.size]
+
     /** Palette proposée pour le choix des couleurs (ordre proche de l'app de référence). */
     val PALETTE: List<Int> = listOf(
         0xFFE53935, 0xFFD81B60, 0xFF8E24AA, 0xFF5E35B1, 0xFF3949AB, 0xFF1E88E5,

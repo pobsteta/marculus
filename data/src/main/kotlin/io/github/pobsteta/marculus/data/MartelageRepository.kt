@@ -17,8 +17,15 @@ import io.github.pobsteta.marculus.data.db.ContexteEntity
 import io.github.pobsteta.marculus.data.db.TigeDao
 import io.github.pobsteta.marculus.data.db.TigeEntity
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import java.util.UUID
+
+/** Un contexte accompagné de son nombre d'événements (pour l'affichage et le verrouillage). */
+data class ResumeContexte(val contexte: Contexte, val nbEvenements: Int) {
+    /** Verrouillé (lecture seule) : il contient des tiges et n'a pas encore été exporté. */
+    val verrouille: Boolean get() = nbEvenements > 0 && !contexte.exporte
+}
 
 private const val RS = "" // séparateur d'enregistrements (essences)
 private const val US = "" // séparateur de champs (nom / fond / texte)
@@ -35,7 +42,36 @@ class MartelageRepository(
     fun contextes(): Flow<List<Contexte>> =
         contexteDao.observerTous().map { liste -> liste.map { it.versDomaine() } }
 
+    /** Contextes + nombre d'événements (combine la liste et les comptes de tiges). */
+    fun resumes(): Flow<List<ResumeContexte>> =
+        contexteDao.observerTous().combine(tigeDao.observerComptes()) { contextes, comptes ->
+            val parId = comptes.associate { it.contexteId to it.n }
+            contextes.map { ResumeContexte(it.versDomaine(), parId[it.id] ?: 0) }
+        }
+
     suspend fun contexte(id: String): Contexte? = contexteDao.parId(id)?.versDomaine()
+
+    /** Duplique un contexte avec toutes ses caractéristiques et ses avis, mais sans les tiges. */
+    suspend fun dupliquerContexte(id: String): String? {
+        val source = contexteDao.parId(id) ?: return null
+        val nouvelId = UUID.randomUUID().toString()
+        contexteDao.inserer(
+            source.copy(
+                id = nouvelId,
+                nom = "${source.nom} (copie)",
+                exporte = false,
+                dateCreation = horloge(),
+            ),
+        )
+        configDao.listeParContexte(id).forEach { configDao.upsert(it.copy(contexteId = nouvelId)) }
+        return nouvelId
+    }
+
+    /** Marque un contexte comme exporté (débloque modification/suppression). */
+    suspend fun marquerExporte(id: String) {
+        val existant = contexteDao.parId(id) ?: return
+        contexteDao.inserer(existant.copy(exporte = true))
+    }
 
     suspend fun creerContexte(
         nom: String,
@@ -58,6 +94,7 @@ class MartelageRepository(
                 essences = encodeEssences(essences),
                 commentaire = commentaire,
                 increment = increment,
+                exporte = false,
                 dateCreation = horloge(),
                 operateur = operateur,
             ),
@@ -254,6 +291,7 @@ class MartelageRepository(
         essences = decodeEssences(essences),
         commentaire = commentaire,
         increment = increment,
+        exporte = exporte,
     )
 
     private fun TigeEntity.versDomaine() = Tige(

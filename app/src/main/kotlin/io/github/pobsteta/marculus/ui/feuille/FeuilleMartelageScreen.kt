@@ -82,20 +82,20 @@ fun FeuilleMartelageScreen(
             TopAppBar(
                 title = { Text(contexte?.nom ?: "Feuille de martelage") },
                 navigationIcon = {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = onRetour) {
-                            Text("←", style = MaterialTheme.typography.titleLarge)
+                    IconButton(onClick = onRetour) {
+                        Text("←", style = MaterialTheme.typography.titleLarge)
+                    }
+                },
+                actions = {
+                    Box {
+                        IconButton(onClick = { menuReset = true }) {
+                            Text("⋮", style = MaterialTheme.typography.titleLarge)
                         }
-                        Box {
-                            IconButton(onClick = { menuReset = true }) {
-                                Text("⋮", style = MaterialTheme.typography.titleLarge)
-                            }
-                            DropdownMenu(expanded = menuReset, onDismissRequest = { menuReset = false }) {
-                                DropdownMenuItem(
-                                    text = { Text("Réinitialiser la fiche à zéro") },
-                                    onClick = { menuReset = false; confirmerReset = true },
-                                )
-                            }
+                        DropdownMenu(expanded = menuReset, onDismissRequest = { menuReset = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Réinitialiser la fiche à zéro") },
+                                onClick = { menuReset = false; confirmerReset = true },
+                            )
                         }
                     }
                 },
@@ -103,6 +103,7 @@ fun FeuilleMartelageScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
             )
         },

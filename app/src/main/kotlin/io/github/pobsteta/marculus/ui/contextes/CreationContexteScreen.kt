@@ -35,9 +35,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import android.content.res.Configuration
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import fr.marculus.core.Referentiels
@@ -85,7 +87,8 @@ fun CreationContexteScreen(
             contexteExistant?.essences?.forEach { put(it.nom, it.couleurFondArgb to it.couleurTexteArgb) }
         }
     }
-    fun fond(e: String) = couleurs[e]?.first ?: Referentiels.COULEUR_FOND_DEFAUT
+    // Fond distinct par défaut selon la position de l'essence ; texte blanc.
+    fun fond(e: String) = couleurs[e]?.first ?: Referentiels.couleurFondDefaut(essencesDisponibles.indexOf(e))
     fun texte(e: String) = couleurs[e]?.second ?: Referentiels.COULEUR_TEXTE_DEFAUT
 
     var erreur by remember { mutableStateOf<String?>(null) }
@@ -133,11 +136,12 @@ fun CreationContexteScreen(
                 }
             }
 
+            val paysage = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ChampNombre("Min", min, { min = it }, Modifier.weight(1f))
-                ChampNombre("Max", max, { max = it }, Modifier.weight(1f))
-                ChampNombre("Pas", pas, { pas = it }, Modifier.weight(1f))
-                ChampNombre("Incrément", increment, { increment = it }, Modifier.weight(1f))
+                ChampNombre(if (paysage) "Minimum" else "Min", min, { min = it }, Modifier.weight(1f))
+                ChampNombre(if (paysage) "Maximum" else "Max", max, { max = it }, Modifier.weight(1f))
+                ChampNombre(if (paysage) "Par pas de" else "Pas", pas, { pas = it }, Modifier.weight(1f))
+                ChampNombre(if (paysage) "Incrément" else "Inc", increment, { increment = it }, Modifier.weight(1f))
             }
 
             HorizontalDivider()

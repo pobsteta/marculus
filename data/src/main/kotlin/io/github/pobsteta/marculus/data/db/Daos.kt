@@ -32,6 +32,9 @@ interface TigeDao {
     @Query("SELECT * FROM tige WHERE contexteId = :contexteId")
     suspend fun listeParContexte(contexteId: String): List<TigeEntity>
 
+    @Query("SELECT contexteId, COUNT(*) AS n FROM tige GROUP BY contexteId")
+    fun observerComptes(): Flow<List<CompteContexte>>
+
     /** Dernière tige PLUS d'une cellule (pour l'annotation hauteur/qualité a posteriori). */
     @Query(
         "SELECT * FROM tige WHERE contexteId = :contexteId AND essence = :essence " +
@@ -46,6 +49,9 @@ interface TigeDao {
     suspend fun supprimerParContexte(contexteId: String)
 }
 
+/** Projection : nombre d'événements (tiges) par contexte. */
+data class CompteContexte(val contexteId: String, val n: Int)
+
 @Dao
 interface CompteurConfigDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -55,6 +61,9 @@ interface CompteurConfigDao {
         "SELECT * FROM compteur_config WHERE contexteId = :contexteId AND essence = :essence AND classe = :classe",
     )
     suspend fun parCle(contexteId: String, essence: String, classe: Int): CompteurConfigEntity?
+
+    @Query("SELECT * FROM compteur_config WHERE contexteId = :contexteId")
+    suspend fun listeParContexte(contexteId: String): List<CompteurConfigEntity>
 
     @Query("DELETE FROM compteur_config WHERE contexteId = :contexteId")
     suspend fun supprimerParContexte(contexteId: String)

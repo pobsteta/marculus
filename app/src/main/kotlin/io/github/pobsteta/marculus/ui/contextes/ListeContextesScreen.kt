@@ -34,8 +34,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import fr.marculus.core.model.Contexte
 import io.github.pobsteta.marculus.data.MartelageRepository
+import io.github.pobsteta.marculus.data.ResumeContexte
 import io.github.pobsteta.marculus.ui.libelle
 import kotlinx.coroutines.launch
 
@@ -46,19 +46,35 @@ fun ListeContextesScreen(
     onCreer: () -> Unit,
     onOuvrir: (String) -> Unit,
     onModifier: (String) -> Unit,
+    onParametres: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val contextes by repository.contextes().collectAsStateWithLifecycle(emptyList())
-    var aSupprimer by remember { mutableStateOf<Contexte?>(null) }
-    var aLire by remember { mutableStateOf<Contexte?>(null) }
+    val resumes by repository.resumes().collectAsStateWithLifecycle(emptyList())
+    var aSupprimer by remember { mutableStateOf<ResumeContexte?>(null) }
+    var aLire by remember { mutableStateOf<ResumeContexte?>(null) }
+    var menuAppli by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Marculus") },
+                actions = {
+                    Box {
+                        IconButton(onClick = { menuAppli = true }) {
+                            Text("⋮", style = MaterialTheme.typography.titleLarge)
+                        }
+                        DropdownMenu(expanded = menuAppli, onDismissRequest = { menuAppli = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Paramètres") },
+                                onClick = { menuAppli = false; onParametres() },
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
             )
         },
@@ -68,7 +84,7 @@ fun ListeContextesScreen(
             }
         },
     ) { padding ->
-        if (contextes.isEmpty()) {
+        if (resumes.isEmpty()) {
             Box(
                 Modifier.fillMaxSize().padding(padding).padding(32.dp),
                 contentAlignment = Alignment.Center,
@@ -84,13 +100,14 @@ fun ListeContextesScreen(
                 contentPadding = PaddingValues(12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                items(contextes, key = { it.id }) { contexte ->
+                items(resumes, key = { it.contexte.id }) { resume ->
                     CarteContexte(
-                        contexte = contexte,
-                        onOuvrir = { onOuvrir(contexte.id) },
-                        onModifier = { onModifier(contexte.id) },
-                        onSupprimer = { aSupprimer = contexte },
-                        onLire = { aLire = contexte },
+                        resume = resume,
+                        onOuvrir = { onOuvrir(resume.contexte.id) },
+                        onModifier = { onModifier(resume.contexte.id) },
+                        onSupprimer = { aSupprimer = resume },
+                        onLire = { aLire = resume },
+                        onDupliquer = { scope.launch { repository.dupliquerContexte(resume.contexte.id) } },
                     )
                 }
             }
@@ -101,10 +118,10 @@ fun ListeContextesScreen(
         AlertDialog(
             onDismissRequest = { aSupprimer = null },
             title = { Text("Supprimer le contexte ?") },
-            text = { Text("« ${cible.nom} » et tout son historique de martelage seront supprimés.") },
+            text = { Text("« ${cible.contexte.nom} » et tout son historique de martelage seront supprimés.") },
             confirmButton = {
                 TextButton(onClick = {
-                    scope.launch { repository.supprimerContexte(cible.id) }
+                    scope.launch { repository.supprimerContexte(cible.contexte.id) }
                     aSupprimer = null
                 }) { Text("Supprimer") }
             },
@@ -113,17 +130,24 @@ fun ListeContextesScreen(
     }
 
     aLire?.let { cible ->
+        val c = cible.contexte
         AlertDialog(
             onDismissRequest = { aLire = null },
-            title = { Text(cible.nom) },
+            title = { Text(c.nom) },
             text = {
                 Column {
-                    Text("Mesure : ${cible.mode.libelle()}")
-                    Text("Classes : ${cible.axe.min}–${cible.axe.max} (pas ${cible.axe.pas})")
-                    Text("Incrément : ${cible.increment}")
-                    Text("Essences : ${cible.essencesNoms.joinToString(", ")}")
-                    cible.commentaire?.takeIf { it.isNotBlank() }?.let {
-                        Text("Commentaire : $it")
+                    Text("Mesure : ${c.mode.libelle()}")
+                    Text("Classes : ${c.axe.min}–${c.axe.max} (pas ${c.axe.pas})")
+                    Text("Incrément : ${c.increment}")
+                    Text("Essences : ${c.essencesNoms.joinToString(", ")}")
+                    Text("Tiges enregistrées : ${cible.nbEvenements}")
+                    Text("Exporté : ${if (c.exporte) "oui" else "non"}")
+                    c.commentaire?.takeIf { it.isNotBlank() }?.let { Text("Commentaire : $it") }
+                    if (cible.verrouille) {
+                        Text(
+                            "Verrouillé : lecture seule tant que le contexte n'est pas exporté.",
+                            color = MaterialTheme.colorScheme.error,
+                        )
                     }
                 }
             },
@@ -134,12 +158,14 @@ fun ListeContextesScreen(
 
 @Composable
 private fun CarteContexte(
-    contexte: Contexte,
+    resume: ResumeContexte,
     onOuvrir: () -> Unit,
     onModifier: () -> Unit,
     onSupprimer: () -> Unit,
     onLire: () -> Unit,
+    onDupliquer: () -> Unit,
 ) {
+    val contexte = resume.contexte
     var menuOuvert by remember { mutableStateOf(false) }
     ElevatedCard(onClick = onOuvrir, modifier = Modifier.fillMaxWidth()) {
         Row(
@@ -150,7 +176,8 @@ private fun CarteContexte(
                 Text(contexte.nom, style = MaterialTheme.typography.titleLarge)
                 Text(
                     "${contexte.mode.libelle()} · classes ${contexte.axe.min}–${contexte.axe.max} " +
-                        "(pas ${contexte.axe.pas}) · ${contexte.essences.size} essences",
+                        "(pas ${contexte.axe.pas}) · ${contexte.essences.size} essences · ${resume.nbEvenements} tiges" +
+                        if (resume.verrouille) " · 🔒" else "",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -160,8 +187,17 @@ private fun CarteContexte(
                 }
                 DropdownMenu(expanded = menuOuvert, onDismissRequest = { menuOuvert = false }) {
                     DropdownMenuItem(text = { Text("Lire") }, onClick = { menuOuvert = false; onLire() })
-                    DropdownMenuItem(text = { Text("Modifier") }, onClick = { menuOuvert = false; onModifier() })
-                    DropdownMenuItem(text = { Text("Supprimer") }, onClick = { menuOuvert = false; onSupprimer() })
+                    DropdownMenuItem(text = { Text("Dupliquer") }, onClick = { menuOuvert = false; onDupliquer() })
+                    DropdownMenuItem(
+                        text = { Text("Modifier") },
+                        enabled = !resume.verrouille,
+                        onClick = { menuOuvert = false; onModifier() },
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Supprimer") },
+                        enabled = !resume.verrouille,
+                        onClick = { menuOuvert = false; onSupprimer() },
+                    )
                 }
             }
         }

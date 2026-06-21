@@ -51,6 +51,7 @@ data class Contexte(
     val essences: List<EssenceColonne>,
     val commentaire: String? = null,
     val increment: Int = 1,
+    val exporte: Boolean = false,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 }
