@@ -132,7 +132,7 @@ fun ParametresScreen(
                 maj(reglages.copy(sonClic = it))
             }
             LigneReglage(
-                "Enregistrer la position GPS",
+                "Enregistrer la position GNSS",
                 "Associe la position du téléphone à chaque tige (si l'autorisation est accordée).",
                 reglages.capturePosition,
             ) { active ->

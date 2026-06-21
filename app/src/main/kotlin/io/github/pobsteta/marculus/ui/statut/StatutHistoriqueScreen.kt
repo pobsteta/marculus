@@ -291,7 +291,7 @@ private fun OngletHistorique(contexte: Contexte, journal: List<Tige>) {
                             tige.hauteurTexte?.takeIf { it.isNotBlank() }?.let { add("h $it") }
                             tige.qualiteArbre?.let { add(it) }
                             tige.position?.let {
-                                add("GPS " + "%.5f, %.5f".format(java.util.Locale.US, it.latitude, it.longitude))
+                                add("GNSS " + "%.5f, %.5f".format(java.util.Locale.US, it.latitude, it.longitude))
                             }
                         }
                         if (details.isNotEmpty()) {

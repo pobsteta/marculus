@@ -1,9 +1,13 @@
 package io.github.pobsteta.marculus.ui
 
+import android.app.Activity
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -22,6 +26,7 @@ import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ReferentielsRepository
 import io.github.pobsteta.marculus.data.ReglagesRepository
 import io.github.pobsteta.marculus.data.SauvegardeRepository
+import io.github.pobsteta.marculus.ui.carte.CarteScreen
 import io.github.pobsteta.marculus.ui.contextes.CreationContexteScreen
 import io.github.pobsteta.marculus.ui.contextes.ListeContextesScreen
 import io.github.pobsteta.marculus.ui.feuille.FeuilleMartelageScreen
@@ -38,6 +43,7 @@ sealed interface Route {
     data class Edition(val contexteId: String) : Route
     data class Feuille(val contexteId: String) : Route
     data class Statut(val contexteId: String) : Route
+    data class Carte(val contexteId: String) : Route
 }
 
 private val RouteSaver = listSaver<Route, String>(
@@ -50,6 +56,7 @@ private val RouteSaver = listSaver<Route, String>(
             is Route.Edition -> listOf("edition", route.contexteId)
             is Route.Feuille -> listOf("feuille", route.contexteId)
             is Route.Statut -> listOf("statut", route.contexteId)
+            is Route.Carte -> listOf("carte", route.contexteId)
         }
     },
     restore = { l ->
@@ -60,6 +67,7 @@ private val RouteSaver = listSaver<Route, String>(
             "edition" -> Route.Edition(l[1])
             "feuille" -> Route.Feuille(l[1])
             "statut" -> Route.Statut(l[1])
+            "carte" -> Route.Carte(l[1])
             else -> Route.Liste
         }
     },
@@ -83,6 +91,32 @@ fun AppRoot(
     val essences by referentielsRepository.essences.collectAsStateWithLifecycle(Referentiels.ESSENCES_DEFAUT)
     val qualitesArbre by referentielsRepository.qualitesArbre.collectAsStateWithLifecycle(Referentiels.QUALITE_ARBRE_DEFAUT)
     val seuils by referentielsRepository.seuils.collectAsStateWithLifecycle(SeuilsCategories.DEFAUT)
+
+    val context = LocalContext.current
+    var dernierRetour by remember { mutableStateOf(0L) }
+    BackHandler {
+        when (val r = route) {
+            Route.Liste -> {
+                val maintenant = System.currentTimeMillis()
+                if (maintenant - dernierRetour < 2000) {
+                    (context as? Activity)?.finish()
+                } else {
+                    dernierRetour = maintenant
+                    Toast.makeText(
+                        context,
+                        "Appuyer deux fois sur retour pour fermer le contexte et quitter l'application",
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+            }
+
+            Route.Creation, Route.Parametres, Route.Referentiels -> route = Route.Liste
+            is Route.Edition -> route = Route.Liste
+            is Route.Feuille -> route = Route.Liste
+            is Route.Statut -> route = Route.Feuille(r.contexteId)
+            is Route.Carte -> route = Route.Feuille(r.contexteId)
+        }
+    }
 
     when (val r = route) {
         Route.Liste -> ListeContextesScreen(
@@ -140,12 +174,19 @@ fun AppRoot(
             qualitesArbre = qualitesArbre,
             onRetour = { route = Route.Liste },
             onStatut = { route = Route.Statut(r.contexteId) },
+            onCarte = { route = Route.Carte(r.contexteId) },
         )
 
         is Route.Statut -> StatutHistoriqueScreen(
             repository = repository,
             contexteId = r.contexteId,
             seuils = seuils,
+            onRetour = { route = Route.Feuille(r.contexteId) },
+        )
+
+        is Route.Carte -> CarteScreen(
+            repository = repository,
+            contexteId = r.contexteId,
             onRetour = { route = Route.Feuille(r.contexteId) },
         )
     }

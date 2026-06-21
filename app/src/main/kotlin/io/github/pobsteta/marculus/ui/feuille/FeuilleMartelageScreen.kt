@@ -144,6 +144,7 @@ fun FeuilleMartelageScreen(
     qualitesArbre: List<String>,
     onRetour: () -> Unit,
     onStatut: () -> Unit,
+    onCarte: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val androidContext = LocalContext.current
@@ -182,6 +183,10 @@ fun FeuilleMartelageScreen(
                             DropdownMenuItem(
                                 text = { Text("Statut / Historique") },
                                 onClick = { menuReset = false; onStatut() },
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Carte") },
+                                onClick = { menuReset = false; onCarte() },
                             )
                             DropdownMenuItem(
                                 text = { Text("Réinitialiser la fiche à zéro") },
