@@ -4,6 +4,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,15 +49,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.Referentiels
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
-import fr.marculus.core.model.EssenceColonne
-import fr.marculus.core.model.ModeMesure
 import io.github.pobsteta.marculus.data.MartelageRepository
 import kotlinx.coroutines.launch
 
-private val LARGEUR_CELLULE = 120.dp
-private val HAUTEUR_CELLULE = 132.dp
-private val LARGEUR_LABEL = 56.dp
-private val HAUTEUR_ENTETE = 56.dp
+private val LARGEUR_CELLULE = 140.dp
+private val HAUTEUR_CELLULE = 144.dp
 
 private sealed interface Saisie {
     data class Hauteur(val essence: String, val classe: Int) : Saisie
@@ -119,8 +116,8 @@ fun FeuilleMartelageScreen(
         }
 
         val classes = ctx.axe.classes()
-        val uniteLabel = if (ctx.mode == ModeMesure.DIAMETRE) "Ø" else "C"
 
+        // Plus d'en-tête ni de colonne de classes : chaque cellule porte son libellé.
         Column(
             Modifier
                 .padding(padding)
@@ -128,18 +125,12 @@ fun FeuilleMartelageScreen(
                 .verticalScroll(rememberScrollState())
                 .horizontalScroll(rememberScrollState()),
         ) {
-            Row {
-                Entete(uniteLabel, LARGEUR_LABEL, HAUTEUR_ENTETE)
-                ctx.essences.forEach { e ->
-                    Entete(e.nom, LARGEUR_CELLULE, HAUTEUR_ENTETE, Color(e.couleurFondArgb), Color(e.couleurTexteArgb))
-                }
-            }
             classes.forEach { classe ->
                 Row {
-                    Entete("$classe", LARGEUR_LABEL, HAUTEUR_CELLULE)
                     ctx.essences.forEach { e ->
                         val total = totaux[CompteurCle(e.nom, classe)] ?: 0
                         CelluleCompteur(
+                            libelle = "${e.nom} $classe",
                             total = total,
                             fond = Color(e.couleurFondArgb),
                             texte = Color(e.couleurTexteArgb),
@@ -207,44 +198,8 @@ fun FeuilleMartelageScreen(
 }
 
 @Composable
-private fun Entete(
-    texte: String,
-    largeur: androidx.compose.ui.unit.Dp,
-    hauteur: androidx.compose.ui.unit.Dp,
-    fond: Color? = null,
-    couleurTexte: Color? = null,
-) {
-    Box(
-        modifier = Modifier.width(largeur).height(hauteur).padding(2.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (fond != null) {
-            Box(
-                Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Card(colors = CardDefaults.cardColors(containerColor = fond), modifier = Modifier.fillMaxSize()) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            texte,
-                            color = couleurTexte ?: MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.titleSmall,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(2.dp),
-                        )
-                    }
-                }
-            }
-        } else {
-            Text(texte, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
-        }
-    }
-}
-
-@Composable
 private fun CelluleCompteur(
+    libelle: String,
     total: Int,
     fond: Color,
     texte: Color,
@@ -260,37 +215,47 @@ private fun CelluleCompteur(
         colors = CardDefaults.cardColors(containerColor = fond),
     ) {
         Column(Modifier.fillMaxSize().padding(4.dp)) {
-            // Haut : H, Q et le menu ⋮ (avis).
+            // Haut : H — libellé (essence + classe) — Q.
             Row(verticalAlignment = Alignment.CenterVertically) {
-                TextButton(onClick = onHauteur, contentPadding = androidx.compose.foundation.layout.PaddingValues(4.dp)) {
-                    Text("H", color = texte)
+                IconButton(onClick = onHauteur, modifier = Modifier.size(32.dp)) {
+                    Text("H", color = texte, style = MaterialTheme.typography.titleMedium)
                 }
-                TextButton(onClick = onQualite, contentPadding = androidx.compose.foundation.layout.PaddingValues(4.dp)) {
-                    Text("Q", color = texte)
+                Text(
+                    libelle,
+                    color = texte,
+                    style = MaterialTheme.typography.labelMedium,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f).padding(horizontal = 2.dp),
+                )
+                IconButton(onClick = onQualite, modifier = Modifier.size(32.dp)) {
+                    Text("Q", color = texte, style = MaterialTheme.typography.titleMedium)
                 }
-                Box(Modifier.weight(1f))
-                Box {
+            }
+            // Centre : la valeur, avec le menu ⋮ (avis) en coin.
+            Box(Modifier.fillMaxWidth().weight(1f)) {
+                Text(
+                    "$total",
+                    color = texte,
+                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+                Box(Modifier.align(Alignment.TopEnd)) {
                     IconButton(onClick = { menu = true }, modifier = Modifier.size(28.dp)) {
                         Text("⋮", color = texte, style = MaterialTheme.typography.titleMedium)
                     }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(
-                            text = { Text("Avis (si + / si −)") },
-                            onClick = { menu = false; onAvis() },
-                        )
+                        DropdownMenuItem(text = { Text("Avis (si + / si −)") }, onClick = { menu = false; onAvis() })
                     }
                 }
-            }
-            // Centre : la valeur.
-            Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                Text("$total", color = texte, style = MaterialTheme.typography.headlineMedium)
             }
             // Bas : − et + (zones les plus faciles à atteindre).
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Button(
                     onClick = onMoins,
                     modifier = Modifier.weight(1f).height(40.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    contentPadding = PaddingValues(0.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                 ) {
                     Text("−", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -298,7 +263,7 @@ private fun CelluleCompteur(
                 Button(
                     onClick = onPlus,
                     modifier = Modifier.weight(1f).height(40.dp),
-                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp),
+                    contentPadding = PaddingValues(0.dp),
                 ) {
                     Text("+", style = MaterialTheme.typography.titleLarge)
                 }
@@ -338,14 +303,10 @@ private fun ChoixQualiteDialog(onAnnuler: () -> Unit, onChoisir: (String) -> Uni
         text = {
             Column {
                 Referentiels.QUALITE_ARBRE_DEFAUT.forEach { qualite ->
-                    Text(
-                        qualite,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp),
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    TextButton(onClick = { onChoisir(qualite) }) { Text("Choisir « $qualite »") }
+                    TextButton(
+                        onClick = { onChoisir(qualite) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text(qualite, style = MaterialTheme.typography.bodyLarge) }
                 }
             }
         },
