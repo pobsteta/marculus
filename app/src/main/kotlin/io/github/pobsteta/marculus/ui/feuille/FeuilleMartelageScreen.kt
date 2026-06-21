@@ -48,13 +48,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.os.Build
+import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import androidx.core.content.ContextCompat
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalConfiguration
@@ -67,9 +74,44 @@ import java.text.DecimalFormatSymbols
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
+import fr.marculus.core.model.Position
 import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.data.MartelageRepository
 import kotlinx.coroutines.launch
+
+/** Position GPS courante du téléphone (null si inactif ou non autorisé). */
+@Composable
+private fun positionActuelle(active: Boolean): Position? {
+    val context = LocalContext.current
+    val etat = remember { mutableStateOf<Position?>(null) }
+    DisposableEffect(active) {
+        val lm = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+        val autorise = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+        var listener: LocationListener? = null
+        if (active && lm != null && autorise) {
+            val l = object : LocationListener {
+                override fun onLocationChanged(location: Location) {
+                    etat.value = Position(location.latitude, location.longitude)
+                }
+                override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+                override fun onProviderEnabled(provider: String) {}
+                override fun onProviderDisabled(provider: String) {}
+            }
+            listener = l
+            runCatching {
+                lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.let {
+                    etat.value = Position(it.latitude, it.longitude)
+                }
+                lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000L, 1f, l)
+            }
+        } else {
+            etat.value = null
+        }
+        onDispose { listener?.let { l -> runCatching { lm?.removeUpdates(l) } } }
+    }
+    return etat.value
+}
 
 private fun vibrer(context: Context) {
     val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -116,6 +158,7 @@ fun FeuilleMartelageScreen(
     }
     val totaux by repository.totaux(contexteId).collectAsStateWithLifecycle(emptyMap())
     val configs by repository.configs(contexteId).collectAsStateWithLifecycle(emptyMap())
+    val position = positionActuelle(reglages.capturePosition)
     var saisie by remember { mutableStateOf<Saisie?>(null) }
     var derniereSaisie by remember { mutableStateOf<DerniereSaisie?>(null) }
     var menuReset by remember { mutableStateOf(false) }
@@ -192,7 +235,11 @@ fun FeuilleMartelageScreen(
                             onPlus = {
                                 retourSensoriel()
                                 scope.launch {
-                                    val uuid = repository.ajouterTige(contexteId, e.nom, classe, quantite = ctx.increment)
+                                    val uuid = repository.ajouterTige(
+                                        contexteId, e.nom, classe,
+                                        quantite = ctx.increment,
+                                        position = position,
+                                    )
                                     derniereSaisie = DerniereSaisie(uuid, e.nom, classe)
                                 }
                             },

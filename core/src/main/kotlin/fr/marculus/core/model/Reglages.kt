@@ -7,4 +7,5 @@ data class Reglages(
     val vibration: Boolean = false,
     val sonClic: Boolean = false,
     val themeSombre: Boolean = false,
+    val capturePosition: Boolean = false,
 )

@@ -1,8 +1,11 @@
 package io.github.pobsteta.marculus.ui.parametres
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -88,6 +91,10 @@ fun ParametresScreen(
         ActivityResultContracts.OpenDocument(),
     ) { uri -> if (uri != null) restaurationUri = uri }
 
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { /* accordée ou non : si refusée, la position ne sera simplement pas capturée */ }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -123,6 +130,19 @@ fun ParametresScreen(
             }
             LigneReglage("Son de clic", "Émet un son au comptage.", reglages.sonClic) {
                 maj(reglages.copy(sonClic = it))
+            }
+            LigneReglage(
+                "Enregistrer la position GPS",
+                "Associe la position du téléphone à chaque tige (si l'autorisation est accordée).",
+                reglages.capturePosition,
+            ) { active ->
+                maj(reglages.copy(capturePosition = active))
+                if (active &&
+                    ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                    PackageManager.PERMISSION_GRANTED
+                ) {
+                    permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                }
             }
 
             HorizontalDivider(Modifier.padding(vertical = 8.dp))

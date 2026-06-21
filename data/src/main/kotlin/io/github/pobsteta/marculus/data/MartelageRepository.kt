@@ -73,6 +73,12 @@ class MartelageRepository(
         contexteDao.inserer(existant.copy(exporte = true))
     }
 
+    /** Toute modification du journal repasse le contexte en « non exporté » (re-verrouillage). */
+    private suspend fun marquerNonExporte(contexteId: String) {
+        val c = contexteDao.parId(contexteId) ?: return
+        if (c.exporte) contexteDao.inserer(c.copy(exporte = false))
+    }
+
     suspend fun creerContexte(
         nom: String,
         mode: ModeMesure,
@@ -172,6 +178,7 @@ class MartelageRepository(
                 operateur = operateur,
             ),
         )
+        marquerNonExporte(contexteId)
         return uuid
     }
 
@@ -199,6 +206,7 @@ class MartelageRepository(
                 operateur = operateur,
             ),
         )
+        marquerNonExporte(contexteId)
     }
 
     /** Annote une tige précise (par uuid) : la hauteur. */
@@ -237,6 +245,7 @@ class MartelageRepository(
                 total < 0 -> tigeDao.inserer(evenement(contexteId, cle.essence, cle.classe, ActionTige.PLUS, -total, t))
             }
         }
+        marquerNonExporte(contexteId)
     }
 
     private fun evenement(

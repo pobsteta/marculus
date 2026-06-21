@@ -20,6 +20,7 @@ class ReglagesRepository(context: Context) {
         val vibration = booleanPreferencesKey("vibration")
         val sonClic = booleanPreferencesKey("son_clic")
         val themeSombre = booleanPreferencesKey("theme_sombre")
+        val capturePosition = booleanPreferencesKey("capture_position")
     }
 
     val reglages: Flow<Reglages> = ds.data.map { p ->
@@ -29,6 +30,7 @@ class ReglagesRepository(context: Context) {
             vibration = p[Cles.vibration] ?: false,
             sonClic = p[Cles.sonClic] ?: false,
             themeSombre = p[Cles.themeSombre] ?: false,
+            capturePosition = p[Cles.capturePosition] ?: false,
         )
     }
 
@@ -39,6 +41,7 @@ class ReglagesRepository(context: Context) {
             p[Cles.vibration] = r.vibration
             p[Cles.sonClic] = r.sonClic
             p[Cles.themeSombre] = r.themeSombre
+            p[Cles.capturePosition] = r.capturePosition
         }
     }
 }

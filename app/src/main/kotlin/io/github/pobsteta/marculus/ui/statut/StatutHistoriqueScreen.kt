@@ -290,6 +290,9 @@ private fun OngletHistorique(contexte: Contexte, journal: List<Tige>) {
                         val details = buildList {
                             tige.hauteurTexte?.takeIf { it.isNotBlank() }?.let { add("h $it") }
                             tige.qualiteArbre?.let { add(it) }
+                            tige.position?.let {
+                                add("GPS " + "%.5f, %.5f".format(java.util.Locale.US, it.latitude, it.longitude))
+                            }
                         }
                         if (details.isNotEmpty()) {
                             Text(details.joinToString(" · "), style = MaterialTheme.typography.bodySmall)
