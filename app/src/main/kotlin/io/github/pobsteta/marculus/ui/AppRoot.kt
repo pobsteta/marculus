@@ -19,6 +19,7 @@ import io.github.pobsteta.marculus.ui.contextes.CreationContexteScreen
 import io.github.pobsteta.marculus.ui.contextes.ListeContextesScreen
 import io.github.pobsteta.marculus.ui.feuille.FeuilleMartelageScreen
 import io.github.pobsteta.marculus.ui.parametres.ParametresScreen
+import io.github.pobsteta.marculus.ui.statut.StatutHistoriqueScreen
 
 /** Navigation minimale entre les écrans de la v1. */
 sealed interface Route {
@@ -27,6 +28,7 @@ sealed interface Route {
     data object Parametres : Route
     data class Edition(val contexteId: String) : Route
     data class Feuille(val contexteId: String) : Route
+    data class Statut(val contexteId: String) : Route
 }
 
 private val RouteSaver = listSaver<Route, String>(
@@ -37,6 +39,7 @@ private val RouteSaver = listSaver<Route, String>(
             Route.Parametres -> listOf("parametres")
             is Route.Edition -> listOf("edition", route.contexteId)
             is Route.Feuille -> listOf("feuille", route.contexteId)
+            is Route.Statut -> listOf("statut", route.contexteId)
         }
     },
     restore = { l ->
@@ -45,6 +48,7 @@ private val RouteSaver = listSaver<Route, String>(
             "parametres" -> Route.Parametres
             "edition" -> Route.Edition(l[1])
             "feuille" -> Route.Feuille(l[1])
+            "statut" -> Route.Statut(l[1])
             else -> Route.Liste
         }
     },
@@ -101,6 +105,13 @@ fun AppRoot(repository: MartelageRepository) {
             repository = repository,
             contexteId = r.contexteId,
             onRetour = { route = Route.Liste },
+            onStatut = { route = Route.Statut(r.contexteId) },
+        )
+
+        is Route.Statut -> StatutHistoriqueScreen(
+            repository = repository,
+            contexteId = r.contexteId,
+            onRetour = { route = Route.Feuille(r.contexteId) },
         )
     }
 }

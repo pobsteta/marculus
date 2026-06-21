@@ -80,6 +80,7 @@ fun FeuilleMartelageScreen(
     repository: MartelageRepository,
     contexteId: String,
     onRetour: () -> Unit,
+    onStatut: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val contexte by produceState<Contexte?>(initialValue = null, contexteId) {
@@ -107,6 +108,10 @@ fun FeuilleMartelageScreen(
                             Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
                         }
                         DropdownMenu(expanded = menuReset, onDismissRequest = { menuReset = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Statut / Historique") },
+                                onClick = { menuReset = false; onStatut() },
+                            )
                             DropdownMenuItem(
                                 text = { Text("Réinitialiser la fiche à zéro") },
                                 onClick = { menuReset = false; confirmerReset = true },
