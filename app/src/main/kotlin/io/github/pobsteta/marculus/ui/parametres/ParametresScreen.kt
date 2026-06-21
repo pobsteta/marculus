@@ -42,11 +42,14 @@ import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.data.ReglagesRepository
 import io.github.pobsteta.marculus.data.SauvegardeRepository
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 private const val ENTREE_ZIP = "marculus.json"
+private val FORMAT_HORODATAGE = DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm")
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,7 +132,10 @@ fun ParametresScreen(
                 style = MaterialTheme.typography.bodySmall,
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { exportLauncher.launch("marculus-sauvegarde.zip") }, modifier = Modifier.weight(1f)) {
+                Button(
+                    onClick = { exportLauncher.launch("marculus-sauvegarde-${LocalDateTime.now().format(FORMAT_HORODATAGE)}.zip") },
+                    modifier = Modifier.weight(1f),
+                ) {
                     Text("Sauvegarder")
                 }
                 OutlinedButton(
