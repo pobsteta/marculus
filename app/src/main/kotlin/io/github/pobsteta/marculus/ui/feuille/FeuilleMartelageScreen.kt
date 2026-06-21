@@ -1,5 +1,6 @@
 package io.github.pobsteta.marculus.ui.feuille
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -219,7 +221,6 @@ private fun CelluleCompteur(
     onQualite: () -> Unit,
     onAvis: () -> Unit,
 ) {
-    val couleurAlerte = Color(0xFFFFD600)
     var menu by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier.width(LARGEUR_CELLULE).height(HAUTEUR_CELLULE).padding(2.dp),
@@ -251,13 +252,9 @@ private fun CelluleCompteur(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    if (alerteMoins) {
-                        Text("⚠−", color = couleurAlerte, style = MaterialTheme.typography.titleMedium)
-                    }
+                    if (alerteMoins) TriangleAlerte("−")
                     Text("$total", color = texte, style = MaterialTheme.typography.headlineMedium)
-                    if (alertePlus) {
-                        Text("⚠+", color = couleurAlerte, style = MaterialTheme.typography.titleMedium)
-                    }
+                    if (alertePlus) TriangleAlerte("+")
                 }
                 Box(Modifier.align(Alignment.TopEnd)) {
                     IconButton(onClick = { menu = true }, modifier = Modifier.size(28.dp)) {
@@ -287,6 +284,28 @@ private fun CelluleCompteur(
                 }
             }
         }
+    }
+}
+
+/** Petit triangle rouge avec un signe blanc (+ ou −) au centre, indicateur d'alerte. */
+@Composable
+private fun TriangleAlerte(signe: String) {
+    Box(Modifier.size(22.dp), contentAlignment = Alignment.BottomCenter) {
+        Canvas(Modifier.matchParentSize()) {
+            val triangle = Path().apply {
+                moveTo(size.width / 2f, 0f)
+                lineTo(size.width, size.height)
+                lineTo(0f, size.height)
+                close()
+            }
+            drawPath(triangle, color = Color(0xFFD32F2F))
+        }
+        Text(
+            signe,
+            color = Color.White,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(bottom = 1.dp),
+        )
     }
 }
 
@@ -344,7 +363,6 @@ private fun AvisDialog(
     val scope = rememberCoroutineScope()
     var avisPlus by remember { mutableStateOf("") }
     var avisMoins by remember { mutableStateOf("") }
-    var erreur by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(essence, classe) {
         val config = repository.configCompteur(contexteId, essence, classe)
         avisPlus = config.avisSiPlus?.toString() ?: ""
@@ -356,8 +374,8 @@ private fun AvisDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    "Seuils numériques. Le « + » (maximum) doit être supérieur au « − » (minimum). " +
-                        "Une alerte s'affiche tant que le total sort de l'intervalle.",
+                    "Seuils indicatifs : une alerte s'affiche tant que le total sort de l'intervalle. " +
+                        "Purement informatif, sans blocage.",
                     style = MaterialTheme.typography.bodySmall,
                 )
                 OutlinedTextField(
@@ -376,20 +394,16 @@ private fun AvisDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
                 )
-                erreur?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             }
         },
         confirmButton = {
             TextButton(onClick = {
-                val p = avisPlus.toIntOrNull()
-                val m = avisMoins.toIntOrNull()
-                if (p != null && m != null && p <= m) {
-                    erreur = "Le « + » doit être supérieur au « − »"
-                } else {
-                    scope.launch {
-                        repository.definirAvis(contexteId, essence, classe, p, m)
-                        onFermer()
-                    }
+                scope.launch {
+                    repository.definirAvis(
+                        contexteId, essence, classe,
+                        avisPlus.toIntOrNull(), avisMoins.toIntOrNull(),
+                    )
+                    onFermer()
                 }
             }) { Text("Enregistrer") }
         },
