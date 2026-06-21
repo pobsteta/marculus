@@ -10,7 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
@@ -61,7 +65,7 @@ fun ListeContextesScreen(
                 actions = {
                     Box {
                         IconButton(onClick = { menuAppli = true }) {
-                            Text("⋮", style = MaterialTheme.typography.titleLarge)
+                            Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
                         }
                         DropdownMenu(expanded = menuAppli, onDismissRequest = { menuAppli = false }) {
                             DropdownMenuItem(
@@ -80,7 +84,7 @@ fun ListeContextesScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onCreer) {
-                Text("+", style = MaterialTheme.typography.headlineSmall)
+                Icon(Icons.Filled.Add, contentDescription = "Nouveau contexte")
             }
         },
     ) { padding ->
@@ -183,7 +187,7 @@ private fun CarteContexte(
             }
             Box {
                 IconButton(onClick = { menuOuvert = true }) {
-                    Text("⋮", style = MaterialTheme.typography.titleLarge)
+                    Icon(Icons.Filled.MoreVert, contentDescription = "Options du contexte")
                 }
                 DropdownMenu(expanded = menuOuvert, onDismissRequest = { menuOuvert = false }) {
                     DropdownMenuItem(text = { Text("Lire") }, onClick = { menuOuvert = false; onLire() })
