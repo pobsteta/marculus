@@ -1,0 +1,36 @@
+package io.github.pobsteta.marculus.data.db
+
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "contexte")
+data class ContexteEntity(
+    @PrimaryKey val id: String,
+    val nom: String,
+    val mode: String,            // ModeMesure.name
+    val classeMin: Int,
+    val classeMax: Int,
+    val classePas: Int,
+    val essencesActives: String, // libellés joints par le séparateur d'unité 
+    val dateCreation: Long,
+    val operateur: String?,
+)
+
+@Entity(
+    tableName = "tige",
+    indices = [Index(value = ["contexteId", "essence", "classe"])],
+)
+data class TigeEntity(
+    @PrimaryKey val uuid: String,
+    val contexteId: String,
+    val essence: String,
+    val classe: Int,
+    val action: String,          // ActionTige.name
+    val horodatage: Long,
+    val hauteurTexte: String?,
+    val qualiteArbre: String?,
+    val latitude: Double?,
+    val longitude: Double?,
+    val operateur: String?,
+)

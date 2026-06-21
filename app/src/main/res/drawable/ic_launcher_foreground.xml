@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Marteau simplifié : tête horizontale + manche vertical, crème. -->
+    <path
+        android:fillColor="#F5EBD8"
+        android:pathData="M30,30 h48 v16 h-19 v34 h-10 v-34 h-19 z" />
+</vector>
