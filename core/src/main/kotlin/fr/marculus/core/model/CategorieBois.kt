@@ -17,14 +17,8 @@ enum class CategorieBois(val code: String, val libelle: String) {
     ;
 
     companion object {
-        fun pour(classe: Int, mode: ModeMesure): CategorieBois {
-            val diametre = if (mode == ModeMesure.CIRCONFERENCE) classe / Math.PI else classe.toDouble()
-            return when {
-                diametre < 27.5 -> PB
-                diametre < 47.5 -> BM
-                diametre < 67.5 -> GB
-                else -> TGB
-            }
-        }
+        /** Classement avec les seuils par défaut (raccourci). */
+        fun pour(classe: Int, mode: ModeMesure): CategorieBois =
+            SeuilsCategories.DEFAUT.categorie(classe, mode)
     }
 }

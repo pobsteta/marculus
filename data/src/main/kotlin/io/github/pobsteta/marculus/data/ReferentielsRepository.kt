@@ -1,10 +1,12 @@
 package io.github.pobsteta.marculus.data
 
 import android.content.Context
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import fr.marculus.core.Referentiels
+import fr.marculus.core.model.SeuilsCategories
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -19,6 +21,9 @@ class ReferentielsRepository(context: Context) {
         val essences = stringPreferencesKey("essences")
         val qualitesArbre = stringPreferencesKey("qualites_arbre")
         val qualitesBois = stringPreferencesKey("qualites_bois")
+        val seuilPbBm = doublePreferencesKey("seuil_pb_bm")
+        val seuilBmGb = doublePreferencesKey("seuil_bm_gb")
+        val seuilGbTgb = doublePreferencesKey("seuil_gb_tgb")
     }
 
     private fun decode(s: String?, defaut: List<String>): List<String> = when {
@@ -42,4 +47,20 @@ class ReferentielsRepository(context: Context) {
 
     suspend fun enregistrerQualitesBois(liste: List<String>) =
         ds.edit { it[Cles.qualitesBois] = liste.joinToString(SEP) }.let {}
+
+    val seuils: Flow<SeuilsCategories> = ds.data.map { p ->
+        SeuilsCategories(
+            pbBm = p[Cles.seuilPbBm] ?: SeuilsCategories.DEFAUT.pbBm,
+            bmGb = p[Cles.seuilBmGb] ?: SeuilsCategories.DEFAUT.bmGb,
+            gbTgb = p[Cles.seuilGbTgb] ?: SeuilsCategories.DEFAUT.gbTgb,
+        )
+    }
+
+    suspend fun enregistrerSeuils(s: SeuilsCategories) {
+        ds.edit {
+            it[Cles.seuilPbBm] = s.pbBm
+            it[Cles.seuilBmGb] = s.bmGb
+            it[Cles.seuilGbTgb] = s.gbTgb
+        }
+    }
 }

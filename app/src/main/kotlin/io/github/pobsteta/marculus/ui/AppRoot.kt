@@ -17,6 +17,7 @@ import fr.marculus.core.Referentiels
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.Reglages
+import fr.marculus.core.model.SeuilsCategories
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ReferentielsRepository
 import io.github.pobsteta.marculus.data.ReglagesRepository
@@ -81,6 +82,7 @@ fun AppRoot(
     var route: Route by rememberSaveable(stateSaver = RouteSaver) { mutableStateOf<Route>(Route.Liste) }
     val essences by referentielsRepository.essences.collectAsStateWithLifecycle(Referentiels.ESSENCES_DEFAUT)
     val qualitesArbre by referentielsRepository.qualitesArbre.collectAsStateWithLifecycle(Referentiels.QUALITE_ARBRE_DEFAUT)
+    val seuils by referentielsRepository.seuils.collectAsStateWithLifecycle(SeuilsCategories.DEFAUT)
 
     when (val r = route) {
         Route.Liste -> ListeContextesScreen(
@@ -143,6 +145,7 @@ fun AppRoot(
         is Route.Statut -> StatutHistoriqueScreen(
             repository = repository,
             contexteId = r.contexteId,
+            seuils = seuils,
             onRetour = { route = Route.Feuille(r.contexteId) },
         )
     }

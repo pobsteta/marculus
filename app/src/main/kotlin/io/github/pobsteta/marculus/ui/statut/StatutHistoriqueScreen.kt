@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CategorieBois
+import fr.marculus.core.model.SeuilsCategories
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Tige
@@ -64,6 +65,7 @@ import java.util.Date
 fun StatutHistoriqueScreen(
     repository: MartelageRepository,
     contexteId: String,
+    seuils: SeuilsCategories,
     onRetour: () -> Unit,
 ) {
     val contexte by produceState<Contexte?>(initialValue = null, contexteId) {
@@ -103,7 +105,7 @@ fun StatutHistoriqueScreen(
                 Tab(selected = onglet == 1, onClick = { onglet = 1 }, text = { Text("Historique détaillé") })
             }
             when (onglet) {
-                0 -> OngletStatut(ctx, totaux)
+                0 -> OngletStatut(ctx, totaux, seuils)
                 else -> OngletHistorique(ctx, journal)
             }
         }
@@ -111,7 +113,7 @@ fun StatutHistoriqueScreen(
 }
 
 @Composable
-private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>) {
+private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, seuils: SeuilsCategories) {
     val couleurs = contexte.essences.associate { it.nom to it.couleurFondArgb }
     // Total par essence (pour le donut), dans l'ordre des colonnes.
     val parEssence = contexte.essencesNoms.map { nom ->
@@ -121,8 +123,8 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>) {
     val classes = contexte.axe.classes()
     // Couleur d'une classe : teinte par catégorie (PB/BM/GB/TGB), dégradé clair→foncé dans la catégorie.
     val couleurClasse: (Int) -> Color = { classe ->
-        val cat = CategorieBois.pour(classe, contexte.mode)
-        val membres = classes.filter { CategorieBois.pour(it, contexte.mode) == cat }
+        val cat = seuils.categorie(classe, contexte.mode)
+        val membres = classes.filter { seuils.categorie(it, contexte.mode) == cat }
         val f = if (membres.size > 1) membres.indexOf(classe).coerceAtLeast(0).toFloat() / (membres.size - 1) else 0f
         gradientCategorie(cat, f)
     }
