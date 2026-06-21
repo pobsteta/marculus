@@ -46,6 +46,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -195,15 +196,14 @@ private fun LegendeClasses(classes: List<Int>, couleur: (Int) -> Color) {
 }
 
 private fun gradientCategorie(cat: CategorieBois, f: Float): Color {
-    val teinte = when (cat) {
-        CategorieBois.PB -> 210f   // bleu
-        CategorieBois.BM -> 50f    // jaune
-        CategorieBois.GB -> 28f    // orange
-        CategorieBois.TGB -> 4f    // rouge
+    // Dégradé clair (petite classe) → foncé (grande classe) par catégorie.
+    val (clair, fonce) = when (cat) {
+        CategorieBois.PB -> Color(0xFF90CAF9) to Color(0xFF0D47A1)  // bleu
+        CategorieBois.BM -> Color(0xFFFFE082) to Color(0xFFF57F17)  // ambre
+        CategorieBois.GB -> Color(0xFFFFB74D) to Color(0xFFE65100)  // orange
+        CategorieBois.TGB -> Color(0xFFEF9A9A) to Color(0xFFB71C1C) // rouge
     }
-    val saturation = (0.45f + 0.50f * f).coerceIn(0f, 1f)
-    val valeur = (0.95f - 0.45f * f).coerceIn(0f, 1f)
-    return Color.hsv(teinte, saturation, valeur)
+    return lerp(clair, fonce, f.coerceIn(0f, 1f))
 }
 
 @Composable
