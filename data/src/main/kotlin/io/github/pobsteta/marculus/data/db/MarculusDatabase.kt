@@ -6,13 +6,14 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [ContexteEntity::class, TigeEntity::class],
-    version = 1,
+    entities = [ContexteEntity::class, TigeEntity::class, CompteurConfigEntity::class],
+    version = 2,
     exportSchema = false,
 )
 abstract class MarculusDatabase : RoomDatabase() {
     abstract fun contexteDao(): ContexteDao
     abstract fun tigeDao(): TigeDao
+    abstract fun compteurConfigDao(): CompteurConfigDao
 
     companion object {
         fun creer(context: Context): MarculusDatabase =
@@ -20,6 +21,9 @@ abstract class MarculusDatabase : RoomDatabase() {
                 context.applicationContext,
                 MarculusDatabase::class.java,
                 "marculus.db",
-            ).build()
+            )
+                // Dev : pas de migration tant que le schéma bouge.
+                .fallbackToDestructiveMigration(dropAllTables = true)
+                .build()
     }
 }

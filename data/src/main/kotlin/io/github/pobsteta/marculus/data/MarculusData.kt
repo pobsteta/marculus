@@ -7,6 +7,6 @@ import io.github.pobsteta.marculus.data.db.MarculusDatabase
 object MarculusData {
     fun creerRepository(context: Context): MartelageRepository {
         val db = MarculusDatabase.creer(context)
-        return MartelageRepository(db.contexteDao(), db.tigeDao())
+        return MartelageRepository(db.contexteDao(), db.tigeDao(), db.compteurConfigDao())
     }
 }

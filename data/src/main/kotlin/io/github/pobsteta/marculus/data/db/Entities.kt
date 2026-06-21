@@ -12,7 +12,9 @@ data class ContexteEntity(
     val classeMin: Int,
     val classeMax: Int,
     val classePas: Int,
-    val essencesActives: String, // libellés joints par le séparateur d'unité 
+    val essences: String,        // encodé : nom US fond US texte, enregistrements séparés par RS
+    val commentaire: String?,
+    val increment: Int,
     val dateCreation: Long,
     val operateur: String?,
 )
@@ -28,9 +30,20 @@ data class TigeEntity(
     val classe: Int,
     val action: String,          // ActionTige.name
     val horodatage: Long,
+    val quantite: Int,
     val hauteurTexte: String?,
     val qualiteArbre: String?,
     val latitude: Double?,
     val longitude: Double?,
     val operateur: String?,
+)
+
+/** Réglages par compteur (cellule) d'un contexte : avis si plus / si moins. */
+@Entity(tableName = "compteur_config", primaryKeys = ["contexteId", "essence", "classe"])
+data class CompteurConfigEntity(
+    val contexteId: String,
+    val essence: String,
+    val classe: Int,
+    val avisSiPlus: String?,
+    val avisSiMoins: String?,
 )

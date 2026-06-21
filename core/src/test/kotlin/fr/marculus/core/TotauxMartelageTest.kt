@@ -9,14 +9,25 @@ import kotlin.test.assertEquals
 class TotauxMartelageTest {
 
     private var seq = 0
-    private fun tige(essence: String, classe: Int, action: ActionTige) = Tige(
+    private fun tige(essence: String, classe: Int, action: ActionTige, quantite: Int = 1) = Tige(
         uuid = "u${seq++}",
         contexteId = "ctx",
         essence = essence,
         classe = classe,
         action = action,
         horodatage = 0L,
+        quantite = quantite,
     )
+
+    @Test
+    fun `le total tient compte de la quantite (increment)`() {
+        val journal = listOf(
+            tige("Chêne", 25, ActionTige.PLUS, quantite = 5),
+            tige("Chêne", 25, ActionTige.ANNULATION, quantite = 5),
+            tige("Chêne", 25, ActionTige.PLUS, quantite = 3),
+        )
+        assertEquals(3, TotauxMartelage(journal).totalPour("Chêne", 25))
+    }
 
     @Test
     fun `le total d'une cellule = nombre de plus moins annulations`() {

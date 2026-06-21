@@ -24,8 +24,23 @@ data class AxeClasses(val min: Int, val max: Int, val pas: Int) {
         generateSequence(min) { it + pas }.takeWhile { it <= max }.toList()
 }
 
+/** Une colonne de la feuille : une essence avec ses couleurs de cellule (ARGB). */
+data class EssenceColonne(
+    val nom: String,
+    val couleurFondArgb: Int,
+    val couleurTexteArgb: Int,
+)
+
 /** Clé d'un compteur : une cellule de la feuille de martelage. */
 data class CompteurCle(val essence: String, val classe: Int)
+
+/** Réglages par compteur (cellule) : avis affichés selon le sens du comptage. */
+data class ConfigCompteur(
+    val essence: String,
+    val classe: Int,
+    val avisSiPlus: String? = null,
+    val avisSiMoins: String? = null,
+)
 
 /** Une opération de martelage. Remplace la notion de « groupe » de l'app de référence. */
 data class Contexte(
@@ -33,12 +48,17 @@ data class Contexte(
     val nom: String,
     val mode: ModeMesure,
     val axe: AxeClasses,
-    val essencesActives: List<String>,
-)
+    val essences: List<EssenceColonne>,
+    val commentaire: String? = null,
+    val increment: Int = 1,
+) {
+    val essencesNoms: List<String> get() = essences.map { it.nom }
+}
 
 /**
  * Un événement du journal append-only. Une tige = un arbre martelé (PLUS) ou une annulation
- * conservée (ANNULATION). Les totaux sont dérivés du journal, jamais stockés.
+ * conservée (ANNULATION). `quantite` porte l'incrément du contexte (1 par défaut = 1 arbre).
+ * Les totaux sont dérivés du journal, jamais stockés.
  */
 data class Tige(
     val uuid: String,
@@ -47,6 +67,7 @@ data class Tige(
     val classe: Int,
     val action: ActionTige,
     val horodatage: Long,
+    val quantite: Int = 1,
     val hauteurTexte: String? = null,
     val qualiteArbre: String? = null,
     val position: Position? = null,

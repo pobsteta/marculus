@@ -16,6 +16,9 @@ interface ContexteDao {
 
     @Query("SELECT * FROM contexte WHERE id = :id")
     suspend fun parId(id: String): ContexteEntity?
+
+    @Query("DELETE FROM contexte WHERE id = :id")
+    suspend fun supprimer(id: String)
 }
 
 @Dao
@@ -26,6 +29,9 @@ interface TigeDao {
     @Query("SELECT * FROM tige WHERE contexteId = :contexteId ORDER BY horodatage ASC")
     fun observerParContexte(contexteId: String): Flow<List<TigeEntity>>
 
+    @Query("SELECT * FROM tige WHERE contexteId = :contexteId")
+    suspend fun listeParContexte(contexteId: String): List<TigeEntity>
+
     /** Dernière tige PLUS d'une cellule (pour l'annotation hauteur/qualité a posteriori). */
     @Query(
         "SELECT * FROM tige WHERE contexteId = :contexteId AND essence = :essence " +
@@ -35,4 +41,21 @@ interface TigeDao {
 
     @Query("UPDATE tige SET hauteurTexte = :hauteur, qualiteArbre = :qualite WHERE uuid = :uuid")
     suspend fun annoter(uuid: String, hauteur: String?, qualite: String?)
+
+    @Query("DELETE FROM tige WHERE contexteId = :contexteId")
+    suspend fun supprimerParContexte(contexteId: String)
+}
+
+@Dao
+interface CompteurConfigDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(config: CompteurConfigEntity)
+
+    @Query(
+        "SELECT * FROM compteur_config WHERE contexteId = :contexteId AND essence = :essence AND classe = :classe",
+    )
+    suspend fun parCle(contexteId: String, essence: String, classe: Int): CompteurConfigEntity?
+
+    @Query("DELETE FROM compteur_config WHERE contexteId = :contexteId")
+    suspend fun supprimerParContexte(contexteId: String)
 }

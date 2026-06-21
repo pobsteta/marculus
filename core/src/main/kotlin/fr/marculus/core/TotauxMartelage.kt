@@ -6,12 +6,12 @@ import fr.marculus.core.model.Tige
 
 /**
  * Calcule les totaux dérivés d'un journal append-only : pour chaque cellule
- * (essence × classe), nombre de PLUS moins nombre d'ANNULATION. Le journal n'est jamais
- * modifié — l'annulation est un événement conservé, pas une suppression.
+ * (essence × classe), somme des quantités PLUS moins somme des quantités ANNULATION.
+ * Le journal n'est jamais modifié — l'annulation est un événement conservé.
  */
 class TotauxMartelage(private val journal: List<Tige>) {
 
-    private fun Tige.delta(): Int = if (action == ActionTige.PLUS) 1 else -1
+    private fun Tige.delta(): Int = if (action == ActionTige.PLUS) quantite else -quantite
 
     /** Total d'une cellule donnée. */
     fun totalPour(essence: String, classe: Int): Int =
