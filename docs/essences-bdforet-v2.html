@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Essences BD Forêt® V2 — référentiel chromatique</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F2F3EE;--paper-2:#FBFBF8;--ink:#20271F;--ink-2:#545C4D;--ink-3:#7C8474;
+    --moss:#6E7A5E;--line:rgba(32,39,31,.14);--line-2:rgba(32,39,31,.08);
+    --mono:"IBM Plex Mono",ui-monospace,monospace;--disp:"Spectral",Georgia,serif;--body:"Inter",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:0 28px}
+
+  header{padding:56px 0 30px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--moss);margin:0 0 16px}
+  h1{font-family:var(--disp);font-weight:600;font-size:clamp(30px,4.6vw,44px);line-height:1.05;letter-spacing:-.01em;margin:0 0 16px;max-width:20ch}
+  .lead{font-size:15px;color:var(--ink-2);max-width:66ch;margin:0}
+
+  .tables{padding:34px 0 70px}
+  .group{margin-top:30px}
+  .group:first-of-type{margin-top:0}
+  .group > h2{font-family:var(--body);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--moss);margin:0 0 4px;padding-bottom:8px;border-bottom:1px solid var(--line-2)}
+  .thead,.row{display:grid;grid-template-columns:42px minmax(150px,1.6fr) 96px 86px 108px minmax(150px,1.7fr);gap:14px;align-items:center}
+  .thead{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:14px 6px 8px}
+  .row{padding:11px 6px;border-bottom:1px solid var(--line-2)}
+  .row:last-child{border-bottom:none}
+  .chip{width:34px;height:34px;border-radius:7px;border:1px solid rgba(32,39,31,.16)}
+  .name{font-size:15px;font-weight:500;line-height:1.25}
+  .code{font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}
+  .copy{font-family:var(--mono);font-size:12.5px;color:var(--ink);background:none;border:none;padding:4px 6px;margin:-4px -6px;border-radius:5px;cursor:pointer;text-align:left;transition:background .15s}
+  .copy:hover{background:rgba(110,122,94,.14)}
+  .copy:focus-visible{outline:2px solid var(--moss);outline-offset:1px}
+  .why{font-size:13px;color:var(--ink-2);line-height:1.4}
+
+  #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);font-family:var(--mono);font-size:12.5px;padding:9px 16px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:9}
+  #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media (max-width:760px){
+    .thead{display:none}
+    .row{grid-template-columns:42px 1fr;grid-auto-rows:min-content;row-gap:4px;column-gap:14px;padding:14px 6px}
+    .row .name{grid-column:2}
+    .row .chip{grid-row:1 / span 5;align-self:start}
+    .row .code,.row .copy,.row .why{grid-column:2}
+    .row .why{margin-top:4px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Référentiel chromatique · essences</p>
+    <h1>Essences de la BD&nbsp;Forêt®&nbsp;V2</h1>
+    <p class="lead">Teinte = famille botanique ; nuance = gradient écologique (du mésophile humide vers le thermo-xérique). Cliquez un code hex ou RVB pour le copier.</p>
+  </header>
+
+  <div class="tables">
+    <div class="group">
+      <h2>Feuillus</h2>
+      <div class="thead"><span></span><span>Essence</span><span>Code TFV</span><span>Hex</span><span>RVB</span><span>Logique écologique</span></div>
+      <div id="tbl-feuillus"></div>
+    </div>
+
+    <div class="group">
+      <h2>Conifères</h2>
+      <div class="thead"><span></span><span>Essence</span><span>Code TFV</span><span>Hex</span><span>RVB</span><span>Logique écologique</span></div>
+      <div id="tbl-coniferes"></div>
+    </div>
+
+    <div class="group">
+      <h2>Mélanges feuillus–conifères</h2>
+      <div class="thead"><span></span><span>Formation</span><span>Code TFV</span><span>Hex</span><span>RVB</span><span>Logique écologique</span></div>
+      <div id="tbl-melanges"></div>
+    </div>
+
+    <div class="group">
+      <h2>Formations &amp; couvertures</h2>
+      <div class="thead"><span></span><span>Type</span><span>Code TFV</span><span>Hex</span><span>RVB</span><span>Logique écologique</span></div>
+      <div id="tbl-formations"></div>
+    </div>
+  </div>
+
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const FEUILLUS = [
+  ["Chênes décidus purs","FF1G01-01","#2A7FA6","42, 127, 166","Chênes sessile/pédonculé, large amplitude tempérée — cœur du registre bleu."],
+  ["Chênes sempervirents purs","FF1G06-06","#AEAD3C","174, 173, 60","Chêne vert / chêne-liège, méditerranéens thermo-xériques — pôle olive, le plus « chaud » des feuillus."],
+  ["Hêtre pur","FF1-09-09","#5061B8","80, 97, 184","Mésophile, atlantique-montagnard, d'ombre et d'ambiance fraîche — pôle bleu profond."],
+  ["Châtaignier pur","FF1-10-10","#4FA15A","79, 161, 90","Acidiphile, plutôt thermophile et atlantique — vert franc, vers la moitié chaude."],
+  ["Robinier pur","FF1-14-14","#86B23F","134, 178, 63","Pionnier, nitrophile, thermophile — vert-jaune, près du pôle chaud."],
+  ["Mélange de feuillus","FF1-00-00","#3E9B86","62, 155, 134","Composition feuillue indifférenciée — teal neutre, centre du registre."],
+  ["Feuillus en îlots","FF1-00","#88C2AD","136, 194, 173","Feuillus dispersés — variante claire et désaturée du mélange."],
+  ["Autre feuillu pur","FF1-49-49","#7E8E9C","126, 142, 156","Catégorie ouverte — bleu-gris désaturé, neutre dans la famille."],
+  ["Peupleraie","FP","#2FA1B0","47, 161, 176","Feuillu cultural, riverain et hygrophile — cyan distinct."]
+];
+const CONIFERES = [
+  ["Sapin ou épicéa","FF2G61-61","#94304D","148, 48, 77","Montagnards humides, sciaphiles — grenat profond, pôle « froid » des conifères."],
+  ["Pin à crochets ou cembro","FF2G58-58","#9E3A66","158, 58, 102","Subalpins, conditions froides — rouge-violet, voisin du pôle humide."],
+  ["Douglas pur","FF2-64-64","#B23B39","178, 59, 57","Montagnard productif introduit, frais — rouge brique."],
+  ["Mélèze pur","FF2-63-63","#C2502F","194, 80, 47","Montagnard de lumière, héliophile — rouge-orangé."],
+  ["Pin sylvestre pur","FF2-52-52","#D07A2E","208, 122, 46","Pionnier continental, large, assez xérophile — orange franc."],
+  ["Pin laricio ou pin noir pur","FF2-53-53","#D98E2A","217, 142, 42","Thermophile, souvent calcicole et pionnier — ambre-orangé."],
+  ["Pin maritime pur","FF2-51-51","#E0A52C","224, 165, 44","Atlantique-thermophile, sols sableux — ambre."],
+  ["Pin d'Alep pur","FF2-57-57","#E8C234","232, 194, 52","Strictement méditerranéen, le plus thermo-xérique — or, pôle le plus chaud."],
+  ["Mélange de pins purs","FF2-80-80","#D2A857","210, 168, 87","Pins indifférenciés — ambre atténué."],
+  ["Autre pin pur","FF2-81-81","#C2A877","194, 168, 119","Catégorie ouverte des pins — tan désaturé."],
+  ["Mélange de conifères","FF2-00-00","#C46A3C","196, 106, 60","Conifères indifférenciés — terracotta, centre du registre chaud."],
+  ["Conifères en îlots","FF2-00","#D0926A","208, 146, 106","Conifères dispersés — variante claire du mélange."],
+  ["Autre conifère pur","FF2-91-91","#AE9381","174, 147, 129","Hors pin, sapin, épicéa, douglas, mélèze — gris-brun chaud neutre."]
+];
+const MELANGES = [
+  ["Mélange de feuillus prépondérants et conifères","FF31","#7A5DAE","122, 93, 174","Domine côté feuillu — violet bleuté, penché vers le registre froid."],
+  ["Mélange de conifères prépondérants et feuillus","FF32","#A1509E","161, 80, 158","Domine côté conifère — violet rougi (magenta), penché vers le registre chaud."]
+];
+const FORMATIONS = [
+  ["Jeune peuplement, coupe rase ou incident","FF0","#BBC2AB","187, 194, 171","Sans couvert arboré identifiable — gris-vert pâle neutre."],
+  ["Forêt ouverte","FO","#AFC0A6","175, 192, 166","Couvert lâche — couleur de l'essence éclaircie."],
+  ["Lande ligneuse","LA","#C7B27E","199, 178, 126","Formation arbustive basse, souvent sèche — khaki."],
+  ["Formation herbacée","FH","#D7DCA2","215, 220, 162","Strate herbacée — vert-jaune pâle."]
+];
+
+function rowHTML(e){
+  return `<div class="row">
+    <span class="chip" style="background:${e[2]}"></span>
+    <span class="name">${e[0]}</span>
+    <span class="code">${e[1]}</span>
+    <button class="copy" data-copy="${e[2]}" title="Copier ${e[2]}">${e[2]}</button>
+    <button class="copy" data-copy="${e[3]}" title="Copier RVB">${e[3]}</button>
+    <span class="why">${e[4]}</span>
+  </div>`;
+}
+document.getElementById('tbl-feuillus').innerHTML = FEUILLUS.map(rowHTML).join('');
+document.getElementById('tbl-coniferes').innerHTML = CONIFERES.map(rowHTML).join('');
+document.getElementById('tbl-melanges').innerHTML = MELANGES.map(rowHTML).join('');
+document.getElementById('tbl-formations').innerHTML = FORMATIONS.map(rowHTML).join('');
+
+const toast = document.getElementById('toast');
+let tmr;
+document.addEventListener('click', async e=>{
+  const b = e.target.closest('.copy');
+  if(!b) return;
+  try{ await navigator.clipboard.writeText(b.dataset.copy); }catch(_){}
+  toast.textContent = 'Copié — ' + b.dataset.copy;
+  toast.classList.add('on');
+  clearTimeout(tmr); tmr = setTimeout(()=>toast.classList.remove('on'), 1400);
+});
+</script>
+</body>
+</html>

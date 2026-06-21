@@ -19,16 +19,19 @@ object Referentiels {
     const val COULEUR_FOND_DEFAUT: Int = 0xFF1FA0EC.toInt()
     const val COULEUR_TEXTE_DEFAUT: Int = 0xFFFFFFFF.toInt()
 
-    /** Fond par défaut distinct par essence (assez foncé pour un texte blanc), cyclé au besoin. */
+    /**
+     * Fond par défaut par essence, dérivé du référentiel chromatique BD Forêt® V2
+     * (cf. docs/essences-bdforet-v2.html). Aligné sur l'ordre de ESSENCES_DEFAUT ; cyclé au besoin.
+     * Déviation : « Sapin ou épicéa » est un seul grenat dans le référentiel ; l'épicéa reçoit ici
+     * un rouge-orangé distinct pour séparer les deux colonnes.
+     */
     val COULEURS_ESSENCES_DEFAUT: List<Int> = listOf(
-        0xFF6D4C41, // brun
-        0xFFEF6C00, // orange
-        0xFF2E7D32, // vert
-        0xFF00838F, // cyan foncé
-        0xFF1565C0, // bleu
-        0xFF6A1B9A, // violet
-        0xFFC62828, // rouge
-        0xFF455A64, // gris-bleu
+        0xFF2A7FA6, // Chêne — Chênes décidus purs (bleu)
+        0xFF5061B8, // Hêtre — Hêtre pur (indigo)
+        0xFF7E8E9C, // Autres feuillus — Autre feuillu pur (bleu-gris)
+        0xFF94304D, // Sapin — Sapin ou épicéa (grenat)
+        0xFFC2502F, // Épicéa — dérivé, séparé du sapin (rouge-orangé)
+        0xFFAE9381, // Autres résineux — Autre conifère pur (gris-brun)
     ).map { it.toInt() }
 
     fun couleurFondDefaut(index: Int): Int =

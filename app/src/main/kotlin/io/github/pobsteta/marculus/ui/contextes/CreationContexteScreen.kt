@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -97,6 +98,7 @@ fun CreationContexteScreen(
     var erreur by remember { mutableStateOf<String?>(null) }
     var picker by remember { mutableStateOf<Pair<String, Boolean>?>(null) } // (essence, true=fond)
     var ajoutOuvert by remember { mutableStateOf(false) }
+    var infoOuvert by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -148,7 +150,16 @@ fun CreationContexteScreen(
             }
 
             HorizontalDivider()
-            Text("Essences (colonnes) et couleurs", style = MaterialTheme.typography.titleSmall)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Essences (colonnes) et couleurs",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.weight(1f),
+                )
+                IconButton(onClick = { infoOuvert = true }) {
+                    Icon(Icons.Filled.Info, contentDescription = "Informations sur les couleurs")
+                }
+            }
             essencesDisponibles.forEach { essence ->
                 LigneEssence(
                     nom = essence,
@@ -233,6 +244,62 @@ fun CreationContexteScreen(
             },
         )
     }
+
+    if (infoOuvert) {
+        InfoCouleursDialog(onFermer = { infoOuvert = false })
+    }
+}
+
+private val RAISONS_COULEURS = mapOf(
+    "Chêne" to "Chênes décidus, large amplitude tempérée.",
+    "Hêtre" to "Mésophile, atlantique-montagnard, frais.",
+    "Autres feuillus" to "Catégorie ouverte des feuillus (bleu-gris neutre).",
+    "Sapin" to "Sapin/épicéa montagnards humides, sciaphiles.",
+    "Épicéa" to "Résineux ; teinte distincte du sapin (déviation assumée).",
+    "Autres résineux" to "Catégorie ouverte des conifères (gris-brun).",
+)
+
+@Composable
+private fun InfoCouleursDialog(onFermer: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onFermer,
+        title = { Text("Couleurs des essences") },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Text(
+                    "Couleurs dérivées du référentiel BD Forêt® V2. Teinte = famille botanique ; " +
+                        "nuance = gradient écologique (du mésophile humide vers le thermo-xérique).",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Referentiels.ESSENCES_DEFAUT.forEachIndexed { i, nom ->
+                    val argb = Referentiels.couleurFondDefaut(i)
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Box(
+                            Modifier.size(28.dp)
+                                .border(1.dp, MaterialTheme.colorScheme.outline)
+                                .background(Color(argb)),
+                        )
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                "$nom — ${"#%06X".format(0xFFFFFF and argb)}",
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            RAISONS_COULEURS[nom]?.let {
+                                Text(it, style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onFermer) { Text("Fermer") } },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
