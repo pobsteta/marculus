@@ -375,6 +375,7 @@ private fun CelluleCompteur(
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Button(
                     onClick = onMoins,
+                    enabled = hqActif, // n'annule que la saisie en cours (après un +)
                     modifier = Modifier.weight(1f).height(40.dp),
                     contentPadding = PaddingValues(0.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
