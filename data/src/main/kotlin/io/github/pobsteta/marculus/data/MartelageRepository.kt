@@ -137,6 +137,10 @@ class MartelageRepository(
     fun journal(contexteId: String): Flow<List<Tige>> =
         tigeDao.observerParContexte(contexteId).map { liste -> liste.map { it.versDomaine() } }
 
+    /** Instantané du journal (pour l'export). */
+    suspend fun journalInstantane(contexteId: String): List<Tige> =
+        tigeDao.listeParContexte(contexteId).map { it.versDomaine() }
+
     fun totaux(contexteId: String): Flow<Map<CompteurCle, Int>> =
         journal(contexteId).map { TotauxMartelage(it).totaux() }
 

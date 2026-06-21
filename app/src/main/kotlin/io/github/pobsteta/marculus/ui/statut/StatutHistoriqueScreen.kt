@@ -5,8 +5,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,6 +50,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.Referentiels
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
@@ -113,9 +118,9 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>) {
         nom to contexte.axe.classes().sumOf { c -> totaux[CompteurCle(nom, c)] ?: 0 }
     }
     val total = parEssence.sumOf { it.second }
-    // Cellules non nulles (pour les barres), triées par valeur décroissante.
-    val cellules = totaux.filterValues { it > 0 }.entries.sortedByDescending { it.value }
-    val maxCellule = cellules.maxOfOrNull { it.value } ?: 0
+    val classes = contexte.axe.classes()
+    val couleurClasse: (Int) -> Color = { idx -> Color(Referentiels.PALETTE[idx % Referentiels.PALETTE.size]) }
+    val maxEssence = parEssence.maxOfOrNull { it.second } ?: 0
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -149,18 +154,64 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>) {
                 }
             }
         }
-        if (cellules.isNotEmpty()) {
+        if (total > 0) {
             item { HorizontalDivider() }
-            item { Text("Détail par classe", style = MaterialTheme.typography.titleSmall) }
-            items(cellules) { (cle, valeur) ->
-                BarreCellule(
-                    libelle = "${cle.essence} ${cle.classe}",
-                    valeur = valeur,
-                    fraction = if (maxCellule > 0) valeur.toFloat() / maxCellule else 0f,
-                    couleur = Color(couleurs[cle.essence] ?: 0xFF888888.toInt()),
+            item { Text("Détail par classe (empilé par essence)", style = MaterialTheme.typography.titleSmall) }
+            item { LegendeClasses(classes, couleurClasse) }
+            items(contexte.essencesNoms) { essence ->
+                BarreEmpilee(
+                    essence = essence,
+                    classesAvecTotal = classes.map { c -> c to (totaux[CompteurCle(essence, c)] ?: 0) },
+                    couleurParIndex = couleurClasse,
+                    maxEssence = maxEssence,
                 )
             }
         }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LegendeClasses(classes: List<Int>, couleur: (Int) -> Color) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        classes.forEachIndexed { i, c ->
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Box(Modifier.size(12.dp).background(couleur(i)))
+                Text("$c", style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+}
+
+@Composable
+private fun BarreEmpilee(
+    essence: String,
+    classesAvecTotal: List<Pair<Int, Int>>,
+    couleurParIndex: (Int) -> Color,
+    maxEssence: Int,
+) {
+    val essenceTotal = classesAvecTotal.sumOf { it.second }
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(essence, modifier = Modifier.width(96.dp), style = MaterialTheme.typography.bodySmall)
+        Box(Modifier.weight(1f).height(24.dp).background(MaterialTheme.colorScheme.surfaceVariant)) {
+            Row(Modifier.fillMaxSize()) {
+                classesAvecTotal.forEachIndexed { i, (_, t) ->
+                    if (t > 0) {
+                        Box(Modifier.weight(t.toFloat()).fillMaxHeight().background(couleurParIndex(i)))
+                    }
+                }
+                val reste = maxEssence - essenceTotal
+                if (reste > 0) Spacer(Modifier.weight(reste.toFloat()))
+            }
+        }
+        Text("$essenceTotal", modifier = Modifier.width(36.dp), fontWeight = FontWeight.Bold)
     }
 }
 
@@ -184,20 +235,6 @@ private fun Donut(parEssence: List<Pair<String, Int>>, couleurs: Map<String, Int
             )
             start += sweep
         }
-    }
-}
-
-@Composable
-private fun BarreCellule(libelle: String, valeur: Int, fraction: Float, couleur: Color) {
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(libelle, modifier = Modifier.width(120.dp), style = MaterialTheme.typography.bodySmall)
-        Box(
-            Modifier.weight(1f).height(20.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-        ) {
-            Box(Modifier.fillMaxWidth(fraction.coerceIn(0f, 1f)).height(20.dp).background(couleur))
-        }
-        Text("$valeur", modifier = Modifier.width(36.dp), fontWeight = FontWeight.Bold)
     }
 }
 

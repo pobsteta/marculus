@@ -1,5 +1,7 @@
 package io.github.pobsteta.marculus.ui.contextes
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,9 +37,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.export.ExportCsv
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ResumeContexte
 import io.github.pobsteta.marculus.ui.libelle
@@ -54,10 +59,28 @@ fun ListeContextesScreen(
     onReferentiels: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val resumes by repository.resumes().collectAsStateWithLifecycle(emptyList())
     var aSupprimer by remember { mutableStateOf<ResumeContexte?>(null) }
     var aLire by remember { mutableStateOf<ResumeContexte?>(null) }
     var menuAppli by remember { mutableStateOf(false) }
+    var pendingExport by remember { mutableStateOf<String?>(null) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv"),
+    ) { uri ->
+        val id = pendingExport
+        pendingExport = null
+        if (uri != null && id != null) {
+            scope.launch {
+                val ctx = repository.contexte(id) ?: return@launch
+                val journal = repository.journalInstantane(id)
+                val csv = ExportCsv.contexteCsv(ctx, journal)
+                context.contentResolver.openOutputStream(uri)?.use { it.write(csv.toByteArray(Charsets.UTF_8)) }
+                repository.marquerExporte(id)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -117,6 +140,10 @@ fun ListeContextesScreen(
                         onSupprimer = { aSupprimer = resume },
                         onLire = { aLire = resume },
                         onDupliquer = { scope.launch { repository.dupliquerContexte(resume.contexte.id) } },
+                        onExporter = {
+                            pendingExport = resume.contexte.id
+                            exportLauncher.launch("${resume.contexte.nom}.csv")
+                        },
                     )
                 }
             }
@@ -173,6 +200,7 @@ private fun CarteContexte(
     onSupprimer: () -> Unit,
     onLire: () -> Unit,
     onDupliquer: () -> Unit,
+    onExporter: () -> Unit,
 ) {
     val contexte = resume.contexte
     var menuOuvert by remember { mutableStateOf(false) }
@@ -183,6 +211,15 @@ private fun CarteContexte(
         ) {
             Column(Modifier.weight(1f)) {
                 Text(contexte.nom, style = MaterialTheme.typography.titleLarge)
+                contexte.commentaire?.takeIf { it.isNotBlank() }?.let { commentaire ->
+                    Text(
+                        commentaire,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
                 Text(
                     "${contexte.mode.libelle()} · classes ${contexte.axe.min}–${contexte.axe.max} " +
                         "(pas ${contexte.axe.pas}) · ${contexte.essences.size} essences · ${resume.nbEvenements} tiges" +
@@ -197,6 +234,7 @@ private fun CarteContexte(
                 DropdownMenu(expanded = menuOuvert, onDismissRequest = { menuOuvert = false }) {
                     DropdownMenuItem(text = { Text("Lire") }, onClick = { menuOuvert = false; onLire() })
                     DropdownMenuItem(text = { Text("Dupliquer") }, onClick = { menuOuvert = false; onDupliquer() })
+                    DropdownMenuItem(text = { Text("Exporter (CSV)") }, onClick = { menuOuvert = false; onExporter() })
                     DropdownMenuItem(
                         text = { Text("Modifier") },
                         enabled = !resume.verrouille,
