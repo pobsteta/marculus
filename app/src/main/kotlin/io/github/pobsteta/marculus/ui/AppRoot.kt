@@ -14,7 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.ModeMesure
+import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.data.MartelageRepository
+import io.github.pobsteta.marculus.data.ReglagesRepository
 import io.github.pobsteta.marculus.ui.contextes.CreationContexteScreen
 import io.github.pobsteta.marculus.ui.contextes.ListeContextesScreen
 import io.github.pobsteta.marculus.ui.feuille.FeuilleMartelageScreen
@@ -60,7 +62,11 @@ fun ModeMesure.libelle(): String = when (this) {
 }
 
 @Composable
-fun AppRoot(repository: MartelageRepository) {
+fun AppRoot(
+    repository: MartelageRepository,
+    reglagesRepository: ReglagesRepository,
+    reglages: Reglages,
+) {
     // rememberSaveable : la navigation survit aux rotations / recréations d'activité.
     var route: Route by rememberSaveable(stateSaver = RouteSaver) { mutableStateOf<Route>(Route.Liste) }
 
@@ -80,7 +86,10 @@ fun AppRoot(repository: MartelageRepository) {
             onEnregistre = { id -> route = Route.Feuille(id) },
         )
 
-        Route.Parametres -> ParametresScreen(onRetour = { route = Route.Liste })
+        Route.Parametres -> ParametresScreen(
+            reglagesRepository = reglagesRepository,
+            onRetour = { route = Route.Liste },
+        )
 
         is Route.Edition -> {
             val contexte by produceState<Contexte?>(initialValue = null, r.contexteId) {
@@ -104,6 +113,7 @@ fun AppRoot(repository: MartelageRepository) {
         is Route.Feuille -> FeuilleMartelageScreen(
             repository = repository,
             contexteId = r.contexteId,
+            reglages = reglages,
             onRetour = { route = Route.Liste },
             onStatut = { route = Route.Statut(r.contexteId) },
         )

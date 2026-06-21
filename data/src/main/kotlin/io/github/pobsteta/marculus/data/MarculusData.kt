@@ -9,4 +9,6 @@ object MarculusData {
         val db = MarculusDatabase.creer(context)
         return MartelageRepository(db.contexteDao(), db.tigeDao(), db.compteurConfigDao())
     }
+
+    fun creerReglages(context: Context): ReglagesRepository = ReglagesRepository(context)
 }

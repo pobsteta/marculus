@@ -47,9 +47,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.view.SoundEffectConstants
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,8 +67,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.Referentiels
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
+import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.data.MartelageRepository
 import kotlinx.coroutines.launch
+
+private fun vibrer(context: Context) {
+    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+    } else {
+        @Suppress("DEPRECATION")
+        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    }
+    vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
+}
 
 private val LARGEUR_CELLULE = 140.dp
 private val HAUTEUR_CELLULE = 144.dp
@@ -79,10 +98,17 @@ private data class DerniereSaisie(val uuid: String, val essence: String, val cla
 fun FeuilleMartelageScreen(
     repository: MartelageRepository,
     contexteId: String,
+    reglages: Reglages,
     onRetour: () -> Unit,
     onStatut: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val androidContext = LocalContext.current
+    val vue = LocalView.current
+    fun retourSensoriel() {
+        if (reglages.vibration) vibrer(androidContext)
+        if (reglages.sonClic) vue.playSoundEffect(SoundEffectConstants.CLICK)
+    }
     val contexte by produceState<Contexte?>(initialValue = null, contexteId) {
         value = repository.contexte(contexteId)
     }
@@ -162,6 +188,7 @@ fun FeuilleMartelageScreen(
                             alertePlus = cfg?.alertePlus(total) ?: false,
                             hqActif = estDerniere,
                             onPlus = {
+                                retourSensoriel()
                                 scope.launch {
                                     val uuid = repository.ajouterTige(contexteId, e.nom, classe, quantite = ctx.increment)
                                     derniereSaisie = DerniereSaisie(uuid, e.nom, classe)
@@ -169,6 +196,7 @@ fun FeuilleMartelageScreen(
                             },
                             onMoins = {
                                 if (total > 0) {
+                                    retourSensoriel()
                                     val q = minOf(ctx.increment, total) // jamais en dessous de zéro
                                     scope.launch { repository.annulerTige(contexteId, e.nom, classe, quantite = q) }
                                     derniereSaisie = null // un − ferme la saisie en cours
