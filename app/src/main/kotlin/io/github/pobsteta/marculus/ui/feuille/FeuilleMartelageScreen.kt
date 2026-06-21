@@ -49,10 +49,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import java.text.DecimalFormatSymbols
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.Referentiels
 import fr.marculus.core.model.CompteurCle
@@ -317,6 +319,8 @@ private fun TriangleAlerte(signe: String) {
 private fun SaisieHauteurDialog(onAnnuler: () -> Unit, onValider: (String) -> Unit) {
     var hauteur by remember { mutableStateOf("") }
     var decoupe by remember { mutableStateOf("") }
+    // Séparateur décimal de la langue de l'application (fr → « , », en → « . »).
+    val separateur = DecimalFormatSymbols.getInstance(LocalConfiguration.current.locales[0]).decimalSeparator
     AlertDialog(
         onDismissRequest = onAnnuler,
         title = { Text("Hauteur de la dernière tige") },
@@ -324,10 +328,18 @@ private fun SaisieHauteurDialog(onAnnuler: () -> Unit, onValider: (String) -> Un
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = hauteur,
-                    // Chiffres + un séparateur décimal (virgule ou point) : accepte 27, 27.5 ou 27,5.
-                    onValueChange = { v -> hauteur = v.filter { it.isDigit() || it == '.' || it == ',' } },
+                    // Chiffres + un seul séparateur, normalisé sur celui de la locale.
+                    onValueChange = { v ->
+                        hauteur = buildString {
+                            var sepVue = false
+                            for (c in v) when {
+                                c.isDigit() -> append(c)
+                                (c == '.' || c == ',') && !sepVue -> { append(separateur); sepVue = true }
+                            }
+                        }
+                    },
                     label = { Text("Hauteur (m)") },
-                    placeholder = { Text("ex. 27,5") },
+                    placeholder = { Text("ex. 27${separateur}5") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
