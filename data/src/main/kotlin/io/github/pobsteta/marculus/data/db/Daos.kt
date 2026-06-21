@@ -19,6 +19,12 @@ interface ContexteDao {
 
     @Query("DELETE FROM contexte WHERE id = :id")
     suspend fun supprimer(id: String)
+
+    @Query("SELECT * FROM contexte")
+    suspend fun toutes(): List<ContexteEntity>
+
+    @Query("DELETE FROM contexte")
+    suspend fun toutSupprimer()
 }
 
 @Dao
@@ -53,6 +59,12 @@ interface TigeDao {
 
     @Query("DELETE FROM tige WHERE contexteId = :contexteId")
     suspend fun supprimerParContexte(contexteId: String)
+
+    @Query("SELECT * FROM tige")
+    suspend fun toutes(): List<TigeEntity>
+
+    @Query("DELETE FROM tige")
+    suspend fun toutSupprimer()
 }
 
 /** Projection : nombre d'événements (tiges) par contexte. */
@@ -76,4 +88,10 @@ interface CompteurConfigDao {
 
     @Query("DELETE FROM compteur_config WHERE contexteId = :contexteId")
     suspend fun supprimerParContexte(contexteId: String)
+
+    @Query("SELECT * FROM compteur_config")
+    suspend fun toutes(): List<CompteurConfigEntity>
+
+    @Query("DELETE FROM compteur_config")
+    suspend fun toutSupprimer()
 }

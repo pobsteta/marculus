@@ -20,6 +20,7 @@ import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ReferentielsRepository
 import io.github.pobsteta.marculus.data.ReglagesRepository
+import io.github.pobsteta.marculus.data.SauvegardeRepository
 import io.github.pobsteta.marculus.ui.contextes.CreationContexteScreen
 import io.github.pobsteta.marculus.ui.contextes.ListeContextesScreen
 import io.github.pobsteta.marculus.ui.feuille.FeuilleMartelageScreen
@@ -74,6 +75,7 @@ fun AppRoot(
     reglagesRepository: ReglagesRepository,
     reglages: Reglages,
     referentielsRepository: ReferentielsRepository,
+    sauvegardeRepository: SauvegardeRepository,
 ) {
     // rememberSaveable : la navigation survit aux rotations / recréations d'activité.
     var route: Route by rememberSaveable(stateSaver = RouteSaver) { mutableStateOf<Route>(Route.Liste) }
@@ -100,6 +102,7 @@ fun AppRoot(
 
         Route.Parametres -> ParametresScreen(
             reglagesRepository = reglagesRepository,
+            sauvegardeRepository = sauvegardeRepository,
             onRetour = { route = Route.Liste },
         )
 

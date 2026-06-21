@@ -50,8 +50,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import fr.marculus.core.Referentiels
 import fr.marculus.core.model.ActionTige
+import fr.marculus.core.model.CategorieBois
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Tige
@@ -119,7 +119,13 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>) {
     }
     val total = parEssence.sumOf { it.second }
     val classes = contexte.axe.classes()
-    val couleurClasse: (Int) -> Color = { idx -> Color(Referentiels.PALETTE[idx % Referentiels.PALETTE.size]) }
+    // Couleur d'une classe : teinte par catégorie (PB/BM/GB/TGB), dégradé clair→foncé dans la catégorie.
+    val couleurClasse: (Int) -> Color = { classe ->
+        val cat = CategorieBois.pour(classe, contexte.mode)
+        val membres = classes.filter { CategorieBois.pour(it, contexte.mode) == cat }
+        val f = if (membres.size > 1) membres.indexOf(classe).coerceAtLeast(0).toFloat() / (membres.size - 1) else 0f
+        gradientCategorie(cat, f)
+    }
     val maxEssence = parEssence.maxOfOrNull { it.second } ?: 0
 
     LazyColumn(
@@ -162,7 +168,7 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>) {
                 BarreEmpilee(
                     essence = essence,
                     classesAvecTotal = classes.map { c -> c to (totaux[CompteurCle(essence, c)] ?: 0) },
-                    couleurParIndex = couleurClasse,
+                    couleurParClasse = couleurClasse,
                     maxEssence = maxEssence,
                 )
             }
@@ -177,20 +183,32 @@ private fun LegendeClasses(classes: List<Int>, couleur: (Int) -> Color) {
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        classes.forEachIndexed { i, c ->
+        classes.forEach { c ->
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Box(Modifier.size(12.dp).background(couleur(i)))
+                Box(Modifier.size(12.dp).background(couleur(c)))
                 Text("$c", style = MaterialTheme.typography.labelSmall)
             }
         }
     }
 }
 
+private fun gradientCategorie(cat: CategorieBois, f: Float): Color {
+    val teinte = when (cat) {
+        CategorieBois.PB -> 210f   // bleu
+        CategorieBois.BM -> 50f    // jaune
+        CategorieBois.GB -> 28f    // orange
+        CategorieBois.TGB -> 4f    // rouge
+    }
+    val saturation = (0.45f + 0.50f * f).coerceIn(0f, 1f)
+    val valeur = (0.95f - 0.45f * f).coerceIn(0f, 1f)
+    return Color.hsv(teinte, saturation, valeur)
+}
+
 @Composable
 private fun BarreEmpilee(
     essence: String,
     classesAvecTotal: List<Pair<Int, Int>>,
-    couleurParIndex: (Int) -> Color,
+    couleurParClasse: (Int) -> Color,
     maxEssence: Int,
 ) {
     val essenceTotal = classesAvecTotal.sumOf { it.second }
@@ -202,9 +220,9 @@ private fun BarreEmpilee(
         Text(essence, modifier = Modifier.width(96.dp), style = MaterialTheme.typography.bodySmall)
         Box(Modifier.weight(1f).height(24.dp).background(MaterialTheme.colorScheme.surfaceVariant)) {
             Row(Modifier.fillMaxSize()) {
-                classesAvecTotal.forEachIndexed { i, (_, t) ->
+                classesAvecTotal.forEach { (classe, t) ->
                     if (t > 0) {
-                        Box(Modifier.weight(t.toFloat()).fillMaxHeight().background(couleurParIndex(i)))
+                        Box(Modifier.weight(t.toFloat()).fillMaxHeight().background(couleurParClasse(classe)))
                     }
                 }
                 val reste = maxEssence - essenceTotal
