@@ -14,13 +14,10 @@ class MarculusApplication : Application() {
         // (le cache externe par défaut est inaccessible sur Android 10+ → tuiles invisibles).
         val config = Configuration.getInstance()
         config.load(this, getSharedPreferences("osmdroid", Context.MODE_PRIVATE))
-        config.userAgentValue = packageName
+        config.userAgentValue = "Marculus/1.0 (+$packageName)"
         val base = File(cacheDir, "osmdroid").apply { mkdirs() }
         config.osmdroidBasePath = base
         config.osmdroidTileCache = File(base, "tiles").apply { mkdirs() }
-        // Diagnostic temporaire du chargement des tuiles.
-        config.isDebugMode = true
-        config.isDebugMapTileDownloader = true
     }
 
     private val data by lazy { MarculusData.creer(this) }

@@ -6,9 +6,17 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -24,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -31,11 +40,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.Contexte
+import fr.marculus.core.model.EssenceColonne
 import io.github.pobsteta.marculus.data.MartelageRepository
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -44,6 +57,8 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+
+private const val ZOOM_MAX = 19.0
 
 private val SOURCE_SATELLITE: OnlineTileSourceBase = object : OnlineTileSourceBase(
     "ESRI World Imagery", 0, 19, 256, "",
@@ -68,23 +83,60 @@ fun CarteScreen(
     val journal by repository.journal(contexteId).collectAsStateWithLifecycle(emptyList())
     var satellite by remember { mutableStateOf(false) }
     var centre by remember { mutableStateOf(false) }
-    val mapView = remember { MapView(context) }
+
+    val mapView = remember {
+        MapView(context).apply {
+            setMultiTouchControls(true)
+            setUseDataConnection(true)
+            setTileSource(TileSourceFactory.MAPNIK)
+            minZoomLevel = 4.0
+            maxZoomLevel = ZOOM_MAX // au-delà, plus de tuiles → fond blanc
+            controller.setZoom(6.0)
+            controller.setCenter(GeoPoint(46.6, 2.5)) // France
+        }
+    }
 
     DisposableEffect(Unit) {
         mapView.onResume()
         onDispose { mapView.onPause() }
     }
 
+    // Fond de carte : ne change que sur bascule OSM/Satellite.
+    LaunchedEffect(satellite) {
+        mapView.setTileSource(if (satellite) SOURCE_SATELLITE else TileSourceFactory.MAPNIK)
+        mapView.invalidate()
+    }
+
+    val ctx = contexte
+    // Marqueurs : reconstruits seulement quand le contexte ou le journal change.
+    LaunchedEffect(ctx, journal) {
+        if (ctx == null) return@LaunchedEffect
+        val couleurs = ctx.essences.associate { it.nom to it.couleurFondArgb }
+        mapView.overlays.clear()
+        val points = mutableListOf<GeoPoint>()
+        journal.filter { it.action == ActionTige.PLUS && it.position != null }.forEach { t ->
+            val gp = GeoPoint(t.position!!.latitude, t.position!!.longitude)
+            points.add(gp)
+            mapView.overlays.add(
+                Marker(mapView).apply {
+                    position = gp
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    icon = marqueur(context, couleurs[t.essence] ?: 0xFF888888.toInt(), tailleMarqueur(ctx.axe.min, ctx.axe.max, t.classe))
+                    title = "${t.essence} ${t.classe}"
+                },
+            )
+        }
+        if (!centre && points.isNotEmpty()) {
+            recadrerSur(mapView, points)
+            centre = true
+        }
+        mapView.invalidate()
+    }
+
     fun recadrer() {
         val points = journal.filter { it.action == ActionTige.PLUS && it.position != null }
             .map { GeoPoint(it.position!!.latitude, it.position!!.longitude) }
-        when {
-            points.size == 1 -> {
-                mapView.controller.setZoom(17.0)
-                mapView.controller.animateTo(points.first())
-            }
-            points.size > 1 -> mapView.zoomToBoundingBox(BoundingBox.fromGeoPoints(points), true, 80)
-        }
+        recadrerSur(mapView, points)
     }
 
     Scaffold(
@@ -101,71 +153,62 @@ fun CarteScreen(
                 },
                 actions = {
                     TextButton(onClick = { satellite = !satellite }) {
-                        Text(
-                            if (satellite) "OSM" else "Satellite",
-                            color = MaterialTheme.colorScheme.onPrimary,
-                        )
+                        Text(if (satellite) "OSM" else "Satellite", color = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
             )
         },
     ) { padding ->
-        val ctx = contexte
         if (ctx == null) {
             Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
             return@Scaffold
         }
-        val couleurs = ctx.essences.associate { it.nom to it.couleurFondArgb }
-        AndroidView(
-            modifier = Modifier.fillMaxSize().padding(padding),
-            factory = {
-                mapView.apply {
-                    setMultiTouchControls(true)
-                    setTileSource(TileSourceFactory.MAPNIK)
-                    controller.setZoom(6.0)
-                    controller.setCenter(GeoPoint(46.6, 2.5)) // France
+        Box(Modifier.fillMaxSize().padding(padding)) {
+            AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
+            LegendeEssences(
+                essences = ctx.essences,
+                modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun LegendeEssences(essences: List<EssenceColonne>, modifier: Modifier = Modifier) {
+    if (essences.isEmpty()) return
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+        ),
+    ) {
+        Column(Modifier.padding(8.dp).widthIn(max = 200.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text("Essences", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+            essences.forEach { e ->
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Box(Modifier.size(12.dp).background(Color(e.couleurFondArgb)))
+                    Text(e.nom, style = MaterialTheme.typography.labelSmall, maxLines = 1)
                 }
-            },
-            update = { map ->
-                map.setTileSource(if (satellite) SOURCE_SATELLITE else TileSourceFactory.MAPNIK)
-                map.overlays.clear()
-                val points = mutableListOf<GeoPoint>()
-                journal.filter { it.action == ActionTige.PLUS && it.position != null }.forEach { t ->
-                    val pos = t.position!!
-                    val gp = GeoPoint(pos.latitude, pos.longitude)
-                    points.add(gp)
-                    map.overlays.add(
-                        Marker(map).apply {
-                            position = gp
-                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                            icon = marqueur(
-                                context,
-                                couleurs[t.essence] ?: 0xFF888888.toInt(),
-                                tailleMarqueur(ctx.axe.min, ctx.axe.max, t.classe),
-                            )
-                            title = "${t.essence} ${t.classe}"
-                        },
-                    )
-                }
-                if (!centre && points.isNotEmpty()) {
-                    if (points.size == 1) {
-                        map.controller.setZoom(17.0)
-                        map.controller.setCenter(points.first())
-                    } else {
-                        map.zoomToBoundingBox(BoundingBox.fromGeoPoints(points), false, 80)
-                    }
-                    centre = true
-                }
-                map.invalidate()
-            },
-        )
+            }
+        }
+    }
+}
+
+private fun recadrerSur(map: MapView, points: List<GeoPoint>) {
+    when {
+        points.size == 1 -> {
+            map.controller.setZoom(17.0)
+            map.controller.animateTo(points.first())
+        }
+        points.size > 1 -> map.zoomToBoundingBox(BoundingBox.fromGeoPoints(points), true, 100)
     }
 }
 
@@ -173,7 +216,7 @@ fun CarteScreen(
 private fun tailleMarqueur(min: Int, max: Int, classe: Int): Int {
     val etendue = (max - min).coerceAtLeast(1)
     val fraction = ((classe - min).toFloat() / etendue).coerceIn(0f, 1f)
-    return (24 + 40 * fraction).toInt() // 24 px (petite classe) → 64 px (grande classe)
+    return (24 + 40 * fraction).toInt()
 }
 
 /** Pastille circulaire colorée (couleur de l'essence) servant d'icône de marqueur. */
