@@ -11,4 +11,6 @@ object MarculusData {
     }
 
     fun creerReglages(context: Context): ReglagesRepository = ReglagesRepository(context)
+
+    fun creerReferentiels(context: Context): ReferentielsRepository = ReferentielsRepository(context)
 }

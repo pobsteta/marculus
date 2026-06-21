@@ -60,6 +60,7 @@ import kotlinx.coroutines.launch
 fun CreationContexteScreen(
     repository: MartelageRepository,
     contexteExistant: Contexte?,
+    essencesReferentiel: List<String>,
     onAnnuler: () -> Unit,
     onEnregistre: (String) -> Unit,
 ) {
@@ -76,14 +77,14 @@ fun CreationContexteScreen(
 
     val essencesDisponibles = remember {
         mutableStateListOf<String>().apply {
-            val base = Referentiels.ESSENCES_DEFAUT.toMutableList()
+            val base = essencesReferentiel.toMutableList()
             contexteExistant?.essencesNoms?.forEach { if (it !in base) base.add(it) }
             addAll(base)
         }
     }
     val selection = remember {
         mutableStateListOf<String>().apply {
-            addAll(contexteExistant?.essencesNoms ?: Referentiels.ESSENCES_DEFAUT)
+            addAll(contexteExistant?.essencesNoms ?: essencesReferentiel)
         }
     }
     val couleurs = remember {

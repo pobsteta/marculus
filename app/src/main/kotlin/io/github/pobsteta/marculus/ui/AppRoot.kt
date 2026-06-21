@@ -12,15 +12,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.Referentiels
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.data.MartelageRepository
+import io.github.pobsteta.marculus.data.ReferentielsRepository
 import io.github.pobsteta.marculus.data.ReglagesRepository
 import io.github.pobsteta.marculus.ui.contextes.CreationContexteScreen
 import io.github.pobsteta.marculus.ui.contextes.ListeContextesScreen
 import io.github.pobsteta.marculus.ui.feuille.FeuilleMartelageScreen
 import io.github.pobsteta.marculus.ui.parametres.ParametresScreen
+import io.github.pobsteta.marculus.ui.referentiels.ReferentielsScreen
 import io.github.pobsteta.marculus.ui.statut.StatutHistoriqueScreen
 
 /** Navigation minimale entre les écrans de la v1. */
@@ -28,6 +32,7 @@ sealed interface Route {
     data object Liste : Route
     data object Creation : Route
     data object Parametres : Route
+    data object Referentiels : Route
     data class Edition(val contexteId: String) : Route
     data class Feuille(val contexteId: String) : Route
     data class Statut(val contexteId: String) : Route
@@ -39,6 +44,7 @@ private val RouteSaver = listSaver<Route, String>(
             Route.Liste -> listOf("liste")
             Route.Creation -> listOf("creation")
             Route.Parametres -> listOf("parametres")
+            Route.Referentiels -> listOf("referentiels")
             is Route.Edition -> listOf("edition", route.contexteId)
             is Route.Feuille -> listOf("feuille", route.contexteId)
             is Route.Statut -> listOf("statut", route.contexteId)
@@ -48,6 +54,7 @@ private val RouteSaver = listSaver<Route, String>(
         when (l[0]) {
             "creation" -> Route.Creation
             "parametres" -> Route.Parametres
+            "referentiels" -> Route.Referentiels
             "edition" -> Route.Edition(l[1])
             "feuille" -> Route.Feuille(l[1])
             "statut" -> Route.Statut(l[1])
@@ -66,9 +73,12 @@ fun AppRoot(
     repository: MartelageRepository,
     reglagesRepository: ReglagesRepository,
     reglages: Reglages,
+    referentielsRepository: ReferentielsRepository,
 ) {
     // rememberSaveable : la navigation survit aux rotations / recréations d'activité.
     var route: Route by rememberSaveable(stateSaver = RouteSaver) { mutableStateOf<Route>(Route.Liste) }
+    val essences by referentielsRepository.essences.collectAsStateWithLifecycle(Referentiels.ESSENCES_DEFAUT)
+    val qualitesArbre by referentielsRepository.qualitesArbre.collectAsStateWithLifecycle(Referentiels.QUALITE_ARBRE_DEFAUT)
 
     when (val r = route) {
         Route.Liste -> ListeContextesScreen(
@@ -77,17 +87,24 @@ fun AppRoot(
             onOuvrir = { id -> route = Route.Feuille(id) },
             onModifier = { id -> route = Route.Edition(id) },
             onParametres = { route = Route.Parametres },
+            onReferentiels = { route = Route.Referentiels },
         )
 
         Route.Creation -> CreationContexteScreen(
             repository = repository,
             contexteExistant = null,
+            essencesReferentiel = essences,
             onAnnuler = { route = Route.Liste },
             onEnregistre = { id -> route = Route.Feuille(id) },
         )
 
         Route.Parametres -> ParametresScreen(
             reglagesRepository = reglagesRepository,
+            onRetour = { route = Route.Liste },
+        )
+
+        Route.Referentiels -> ReferentielsScreen(
+            referentielsRepository = referentielsRepository,
             onRetour = { route = Route.Liste },
         )
 
@@ -104,6 +121,7 @@ fun AppRoot(
                 CreationContexteScreen(
                     repository = repository,
                     contexteExistant = ctx,
+                    essencesReferentiel = essences,
                     onAnnuler = { route = Route.Liste },
                     onEnregistre = { route = Route.Liste },
                 )
@@ -114,6 +132,7 @@ fun AppRoot(
             repository = repository,
             contexteId = r.contexteId,
             reglages = reglages,
+            qualitesArbre = qualitesArbre,
             onRetour = { route = Route.Liste },
             onStatut = { route = Route.Statut(r.contexteId) },
         )

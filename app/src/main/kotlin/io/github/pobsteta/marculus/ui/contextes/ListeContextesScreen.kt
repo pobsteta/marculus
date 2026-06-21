@@ -51,6 +51,7 @@ fun ListeContextesScreen(
     onOuvrir: (String) -> Unit,
     onModifier: (String) -> Unit,
     onParametres: () -> Unit,
+    onReferentiels: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val resumes by repository.resumes().collectAsStateWithLifecycle(emptyList())
@@ -68,6 +69,10 @@ fun ListeContextesScreen(
                             Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
                         }
                         DropdownMenu(expanded = menuAppli, onDismissRequest = { menuAppli = false }) {
+                            DropdownMenuItem(
+                                text = { Text("Référentiels") },
+                                onClick = { menuAppli = false; onReferentiels() },
+                            )
                             DropdownMenuItem(
                                 text = { Text("Paramètres") },
                                 onClick = { menuAppli = false; onParametres() },

@@ -64,7 +64,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.text.DecimalFormatSymbols
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import fr.marculus.core.Referentiels
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Reglages
@@ -99,6 +98,7 @@ fun FeuilleMartelageScreen(
     repository: MartelageRepository,
     contexteId: String,
     reglages: Reglages,
+    qualitesArbre: List<String>,
     onRetour: () -> Unit,
     onStatut: () -> Unit,
 ) {
@@ -237,6 +237,7 @@ fun FeuilleMartelageScreen(
         )
 
         is Saisie.Qualite -> ChoixQualiteDialog(
+            qualites = qualitesArbre,
             onAnnuler = { saisie = null },
             onChoisir = { qualite ->
                 scope.launch { repository.annoterQualite(s.uuid, qualite) }
@@ -415,13 +416,13 @@ private fun SaisieHauteurDialog(onAnnuler: () -> Unit, onValider: (String) -> Un
 }
 
 @Composable
-private fun ChoixQualiteDialog(onAnnuler: () -> Unit, onChoisir: (String) -> Unit) {
+private fun ChoixQualiteDialog(qualites: List<String>, onAnnuler: () -> Unit, onChoisir: (String) -> Unit) {
     AlertDialog(
         onDismissRequest = onAnnuler,
         title = { Text("Qualité de l'arbre") },
         text = {
             Column {
-                Referentiels.QUALITE_ARBRE_DEFAUT.forEach { qualite ->
+                qualites.forEach { qualite ->
                     TextButton(
                         onClick = { onChoisir(qualite) },
                         modifier = Modifier.fillMaxWidth(),
