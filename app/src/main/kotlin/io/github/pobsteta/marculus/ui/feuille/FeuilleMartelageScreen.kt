@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -42,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -73,6 +75,7 @@ fun FeuilleMartelageScreen(
         value = repository.contexte(contexteId)
     }
     val totaux by repository.totaux(contexteId).collectAsStateWithLifecycle(emptyMap())
+    val configs by repository.configs(contexteId).collectAsStateWithLifecycle(emptyMap())
     var saisie by remember { mutableStateOf<Saisie?>(null) }
     var menuReset by remember { mutableStateOf(false) }
     var confirmerReset by remember { mutableStateOf(false) }
@@ -129,12 +132,16 @@ fun FeuilleMartelageScreen(
             classes.forEach { classe ->
                 Row {
                     ctx.essences.forEach { e ->
-                        val total = totaux[CompteurCle(e.nom, classe)] ?: 0
+                        val cle = CompteurCle(e.nom, classe)
+                        val total = totaux[cle] ?: 0
+                        val cfg = configs[cle]
                         CelluleCompteur(
                             libelle = "${e.nom} $classe",
                             total = total,
                             fond = Color(e.couleurFondArgb),
                             texte = Color(e.couleurTexteArgb),
+                            alerteMoins = cfg?.alerteMoins(total) ?: false,
+                            alertePlus = cfg?.alertePlus(total) ?: false,
                             onPlus = {
                                 scope.launch { repository.ajouterTige(contexteId, e.nom, classe, quantite = ctx.increment) }
                             },
@@ -204,12 +211,15 @@ private fun CelluleCompteur(
     total: Int,
     fond: Color,
     texte: Color,
+    alerteMoins: Boolean,
+    alertePlus: Boolean,
     onPlus: () -> Unit,
     onMoins: () -> Unit,
     onHauteur: () -> Unit,
     onQualite: () -> Unit,
     onAvis: () -> Unit,
 ) {
+    val couleurAlerte = Color(0xFFFFD600)
     var menu by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier.width(LARGEUR_CELLULE).height(HAUTEUR_CELLULE).padding(2.dp),
@@ -234,14 +244,21 @@ private fun CelluleCompteur(
                     Text("Q", color = texte, style = MaterialTheme.typography.titleMedium)
                 }
             }
-            // Centre : la valeur, avec le menu ⋮ (avis) en coin.
+            // Centre : la valeur encadrée des alertes (⚠− à gauche, ⚠+ à droite), menu ⋮ en coin.
             Box(Modifier.fillMaxWidth().weight(1f)) {
-                Text(
-                    "$total",
-                    color = texte,
-                    style = MaterialTheme.typography.headlineMedium,
+                Row(
                     modifier = Modifier.align(Alignment.Center),
-                )
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    if (alerteMoins) {
+                        Text("⚠−", color = couleurAlerte, style = MaterialTheme.typography.titleMedium)
+                    }
+                    Text("$total", color = texte, style = MaterialTheme.typography.headlineMedium)
+                    if (alertePlus) {
+                        Text("⚠+", color = couleurAlerte, style = MaterialTheme.typography.titleMedium)
+                    }
+                }
                 Box(Modifier.align(Alignment.TopEnd)) {
                     IconButton(onClick = { menu = true }, modifier = Modifier.size(28.dp)) {
                         Text("⋮", color = texte, style = MaterialTheme.typography.titleMedium)
@@ -327,39 +344,52 @@ private fun AvisDialog(
     val scope = rememberCoroutineScope()
     var avisPlus by remember { mutableStateOf("") }
     var avisMoins by remember { mutableStateOf("") }
+    var erreur by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(essence, classe) {
         val config = repository.configCompteur(contexteId, essence, classe)
-        avisPlus = config.avisSiPlus ?: ""
-        avisMoins = config.avisSiMoins ?: ""
+        avisPlus = config.avisSiPlus?.toString() ?: ""
+        avisMoins = config.avisSiMoins?.toString() ?: ""
     }
     AlertDialog(
         onDismissRequest = onFermer,
         title = { Text("Avis — $essence $classe") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = avisPlus,
-                    onValueChange = { avisPlus = it },
-                    label = { Text("Avis si plus") },
-                    modifier = Modifier.fillMaxWidth(),
+                Text(
+                    "Seuils numériques. Le « + » (maximum) doit être supérieur au « − » (minimum). " +
+                        "Une alerte s'affiche tant que le total sort de l'intervalle.",
+                    style = MaterialTheme.typography.bodySmall,
                 )
                 OutlinedTextField(
                     value = avisMoins,
-                    onValueChange = { avisMoins = it },
-                    label = { Text("Avis si moins") },
+                    onValueChange = { v -> avisMoins = v.filter { it.isDigit() } },
+                    label = { Text("Avis si − (minimum)") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
                 )
+                OutlinedTextField(
+                    value = avisPlus,
+                    onValueChange = { v -> avisPlus = v.filter { it.isDigit() } },
+                    label = { Text("Avis si + (maximum)") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                erreur?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             }
         },
         confirmButton = {
             TextButton(onClick = {
-                scope.launch {
-                    repository.definirAvis(
-                        contexteId, essence, classe,
-                        avisPlus.trim().ifBlank { null },
-                        avisMoins.trim().ifBlank { null },
-                    )
-                    onFermer()
+                val p = avisPlus.toIntOrNull()
+                val m = avisMoins.toIntOrNull()
+                if (p != null && m != null && p <= m) {
+                    erreur = "Le « + » doit être supérieur au « − »"
+                } else {
+                    scope.launch {
+                        repository.definirAvis(contexteId, essence, classe, p, m)
+                        onFermer()
+                    }
                 }
             }) { Text("Enregistrer") }
         },

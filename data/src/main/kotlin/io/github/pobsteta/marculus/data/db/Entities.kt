@@ -45,6 +45,6 @@ data class CompteurConfigEntity(
     val contexteId: String,
     val essence: String,
     val classe: Int,
-    val avisSiPlus: String?,
-    val avisSiMoins: String?,
+    val avisSiPlus: Int?,
+    val avisSiMoins: Int?,
 )

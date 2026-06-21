@@ -65,6 +65,9 @@ interface CompteurConfigDao {
     @Query("SELECT * FROM compteur_config WHERE contexteId = :contexteId")
     suspend fun listeParContexte(contexteId: String): List<CompteurConfigEntity>
 
+    @Query("SELECT * FROM compteur_config WHERE contexteId = :contexteId")
+    fun observerParContexte(contexteId: String): Flow<List<CompteurConfigEntity>>
+
     @Query("DELETE FROM compteur_config WHERE contexteId = :contexteId")
     suspend fun supprimerParContexte(contexteId: String)
 }

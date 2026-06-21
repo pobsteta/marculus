@@ -258,12 +258,20 @@ class MartelageRepository(
         return ConfigCompteur(essence, classe, e?.avisSiPlus, e?.avisSiMoins)
     }
 
+    /** Réglages (avis) de tous les compteurs d'un contexte, réactifs (pour les alertes de la feuille). */
+    fun configs(contexteId: String): Flow<Map<CompteurCle, ConfigCompteur>> =
+        configDao.observerParContexte(contexteId).map { liste ->
+            liste.associate {
+                CompteurCle(it.essence, it.classe) to ConfigCompteur(it.essence, it.classe, it.avisSiPlus, it.avisSiMoins)
+            }
+        }
+
     suspend fun definirAvis(
         contexteId: String,
         essence: String,
         classe: Int,
-        avisSiPlus: String?,
-        avisSiMoins: String?,
+        avisSiPlus: Int?,
+        avisSiMoins: Int?,
     ) {
         configDao.upsert(CompteurConfigEntity(contexteId, essence, classe, avisSiPlus, avisSiMoins))
     }

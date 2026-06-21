@@ -34,13 +34,20 @@ data class EssenceColonne(
 /** Clé d'un compteur : une cellule de la feuille de martelage. */
 data class CompteurCle(val essence: String, val classe: Int)
 
-/** Réglages par compteur (cellule) : avis affichés selon le sens du comptage. */
+/**
+ * Réglages par compteur (cellule) : seuils numériques.
+ * `avisSiMoins` = borne basse, `avisSiPlus` = borne haute (doit être > avisSiMoins).
+ * Une alerte s'affiche tant que le total sort de l'intervalle.
+ */
 data class ConfigCompteur(
     val essence: String,
     val classe: Int,
-    val avisSiPlus: String? = null,
-    val avisSiMoins: String? = null,
-)
+    val avisSiPlus: Int? = null,
+    val avisSiMoins: Int? = null,
+) {
+    fun alerteMoins(total: Int): Boolean = avisSiMoins != null && total < avisSiMoins
+    fun alertePlus(total: Int): Boolean = avisSiPlus != null && total > avisSiPlus
+}
 
 /** Une opération de martelage. Remplace la notion de « groupe » de l'app de référence. */
 data class Contexte(
