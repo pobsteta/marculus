@@ -43,10 +43,13 @@ class OrthoSource(
     }
 }
 
-/** Une parcelle lue du GPKG : identifiant, étiquette dérivée, attributs bruts et anneaux (WGS84). */
+/** Une parcelle lue du GPKG : identifiant, hiérarchie foncière détectée, étiquette, attributs et anneaux (WGS84). */
 data class ParcelleGpkg(
     val id: Long,
     val label: String,
+    val proprietaire: String?,
+    val foret: String?,
+    val parcelleNom: String?,
     val attributs: Map<String, String>,
     val anneaux: List<List<Position>>,
 )
@@ -131,7 +134,12 @@ class GpkgRepository(private val context: Context) {
                                 val v = runCatching { row.getValue(c) }.getOrNull()
                                 if (v != null) c to v.toString() else null
                             }.toMap()
-                            out.add(ParcelleGpkg(row.id, etiquette(row.id, attrs), attrs, anneaux))
+                            val prop = trouver(attrs, "proprietaire", "propriétaire", "owner", "prop")
+                            val foret = trouver(attrs, "foret", "forêt", "forest")
+                            val parc = trouver(attrs, "parcelle", "numero", "num", "n_parcelle", "id_parcelle", "idu", "section")
+                            val parties = listOfNotNull(prop, foret, parc?.let { "Parc. $it" })
+                            val label = if (parties.isEmpty()) "Parcelle ${row.id}" else parties.joinToString(" · ")
+                            out.add(ParcelleGpkg(row.id, label, prop, foret, parc, attrs, anneaux))
                         }
                     } finally {
                         rs.close()
@@ -146,18 +154,11 @@ class GpkgRepository(private val context: Context) {
         return out
     }
 
-    /** Étiquette générique : propriétaire · forêt · parcelle si détectés, sinon « Parcelle <id> ». */
-    private fun etiquette(id: Long, attrs: Map<String, String>): String {
-        fun trouver(vararg cles: String): String? =
-            attrs.entries.firstOrNull { e ->
-                cles.any { it.equals(e.key, ignoreCase = true) } && e.value.isNotBlank()
-            }?.value
-        val prop = trouver("proprietaire", "propriétaire", "owner", "prop")
-        val foret = trouver("foret", "forêt", "forest")
-        val parc = trouver("parcelle", "numero", "num", "n_parcelle", "id_parcelle", "idu", "section")
-        val parties = listOfNotNull(prop, foret, parc?.let { "Parc. $it" })
-        return if (parties.isEmpty()) "Parcelle $id" else parties.joinToString(" · ")
-    }
+    /** Première valeur non vide parmi les colonnes dont le nom correspond (insensible à la casse). */
+    private fun trouver(attrs: Map<String, String>, vararg cles: String): String? =
+        attrs.entries.firstOrNull { e ->
+            cles.any { it.equals(e.key, ignoreCase = true) } && e.value.isNotBlank()
+        }?.value
 
     /** Ouvre l'ortho du GPKG, la reprojette en Web Mercator si besoin, et renvoie un fournisseur de tuiles. */
     fun ouvrirOrtho(chemin: String): OrthoSource? {

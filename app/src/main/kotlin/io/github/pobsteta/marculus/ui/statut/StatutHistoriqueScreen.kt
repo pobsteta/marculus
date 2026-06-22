@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -197,22 +198,26 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
     val geo = plus.filter { it.position != null }
     val sansPosition = plus.filter { it.position == null }.sumOf { it.quantite }
 
-    // Rattachement point-dans-polygone : on regroupe les tiges géolocalisées par parcelle.
-    val groupes = geo.groupBy { t ->
-        parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, t.position!!) }?.label ?: "Hors parcelle"
-    }
-    val stats = groupes.map { (label, tiges) ->
-        val parEssence = contexte.essencesNoms.mapNotNull { nom ->
+    fun parcelleDe(t: Tige): ParcelleGpkg? =
+        parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, t.position!!) }
+
+    fun essences(tiges: List<Tige>): List<Pair<String, Int>> =
+        contexte.essencesNoms.mapNotNull { nom ->
             val n = tiges.filter { it.essence == nom }.sumOf { it.quantite }
             if (n > 0) nom to n else null
         }
-        Triple(label, tiges.sumOf { it.quantite }, parEssence)
-    }.sortedByDescending { it.second }
+
+    // Rattachement point-dans-polygone, puis regroupement Propriétaire → Forêt → Parcelle.
+    val rattachees = geo.map { it to parcelleDe(it) }
+    fun total(l: List<Pair<Tige, ParcelleGpkg?>>) = l.sumOf { it.first.quantite }
+    val parProp = rattachees
+        .groupBy { (_, p) -> p?.proprietaire ?: if (p == null) "Hors parcelle" else "Sans propriétaire" }
+        .toList().sortedByDescending { (_, l) -> total(l) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (parcelles.isEmpty()) {
             item {
@@ -222,21 +227,27 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
                 )
             }
         }
-        if (stats.isEmpty()) {
+        if (parProp.isEmpty()) {
             item { Text("Aucune tige géolocalisée.", style = MaterialTheme.typography.bodyMedium) }
         }
-        items(stats) { (label, total, parEssence) ->
+        items(parProp) { (prop, tigesProp) ->
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
-                    Text("$total", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
-                }
-                parEssence.forEach { (nom, n) ->
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Box(Modifier.size(12.dp).background(Color(couleurs[nom] ?: 0xFF888888.toInt())))
-                        Text(nom, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
-                        Text("$n", style = MaterialTheme.typography.bodySmall)
-                    }
+                LigneNiveau(prop, total(tigesProp), 0, MaterialTheme.typography.titleMedium)
+                if (prop == "Hors parcelle") {
+                    essences(tigesProp.map { it.first }).forEach { (nom, n) -> LigneEssenceParc(nom, n, couleurs, 1) }
+                } else {
+                    tigesProp.groupBy { (_, p) -> p?.foret ?: "—" }
+                        .toList().sortedByDescending { (_, l) -> total(l) }
+                        .forEach { (foret, tigesForet) ->
+                            LigneNiveau(foret, total(tigesForet), 1, MaterialTheme.typography.titleSmall)
+                            tigesForet.groupBy { (_, p) ->
+                                p?.parcelleNom?.let { "Parcelle $it" } ?: p?.let { "Parcelle ${it.id}" } ?: "—"
+                            }.toList().sortedByDescending { (_, l) -> total(l) }
+                                .forEach { (parc, tigesParc) ->
+                                    LigneNiveau(parc, total(tigesParc), 2, MaterialTheme.typography.bodyMedium)
+                                    essences(tigesParc.map { it.first }).forEach { (nom, n) -> LigneEssenceParc(nom, n, couleurs, 3) }
+                                }
+                        }
                 }
                 HorizontalDivider(Modifier.padding(top = 4.dp))
             }
@@ -250,6 +261,33 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
                 )
             }
         }
+    }
+}
+
+/** Ligne d'un niveau de la hiérarchie (propriétaire/forêt/parcelle) avec son total, indentée. */
+@Composable
+private fun LigneNiveau(libelle: String, total: Int, niveau: Int, style: TextStyle) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(start = (niveau * 12).dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(libelle, modifier = Modifier.weight(1f), style = style, fontWeight = if (niveau == 0) FontWeight.Bold else null)
+        Text("$total", style = style, fontWeight = FontWeight.Bold)
+    }
+}
+
+/** Détail par essence (pastille couleur) sous une parcelle, indenté. */
+@Composable
+private fun LigneEssenceParc(nom: String, n: Int, couleurs: Map<String, Int>, niveau: Int) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(start = (niveau * 12).dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Box(Modifier.size(12.dp).background(Color(couleurs[nom] ?: 0xFF888888.toInt())))
+        Text(nom, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
+        Text("$n", style = MaterialTheme.typography.bodySmall)
     }
 }
 
