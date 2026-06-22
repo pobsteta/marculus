@@ -24,6 +24,14 @@ class CubageTest {
     }
 
     @Test
+    fun `emerge volume plausible et repli forme`() {
+        val v = Cubage.volumeEmerge("Chêne", 125.0, 20.0) // ~40 cm DBH, 20 m
+        assertTrue(v in 1.0..2.5, "EMERGE chêne attendu ~1,6 m³, obtenu $v")
+        assertEquals(0.0, Cubage.volumeEmerge("Essence inconnue", 125.0, 20.0))
+        assertTrue(Cubage.volumeForme(40.0, 20.0) > 0.0)
+    }
+
+    @Test
     fun `aucun tarif donne zero et pas de volume negatif`() {
         assertEquals(0.0, Cubage.volume(TarifCubage.AUCUN, 10, 50.0))
         assertEquals(0.0, Cubage.volume(TarifCubage.SCHAEFFER_RAPIDE, 10, 8.0)) // D<10 → négatif → 0

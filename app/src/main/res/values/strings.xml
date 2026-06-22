@@ -97,10 +97,11 @@
     <string name="creation_dialog_ajout_essence_label">Nom de l\'essence</string>
     <string name="creation_btn_ajouter">Ajouter</string>
     <string name="creation_tarif_section">Tarif de cubage</string>
-    <string name="creation_tarif_aide">Estime le volume bois fort tige (centre de classe).</string>
+    <string name="creation_tarif_aide">Estime le volume des tiges (centre de classe ; EMERGE = volume total aérien à 2 entrées, utilise la hauteur saisie).</string>
     <string name="creation_tarif_aucun">Aucun</string>
     <string name="creation_tarif_rapide">Schaeffer rapide</string>
     <string name="creation_tarif_lent">Schaeffer lent</string>
+    <string name="creation_tarif_emerge">EMERGE (2 entrées)</string>
     <string name="creation_tarif_numero">Numéro de tarif (1–20)</string>
 
     <!-- Feuille de martelage -->

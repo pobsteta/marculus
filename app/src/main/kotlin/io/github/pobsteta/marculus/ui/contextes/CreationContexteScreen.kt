@@ -7,6 +7,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -64,7 +66,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun CreationContexteScreen(
     repository: MartelageRepository,
@@ -238,12 +240,13 @@ fun CreationContexteScreen(
             HorizontalDivider()
             Text(stringResource(R.string.creation_tarif_section), style = MaterialTheme.typography.titleSmall)
             Text(stringResource(R.string.creation_tarif_aide), style = MaterialTheme.typography.bodySmall)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 FilterChip(selected = tarif == TarifCubage.AUCUN, onClick = { tarif = TarifCubage.AUCUN }, label = { Text(stringResource(R.string.creation_tarif_aucun)) })
                 FilterChip(selected = tarif == TarifCubage.SCHAEFFER_RAPIDE, onClick = { tarif = TarifCubage.SCHAEFFER_RAPIDE }, label = { Text(stringResource(R.string.creation_tarif_rapide)) })
                 FilterChip(selected = tarif == TarifCubage.SCHAEFFER_LENT, onClick = { tarif = TarifCubage.SCHAEFFER_LENT }, label = { Text(stringResource(R.string.creation_tarif_lent)) })
+                FilterChip(selected = tarif == TarifCubage.EMERGE, onClick = { tarif = TarifCubage.EMERGE }, label = { Text(stringResource(R.string.creation_tarif_emerge)) })
             }
-            if (tarif != TarifCubage.AUCUN) {
+            if (tarif == TarifCubage.SCHAEFFER_RAPIDE || tarif == TarifCubage.SCHAEFFER_LENT) {
                 OutlinedTextField(
                     value = tarifNumero,
                     onValueChange = { saisie -> tarifNumero = saisie.filter { it.isDigit() }.take(2) },

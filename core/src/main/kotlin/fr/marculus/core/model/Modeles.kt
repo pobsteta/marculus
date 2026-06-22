@@ -4,7 +4,7 @@ package fr.marculus.core.model
 enum class ModeMesure { DIAMETRE, CIRCONFERENCE }
 
 /** Tarif de cubage à une entrée appliqué au contexte (volume bois fort tige). */
-enum class TarifCubage { AUCUN, SCHAEFFER_RAPIDE, SCHAEFFER_LENT }
+enum class TarifCubage { AUCUN, SCHAEFFER_RAPIDE, SCHAEFFER_LENT, EMERGE }
 
 /** Un `+` ajoute une tige ; un `−` enregistre une annulation (jamais d'effacement). */
 enum class ActionTige { PLUS, ANNULATION }

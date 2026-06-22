@@ -152,7 +152,7 @@ fun StatutHistoriqueScreen(
                 Tab(selected = onglet == 2, onClick = { onglet = 2 }, text = { Text(stringResource(R.string.statut_onglet_historique)) })
             }
             when (onglet) {
-                0 -> OngletStatut(ctx, totaux, seuils)
+                0 -> OngletStatut(ctx, totaux, journal, seuils)
                 1 -> OngletParcelles(ctx, journal, parcelles)
                 else -> OngletHistorique(ctx, journal, onEdit = { tigeEnEdition = it })
             }
@@ -182,7 +182,7 @@ fun StatutHistoriqueScreen(
 }
 
 @Composable
-private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, seuils: SeuilsCategories) {
+private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, journal: List<Tige>, seuils: SeuilsCategories) {
     val couleurs = contexte.essences.associate { it.nom to it.couleurFondArgb }
     // Total par essence (donut/récap) : union des essences paramétrées et de celles du journal
     // (saisies libres hors matrice), sommées sur toutes leurs classes.
@@ -202,7 +202,10 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, seui
     val maxEssence = parEssence.maxOfOrNull { it.second } ?: 0
     val locale = LocalConfiguration.current.locales[0]
     val volumeTotal = if (contexte.tarif != TarifCubage.AUCUN) {
-        totaux.entries.sumOf { (cle, n) -> Cubage.volumeUnitaire(contexte, cle.classe) * n }
+        journal.sumOf {
+            val v = Cubage.volumeUnitaireTige(contexte, it.essence, it.classe, it.hauteurTexte) * it.quantite
+            if (it.action == ActionTige.PLUS) v else -v
+        }
     } else {
         0.0
     }
@@ -357,7 +360,7 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
                                     }
                                     if (contexte.tarif != TarifCubage.AUCUN) {
                                         val volParc = tigesParc.sumOf {
-                                            Cubage.volumeUnitaire(contexte, it.first.classe) * it.first.quantite
+                                            Cubage.volumeUnitaireTige(contexte, it.first.essence, it.first.classe, it.first.hauteurTexte) * it.first.quantite
                                         }
                                         Text(
                                             stringResource(
@@ -407,13 +410,21 @@ private fun csvFoncier(
         val totalParcelle = tiges.sumOf { it.quantite }
         val densite = if (ha > 0.0) String.format(locale, "%.1f", totalParcelle / ha) else ""
         val surface = if (ha > 0.0) String.format(locale, "%.4f", ha) else ""
-        val volumeParcelle = if (tarif) tiges.sumOf { Cubage.volumeUnitaire(contexte, it.classe) * it.quantite } else 0.0
+        val volumeParcelle = if (tarif) tiges.sumOf { Cubage.volumeUnitaireTige(contexte, it.essence, it.classe, it.hauteurTexte) * it.quantite } else 0.0
         val volHaStr = if (tarif && ha > 0.0) String.format(locale, "%.2f", volumeParcelle / ha) else ""
         for (essence in contexte.essencesNoms) {
             for (classe in contexte.axe.classes()) {
                 val n = tiges.filter { it.essence == essence && it.classe == classe }.sumOf { it.quantite }
                 if (n > 0) {
-                    val volRow = if (tarif) String.format(locale, "%.3f", Cubage.volumeUnitaire(contexte, classe) * n) else ""
+                    val volRow = if (tarif) {
+                        String.format(
+                            locale, "%.3f",
+                            tiges.filter { it.essence == essence && it.classe == classe }
+                                .sumOf { Cubage.volumeUnitaireTige(contexte, it.essence, it.classe, it.hauteurTexte) * it.quantite },
+                        )
+                    } else {
+                        ""
+                    }
                     sb.append(champ(pcl?.proprietaire ?: "")).append(';')
                         .append(champ(pcl?.foret ?: "")).append(';')
                         .append(champ(pcl?.commune ?: "")).append(';')
@@ -572,7 +583,7 @@ private fun OngletHistorique(contexte: Contexte, journal: List<Tige>, onEdit: (T
                             tige.qualiteArbre?.let { add(it) }
                             tige.parcelle?.takeIf { it.isNotBlank() }?.let { add("⌖ $it") }
                             if (contexte.tarif != TarifCubage.AUCUN) {
-                                val v = Cubage.volumeUnitaire(contexte, tige.classe) * tige.quantite
+                                val v = Cubage.volumeUnitaireTige(contexte, tige.essence, tige.classe, tige.hauteurTexte) * tige.quantite
                                 if (v > 0.0) add(String.format(locale, "%.3f m³", v))
                             }
                             tige.position?.let {
