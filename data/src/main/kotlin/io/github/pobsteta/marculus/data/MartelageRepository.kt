@@ -9,6 +9,7 @@ import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.Position
+import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.Tige
 import io.github.pobsteta.marculus.data.db.CompteurConfigDao
 import io.github.pobsteta.marculus.data.db.CompteurConfigEntity
@@ -88,6 +89,8 @@ class MartelageRepository(
         increment: Int = 1,
         operateur: String? = null,
         cheminGpkg: String? = null,
+        tarif: TarifCubage = TarifCubage.AUCUN,
+        tarifNumero: Int = 0,
     ): String {
         val id = UUID.randomUUID().toString()
         contexteDao.inserer(
@@ -105,6 +108,8 @@ class MartelageRepository(
                 dateCreation = horloge(),
                 operateur = operateur,
                 cheminGpkg = cheminGpkg,
+                tarif = tarif.name,
+                tarifNumero = tarifNumero,
             ),
         )
         return id
@@ -119,6 +124,8 @@ class MartelageRepository(
         commentaire: String?,
         increment: Int,
         cheminGpkg: String? = null,
+        tarif: TarifCubage = TarifCubage.AUCUN,
+        tarifNumero: Int = 0,
     ) {
         val existant = contexteDao.parId(id) ?: return
         contexteDao.inserer(
@@ -132,6 +139,8 @@ class MartelageRepository(
                 commentaire = commentaire,
                 increment = increment,
                 cheminGpkg = cheminGpkg,
+                tarif = tarif.name,
+                tarifNumero = tarifNumero,
             ),
         )
     }
@@ -170,6 +179,7 @@ class MartelageRepository(
         qualiteArbre: String? = null,
         position: Position? = null,
         operateur: String? = null,
+        parcelle: String? = null,
     ): String {
         val uuid = UUID.randomUUID().toString()
         tigeDao.inserer(
@@ -186,6 +196,7 @@ class MartelageRepository(
                 latitude = position?.latitude,
                 longitude = position?.longitude,
                 operateur = operateur,
+                parcelle = parcelle,
             ),
         )
         marquerNonExporte(contexteId)
@@ -330,6 +341,8 @@ class MartelageRepository(
         increment = increment,
         exporte = exporte,
         cheminGpkg = cheminGpkg,
+        tarif = runCatching { TarifCubage.valueOf(tarif) }.getOrDefault(TarifCubage.AUCUN),
+        tarifNumero = tarifNumero,
     )
 
     private fun TigeEntity.versDomaine() = Tige(
@@ -344,5 +357,6 @@ class MartelageRepository(
         qualiteArbre = qualiteArbre,
         position = if (latitude != null && longitude != null) Position(latitude, longitude) else null,
         operateur = operateur,
+        parcelle = parcelle,
     )
 }

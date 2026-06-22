@@ -1,5 +1,7 @@
 package io.github.pobsteta.marculus.ui.statut
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,11 +34,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -48,14 +53,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.AttributionSpatiale
+import fr.marculus.core.Cubage
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CategorieBois
+import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.SeuilsCategories
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
@@ -87,6 +95,18 @@ fun StatutHistoriqueScreen(
         value = contexte?.cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcellesDetail(it) } } ?: emptyList()
     }
     var onglet by rememberSaveable { mutableIntStateOf(0) }
+    val context = LocalContext.current
+    val locale = LocalConfiguration.current.locales[0]
+    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+        val ctx = contexte
+        if (uri != null && ctx != null) {
+            val csv = csvFoncier(ctx, journal, parcelles, locale)
+            context.contentResolver.openOutputStream(uri)?.use {
+                it.write("﻿".toByteArray(Charsets.UTF_8))
+                it.write(csv.toByteArray(Charsets.UTF_8))
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -97,10 +117,16 @@ fun StatutHistoriqueScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.statut_retour_cd))
                     }
                 },
+                actions = {
+                    TextButton(onClick = { exportLauncher.launch("martelage-foncier.csv") }) {
+                        Text(stringResource(R.string.statut_export_csv), color = MaterialTheme.colorScheme.onPrimary)
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
             )
         },
@@ -144,12 +170,27 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, seui
         gradientCategorie(cat, f)
     }
     val maxEssence = parEssence.maxOfOrNull { it.second } ?: 0
+    val locale = LocalConfiguration.current.locales[0]
+    val volumeTotal = if (contexte.tarif != TarifCubage.AUCUN) {
+        totaux.entries.sumOf { (cle, n) -> Cubage.volumeUnitaire(contexte, cle.classe) * n }
+    } else {
+        0.0
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        if (contexte.tarif != TarifCubage.AUCUN && total > 0) {
+            item {
+                Text(
+                    stringResource(R.string.statut_volume_total, String.format(locale, "%.2f", volumeTotal)),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
         item {
             if (total == 0) {
                 Text(stringResource(R.string.statut_aucune_tige), style = MaterialTheme.typography.bodyMedium)
@@ -193,6 +234,7 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, seui
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: List<ParcelleGpkg>) {
     val strHorsParcelle = stringResource(R.string.statut_hors_parcelle)
@@ -213,11 +255,14 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
         }
 
     // Rattachement point-dans-polygone, puis regroupement Propriétaire → Forêt → Parcelle.
+    val locale = LocalConfiguration.current.locales[0]
     val rattachees = geo.map { it to parcelleDe(it) }
     fun total(l: List<Pair<Tige, ParcelleGpkg?>>) = l.sumOf { it.first.quantite }
     val parProp = rattachees
         .groupBy { (_, p) -> p?.proprietaire ?: if (p == null) strHorsParcelle else strSansProprietaire }
         .toList().sortedByDescending { (_, l) -> total(l) }
+    var filtre by remember { mutableStateOf<String?>(null) }
+    val affiches = parProp.filter { filtre == null || it.first == filtre }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -225,17 +270,30 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (parcelles.isEmpty()) {
+            item { Text(stringResource(R.string.statut_aucun_gpkg), style = MaterialTheme.typography.bodyMedium) }
+        }
+        if (parProp.size > 1) {
             item {
-                Text(
-                    stringResource(R.string.statut_aucun_gpkg),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    FilterChip(
+                        selected = filtre == null,
+                        onClick = { filtre = null },
+                        label = { Text(stringResource(R.string.statut_filtre_tous)) },
+                    )
+                    parProp.forEach { (prop, _) ->
+                        FilterChip(
+                            selected = filtre == prop,
+                            onClick = { filtre = if (filtre == prop) null else prop },
+                            label = { Text(prop) },
+                        )
+                    }
+                }
             }
         }
         if (parProp.isEmpty()) {
             item { Text(stringResource(R.string.statut_aucune_tige_geo), style = MaterialTheme.typography.bodyMedium) }
         }
-        items(parProp) { (prop, tigesProp) ->
+        items(affiches) { (prop, tigesProp) ->
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 LigneNiveau(prop, total(tigesProp), 0, MaterialTheme.typography.titleMedium)
                 if (prop == strHorsParcelle) {
@@ -245,11 +303,41 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
                         .toList().sortedByDescending { (_, l) -> total(l) }
                         .forEach { (foret, tigesForet) ->
                             LigneNiveau(foret, total(tigesForet), 1, MaterialTheme.typography.titleSmall)
-                            tigesForet.groupBy { (_, p) ->
-                                p?.parcelleNom?.let { "$strParcelle $it" } ?: p?.let { "$strParcelle ${it.id}" } ?: "—"
-                            }.toList().sortedByDescending { (_, l) -> total(l) }
-                                .forEach { (parc, tigesParc) ->
-                                    LigneNiveau(parc, total(tigesParc), 2, MaterialTheme.typography.bodyMedium)
+                            tigesForet.groupBy { (_, p) -> p }
+                                .toList().sortedByDescending { (_, l) -> total(l) }
+                                .forEach { (pcl, tigesParc) ->
+                                    val libelle = pcl?.parcelleNom?.let { "$strParcelle $it" }
+                                        ?: pcl?.let { "$strParcelle ${it.id}" } ?: "—"
+                                    val tot = total(tigesParc)
+                                    LigneNiveau(libelle, tot, 2, MaterialTheme.typography.bodyMedium)
+                                    val ha = pcl?.surfaceHa ?: 0.0
+                                    if (ha > 0.0) {
+                                        Text(
+                                            stringResource(
+                                                R.string.statut_surface_densite,
+                                                String.format(locale, "%.2f", ha),
+                                                String.format(locale, "%.1f", tot / ha),
+                                            ),
+                                            modifier = Modifier.padding(start = 36.dp),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.outline,
+                                        )
+                                    }
+                                    if (contexte.tarif != TarifCubage.AUCUN) {
+                                        val volParc = tigesParc.sumOf {
+                                            Cubage.volumeUnitaire(contexte, it.first.classe) * it.first.quantite
+                                        }
+                                        Text(
+                                            stringResource(
+                                                R.string.statut_volume_parcelle,
+                                                String.format(locale, "%.2f", volParc),
+                                                if (ha > 0.0) String.format(locale, "%.2f", volParc / ha) else "—",
+                                            ),
+                                            modifier = Modifier.padding(start = 36.dp),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.outline,
+                                        )
+                                    }
                                     essences(tigesParc.map { it.first }).forEach { (nom, n) -> LigneEssenceParc(nom, n, couleurs, 3) }
                                 }
                         }
@@ -267,6 +355,49 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
             }
         }
     }
+}
+
+/** Construit le CSV « par foncier » (propriétaire/forêt/commune/parcelle × essence × classe). */
+private fun csvFoncier(
+    contexte: Contexte,
+    journal: List<Tige>,
+    parcelles: List<ParcelleGpkg>,
+    locale: java.util.Locale,
+): String {
+    val plus = journal.filter { it.action == ActionTige.PLUS && it.position != null }
+    fun parcelleDe(t: Tige) = parcelles.firstOrNull { p -> t.position?.let { AttributionSpatiale.contient(p.anneaux, it) } == true }
+    fun champ(s: String) = s.replace(';', ' ').replace('\n', ' ')
+    val sb = StringBuilder()
+    val tarif = contexte.tarif != TarifCubage.AUCUN
+    sb.append("Proprietaire;Foret;Commune;Parcelle;Surface_ha;Essence;Classe;Nombre;Tiges_ha;Volume_m3;Volume_ha\n")
+    plus.groupBy { parcelleDe(it) }.forEach { (pcl, tiges) ->
+        val ha = pcl?.surfaceHa ?: 0.0
+        val totalParcelle = tiges.sumOf { it.quantite }
+        val densite = if (ha > 0.0) String.format(locale, "%.1f", totalParcelle / ha) else ""
+        val surface = if (ha > 0.0) String.format(locale, "%.4f", ha) else ""
+        val volumeParcelle = if (tarif) tiges.sumOf { Cubage.volumeUnitaire(contexte, it.classe) * it.quantite } else 0.0
+        val volHaStr = if (tarif && ha > 0.0) String.format(locale, "%.2f", volumeParcelle / ha) else ""
+        for (essence in contexte.essencesNoms) {
+            for (classe in contexte.axe.classes()) {
+                val n = tiges.filter { it.essence == essence && it.classe == classe }.sumOf { it.quantite }
+                if (n > 0) {
+                    val volRow = if (tarif) String.format(locale, "%.3f", Cubage.volumeUnitaire(contexte, classe) * n) else ""
+                    sb.append(champ(pcl?.proprietaire ?: "")).append(';')
+                        .append(champ(pcl?.foret ?: "")).append(';')
+                        .append(champ(pcl?.commune ?: "")).append(';')
+                        .append(champ(pcl?.parcelleNom ?: pcl?.id?.toString() ?: "")).append(';')
+                        .append(surface).append(';')
+                        .append(champ(essence)).append(';')
+                        .append(classe).append(';')
+                        .append(n).append(';')
+                        .append(densite).append(';')
+                        .append(volRow).append(';')
+                        .append(volHaStr).append('\n')
+                }
+            }
+        }
+    }
+    return sb.toString()
 }
 
 /** Ligne d'un niveau de la hiérarchie (propriétaire/forêt/parcelle) avec son total, indentée. */
@@ -407,6 +538,11 @@ private fun OngletHistorique(contexte: Contexte, journal: List<Tige>) {
                         val details = buildList {
                             tige.hauteurTexte?.takeIf { it.isNotBlank() }?.let { add("h $it") }
                             tige.qualiteArbre?.let { add(it) }
+                            tige.parcelle?.takeIf { it.isNotBlank() }?.let { add("⌖ $it") }
+                            if (contexte.tarif != TarifCubage.AUCUN) {
+                                val v = Cubage.volumeUnitaire(contexte, tige.classe) * tige.quantite
+                                if (v > 0.0) add(String.format(locale, "%.3f m³", v))
+                            }
                             tige.position?.let {
                                 add("GNSS " + "%.5f, %.5f".format(java.util.Locale.US, it.latitude, it.longitude))
                             }

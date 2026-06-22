@@ -207,6 +207,7 @@ fun AppRoot(
             reglages = reglages,
             qualitesArbre = qualitesArbre,
             qualitesBois = qualitesBois,
+            gpkgRepository = gpkgRepository,
             onRetour = { route = Route.Liste },
             onStatut = { route = Route.Statut(r.contexteId) },
             onCarte = { route = Route.Carte(r.contexteId) },

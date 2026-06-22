@@ -19,6 +19,8 @@ data class ContexteEntity(
     val dateCreation: Long,
     val operateur: String?,
     val cheminGpkg: String? = null,
+    val tarif: String = "AUCUN",
+    val tarifNumero: Int = 0,
 )
 
 @Entity(
@@ -38,6 +40,7 @@ data class TigeEntity(
     val latitude: Double?,
     val longitude: Double?,
     val operateur: String?,
+    val parcelle: String? = null,
 )
 
 /** Réglages par compteur (cellule) d'un contexte : avis si plus / si moins. */

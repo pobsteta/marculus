@@ -57,7 +57,7 @@ class SauvegardeRepository(
         put("classeMin", classeMin); put("classeMax", classeMax); put("classePas", classePas)
         put("essences", essences); putOpt("commentaire", commentaire); put("increment", increment)
         put("exporte", exporte); put("dateCreation", dateCreation); putOpt("operateur", operateur)
-        putOpt("cheminGpkg", cheminGpkg)
+        putOpt("cheminGpkg", cheminGpkg); put("tarif", tarif); put("tarifNumero", tarifNumero)
     }
 
     private fun JSONObject.versContexte() = ContexteEntity(
@@ -67,6 +67,8 @@ class SauvegardeRepository(
         increment = getInt("increment"), exporte = getBoolean("exporte"),
         dateCreation = getLong("dateCreation"), operateur = texteOuNull("operateur"),
         cheminGpkg = texteOuNull("cheminGpkg"),
+        tarif = if (has("tarif") && !isNull("tarif")) getString("tarif") else "AUCUN",
+        tarifNumero = if (has("tarifNumero") && !isNull("tarifNumero")) getInt("tarifNumero") else 0,
     )
 
     private fun TigeEntity.toJson() = JSONObject().apply {
@@ -74,6 +76,7 @@ class SauvegardeRepository(
         put("action", action); put("horodatage", horodatage); put("quantite", quantite)
         putOpt("hauteurTexte", hauteurTexte); putOpt("qualiteArbre", qualiteArbre)
         putOpt("latitude", latitude); putOpt("longitude", longitude); putOpt("operateur", operateur)
+        putOpt("parcelle", parcelle)
     }
 
     private fun JSONObject.versTige() = TigeEntity(
@@ -82,6 +85,7 @@ class SauvegardeRepository(
         quantite = getInt("quantite"), hauteurTexte = texteOuNull("hauteurTexte"),
         qualiteArbre = texteOuNull("qualiteArbre"), latitude = reelOuNull("latitude"),
         longitude = reelOuNull("longitude"), operateur = texteOuNull("operateur"),
+        parcelle = texteOuNull("parcelle"),
     )
 
     private fun CompteurConfigEntity.toJson() = JSONObject().apply {

@@ -3,6 +3,9 @@ package fr.marculus.core.model
 /** Convention de mesure fixée au niveau du contexte, commune à toutes les essences. */
 enum class ModeMesure { DIAMETRE, CIRCONFERENCE }
 
+/** Tarif de cubage à une entrée appliqué au contexte (volume bois fort tige). */
+enum class TarifCubage { AUCUN, SCHAEFFER_RAPIDE, SCHAEFFER_LENT }
+
 /** Un `+` ajoute une tige ; un `−` enregistre une annulation (jamais d'effacement). */
 enum class ActionTige { PLUS, ANNULATION }
 
@@ -61,6 +64,10 @@ data class Contexte(
     val exporte: Boolean = false,
     /** Chemin du GeoPackage (parcelles + ortho) rattaché à ce contexte, ou null. */
     val cheminGpkg: String? = null,
+    /** Tarif de cubage choisi pour estimer les volumes (ou AUCUN). */
+    val tarif: TarifCubage = TarifCubage.AUCUN,
+    /** Numéro de tarif (1..20) : fixe M = 0,8 + 0,1·N (volume de l'arbre de 45 cm). */
+    val tarifNumero: Int = 0,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 }
@@ -82,4 +89,6 @@ data class Tige(
     val qualiteArbre: String? = null,
     val position: Position? = null,
     val operateur: String? = null,
+    /** Parcelle attribuée au moment du martelage (instantané figé), ou null. */
+    val parcelle: String? = null,
 )

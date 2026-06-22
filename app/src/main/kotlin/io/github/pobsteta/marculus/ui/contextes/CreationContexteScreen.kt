@@ -46,6 +46,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import fr.marculus.core.Referentiels
@@ -53,6 +55,8 @@ import fr.marculus.core.model.AxeClasses
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.ModeMesure
+import fr.marculus.core.model.TarifCubage
+import io.github.pobsteta.marculus.R
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.ui.libelle
@@ -71,6 +75,7 @@ fun CreationContexteScreen(
     onEnregistre: (String) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     val edition = contexteExistant != null
 
     var nom by remember { mutableStateOf(contexteExistant?.nom ?: "") }
@@ -80,6 +85,10 @@ fun CreationContexteScreen(
     var max by remember { mutableStateOf(contexteExistant?.axe?.max?.toString() ?: "90") }
     var pas by remember { mutableStateOf(contexteExistant?.axe?.pas?.toString() ?: "5") }
     var increment by remember { mutableStateOf(contexteExistant?.increment?.toString() ?: "1") }
+    var tarif by remember { mutableStateOf(contexteExistant?.tarif ?: TarifCubage.AUCUN) }
+    var tarifNumero by remember {
+        mutableStateOf(contexteExistant?.tarifNumero?.takeIf { it > 0 }?.toString() ?: "")
+    }
 
     val essencesDisponibles = remember {
         mutableStateListOf<String>().apply {
@@ -98,12 +107,11 @@ fun CreationContexteScreen(
             contexteExistant?.essences?.forEach { put(it.nom, it.couleurFondArgb to it.couleurTexteArgb) }
         }
     }
-    // Fond distinct par défaut selon la position de l'essence ; texte blanc.
     fun fond(e: String) = couleurs[e]?.first ?: Referentiels.couleurFondDefaut(essencesDisponibles.indexOf(e))
     fun texte(e: String) = couleurs[e]?.second ?: Referentiels.COULEUR_TEXTE_DEFAUT
 
     var erreur by remember { mutableStateOf<String?>(null) }
-    var picker by remember { mutableStateOf<Pair<String, Boolean>?>(null) } // (essence, true=fond)
+    var picker by remember { mutableStateOf<Pair<String, Boolean>?>(null) }
     var ajoutOuvert by remember { mutableStateOf(false) }
     var infoOuvert by remember { mutableStateOf(false) }
     var cheminGpkg by remember { mutableStateOf(contexteExistant?.cheminGpkg) }
@@ -113,13 +121,23 @@ fun CreationContexteScreen(
         }
     }
 
+    // Messages d'erreur (résolus hors composition, dans le onClick).
+    val errNom = stringResource(R.string.creation_erreur_nom_obligatoire)
+    val errNombres = stringResource(R.string.creation_erreur_nombres_invalides)
+    val errPas = stringResource(R.string.creation_erreur_pas_positif)
+    val errMinMax = stringResource(R.string.creation_erreur_min_max)
+    val errInc = stringResource(R.string.creation_erreur_increment)
+    val errEssence = stringResource(R.string.creation_erreur_essence_requise)
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (edition) "Modifier le contexte" else "Nouveau contexte") },
+                title = {
+                    Text(stringResource(if (edition) R.string.creation_titre_modifier else R.string.creation_titre_nouveau))
+                },
                 navigationIcon = {
                     IconButton(onClick = onAnnuler) {
-                        Icon(Icons.Filled.Close, contentDescription = "Annuler")
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.creation_action_annuler))
                     }
                 },
             )
@@ -135,19 +153,19 @@ fun CreationContexteScreen(
             OutlinedTextField(
                 value = nom,
                 onValueChange = { nom = it },
-                label = { Text("Nom du contexte") },
+                label = { Text(stringResource(R.string.creation_label_nom)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
                 value = commentaire,
                 onValueChange = { commentaire = it },
-                label = { Text("Commentaire") },
+                label = { Text(stringResource(R.string.creation_label_commentaire)) },
                 minLines = 2,
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            Text("Mode de mesure", style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.creation_section_mode_mesure), style = MaterialTheme.typography.titleSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ModeMesure.entries.forEach { m ->
                     FilterChip(selected = mode == m, onClick = { mode = m }, label = { Text(m.libelle()) })
@@ -156,21 +174,33 @@ fun CreationContexteScreen(
 
             val paysage = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                ChampNombre(if (paysage) "Minimum" else "Min", min, { min = it }, Modifier.weight(1f))
-                ChampNombre(if (paysage) "Maximum" else "Max", max, { max = it }, Modifier.weight(1f))
-                ChampNombre(if (paysage) "Par pas de" else "Pas", pas, { pas = it }, Modifier.weight(1f))
-                ChampNombre(if (paysage) "Incrément" else "Inc", increment, { increment = it }, Modifier.weight(1f))
+                ChampNombre(
+                    stringResource(if (paysage) R.string.creation_champ_minimum_long else R.string.creation_champ_minimum_court),
+                    min, { min = it }, Modifier.weight(1f),
+                )
+                ChampNombre(
+                    stringResource(if (paysage) R.string.creation_champ_maximum_long else R.string.creation_champ_maximum_court),
+                    max, { max = it }, Modifier.weight(1f),
+                )
+                ChampNombre(
+                    stringResource(if (paysage) R.string.creation_champ_pas_long else R.string.creation_champ_pas_court),
+                    pas, { pas = it }, Modifier.weight(1f),
+                )
+                ChampNombre(
+                    stringResource(if (paysage) R.string.creation_champ_increment_long else R.string.creation_champ_increment_court),
+                    increment, { increment = it }, Modifier.weight(1f),
+                )
             }
 
             HorizontalDivider()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "Essences (colonnes) et couleurs",
+                    stringResource(R.string.creation_section_essences),
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier.weight(1f),
                 )
                 IconButton(onClick = { infoOuvert = true }) {
-                    Icon(Icons.Filled.Info, contentDescription = "Informations sur les couleurs")
+                    Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.creation_cd_info_couleurs))
                 }
             }
             essencesDisponibles.forEach { essence ->
@@ -185,33 +215,51 @@ fun CreationContexteScreen(
                 )
             }
             OutlinedButton(onClick = { ajoutOuvert = true }, modifier = Modifier.fillMaxWidth()) {
-                Text("+ Ajouter une essence")
+                Text(stringResource(R.string.creation_btn_ajouter_essence))
             }
 
             HorizontalDivider()
-            Text("Fond cartographique (GeoPackage)", style = MaterialTheme.typography.titleSmall)
-            Text(
-                "Parcelles + ortho rattachées à ce contexte (facultatif).",
-                style = MaterialTheme.typography.bodySmall,
-            )
+            Text(stringResource(R.string.creation_section_fond_carto), style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.creation_fond_carto_description), style = MaterialTheme.typography.bodySmall)
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { gpkgLauncher.launch(arrayOf("*/*")) }) {
-                    Text(if (cheminGpkg == null) "Choisir un GPKG" else "Remplacer")
+                    Text(stringResource(if (cheminGpkg == null) R.string.creation_btn_choisir_gpkg else R.string.creation_btn_remplacer_gpkg))
                 }
                 Text(
-                    cheminGpkg?.substringAfterLast('/') ?: "Aucun fichier",
+                    cheminGpkg?.substringAfterLast('/') ?: stringResource(R.string.creation_gpkg_aucun_fichier),
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.weight(1f),
                 )
                 if (cheminGpkg != null) {
-                    TextButton(onClick = { cheminGpkg = null }) { Text("Retirer") }
+                    TextButton(onClick = { cheminGpkg = null }) { Text(stringResource(R.string.creation_btn_retirer_gpkg)) }
                 }
+            }
+
+            HorizontalDivider()
+            Text(stringResource(R.string.creation_tarif_section), style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.creation_tarif_aide), style = MaterialTheme.typography.bodySmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilterChip(selected = tarif == TarifCubage.AUCUN, onClick = { tarif = TarifCubage.AUCUN }, label = { Text(stringResource(R.string.creation_tarif_aucun)) })
+                FilterChip(selected = tarif == TarifCubage.SCHAEFFER_RAPIDE, onClick = { tarif = TarifCubage.SCHAEFFER_RAPIDE }, label = { Text(stringResource(R.string.creation_tarif_rapide)) })
+                FilterChip(selected = tarif == TarifCubage.SCHAEFFER_LENT, onClick = { tarif = TarifCubage.SCHAEFFER_LENT }, label = { Text(stringResource(R.string.creation_tarif_lent)) })
+            }
+            if (tarif != TarifCubage.AUCUN) {
+                OutlinedTextField(
+                    value = tarifNumero,
+                    onValueChange = { saisie -> tarifNumero = saisie.filter { it.isDigit() }.take(2) },
+                    label = { Text(stringResource(R.string.creation_tarif_numero)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                )
             }
 
             erreur?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onAnnuler, modifier = Modifier.weight(1f)) { Text("Annuler") }
+                OutlinedButton(onClick = onAnnuler, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.creation_action_annuler))
+                }
                 Button(
                     modifier = Modifier.weight(1f),
                     onClick = {
@@ -220,28 +268,30 @@ fun CreationContexteScreen(
                         val pa = pas.toIntOrNull()
                         val inc = increment.toIntOrNull()
                         erreur = when {
-                            nom.isBlank() -> "Le nom est obligatoire"
-                            mi == null || ma == null || pa == null -> "Min, max et pas doivent être des nombres"
-                            pa <= 0 -> "Le pas doit être positif"
-                            mi > ma -> "Min doit être inférieur ou égal à max"
-                            inc == null || inc <= 0 -> "L'incrément doit être un entier positif"
-                            selection.isEmpty() -> "Sélectionnez au moins une essence"
+                            nom.isBlank() -> errNom
+                            mi == null || ma == null || pa == null -> errNombres
+                            pa <= 0 -> errPas
+                            mi > ma -> errMinMax
+                            inc == null || inc <= 0 -> errInc
+                            selection.isEmpty() -> errEssence
                             else -> {
                                 val essences = essencesDisponibles
                                     .filter { it in selection }
                                     .map { EssenceColonne(it, fond(it), texte(it)) }
                                 val commentaireFinal = commentaire.trim().ifBlank { null }
+                                val numero = tarifNumero.toIntOrNull() ?: 0
                                 scope.launch {
                                     if (edition) {
                                         repository.modifierContexte(
                                             contexteExistant!!.id, nom.trim(), mode,
-                                            AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg,
+                                            AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg, tarif, numero,
                                         )
                                         onEnregistre(contexteExistant.id)
                                     } else {
                                         val id = repository.creerContexte(
                                             nom.trim(), mode, AxeClasses(mi, ma, pa),
-                                            essences, commentaireFinal, inc, cheminGpkg = cheminGpkg,
+                                            essences, commentaireFinal, inc,
+                                            cheminGpkg = cheminGpkg, tarif = tarif, tarifNumero = numero,
                                         )
                                         onEnregistre(id)
                                     }
@@ -250,7 +300,7 @@ fun CreationContexteScreen(
                             }
                         }
                     },
-                ) { Text(if (edition) "Enregistrer" else "Créer") }
+                ) { Text(stringResource(if (edition) R.string.creation_btn_enregistrer else R.string.creation_btn_creer)) }
             }
         }
     }
@@ -283,32 +333,32 @@ fun CreationContexteScreen(
     }
 }
 
-private val RAISONS_COULEURS = mapOf(
-    "Chêne" to "Chênes décidus, large amplitude tempérée.",
-    "Hêtre" to "Mésophile, atlantique-montagnard, frais.",
-    "Autres feuillus" to "Catégorie ouverte des feuillus (bleu-gris neutre).",
-    "Sapin" to "Sapin/épicéa montagnards humides, sciaphiles.",
-    "Épicéa" to "Résineux ; teinte distincte du sapin (déviation assumée).",
-    "Autres résineux" to "Catégorie ouverte des conifères (gris-brun).",
-)
+/** Description écologique d'une essence par défaut (BD Forêt V2), ou null. */
+@Composable
+private fun raisonCouleur(nom: String): String? = when (nom) {
+    "Chêne" -> stringResource(R.string.creation_raison_chene)
+    "Hêtre" -> stringResource(R.string.creation_raison_hetre)
+    "Autres feuillus" -> stringResource(R.string.creation_raison_autres_feuillus)
+    "Sapin" -> stringResource(R.string.creation_raison_sapin)
+    "Épicéa" -> stringResource(R.string.creation_raison_epicea)
+    "Autres résineux" -> stringResource(R.string.creation_raison_autres_resineux)
+    else -> null
+}
 
 @Composable
 private fun InfoCouleursDialog(onFermer: () -> Unit) {
     AlertDialog(
         onDismissRequest = onFermer,
-        title = { Text("Couleurs des essences") },
+        title = { Text(stringResource(R.string.creation_info_couleurs_titre)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text(
-                    "Couleurs dérivées du référentiel BD Forêt® V2. Teinte = famille botanique ; " +
-                        "nuance = gradient écologique (du mésophile humide vers le thermo-xérique).",
-                    style = MaterialTheme.typography.bodySmall,
-                )
+                Text(stringResource(R.string.creation_info_couleurs_corps), style = MaterialTheme.typography.bodySmall)
                 Referentiels.ESSENCES_DEFAUT.forEachIndexed { i, nom ->
                     val argb = Referentiels.couleurFondDefaut(i)
+                    val raison = raisonCouleur(nom)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -319,19 +369,14 @@ private fun InfoCouleursDialog(onFermer: () -> Unit) {
                                 .background(Color(argb)),
                         )
                         Column(Modifier.weight(1f)) {
-                            Text(
-                                "$nom — ${"#%06X".format(0xFFFFFF and argb)}",
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                            RAISONS_COULEURS[nom]?.let {
-                                Text(it, style = MaterialTheme.typography.bodySmall)
-                            }
+                            Text("$nom — ${"#%06X".format(0xFFFFFF and argb)}", style = MaterialTheme.typography.bodyMedium)
+                            raison?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
                         }
                     }
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onFermer) { Text("Fermer") } },
+        confirmButton = { TextButton(onClick = onFermer) { Text(stringResource(R.string.creation_btn_fermer)) } },
     )
 }
 
@@ -365,7 +410,6 @@ private fun LigneEssence(
     ) {
         Checkbox(checked = coche, onCheckedChange = { onToggle() })
         Text(nom, modifier = Modifier.weight(1f))
-        // Aperçu : fond seul, puis fond + lettre dans la couleur du texte.
         Echantillon(couleur = fond, onClick = onPickFond)
         EchantillonTexte(fond = fond, texte = texte, onClick = onPickTexte)
     }
@@ -400,7 +444,7 @@ private fun EchantillonTexte(fond: Color, texte: Color, onClick: () -> Unit) {
 private fun SelecteurCouleurDialog(onAnnuler: () -> Unit, onChoisir: (Int) -> Unit) {
     AlertDialog(
         onDismissRequest = onAnnuler,
-        title = { Text("Choisir une couleur") },
+        title = { Text(stringResource(R.string.creation_selecteur_couleur_titre)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Referentiels.PALETTE.chunked(5).forEach { ligne ->
@@ -413,7 +457,7 @@ private fun SelecteurCouleurDialog(onAnnuler: () -> Unit, onChoisir: (Int) -> Un
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onAnnuler) { Text("Fermer") } },
+        dismissButton = { TextButton(onClick = onAnnuler) { Text(stringResource(R.string.creation_btn_fermer)) } },
     )
 }
 
@@ -423,17 +467,17 @@ private fun AjoutEssenceDialog(onAnnuler: () -> Unit, onAjouter: (String) -> Uni
     var nom by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onAnnuler,
-        title = { Text("Ajouter une essence") },
+        title = { Text(stringResource(R.string.creation_dialog_ajout_essence_titre)) },
         text = {
             OutlinedTextField(
                 value = nom,
                 onValueChange = { nom = it },
-                label = { Text("Nom de l'essence") },
+                label = { Text(stringResource(R.string.creation_dialog_ajout_essence_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
         },
-        confirmButton = { TextButton(onClick = { onAjouter(nom.trim()) }) { Text("Ajouter") } },
-        dismissButton = { TextButton(onClick = onAnnuler) { Text("Annuler") } },
+        confirmButton = { TextButton(onClick = { onAjouter(nom.trim()) }) { Text(stringResource(R.string.creation_btn_ajouter)) } },
+        dismissButton = { TextButton(onClick = onAnnuler) { Text(stringResource(R.string.creation_action_annuler)) } },
     )
 }

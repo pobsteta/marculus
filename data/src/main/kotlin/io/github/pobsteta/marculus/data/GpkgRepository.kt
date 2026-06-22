@@ -3,6 +3,7 @@ package io.github.pobsteta.marculus.data
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import fr.marculus.core.Geodesie
 import fr.marculus.core.model.Position
 import mil.nga.geopackage.GeoPackage
 import mil.nga.geopackage.GeoPackageFactory
@@ -48,8 +49,13 @@ data class ParcelleGpkg(
     val id: Long,
     val label: String,
     val proprietaire: String?,
+    /** Co-propriétaires en indivision (propriétaire scindé sur ; / &), sinon liste à un élément. */
+    val proprietaires: List<String>,
     val foret: String?,
     val parcelleNom: String?,
+    val commune: String?,
+    /** Surface calculée depuis la géométrie (hectares). */
+    val surfaceHa: Double,
     val attributs: Map<String, String>,
     val anneaux: List<List<Position>>,
 )
@@ -136,10 +142,20 @@ class GpkgRepository(private val context: Context) {
                             }.toMap()
                             val prop = trouver(attrs, "proprietaire", "propriétaire", "owner", "prop")
                             val foret = trouver(attrs, "foret", "forêt", "forest")
-                            val parc = trouver(attrs, "parcelle", "numero", "num", "n_parcelle", "id_parcelle", "idu", "section")
-                            val parties = listOfNotNull(prop, foret, parc?.let { "Parc. $it" })
+                            val commune = trouver(attrs, "commune", "nom_com", "ville")
+                            val section = trouver(attrs, "section", "sect")
+                            val numero = trouver(attrs, "numero", "num", "n_parcelle", "parcelle", "id_parcelle", "idu")
+                            val parcelleNom = if (section != null && numero != null) "$section $numero" else numero
+                            val proprietaires = prop?.split(';', '/', '&')
+                                ?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
+                            val surfaceHa = Geodesie.aireHa(anneaux)
+                            val parties = listOfNotNull(prop, foret, commune, parcelleNom?.let { "Parc. $it" })
                             val label = if (parties.isEmpty()) "Parcelle ${row.id}" else parties.joinToString(" · ")
-                            out.add(ParcelleGpkg(row.id, label, prop, foret, parc, attrs, anneaux))
+                            out.add(
+                                ParcelleGpkg(
+                                    row.id, label, prop, proprietaires, foret, parcelleNom, commune, surfaceHa, attrs, anneaux,
+                                ),
+                            )
                         }
                     } finally {
                         rs.close()

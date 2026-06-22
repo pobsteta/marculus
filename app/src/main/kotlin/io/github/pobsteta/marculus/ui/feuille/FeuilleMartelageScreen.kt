@@ -81,14 +81,19 @@ import androidx.compose.ui.unit.dp
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.HauteurParser
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Position
 import fr.marculus.core.model.Reglages
+import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
+import io.github.pobsteta.marculus.data.ParcelleGpkg
 import io.github.pobsteta.marculus.ui.ToucheVolume
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Position GPS courante du téléphone (null si inactif ou non autorisé). */
 @Composable
@@ -154,6 +159,7 @@ fun FeuilleMartelageScreen(
     reglages: Reglages,
     qualitesArbre: List<String>,
     qualitesBois: List<String>,
+    gpkgRepository: GpkgRepository,
     onRetour: () -> Unit,
     onStatut: () -> Unit,
     onCarte: () -> Unit,
@@ -191,6 +197,10 @@ fun FeuilleMartelageScreen(
     val totaux by repository.totaux(contexteId).collectAsStateWithLifecycle(emptyMap())
     val configs by repository.configs(contexteId).collectAsStateWithLifecycle(emptyMap())
     val position = positionActuelle(reglages.capturePosition)
+    // Parcelles du contexte : pour figer le rattachement spatial dans la tige au moment du martelage.
+    val parcelles by produceState(initialValue = emptyList<ParcelleGpkg>(), contexte) {
+        value = contexte?.cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcellesDetail(it) } } ?: emptyList()
+    }
     var saisie by remember { mutableStateOf<Saisie?>(null) }
     var derniereSaisie by remember { mutableStateOf<DerniereSaisie?>(null) }
     var menuReset by remember { mutableStateOf(false) }
@@ -249,8 +259,11 @@ fun FeuilleMartelageScreen(
         fun ajouter(essence: String, classe: Int) {
             retourSensoriel()
             annoncer(essence, classe, (totaux[CompteurCle(essence, classe)] ?: 0) + ctx.increment)
+            val parcelleLabel = position?.let { p -> parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label }
             scope.launch {
-                val uuid = repository.ajouterTige(contexteId, essence, classe, quantite = ctx.increment, position = position)
+                val uuid = repository.ajouterTige(
+                    contexteId, essence, classe, quantite = ctx.increment, position = position, parcelle = parcelleLabel,
+                )
                 derniereSaisie = DerniereSaisie(uuid, essence, classe)
             }
         }

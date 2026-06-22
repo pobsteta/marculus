@@ -99,6 +99,12 @@ import org.osmdroid.views.overlay.Polygon
 
 private const val ZOOM_MAX = 19.0
 
+/** Palette de couleurs distinctes pour colorer les parcelles par propriétaire. */
+private val PALETTE_FONCIER = listOf(
+    0xFF1E88E5.toInt(), 0xFF43A047.toInt(), 0xFFF4511E.toInt(), 0xFF8E24AA.toInt(),
+    0xFFFDD835.toInt(), 0xFF00ACC1.toInt(), 0xFF6D4C41.toInt(), 0xFFEC407A.toInt(),
+)
+
 private enum class Fond(val libelle: String) { OSM("OSM"), SATELLITE("Satellite"), ORTHO("Ortho") }
 
 private val SOURCE_SATELLITE: OnlineTileSourceBase = object : OnlineTileSourceBase(
@@ -208,19 +214,37 @@ fun CarteScreen(
         if (ctx == null) return@LaunchedEffect
         val couleurs = ctx.essences.associate { it.nom to it.couleurFondArgb }
         mapView.overlays.clear()
-        // Parcelles (dessous).
+        // Parcelles (dessous), colorées par propriétaire, avec étiquette au centre.
+        val proprios = parcelles.mapNotNull { it.proprietaire }.distinct()
+        fun couleurFonciere(p: String?): Int =
+            if (p == null) 0xFF374742.toInt()
+            else PALETTE_FONCIER[(proprios.indexOf(p).coerceAtLeast(0)) % PALETTE_FONCIER.size]
         parcelles.forEach { pcl ->
+            val c = couleurFonciere(pcl.proprietaire)
             pcl.anneaux.forEach { anneau ->
                 if (anneau.size >= 2) {
                     mapView.overlays.add(
                         Polygon(mapView).apply {
                             points = anneau.map { GeoPoint(it.latitude, it.longitude) }
-                            fillPaint.color = 0x22374742
-                            outlinePaint.color = 0xFF374742.toInt()
+                            fillPaint.color = (0x33 shl 24) or (c and 0xFFFFFF)
+                            outlinePaint.color = c
                             outlinePaint.strokeWidth = 4f
                         },
                     )
                 }
+            }
+            val ext = pcl.anneaux.firstOrNull()
+            if (!ext.isNullOrEmpty()) {
+                val lat = ext.sumOf { it.latitude } / ext.size
+                val lon = ext.sumOf { it.longitude } / ext.size
+                mapView.overlays.add(
+                    Marker(mapView).apply {
+                        position = GeoPoint(lat, lon)
+                        setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                        setTextIcon(pcl.parcelleNom ?: pcl.id.toString())
+                        setOnMarkerClickListener { _, _ -> false }
+                    },
+                )
             }
         }
         // Tiges (dessus) : titre = essence/classe, sous-titre = parcelle (rattachement spatial).
@@ -235,7 +259,8 @@ fun CarteScreen(
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                     icon = marqueur(context, couleurs[t.essence] ?: 0xFF888888.toInt(), tailleMarqueur(ctx.axe.min, ctx.axe.max, t.classe))
                     title = "${t.essence} ${t.classe}"
-                    snippet = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, pos) }?.label
+                    snippet = t.parcelle
+                        ?: parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, pos) }?.label
                         ?: context.getString(R.string.carte_hors_parcelle)
                     val hq = buildList {
                         t.hauteurTexte?.takeIf { it.isNotBlank() }?.let { add(context.getString(R.string.carte_hauteur_prefix, it)) }

@@ -83,6 +83,12 @@
     <string name="creation_dialog_ajout_essence_titre">Ajouter une essence</string>
     <string name="creation_dialog_ajout_essence_label">Nom de l\'essence</string>
     <string name="creation_btn_ajouter">Ajouter</string>
+    <string name="creation_tarif_section">Tarif de cubage</string>
+    <string name="creation_tarif_aide">Estime le volume bois fort tige (centre de classe).</string>
+    <string name="creation_tarif_aucun">Aucun</string>
+    <string name="creation_tarif_rapide">Schaeffer rapide</string>
+    <string name="creation_tarif_lent">Schaeffer lent</string>
+    <string name="creation_tarif_numero">Numéro de tarif (1–20)</string>
 
     <!-- Feuille de martelage -->
     <string name="feuille_titre">Feuille de martelage</string>
@@ -98,7 +104,7 @@
     <string name="feuille_avis">Avis</string>
     <string name="feuille_avis_menu">Avis (si + / si −)</string>
     <string name="feuille_hauteur_titre">Hauteur de la dernière tige</string>
-    <string name="feuille_hauteur_label">Hauteur (m)</string>
+    <string name="feuille_hauteur_label">Hauteur totale (m)</string>
     <string name="feuille_hauteur_placeholder">ex. 27%1$s5</string>
     <string name="feuille_decoupe_label">Découpe / qualités bois</string>
     <string name="feuille_decoupe_placeholder">ex. 6AB4CD</string>
@@ -130,6 +136,11 @@
     <string name="statut_parcelle_prefix">Parcelle</string>
     <string name="statut_tiges_sans_position_gnss">%1$d tige(s) sans position GNSS (non rattachées).</string>
     <string name="statut_aucun_evenement">Aucun événement.</string>
+    <string name="statut_filtre_tous">Tous</string>
+    <string name="statut_surface_densite">%1$s ha · %2$s tiges/ha</string>
+    <string name="statut_export_csv">CSV foncier</string>
+    <string name="statut_volume_total">Volume total : %1$s m³</string>
+    <string name="statut_volume_parcelle">%1$s m³ · %2$s m³/ha</string>
 
     <!-- Carte -->
     <string name="carte_zoom_avant">Zoom avant</string>

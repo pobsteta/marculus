@@ -81,6 +81,12 @@
     <string name="creation_dialog_ajout_essence_titre">Add a species</string>
     <string name="creation_dialog_ajout_essence_label">Species name</string>
     <string name="creation_btn_ajouter">Add</string>
+    <string name="creation_tarif_section">Volume tariff</string>
+    <string name="creation_tarif_aide">Estimates merchantable stem volume (class centre).</string>
+    <string name="creation_tarif_aucun">None</string>
+    <string name="creation_tarif_rapide">Schaeffer fast</string>
+    <string name="creation_tarif_lent">Schaeffer slow</string>
+    <string name="creation_tarif_numero">Tariff number (1–20)</string>
 
     <!-- Tree marking sheet -->
     <string name="feuille_titre">Tree Marking Sheet</string>
@@ -96,7 +102,7 @@
     <string name="feuille_avis">Advisory</string>
     <string name="feuille_avis_menu">Advisory (if + / if −)</string>
     <string name="feuille_hauteur_titre">Height of last tree</string>
-    <string name="feuille_hauteur_label">Height (m)</string>
+    <string name="feuille_hauteur_label">Total height (m)</string>
     <string name="feuille_hauteur_placeholder">e.g. 27%1$s5</string>
     <string name="feuille_decoupe_label">Cross-cut / log grades</string>
     <string name="feuille_decoupe_placeholder">e.g. 6AB4CD</string>
@@ -128,6 +134,11 @@
     <string name="statut_parcelle_prefix">Parcel</string>
     <string name="statut_tiges_sans_position_gnss">%1$d stem(s) with no GNSS position (unassigned).</string>
     <string name="statut_aucun_evenement">No events.</string>
+    <string name="statut_filtre_tous">All</string>
+    <string name="statut_surface_densite">%1$s ha · %2$s stems/ha</string>
+    <string name="statut_export_csv">Land CSV</string>
+    <string name="statut_volume_total">Total volume: %1$s m³</string>
+    <string name="statut_volume_parcelle">%1$s m³ · %2$s m³/ha</string>
 
     <!-- Map -->
     <string name="carte_zoom_avant">Zoom in</string>
