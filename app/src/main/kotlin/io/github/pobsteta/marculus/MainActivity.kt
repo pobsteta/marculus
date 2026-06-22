@@ -1,5 +1,6 @@
 package io.github.pobsteta.marculus
 
+import android.content.Context
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.WindowManager
@@ -22,6 +23,11 @@ import io.github.pobsteta.marculus.ui.ToucheVolume
 import io.github.pobsteta.marculus.ui.theme.MarculusTheme
 
 class MainActivity : ComponentActivity() {
+    // Applique la langue choisie avant la création des vues (locale du contexte de base).
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(Langue.appliquer(newBase))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val repository = (application as MarculusApplication).repository

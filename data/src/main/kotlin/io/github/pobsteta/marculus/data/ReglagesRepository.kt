@@ -27,6 +27,7 @@ class ReglagesRepository(context: Context) {
         val boutonsVolume = booleanPreferencesKey("boutons_volume")
         val rouvrirDernier = booleanPreferencesKey("rouvrir_dernier")
         val dernierContexte = stringPreferencesKey("dernier_contexte")
+        val voixTts = stringPreferencesKey("voix_tts")
     }
 
     val reglages: Flow<Reglages> = ds.data.map { p ->
@@ -42,6 +43,7 @@ class ReglagesRepository(context: Context) {
             boutonsVolume = p[Cles.boutonsVolume] ?: false,
             rouvrirDernier = p[Cles.rouvrirDernier] ?: false,
             dernierContexteId = p[Cles.dernierContexte],
+            voixTts = p[Cles.voixTts],
         )
     }
 
@@ -59,6 +61,8 @@ class ReglagesRepository(context: Context) {
             p[Cles.rouvrirDernier] = r.rouvrirDernier
             val id = r.dernierContexteId
             if (id == null) p.remove(Cles.dernierContexte) else p[Cles.dernierContexte] = id
+            val voix = r.voixTts
+            if (voix == null) p.remove(Cles.voixTts) else p[Cles.voixTts] = voix
         }
     }
 

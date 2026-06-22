@@ -1,4 +1,205 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Marculus</string>
+
+    <!-- AppRoot -->
+    <string name="app_double_retour">Appuyer deux fois sur retour pour fermer le contexte et quitter l\'application</string>
+    <string name="app_mode_diametre">Diamètre</string>
+    <string name="app_mode_circonference">Circonférence</string>
+
+    <!-- Liste des contextes -->
+    <string name="liste_app_title">Marculus</string>
+    <string name="liste_menu_content_desc">Menu</string>
+    <string name="liste_menu_referentiels">Référentiels</string>
+    <string name="liste_menu_parametres">Paramètres</string>
+    <string name="liste_fab_nouveau_contexte">Nouveau contexte</string>
+    <string name="liste_vide_message">Aucun contexte. Touchez + pour créer une opération de martelage.</string>
+    <string name="liste_dialog_supprimer_titre">Supprimer le contexte ?</string>
+    <string name="liste_dialog_supprimer_texte">« %1$s » et tout son historique de martelage seront supprimés.</string>
+    <string name="liste_dialog_supprimer_confirmer">Supprimer</string>
+    <string name="liste_dialog_annuler">Annuler</string>
+    <string name="liste_dialog_fermer">Fermer</string>
+    <string name="liste_oui">oui</string>
+    <string name="liste_non">non</string>
+    <string name="liste_detail_mesure">Mesure : %1$s</string>
+    <string name="liste_detail_classes">Classes : %1$d–%2$d (pas %3$d)</string>
+    <string name="liste_detail_increment">Incrément : %1$s</string>
+    <string name="liste_detail_essences">Essences : %1$s</string>
+    <string name="liste_detail_tiges">Tiges enregistrées : %1$d</string>
+    <string name="liste_detail_exporte">Exporté : %1$s</string>
+    <string name="liste_detail_commentaire">Commentaire : %1$s</string>
+    <string name="liste_detail_verrouille">Verrouillé : lecture seule tant que le contexte n\'est pas exporté.</string>
+    <string name="liste_carte_resume">%1$s · classes %2$d–%3$d (pas %4$d) · %5$d essences · %6$d tiges</string>
+    <string name="liste_carte_resume_verrouille"> · 🔒</string>
+    <string name="liste_carte_options_content_desc">Options du contexte</string>
+    <string name="liste_carte_menu_lire">Lire</string>
+    <string name="liste_carte_menu_dupliquer">Dupliquer</string>
+    <string name="liste_carte_menu_exporter_csv">Exporter (CSV)</string>
+    <string name="liste_carte_menu_modifier">Modifier</string>
+    <string name="liste_carte_menu_supprimer">Supprimer</string>
+
+    <!-- Création / édition de contexte -->
+    <string name="creation_titre_modifier">Modifier le contexte</string>
+    <string name="creation_titre_nouveau">Nouveau contexte</string>
+    <string name="creation_action_annuler">Annuler</string>
+    <string name="creation_label_nom">Nom du contexte</string>
+    <string name="creation_label_commentaire">Commentaire</string>
+    <string name="creation_section_mode_mesure">Mode de mesure</string>
+    <string name="creation_champ_minimum_long">Minimum</string>
+    <string name="creation_champ_minimum_court">Min</string>
+    <string name="creation_champ_maximum_long">Maximum</string>
+    <string name="creation_champ_maximum_court">Max</string>
+    <string name="creation_champ_pas_long">Par pas de</string>
+    <string name="creation_champ_pas_court">Pas</string>
+    <string name="creation_champ_increment_long">Incrément</string>
+    <string name="creation_champ_increment_court">Inc</string>
+    <string name="creation_section_essences">Essences (colonnes) et couleurs</string>
+    <string name="creation_cd_info_couleurs">Informations sur les couleurs</string>
+    <string name="creation_btn_ajouter_essence">+ Ajouter une essence</string>
+    <string name="creation_section_fond_carto">Fond cartographique (GeoPackage)</string>
+    <string name="creation_fond_carto_description">Parcelles + ortho rattachées à ce contexte (facultatif).</string>
+    <string name="creation_btn_choisir_gpkg">Choisir un GPKG</string>
+    <string name="creation_btn_remplacer_gpkg">Remplacer</string>
+    <string name="creation_gpkg_aucun_fichier">Aucun fichier</string>
+    <string name="creation_btn_retirer_gpkg">Retirer</string>
+    <string name="creation_erreur_nom_obligatoire">Le nom est obligatoire</string>
+    <string name="creation_erreur_nombres_invalides">Min, max et pas doivent être des nombres</string>
+    <string name="creation_erreur_pas_positif">Le pas doit être positif</string>
+    <string name="creation_erreur_min_max">Min doit être inférieur ou égal à max</string>
+    <string name="creation_erreur_increment">L\'incrément doit être un entier positif</string>
+    <string name="creation_erreur_essence_requise">Sélectionnez au moins une essence</string>
+    <string name="creation_btn_enregistrer">Enregistrer</string>
+    <string name="creation_btn_creer">Créer</string>
+    <string name="creation_info_couleurs_titre">Couleurs des essences</string>
+    <string name="creation_info_couleurs_corps">Couleurs dérivées du référentiel BD Forêt® V2. Teinte = famille botanique ; nuance = gradient écologique (du mésophile humide vers le thermo-xérique).</string>
+    <string name="creation_btn_fermer">Fermer</string>
+    <string name="creation_raison_chene">Chênes décidus, large amplitude tempérée.</string>
+    <string name="creation_raison_hetre">Mésophile, atlantique-montagnard, frais.</string>
+    <string name="creation_raison_autres_feuillus">Catégorie ouverte des feuillus (bleu-gris neutre).</string>
+    <string name="creation_raison_sapin">Sapin/épicéa montagnards humides, sciaphiles.</string>
+    <string name="creation_raison_epicea">Résineux ; teinte distincte du sapin (déviation assumée).</string>
+    <string name="creation_raison_autres_resineux">Catégorie ouverte des conifères (gris-brun).</string>
+    <string name="creation_selecteur_couleur_titre">Choisir une couleur</string>
+    <string name="creation_dialog_ajout_essence_titre">Ajouter une essence</string>
+    <string name="creation_dialog_ajout_essence_label">Nom de l\'essence</string>
+    <string name="creation_btn_ajouter">Ajouter</string>
+
+    <!-- Feuille de martelage -->
+    <string name="feuille_titre">Feuille de martelage</string>
+    <string name="feuille_retour">Retour</string>
+    <string name="feuille_menu">Menu</string>
+    <string name="feuille_menu_statut">Statut / Historique</string>
+    <string name="feuille_menu_carte">Carte</string>
+    <string name="feuille_menu_reinitialiser">Réinitialiser la fiche à zéro</string>
+    <string name="feuille_reset_titre">Réinitialiser la fiche ?</string>
+    <string name="feuille_reset_texte">Tous les compteurs reviennent à zéro. L\'historique est conservé (annulations enregistrées).</string>
+    <string name="feuille_reset_confirmer">Réinitialiser</string>
+    <string name="feuille_annuler">Annuler</string>
+    <string name="feuille_avis">Avis</string>
+    <string name="feuille_avis_menu">Avis (si + / si −)</string>
+    <string name="feuille_hauteur_titre">Hauteur de la dernière tige</string>
+    <string name="feuille_hauteur_label">Hauteur (m)</string>
+    <string name="feuille_hauteur_placeholder">ex. 27%1$s5</string>
+    <string name="feuille_decoupe_label">Découpe / qualités bois</string>
+    <string name="feuille_decoupe_placeholder">ex. 6AB4CD</string>
+    <string name="feuille_qualites_bois_titre">Qualités bois (appui pour insérer)</string>
+    <string name="feuille_codes_inconnus">Codes hors référentiel : %1$s (non bloquant).</string>
+    <string name="feuille_decoupe_aide">La découpe associe longueurs et qualités bois (ex. 6 m de AB, 4 m de CD).</string>
+    <string name="feuille_valider">Valider</string>
+    <string name="feuille_qualite_titre">Qualité de l\'arbre</string>
+    <string name="feuille_fermer">Fermer</string>
+    <string name="feuille_avis_titre">Avis — %1$s %2$d</string>
+    <string name="feuille_avis_aide">Seuils indicatifs : une alerte s\'affiche tant que le total sort de l\'intervalle. Purement informatif, sans blocage.</string>
+    <string name="feuille_avis_moins_label">Avis si − (minimum)</string>
+    <string name="feuille_avis_plus_label">Avis si + (maximum)</string>
+    <string name="feuille_enregistrer">Enregistrer</string>
+
+    <!-- Statut / Historique -->
+    <string name="statut_titre_fallback">Statut</string>
+    <string name="statut_retour_cd">Retour</string>
+    <string name="statut_onglet_statut">Statut</string>
+    <string name="statut_onglet_par_parcelle">Par parcelle</string>
+    <string name="statut_onglet_historique">Historique</string>
+    <string name="statut_aucune_tige">Aucune tige enregistrée.</string>
+    <string name="statut_tiges">tiges</string>
+    <string name="statut_detail_par_classe">Détail par classe (empilé par essence)</string>
+    <string name="statut_aucun_gpkg">Aucun GPKG rattaché à ce contexte (rattachement par parcelle indisponible).</string>
+    <string name="statut_aucune_tige_geo">Aucune tige géolocalisée.</string>
+    <string name="statut_hors_parcelle">Hors parcelle</string>
+    <string name="statut_sans_proprietaire">Sans propriétaire</string>
+    <string name="statut_parcelle_prefix">Parcelle</string>
+    <string name="statut_tiges_sans_position_gnss">%1$d tige(s) sans position GNSS (non rattachées).</string>
+    <string name="statut_aucun_evenement">Aucun événement.</string>
+
+    <!-- Carte -->
+    <string name="carte_zoom_avant">Zoom avant</string>
+    <string name="carte_zoom_arriere">Zoom arrière</string>
+    <string name="carte_recentrer">Recentrer</string>
+    <string name="carte_retour">Retour</string>
+    <string name="carte_charge_gpkg">Charge : gpkg</string>
+    <string name="carte_fond_label">Fond : %1$s</string>
+    <string name="carte_hors_parcelle">Hors parcelle</string>
+    <string name="carte_hauteur_prefix">H : %1$s</string>
+    <string name="carte_qualite_prefix">Q : %1$s</string>
+    <string name="carte_essences">Essences</string>
+    <string name="carte_replier_legende">Replier la légende</string>
+    <string name="carte_deplier_legende">Déplier la légende</string>
+    <string name="carte_import_gpkg">Import du GPKG…</string>
+
+    <!-- Référentiels -->
+    <string name="ref_title">Référentiels</string>
+    <string name="ref_back">Retour</string>
+    <string name="ref_essences">Essences</string>
+    <string name="ref_qualite_arbre">Qualité de l\'arbre</string>
+    <string name="ref_qualite_bois">Qualité bois</string>
+    <string name="ref_seuils_titre">Catégories de grosseur (seuils de diamètre, cm)</string>
+    <string name="ref_seuils_explication">PB &lt; seuil₁ ≤ BM &lt; seuil₂ ≤ GB &lt; seuil₃ ≤ TGB.</string>
+    <string name="ref_seuils_enregistrer">Enregistrer les seuils</string>
+    <string name="ref_supprimer_item">Supprimer %1$s</string>
+    <string name="ref_ajouter">Ajouter</string>
+
+    <!-- Paramètres -->
+    <string name="param_titre">Paramètres</string>
+    <string name="param_retour">Retour</string>
+    <string name="param_theme_titre">Thème sombre</string>
+    <string name="param_theme_desc">Force le thème sombre de l\'application.</string>
+    <string name="param_veille_titre">Empêcher la mise en veille</string>
+    <string name="param_veille_desc">Garde l\'écran allumé pendant le martelage.</string>
+    <string name="param_plein_titre">Plein écran</string>
+    <string name="param_plein_desc">Masque les barres de statut et de navigation.</string>
+    <string name="param_vibration_titre">Vibration</string>
+    <string name="param_vibration_desc">Vibre brièvement à chaque comptage.</string>
+    <string name="param_son_titre">Son de clic</string>
+    <string name="param_son_desc">Émet un son au comptage.</string>
+    <string name="param_gnss_titre">Enregistrer la position GNSS</string>
+    <string name="param_gnss_desc">Associe la position du téléphone à chaque tige (si l\'autorisation est accordée).</string>
+    <string name="param_annonce_nombre_titre">Annonce du nombre</string>
+    <string name="param_annonce_nombre_desc">Lit le nouveau total à voix haute à chaque comptage.</string>
+    <string name="param_annonce_etiquette_titre">Annonce de l\'étiquette</string>
+    <string name="param_annonce_etiquette_desc">Lit « essence classe » à voix haute à chaque comptage.</string>
+    <string name="param_volume_titre">Boutons de volume pour compter</string>
+    <string name="param_volume_desc">Volume + ajoute, volume − retire sur la cellule active.</string>
+    <string name="param_rouvrir_titre">Rouvrir le dernier contexte</string>
+    <string name="param_rouvrir_desc">Au lancement, ouvre directement la dernière feuille utilisée.</string>
+    <string name="param_langue_titre">Langue</string>
+    <string name="param_langue_changer">Changer</string>
+    <string name="param_langue_systeme">Système</string>
+    <string name="param_langue_fr">Français</string>
+    <string name="param_langue_en">English</string>
+    <string name="param_sauvegarde_section">Sauvegarde / Restauration</string>
+    <string name="param_sauvegarde_desc">Enregistre ou restaure toutes les données (contextes, journal, avis, référentiels) dans un fichier ZIP.</string>
+    <string name="param_sauvegarder">Sauvegarder</string>
+    <string name="param_restaurer">Restaurer</string>
+    <string name="param_restaurer_titre">Restaurer la sauvegarde ?</string>
+    <string name="param_restaurer_texte">Toutes les données actuelles seront remplacées par celles du fichier.</string>
+    <string name="param_annuler">Annuler</string>
+    <string name="param_ok">OK</string>
+    <string name="param_msg_sauvegarde">Sauvegarde enregistrée.</string>
+    <string name="param_msg_restauration">Restauration effectuée.</string>
+    <string name="param_msg_illisible">Fichier illisible ou invalide.</string>
+    <string name="param_voix_titre">Voix de synthèse vocale</string>
+    <string name="param_voix_defaut">Par défaut</string>
+    <string name="param_voix_test">Test de la voix</string>
+    <string name="param_voix_aucune">Aucune voix disponible (installez des données vocales dans les réglages Android).</string>
+    <string name="param_fermer">Fermer</string>
 </resources>

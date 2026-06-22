@@ -38,11 +38,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.export.ExportCsv
+import io.github.pobsteta.marculus.R
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ResumeContexte
 import io.github.pobsteta.marculus.ui.libelle
@@ -88,19 +90,19 @@ fun ListeContextesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Marculus") },
+                title = { Text(stringResource(R.string.liste_app_title)) },
                 actions = {
                     Box {
                         IconButton(onClick = { menuAppli = true }) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
+                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.liste_menu_content_desc))
                         }
                         DropdownMenu(expanded = menuAppli, onDismissRequest = { menuAppli = false }) {
                             DropdownMenuItem(
-                                text = { Text("Référentiels") },
+                                text = { Text(stringResource(R.string.liste_menu_referentiels)) },
                                 onClick = { menuAppli = false; onReferentiels() },
                             )
                             DropdownMenuItem(
-                                text = { Text("Paramètres") },
+                                text = { Text(stringResource(R.string.liste_menu_parametres)) },
                                 onClick = { menuAppli = false; onParametres() },
                             )
                         }
@@ -115,7 +117,7 @@ fun ListeContextesScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onCreer) {
-                Icon(Icons.Filled.Add, contentDescription = "Nouveau contexte")
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.liste_fab_nouveau_contexte))
             }
         },
     ) { padding ->
@@ -125,7 +127,7 @@ fun ListeContextesScreen(
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    "Aucun contexte. Touchez + pour créer une opération de martelage.",
+                    stringResource(R.string.liste_vide_message),
                     textAlign = TextAlign.Center,
                 )
             }
@@ -156,15 +158,15 @@ fun ListeContextesScreen(
     aSupprimer?.let { cible ->
         AlertDialog(
             onDismissRequest = { aSupprimer = null },
-            title = { Text("Supprimer le contexte ?") },
-            text = { Text("« ${cible.contexte.nom} » et tout son historique de martelage seront supprimés.") },
+            title = { Text(stringResource(R.string.liste_dialog_supprimer_titre)) },
+            text = { Text(stringResource(R.string.liste_dialog_supprimer_texte, cible.contexte.nom)) },
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch { repository.supprimerContexte(cible.contexte.id) }
                     aSupprimer = null
-                }) { Text("Supprimer") }
+                }) { Text(stringResource(R.string.liste_dialog_supprimer_confirmer)) }
             },
-            dismissButton = { TextButton(onClick = { aSupprimer = null }) { Text("Annuler") } },
+            dismissButton = { TextButton(onClick = { aSupprimer = null }) { Text(stringResource(R.string.liste_dialog_annuler)) } },
         )
     }
 
@@ -175,22 +177,22 @@ fun ListeContextesScreen(
             title = { Text(c.nom) },
             text = {
                 Column {
-                    Text("Mesure : ${c.mode.libelle()}")
-                    Text("Classes : ${c.axe.min}–${c.axe.max} (pas ${c.axe.pas})")
-                    Text("Incrément : ${c.increment}")
-                    Text("Essences : ${c.essencesNoms.joinToString(", ")}")
-                    Text("Tiges enregistrées : ${cible.nbEvenements}")
-                    Text("Exporté : ${if (c.exporte) "oui" else "non"}")
-                    c.commentaire?.takeIf { it.isNotBlank() }?.let { Text("Commentaire : $it") }
+                    Text(stringResource(R.string.liste_detail_mesure, c.mode.libelle()))
+                    Text(stringResource(R.string.liste_detail_classes, c.axe.min, c.axe.max, c.axe.pas))
+                    Text(stringResource(R.string.liste_detail_increment, c.increment))
+                    Text(stringResource(R.string.liste_detail_essences, c.essencesNoms.joinToString(", ")))
+                    Text(stringResource(R.string.liste_detail_tiges, cible.nbEvenements))
+                    Text(stringResource(R.string.liste_detail_exporte, stringResource(if (c.exporte) R.string.liste_oui else R.string.liste_non)))
+                    c.commentaire?.takeIf { it.isNotBlank() }?.let { Text(stringResource(R.string.liste_detail_commentaire, it)) }
                     if (cible.verrouille) {
                         Text(
-                            "Verrouillé : lecture seule tant que le contexte n'est pas exporté.",
+                            stringResource(R.string.liste_detail_verrouille),
                             color = MaterialTheme.colorScheme.error,
                         )
                     }
                 }
             },
-            confirmButton = { TextButton(onClick = { aLire = null }) { Text("Fermer") } },
+            confirmButton = { TextButton(onClick = { aLire = null }) { Text(stringResource(R.string.liste_dialog_fermer)) } },
         )
     }
 }
@@ -224,27 +226,32 @@ private fun CarteContexte(
                     )
                 }
                 Text(
-                    "${contexte.mode.libelle()} · classes ${contexte.axe.min}–${contexte.axe.max} " +
-                        "(pas ${contexte.axe.pas}) · ${contexte.essences.size} essences · ${resume.nbEvenements} tiges" +
-                        if (resume.verrouille) " · 🔒" else "",
+                    stringResource(R.string.liste_carte_resume,
+                        contexte.mode.libelle(),
+                        contexte.axe.min,
+                        contexte.axe.max,
+                        contexte.axe.pas,
+                        contexte.essences.size,
+                        resume.nbEvenements,
+                    ) + if (resume.verrouille) stringResource(R.string.liste_carte_resume_verrouille) else "",
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
             Box {
                 IconButton(onClick = { menuOuvert = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = "Options du contexte")
+                    Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.liste_carte_options_content_desc))
                 }
                 DropdownMenu(expanded = menuOuvert, onDismissRequest = { menuOuvert = false }) {
-                    DropdownMenuItem(text = { Text("Lire") }, onClick = { menuOuvert = false; onLire() })
-                    DropdownMenuItem(text = { Text("Dupliquer") }, onClick = { menuOuvert = false; onDupliquer() })
-                    DropdownMenuItem(text = { Text("Exporter (CSV)") }, onClick = { menuOuvert = false; onExporter() })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_lire)) }, onClick = { menuOuvert = false; onLire() })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_dupliquer)) }, onClick = { menuOuvert = false; onDupliquer() })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_exporter_csv)) }, onClick = { menuOuvert = false; onExporter() })
                     DropdownMenuItem(
-                        text = { Text("Modifier") },
+                        text = { Text(stringResource(R.string.liste_carte_menu_modifier)) },
                         enabled = !resume.verrouille,
                         onClick = { menuOuvert = false; onModifier() },
                     )
                     DropdownMenuItem(
-                        text = { Text("Supprimer") },
+                        text = { Text(stringResource(R.string.liste_carte_menu_supprimer)) },
                         enabled = !resume.verrouille,
                         onClick = { menuOuvert = false; onSupprimer() },
                     )

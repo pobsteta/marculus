@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -59,6 +60,7 @@ import fr.marculus.core.model.SeuilsCategories
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Tige
+import io.github.pobsteta.marculus.R
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ParcelleGpkg
@@ -89,10 +91,10 @@ fun StatutHistoriqueScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(contexte?.nom ?: "Statut") },
+                title = { Text(contexte?.nom ?: stringResource(R.string.statut_titre_fallback)) },
                 navigationIcon = {
                     IconButton(onClick = onRetour) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.statut_retour_cd))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -112,9 +114,9 @@ fun StatutHistoriqueScreen(
         }
         Column(Modifier.padding(padding).fillMaxSize()) {
             TabRow(selectedTabIndex = onglet) {
-                Tab(selected = onglet == 0, onClick = { onglet = 0 }, text = { Text("Statut") })
-                Tab(selected = onglet == 1, onClick = { onglet = 1 }, text = { Text("Par parcelle") })
-                Tab(selected = onglet == 2, onClick = { onglet = 2 }, text = { Text("Historique") })
+                Tab(selected = onglet == 0, onClick = { onglet = 0 }, text = { Text(stringResource(R.string.statut_onglet_statut)) })
+                Tab(selected = onglet == 1, onClick = { onglet = 1 }, text = { Text(stringResource(R.string.statut_onglet_par_parcelle)) })
+                Tab(selected = onglet == 2, onClick = { onglet = 2 }, text = { Text(stringResource(R.string.statut_onglet_historique)) })
             }
             when (onglet) {
                 0 -> OngletStatut(ctx, totaux, seuils)
@@ -150,14 +152,14 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, seui
     ) {
         item {
             if (total == 0) {
-                Text("Aucune tige enregistrée.", style = MaterialTheme.typography.bodyMedium)
+                Text(stringResource(R.string.statut_aucune_tige), style = MaterialTheme.typography.bodyMedium)
             } else {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Box(contentAlignment = Alignment.Center) {
                         Donut(parEssence.filter { it.second > 0 }, couleurs, total)
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text("$total", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-                            Text("tiges", style = MaterialTheme.typography.labelMedium)
+                            Text(stringResource(R.string.statut_tiges), style = MaterialTheme.typography.labelMedium)
                         }
                     }
                 }
@@ -177,7 +179,7 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, seui
         }
         if (total > 0) {
             item { HorizontalDivider() }
-            item { Text("Détail par classe (empilé par essence)", style = MaterialTheme.typography.titleSmall) }
+            item { Text(stringResource(R.string.statut_detail_par_classe), style = MaterialTheme.typography.titleSmall) }
             item { LegendeClasses(classes, couleurClasse) }
             items(contexte.essencesNoms) { essence ->
                 BarreEmpilee(
@@ -193,6 +195,9 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, seui
 
 @Composable
 private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: List<ParcelleGpkg>) {
+    val strHorsParcelle = stringResource(R.string.statut_hors_parcelle)
+    val strSansProprietaire = stringResource(R.string.statut_sans_proprietaire)
+    val strParcelle = stringResource(R.string.statut_parcelle_prefix)
     val couleurs = contexte.essences.associate { it.nom to it.couleurFondArgb }
     val plus = journal.filter { it.action == ActionTige.PLUS }
     val geo = plus.filter { it.position != null }
@@ -211,7 +216,7 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
     val rattachees = geo.map { it to parcelleDe(it) }
     fun total(l: List<Pair<Tige, ParcelleGpkg?>>) = l.sumOf { it.first.quantite }
     val parProp = rattachees
-        .groupBy { (_, p) -> p?.proprietaire ?: if (p == null) "Hors parcelle" else "Sans propriétaire" }
+        .groupBy { (_, p) -> p?.proprietaire ?: if (p == null) strHorsParcelle else strSansProprietaire }
         .toList().sortedByDescending { (_, l) -> total(l) }
 
     LazyColumn(
@@ -222,18 +227,18 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
         if (parcelles.isEmpty()) {
             item {
                 Text(
-                    "Aucun GPKG rattaché à ce contexte (rattachement par parcelle indisponible).",
+                    stringResource(R.string.statut_aucun_gpkg),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }
         if (parProp.isEmpty()) {
-            item { Text("Aucune tige géolocalisée.", style = MaterialTheme.typography.bodyMedium) }
+            item { Text(stringResource(R.string.statut_aucune_tige_geo), style = MaterialTheme.typography.bodyMedium) }
         }
         items(parProp) { (prop, tigesProp) ->
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 LigneNiveau(prop, total(tigesProp), 0, MaterialTheme.typography.titleMedium)
-                if (prop == "Hors parcelle") {
+                if (prop == strHorsParcelle) {
                     essences(tigesProp.map { it.first }).forEach { (nom, n) -> LigneEssenceParc(nom, n, couleurs, 1) }
                 } else {
                     tigesProp.groupBy { (_, p) -> p?.foret ?: "—" }
@@ -241,7 +246,7 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
                         .forEach { (foret, tigesForet) ->
                             LigneNiveau(foret, total(tigesForet), 1, MaterialTheme.typography.titleSmall)
                             tigesForet.groupBy { (_, p) ->
-                                p?.parcelleNom?.let { "Parcelle $it" } ?: p?.let { "Parcelle ${it.id}" } ?: "—"
+                                p?.parcelleNom?.let { "$strParcelle $it" } ?: p?.let { "$strParcelle ${it.id}" } ?: "—"
                             }.toList().sortedByDescending { (_, l) -> total(l) }
                                 .forEach { (parc, tigesParc) ->
                                     LigneNiveau(parc, total(tigesParc), 2, MaterialTheme.typography.bodyMedium)
@@ -255,7 +260,7 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
         if (sansPosition > 0) {
             item {
                 Text(
-                    "$sansPosition tige(s) sans position GNSS (non rattachées).",
+                    stringResource(R.string.statut_tiges_sans_position_gnss, sansPosition),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.outline,
                 )
@@ -378,7 +383,7 @@ private fun OngletHistorique(contexte: Contexte, journal: List<Tige>) {
 
     if (evenements.isEmpty()) {
         Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-            Text("Aucun événement.", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.statut_aucun_evenement), style = MaterialTheme.typography.bodyMedium)
         }
         return
     }

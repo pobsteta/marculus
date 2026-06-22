@@ -70,6 +70,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import io.github.pobsteta.marculus.R
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -178,7 +180,10 @@ fun FeuilleMartelageScreen(
             if (reglages.annonceEtiquette) add("$essence $classe")
             if (reglages.annonceNombre) add(total.toString())
         }
-        if (parties.isNotEmpty()) tts.speak(parties.joinToString(", "), TextToSpeech.QUEUE_FLUSH, null, "tige")
+        if (parties.isNotEmpty()) {
+            reglages.voixTts?.let { nom -> tts.voices?.firstOrNull { it.name == nom }?.let { tts.voice = it } }
+            tts.speak(parties.joinToString(", "), TextToSpeech.QUEUE_FLUSH, null, "tige")
+        }
     }
     val contexte by produceState<Contexte?>(initialValue = null, contexteId) {
         value = repository.contexte(contexteId)
@@ -194,28 +199,28 @@ fun FeuilleMartelageScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(contexte?.nom ?: "Feuille de martelage") },
+                title = { Text(contexte?.nom ?: stringResource(R.string.feuille_titre)) },
                 navigationIcon = {
                     IconButton(onClick = onRetour) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.feuille_retour))
                     }
                 },
                 actions = {
                     Box {
                         IconButton(onClick = { menuReset = true }) {
-                            Icon(Icons.Filled.MoreVert, contentDescription = "Menu")
+                            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.feuille_menu))
                         }
                         DropdownMenu(expanded = menuReset, onDismissRequest = { menuReset = false }) {
                             DropdownMenuItem(
-                                text = { Text("Statut / Historique") },
+                                text = { Text(stringResource(R.string.feuille_menu_statut)) },
                                 onClick = { menuReset = false; onStatut() },
                             )
                             DropdownMenuItem(
-                                text = { Text("Carte") },
+                                text = { Text(stringResource(R.string.feuille_menu_carte)) },
                                 onClick = { menuReset = false; onCarte() },
                             )
                             DropdownMenuItem(
-                                text = { Text("Réinitialiser la fiche à zéro") },
+                                text = { Text(stringResource(R.string.feuille_menu_reinitialiser)) },
                                 onClick = { menuReset = false; confirmerReset = true },
                             )
                         }
@@ -316,15 +321,15 @@ fun FeuilleMartelageScreen(
     if (confirmerReset) {
         AlertDialog(
             onDismissRequest = { confirmerReset = false },
-            title = { Text("Réinitialiser la fiche ?") },
-            text = { Text("Tous les compteurs reviennent à zéro. L'historique est conservé (annulations enregistrées).") },
+            title = { Text(stringResource(R.string.feuille_reset_titre)) },
+            text = { Text(stringResource(R.string.feuille_reset_texte)) },
             confirmButton = {
                 TextButton(onClick = {
                     scope.launch { repository.reinitialiser(contexteId) }
                     confirmerReset = false
-                }) { Text("Réinitialiser") }
+                }) { Text(stringResource(R.string.feuille_reset_confirmer)) }
             },
-            dismissButton = { TextButton(onClick = { confirmerReset = false }) { Text("Annuler") } },
+            dismissButton = { TextButton(onClick = { confirmerReset = false }) { Text(stringResource(R.string.feuille_annuler)) } },
         )
     }
 
@@ -412,10 +417,10 @@ private fun CelluleCompteur(
                 }
                 Box(Modifier.align(Alignment.TopEnd)) {
                     IconButton(onClick = { menu = true }, modifier = Modifier.size(28.dp)) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = "Avis", tint = texte)
+                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.feuille_avis), tint = texte)
                     }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text("Avis (si + / si −)") }, onClick = { menu = false; onAvis() })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.feuille_avis_menu)) }, onClick = { menu = false; onAvis() })
                     }
                 }
             }
@@ -490,7 +495,7 @@ private fun SaisieHauteurDialog(
     }
     AlertDialog(
         onDismissRequest = onAnnuler,
-        title = { Text("Hauteur de la dernière tige") },
+        title = { Text(stringResource(R.string.feuille_hauteur_titre)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -508,8 +513,8 @@ private fun SaisieHauteurDialog(
                             }
                         }
                     },
-                    label = { Text("Hauteur (m)") },
-                    placeholder = { Text("ex. 27${separateur}5") },
+                    label = { Text(stringResource(R.string.feuille_hauteur_label)) },
+                    placeholder = { Text(stringResource(R.string.feuille_hauteur_placeholder, separateur)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
@@ -517,13 +522,13 @@ private fun SaisieHauteurDialog(
                 OutlinedTextField(
                     value = decoupe,
                     onValueChange = { decoupe = it },
-                    label = { Text("Découpe / qualités bois") },
-                    placeholder = { Text("ex. 6AB4CD") },
+                    label = { Text(stringResource(R.string.feuille_decoupe_label)) },
+                    placeholder = { Text(stringResource(R.string.feuille_decoupe_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
                 if (qualitesBois.isNotEmpty()) {
-                    Text("Qualités bois (appui pour insérer)", style = MaterialTheme.typography.labelSmall)
+                    Text(stringResource(R.string.feuille_qualites_bois_titre), style = MaterialTheme.typography.labelSmall)
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         qualitesBois.forEach { code ->
                             AssistChip(onClick = { insererCode(code) }, label = { Text(code) })
@@ -532,13 +537,13 @@ private fun SaisieHauteurDialog(
                 }
                 if (inconnues.isNotEmpty()) {
                     Text(
-                        "Codes hors référentiel : ${inconnues.joinToString(", ")} (non bloquant).",
+                        stringResource(R.string.feuille_codes_inconnus, inconnues.joinToString(", ")),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error,
                     )
                 }
                 Text(
-                    "La découpe associe longueurs et qualités bois (ex. 6 m de AB, 4 m de CD).",
+                    stringResource(R.string.feuille_decoupe_aide),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -548,9 +553,9 @@ private fun SaisieHauteurDialog(
                 val h = hauteur.trim()
                 val d = decoupe.text.trim()
                 onValider(if (d.isNotBlank()) "$h-$d" else h)
-            }) { Text("Valider") }
+            }) { Text(stringResource(R.string.feuille_valider)) }
         },
-        dismissButton = { TextButton(onClick = onAnnuler) { Text("Annuler") } },
+        dismissButton = { TextButton(onClick = onAnnuler) { Text(stringResource(R.string.feuille_annuler)) } },
     )
 }
 
@@ -558,7 +563,7 @@ private fun SaisieHauteurDialog(
 private fun ChoixQualiteDialog(qualites: List<String>, onAnnuler: () -> Unit, onChoisir: (String) -> Unit) {
     AlertDialog(
         onDismissRequest = onAnnuler,
-        title = { Text("Qualité de l'arbre") },
+        title = { Text(stringResource(R.string.feuille_qualite_titre)) },
         text = {
             Column {
                 qualites.forEach { qualite ->
@@ -570,7 +575,7 @@ private fun ChoixQualiteDialog(qualites: List<String>, onAnnuler: () -> Unit, on
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onAnnuler) { Text("Fermer") } },
+        dismissButton = { TextButton(onClick = onAnnuler) { Text(stringResource(R.string.feuille_fermer)) } },
     )
 }
 
@@ -592,18 +597,17 @@ private fun AvisDialog(
     }
     AlertDialog(
         onDismissRequest = onFermer,
-        title = { Text("Avis — $essence $classe") },
+        title = { Text(stringResource(R.string.feuille_avis_titre, essence, classe)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    "Seuils indicatifs : une alerte s'affiche tant que le total sort de l'intervalle. " +
-                        "Purement informatif, sans blocage.",
+                    stringResource(R.string.feuille_avis_aide),
                     style = MaterialTheme.typography.bodySmall,
                 )
                 OutlinedTextField(
                     value = avisMoins,
                     onValueChange = { v -> avisMoins = v.filter { it.isDigit() } },
-                    label = { Text("Avis si − (minimum)") },
+                    label = { Text(stringResource(R.string.feuille_avis_moins_label)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
@@ -611,7 +615,7 @@ private fun AvisDialog(
                 OutlinedTextField(
                     value = avisPlus,
                     onValueChange = { v -> avisPlus = v.filter { it.isDigit() } },
-                    label = { Text("Avis si + (maximum)") },
+                    label = { Text(stringResource(R.string.feuille_avis_plus_label)) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
@@ -627,8 +631,8 @@ private fun AvisDialog(
                     )
                     onFermer()
                 }
-            }) { Text("Enregistrer") }
+            }) { Text(stringResource(R.string.feuille_enregistrer)) }
         },
-        dismissButton = { TextButton(onClick = onFermer) { Text("Annuler") } },
+        dismissButton = { TextButton(onClick = onFermer) { Text(stringResource(R.string.feuille_annuler)) } },
     )
 }

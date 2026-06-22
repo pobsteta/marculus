@@ -18,4 +18,6 @@ data class Reglages(
     val rouvrirDernier: Boolean = false,
     /** Identifiant du dernier contexte ouvert (pour « rouvrir le dernier »). */
     val dernierContexteId: String? = null,
+    /** Nom de la voix de synthèse choisie (Voice.name), ou null = voix par défaut. */
+    val voixTts: String? = null,
 )

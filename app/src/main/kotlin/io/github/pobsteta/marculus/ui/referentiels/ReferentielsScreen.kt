@@ -31,9 +31,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import io.github.pobsteta.marculus.R
 import fr.marculus.core.Referentiels
 import fr.marculus.core.model.SeuilsCategories
 import io.github.pobsteta.marculus.data.ReferentielsRepository
@@ -54,10 +56,10 @@ fun ReferentielsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Référentiels") },
+                title = { Text(stringResource(R.string.ref_title)) },
                 navigationIcon = {
                     IconButton(onClick = onRetour) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.ref_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -73,21 +75,21 @@ fun ReferentielsScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             SectionListe(
-                titre = "Essences",
+                titre = stringResource(R.string.ref_essences),
                 items = essences,
                 onAjouter = { scope.launch { referentielsRepository.enregistrerEssences(essences + it) } },
                 onSupprimer = { scope.launch { referentielsRepository.enregistrerEssences(essences - it) } },
             )
             HorizontalDivider(Modifier.padding(vertical = 4.dp))
             SectionListe(
-                titre = "Qualité de l'arbre",
+                titre = stringResource(R.string.ref_qualite_arbre),
                 items = qualitesArbre,
                 onAjouter = { scope.launch { referentielsRepository.enregistrerQualitesArbre(qualitesArbre + it) } },
                 onSupprimer = { scope.launch { referentielsRepository.enregistrerQualitesArbre(qualitesArbre - it) } },
             )
             HorizontalDivider(Modifier.padding(vertical = 4.dp))
             SectionListe(
-                titre = "Qualité bois",
+                titre = stringResource(R.string.ref_qualite_bois),
                 items = qualitesBois,
                 onAjouter = { scope.launch { referentielsRepository.enregistrerQualitesBois(qualitesBois + it) } },
                 onSupprimer = { scope.launch { referentielsRepository.enregistrerQualitesBois(qualitesBois - it) } },
@@ -106,9 +108,9 @@ private fun SectionSeuils(seuils: SeuilsCategories, onEnregistrer: (SeuilsCatego
     var bm by remember(seuils) { mutableStateOf(formatSeuil(seuils.bmGb)) }
     var gb by remember(seuils) { mutableStateOf(formatSeuil(seuils.gbTgb)) }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("Catégories de grosseur (seuils de diamètre, cm)", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.ref_seuils_titre), style = MaterialTheme.typography.titleMedium)
         Text(
-            "PB < seuil₁ ≤ BM < seuil₂ ≤ GB < seuil₃ ≤ TGB.",
+            stringResource(R.string.ref_seuils_explication),
             style = MaterialTheme.typography.bodySmall,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -123,7 +125,7 @@ private fun SectionSeuils(seuils: SeuilsCategories, onEnregistrer: (SeuilsCatego
             if (p != null && b != null && g != null && p < b && b < g) {
                 onEnregistrer(SeuilsCategories(p, b, g))
             }
-        }) { Text("Enregistrer les seuils") }
+        }) { Text(stringResource(R.string.ref_seuils_enregistrer)) }
     }
 }
 
@@ -153,7 +155,7 @@ private fun SectionListe(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(item, modifier = Modifier.weight(1f))
                 IconButton(onClick = { onSupprimer(item) }) {
-                    Icon(Icons.Filled.Delete, contentDescription = "Supprimer $item")
+                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.ref_supprimer_item, item))
                 }
             }
         }
@@ -161,7 +163,7 @@ private fun SectionListe(
             OutlinedTextField(
                 value = nouveau,
                 onValueChange = { nouveau = it },
-                label = { Text("Ajouter") },
+                label = { Text(stringResource(R.string.ref_ajouter)) },
                 singleLine = true,
                 modifier = Modifier.weight(1f),
             )
@@ -169,7 +171,7 @@ private fun SectionListe(
                 val v = nouveau.trim()
                 if (v.isNotBlank() && v !in items) onAjouter(v)
                 nouveau = ""
-            }) { Text("Ajouter") }
+            }) { Text(stringResource(R.string.ref_ajouter)) }
         }
     }
 }

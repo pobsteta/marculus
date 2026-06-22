@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AppRoot -->
+    <string name="app_double_retour">Press back twice to close the context and quit the app</string>
+    <string name="app_mode_diametre">Diameter</string>
+    <string name="app_mode_circonference">Circumference</string>
+
+    <!-- Context list -->
+    <string name="liste_app_title">Marculus</string>
+    <string name="liste_menu_content_desc">Menu</string>
+    <string name="liste_menu_referentiels">Reference data</string>
+    <string name="liste_menu_parametres">Settings</string>
+    <string name="liste_fab_nouveau_contexte">New marking context</string>
+    <string name="liste_vide_message">No marking context. Tap + to create a tree-marking operation.</string>
+    <string name="liste_dialog_supprimer_titre">Delete context?</string>
+    <string name="liste_dialog_supprimer_texte">\"%1$s\" and its entire marking history will be deleted.</string>
+    <string name="liste_dialog_supprimer_confirmer">Delete</string>
+    <string name="liste_dialog_annuler">Cancel</string>
+    <string name="liste_dialog_fermer">Close</string>
+    <string name="liste_oui">yes</string>
+    <string name="liste_non">no</string>
+    <string name="liste_detail_mesure">Measurement: %1$s</string>
+    <string name="liste_detail_classes">Classes: %1$d–%2$d (step %3$d)</string>
+    <string name="liste_detail_increment">Increment: %1$s</string>
+    <string name="liste_detail_essences">Species: %1$s</string>
+    <string name="liste_detail_tiges">Stems recorded: %1$d</string>
+    <string name="liste_detail_exporte">Exported: %1$s</string>
+    <string name="liste_detail_commentaire">Comment: %1$s</string>
+    <string name="liste_detail_verrouille">Locked: read-only until the context is exported.</string>
+    <string name="liste_carte_resume">%1$s · classes %2$d–%3$d (step %4$d) · %5$d species · %6$d stems</string>
+    <string name="liste_carte_resume_verrouille"> · 🔒</string>
+    <string name="liste_carte_options_content_desc">Context options</string>
+    <string name="liste_carte_menu_lire">View</string>
+    <string name="liste_carte_menu_dupliquer">Duplicate</string>
+    <string name="liste_carte_menu_exporter_csv">Export (CSV)</string>
+    <string name="liste_carte_menu_modifier">Edit</string>
+    <string name="liste_carte_menu_supprimer">Delete</string>
+
+    <!-- Context creation / editing -->
+    <string name="creation_titre_modifier">Edit context</string>
+    <string name="creation_titre_nouveau">New context</string>
+    <string name="creation_action_annuler">Cancel</string>
+    <string name="creation_label_nom">Context name</string>
+    <string name="creation_label_commentaire">Comment</string>
+    <string name="creation_section_mode_mesure">Measurement mode</string>
+    <string name="creation_champ_minimum_long">Minimum</string>
+    <string name="creation_champ_minimum_court">Min</string>
+    <string name="creation_champ_maximum_long">Maximum</string>
+    <string name="creation_champ_maximum_court">Max</string>
+    <string name="creation_champ_pas_long">Step size</string>
+    <string name="creation_champ_pas_court">Step</string>
+    <string name="creation_champ_increment_long">Increment</string>
+    <string name="creation_champ_increment_court">Inc</string>
+    <string name="creation_section_essences">Species (columns) and colours</string>
+    <string name="creation_cd_info_couleurs">Colour information</string>
+    <string name="creation_btn_ajouter_essence">+ Add a species</string>
+    <string name="creation_section_fond_carto">Cartographic background (GeoPackage)</string>
+    <string name="creation_fond_carto_description">Stands + ortho attached to this context (optional).</string>
+    <string name="creation_btn_choisir_gpkg">Choose a GPKG</string>
+    <string name="creation_btn_remplacer_gpkg">Replace</string>
+    <string name="creation_gpkg_aucun_fichier">No file</string>
+    <string name="creation_btn_retirer_gpkg">Remove</string>
+    <string name="creation_erreur_nom_obligatoire">Name is required</string>
+    <string name="creation_erreur_nombres_invalides">Min, max and step must be numbers</string>
+    <string name="creation_erreur_pas_positif">Step must be positive</string>
+    <string name="creation_erreur_min_max">Min must be less than or equal to max</string>
+    <string name="creation_erreur_increment">Increment must be a positive integer</string>
+    <string name="creation_erreur_essence_requise">Select at least one species</string>
+    <string name="creation_btn_enregistrer">Save</string>
+    <string name="creation_btn_creer">Create</string>
+    <string name="creation_info_couleurs_titre">Species colours</string>
+    <string name="creation_info_couleurs_corps">Colours derived from the BD Forêt® V2 reference. Hue = botanical family; shade = ecological gradient (from moist mesophytic to thermo-xeric).</string>
+    <string name="creation_btn_fermer">Close</string>
+    <string name="creation_raison_chene">Deciduous oaks, broad temperate range.</string>
+    <string name="creation_raison_hetre">Mesophytic, Atlantic-montane, cool.</string>
+    <string name="creation_raison_autres_feuillus">Open broadleaf category (neutral blue-grey).</string>
+    <string name="creation_raison_sapin">Montane humid fir/spruce, shade-tolerant.</string>
+    <string name="creation_raison_epicea">Conifer; distinct hue from fir (intentional deviation).</string>
+    <string name="creation_raison_autres_resineux">Open conifer category (grey-brown).</string>
+    <string name="creation_selecteur_couleur_titre">Choose a colour</string>
+    <string name="creation_dialog_ajout_essence_titre">Add a species</string>
+    <string name="creation_dialog_ajout_essence_label">Species name</string>
+    <string name="creation_btn_ajouter">Add</string>
+
+    <!-- Tree marking sheet -->
+    <string name="feuille_titre">Tree Marking Sheet</string>
+    <string name="feuille_retour">Back</string>
+    <string name="feuille_menu">Menu</string>
+    <string name="feuille_menu_statut">Status / History</string>
+    <string name="feuille_menu_carte">Map</string>
+    <string name="feuille_menu_reinitialiser">Reset sheet to zero</string>
+    <string name="feuille_reset_titre">Reset sheet?</string>
+    <string name="feuille_reset_texte">All counters return to zero. The history is preserved (cancellations recorded).</string>
+    <string name="feuille_reset_confirmer">Reset</string>
+    <string name="feuille_annuler">Cancel</string>
+    <string name="feuille_avis">Advisory</string>
+    <string name="feuille_avis_menu">Advisory (if + / if −)</string>
+    <string name="feuille_hauteur_titre">Height of last tree</string>
+    <string name="feuille_hauteur_label">Height (m)</string>
+    <string name="feuille_hauteur_placeholder">e.g. 27%1$s5</string>
+    <string name="feuille_decoupe_label">Cross-cut / log grades</string>
+    <string name="feuille_decoupe_placeholder">e.g. 6AB4CD</string>
+    <string name="feuille_qualites_bois_titre">Log grades (tap to insert)</string>
+    <string name="feuille_codes_inconnus">Unknown grade codes: %1$s (non-blocking).</string>
+    <string name="feuille_decoupe_aide">Cross-cut links lengths and log grades (e.g. 6 m of AB, 4 m of CD).</string>
+    <string name="feuille_valider">Confirm</string>
+    <string name="feuille_qualite_titre">Tree grade</string>
+    <string name="feuille_fermer">Close</string>
+    <string name="feuille_avis_titre">Advisory — %1$s %2$d</string>
+    <string name="feuille_avis_aide">Indicative thresholds: an alert is shown while the total falls outside the range. Informational only, no blocking.</string>
+    <string name="feuille_avis_moins_label">Advisory if − (minimum)</string>
+    <string name="feuille_avis_plus_label">Advisory if + (maximum)</string>
+    <string name="feuille_enregistrer">Save</string>
+
+    <!-- Status / History -->
+    <string name="statut_titre_fallback">Status</string>
+    <string name="statut_retour_cd">Back</string>
+    <string name="statut_onglet_statut">Status</string>
+    <string name="statut_onglet_par_parcelle">By parcel</string>
+    <string name="statut_onglet_historique">History</string>
+    <string name="statut_aucune_tige">No stems recorded.</string>
+    <string name="statut_tiges">stems</string>
+    <string name="statut_detail_par_classe">Detail by class (stacked by species)</string>
+    <string name="statut_aucun_gpkg">No GPKG attached to this context (parcel assignment unavailable).</string>
+    <string name="statut_aucune_tige_geo">No geolocated stems.</string>
+    <string name="statut_hors_parcelle">Outside parcel</string>
+    <string name="statut_sans_proprietaire">No owner</string>
+    <string name="statut_parcelle_prefix">Parcel</string>
+    <string name="statut_tiges_sans_position_gnss">%1$d stem(s) with no GNSS position (unassigned).</string>
+    <string name="statut_aucun_evenement">No events.</string>
+
+    <!-- Map -->
+    <string name="carte_zoom_avant">Zoom in</string>
+    <string name="carte_zoom_arriere">Zoom out</string>
+    <string name="carte_recentrer">Recenter</string>
+    <string name="carte_retour">Back</string>
+    <string name="carte_charge_gpkg">Load: gpkg</string>
+    <string name="carte_fond_label">Base map: %1$s</string>
+    <string name="carte_hors_parcelle">Outside parcels</string>
+    <string name="carte_hauteur_prefix">H: %1$s</string>
+    <string name="carte_qualite_prefix">Q: %1$s</string>
+    <string name="carte_essences">Species</string>
+    <string name="carte_replier_legende">Collapse legend</string>
+    <string name="carte_deplier_legende">Expand legend</string>
+    <string name="carte_import_gpkg">Importing GPKG…</string>
+
+    <!-- Reference lists -->
+    <string name="ref_title">Reference lists</string>
+    <string name="ref_back">Back</string>
+    <string name="ref_essences">Species</string>
+    <string name="ref_qualite_arbre">Tree quality</string>
+    <string name="ref_qualite_bois">Log grade</string>
+    <string name="ref_seuils_titre">Size categories (diameter thresholds, cm)</string>
+    <string name="ref_seuils_explication">PB &lt; threshold₁ ≤ BM &lt; threshold₂ ≤ GB &lt; threshold₃ ≤ TGB.</string>
+    <string name="ref_seuils_enregistrer">Save thresholds</string>
+    <string name="ref_supprimer_item">Delete %1$s</string>
+    <string name="ref_ajouter">Add</string>
+
+    <!-- Settings -->
+    <string name="param_titre">Settings</string>
+    <string name="param_retour">Back</string>
+    <string name="param_theme_titre">Dark theme</string>
+    <string name="param_theme_desc">Force the app dark theme.</string>
+    <string name="param_veille_titre">Keep screen awake</string>
+    <string name="param_veille_desc">Keeps the screen on during marking.</string>
+    <string name="param_plein_titre">Full screen</string>
+    <string name="param_plein_desc">Hides the status and navigation bars.</string>
+    <string name="param_vibration_titre">Vibration</string>
+    <string name="param_vibration_desc">Brief vibration on each count.</string>
+    <string name="param_son_titre">Click sound</string>
+    <string name="param_son_desc">Plays a sound on each count.</string>
+    <string name="param_gnss_titre">Record GNSS position</string>
+    <string name="param_gnss_desc">Attaches the phone position to each stem (if permission is granted).</string>
+    <string name="param_annonce_nombre_titre">Announce the count</string>
+    <string name="param_annonce_nombre_desc">Reads the new total aloud on each count.</string>
+    <string name="param_annonce_etiquette_titre">Announce the label</string>
+    <string name="param_annonce_etiquette_desc">Reads \"species class\" aloud on each count.</string>
+    <string name="param_volume_titre">Count with volume buttons</string>
+    <string name="param_volume_desc">Volume + adds, volume − removes on the active cell.</string>
+    <string name="param_rouvrir_titre">Reopen last context</string>
+    <string name="param_rouvrir_desc">On launch, open the last used sheet directly.</string>
+    <string name="param_langue_titre">Language</string>
+    <string name="param_langue_changer">Change</string>
+    <string name="param_langue_systeme">System</string>
+    <string name="param_langue_fr">Français</string>
+    <string name="param_langue_en">English</string>
+    <string name="param_sauvegarde_section">Backup / Restore</string>
+    <string name="param_sauvegarde_desc">Saves or restores all data (contexts, journal, advisories, reference lists) to a ZIP file.</string>
+    <string name="param_sauvegarder">Back up</string>
+    <string name="param_restaurer">Restore</string>
+    <string name="param_restaurer_titre">Restore backup?</string>
+    <string name="param_restaurer_texte">All current data will be replaced with the file\'s content.</string>
+    <string name="param_annuler">Cancel</string>
+    <string name="param_ok">OK</string>
+    <string name="param_msg_sauvegarde">Backup saved.</string>
+    <string name="param_msg_restauration">Restore completed.</string>
+    <string name="param_msg_illisible">Unreadable or invalid file.</string>
+    <string name="param_voix_titre">Text-to-speech voice</string>
+    <string name="param_voix_defaut">Default</string>
+    <string name="param_voix_test">Voice test</string>
+    <string name="param_voix_aucune">No voice available (install voice data in Android settings).</string>
+    <string name="param_fermer">Close</string>
+</resources>

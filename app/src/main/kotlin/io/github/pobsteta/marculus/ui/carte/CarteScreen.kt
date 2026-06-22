@@ -62,9 +62,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import io.github.pobsteta.marculus.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.model.ActionTige
@@ -234,10 +236,10 @@ fun CarteScreen(
                     icon = marqueur(context, couleurs[t.essence] ?: 0xFF888888.toInt(), tailleMarqueur(ctx.axe.min, ctx.axe.max, t.classe))
                     title = "${t.essence} ${t.classe}"
                     snippet = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, pos) }?.label
-                        ?: "Hors parcelle"
+                        ?: context.getString(R.string.carte_hors_parcelle)
                     val hq = buildList {
-                        t.hauteurTexte?.takeIf { it.isNotBlank() }?.let { add("H : $it") }
-                        t.qualiteArbre?.takeIf { it.isNotBlank() }?.let { add("Q : $it") }
+                        t.hauteurTexte?.takeIf { it.isNotBlank() }?.let { add(context.getString(R.string.carte_hauteur_prefix, it)) }
+                        t.qualiteArbre?.takeIf { it.isNotBlank() }?.let { add(context.getString(R.string.carte_qualite_prefix, it)) }
                     }
                     if (hq.isNotEmpty()) subDescription = hq.joinToString(" · ")
                 },
@@ -265,7 +267,7 @@ fun CarteScreen(
         }
         val c = mapView.mapCenter
         val p = Position(c.latitude, c.longitude)
-        parcelleCentre = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label ?: "Hors parcelle"
+        parcelleCentre = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label ?: context.getString(R.string.carte_hors_parcelle)
     }
 
     DisposableEffect(parcelles) {
@@ -282,13 +284,13 @@ fun CarteScreen(
         floatingActionButton = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 SmallFloatingActionButton(onClick = { mapView.controller.zoomIn() }) {
-                    Icon(Icons.Filled.Add, contentDescription = "Zoom avant")
+                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.carte_zoom_avant))
                 }
                 SmallFloatingActionButton(onClick = { mapView.controller.zoomOut() }) {
-                    Icon(Icons.Filled.Remove, contentDescription = "Zoom arrière")
+                    Icon(Icons.Filled.Remove, contentDescription = stringResource(R.string.carte_zoom_arriere))
                 }
                 SmallFloatingActionButton(onClick = { recadrer() }) {
-                    Icon(Icons.Filled.MyLocation, contentDescription = "Recentrer")
+                    Icon(Icons.Filled.MyLocation, contentDescription = stringResource(R.string.carte_recentrer))
                 }
             }
         },
@@ -297,12 +299,12 @@ fun CarteScreen(
                 title = { Text(contexte?.nom ?: "Carte") },
                 navigationIcon = {
                     IconButton(onClick = onRetour) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.carte_retour))
                     }
                 },
                 actions = {
                     TextButton(onClick = { importGpkgLauncher.launch(arrayOf("*/*")) }) {
-                        Text("Charge : gpkg", color = MaterialTheme.colorScheme.onPrimary)
+                        Text(stringResource(R.string.carte_charge_gpkg), color = MaterialTheme.colorScheme.onPrimary)
                     }
                     TextButton(onClick = {
                         fond = when (fond) {
@@ -311,7 +313,7 @@ fun CarteScreen(
                             Fond.ORTHO -> Fond.OSM
                         }
                     }) {
-                        Text("Fond : ${fond.libelle}", color = MaterialTheme.colorScheme.onPrimary)
+                        Text(stringResource(R.string.carte_fond_label, fond.libelle), color = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -382,14 +384,14 @@ private fun LegendeEssences(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
-                    "Essences",
+                    stringResource(R.string.carte_essences),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f),
                 )
                 Icon(
                     if (ouverte) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
-                    contentDescription = if (ouverte) "Replier la légende" else "Déplier la légende",
+                    contentDescription = if (ouverte) stringResource(R.string.carte_replier_legende) else stringResource(R.string.carte_deplier_legende),
                     modifier = Modifier.size(18.dp),
                 )
             }
@@ -430,7 +432,7 @@ private fun IndicateurImport(modifier: Modifier = Modifier) {
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(40.dp).rotate(angle),
             )
-            Text("Import du GPKG…", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.carte_import_gpkg), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

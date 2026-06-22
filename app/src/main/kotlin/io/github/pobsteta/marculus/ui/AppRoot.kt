@@ -19,6 +19,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import io.github.pobsteta.marculus.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -79,9 +81,10 @@ private val RouteSaver = listSaver<Route, String>(
     },
 )
 
+@Composable
 fun ModeMesure.libelle(): String = when (this) {
-    ModeMesure.DIAMETRE -> "Diamètre"
-    ModeMesure.CIRCONFERENCE -> "Circonférence"
+    ModeMesure.DIAMETRE -> stringResource(R.string.app_mode_diametre)
+    ModeMesure.CIRCONFERENCE -> stringResource(R.string.app_mode_circonference)
 }
 
 @Composable
@@ -133,7 +136,7 @@ fun AppRoot(
                     dernierRetour = maintenant
                     Toast.makeText(
                         context,
-                        "Appuyer deux fois sur retour pour fermer le contexte et quitter l'application",
+                        context.getString(R.string.app_double_retour),
                         Toast.LENGTH_SHORT,
                     ).show()
                 }
