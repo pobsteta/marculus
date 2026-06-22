@@ -83,6 +83,7 @@ import java.util.Locale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.HauteurParser
+import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Position
@@ -91,6 +92,7 @@ import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ParcelleGpkg
 import io.github.pobsteta.marculus.ui.ToucheVolume
+import io.github.pobsteta.marculus.ui.tige.SaisieTigeDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -205,6 +207,7 @@ fun FeuilleMartelageScreen(
     var derniereSaisie by remember { mutableStateOf<DerniereSaisie?>(null) }
     var menuReset by remember { mutableStateOf(false) }
     var confirmerReset by remember { mutableStateOf(false) }
+    var saisieLibre by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -221,6 +224,10 @@ fun FeuilleMartelageScreen(
                             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.feuille_menu))
                         }
                         DropdownMenu(expanded = menuReset, onDismissRequest = { menuReset = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.tige_saisir_titre)) },
+                                onClick = { menuReset = false; saisieLibre = true },
+                            )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.feuille_menu_statut)) },
                                 onClick = { menuReset = false; onStatut() },
@@ -374,6 +381,34 @@ fun FeuilleMartelageScreen(
         )
 
         null -> Unit
+    }
+
+    if (saisieLibre) {
+        val ctxLibre = contexte
+        SaisieTigeDialog(
+            edition = false,
+            essencesContexte = ctxLibre?.essences?.map { it.nom } ?: emptyList(),
+            qualites = qualitesArbre,
+            quantiteInitiale = (ctxLibre?.increment ?: 1).toString(),
+            onAnnuler = { saisieLibre = false },
+            onValider = { action, essence, classe, quantite, hauteur, qualite ->
+                val pos = position
+                val parcelleLabel = pos?.let { p ->
+                    parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label
+                }
+                scope.launch {
+                    if (action == ActionTige.PLUS) {
+                        repository.ajouterTige(
+                            contexteId, essence, classe, quantite = quantite,
+                            hauteurTexte = hauteur, qualiteArbre = qualite, position = pos, parcelle = parcelleLabel,
+                        )
+                    } else {
+                        repository.annulerTige(contexteId, essence, classe, quantite = quantite)
+                    }
+                }
+                saisieLibre = false
+            },
+        )
     }
 }
 

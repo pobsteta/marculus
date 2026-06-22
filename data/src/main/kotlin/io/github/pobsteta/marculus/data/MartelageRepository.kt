@@ -230,6 +230,21 @@ class MartelageRepository(
         marquerNonExporte(contexteId)
     }
 
+    /** Corrige une tige (essence/classe/action/quantité/hauteur/qualité) ; la position GNSS et la parcelle restent inchangées. */
+    suspend fun modifierTige(
+        uuid: String,
+        contexteId: String,
+        essence: String,
+        classe: Int,
+        action: ActionTige,
+        quantite: Int,
+        hauteurTexte: String?,
+        qualiteArbre: String?,
+    ) {
+        tigeDao.majComplet(uuid, essence, classe, action.name, quantite, hauteurTexte, qualiteArbre)
+        marquerNonExporte(contexteId)
+    }
+
     /** Annote une tige précise (par uuid) : la hauteur. */
     suspend fun annoterHauteur(uuid: String, hauteurTexte: String?) = tigeDao.majHauteur(uuid, hauteurTexte)
 

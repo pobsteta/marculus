@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -72,7 +74,9 @@ import io.github.pobsteta.marculus.R
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ParcelleGpkg
+import io.github.pobsteta.marculus.ui.tige.SaisieTigeDialog
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -84,6 +88,7 @@ fun StatutHistoriqueScreen(
     gpkgRepository: GpkgRepository,
     contexteId: String,
     seuils: SeuilsCategories,
+    qualitesArbre: List<String>,
     onRetour: () -> Unit,
 ) {
     val contexte by produceState<Contexte?>(initialValue = null, contexteId) {
@@ -95,6 +100,8 @@ fun StatutHistoriqueScreen(
         value = contexte?.cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcellesDetail(it) } } ?: emptyList()
     }
     var onglet by rememberSaveable { mutableIntStateOf(0) }
+    var tigeEnEdition by remember { mutableStateOf<Tige?>(null) }
+    val scopeStatut = rememberCoroutineScope()
     val context = LocalContext.current
     val locale = LocalConfiguration.current.locales[0]
     val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
@@ -147,18 +154,41 @@ fun StatutHistoriqueScreen(
             when (onglet) {
                 0 -> OngletStatut(ctx, totaux, seuils)
                 1 -> OngletParcelles(ctx, journal, parcelles)
-                else -> OngletHistorique(ctx, journal)
+                else -> OngletHistorique(ctx, journal, onEdit = { tigeEnEdition = it })
             }
         }
+    }
+
+    tigeEnEdition?.let { t ->
+        SaisieTigeDialog(
+            edition = true,
+            essencesContexte = contexte?.essences?.map { it.nom } ?: emptyList(),
+            qualites = qualitesArbre,
+            actionInitiale = t.action,
+            essenceInitiale = t.essence,
+            classeInitiale = t.classe.toString(),
+            quantiteInitiale = t.quantite.toString(),
+            hauteurInitiale = t.hauteurTexte ?: "",
+            qualiteInitiale = t.qualiteArbre ?: "",
+            onAnnuler = { tigeEnEdition = null },
+            onValider = { action, essence, classe, quantite, hauteur, qualite ->
+                scopeStatut.launch {
+                    repository.modifierTige(t.uuid, t.contexteId, essence, classe, action, quantite, hauteur, qualite)
+                }
+                tigeEnEdition = null
+            },
+        )
     }
 }
 
 @Composable
 private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, seuils: SeuilsCategories) {
     val couleurs = contexte.essences.associate { it.nom to it.couleurFondArgb }
-    // Total par essence (pour le donut), dans l'ordre des colonnes.
-    val parEssence = contexte.essencesNoms.map { nom ->
-        nom to contexte.axe.classes().sumOf { c -> totaux[CompteurCle(nom, c)] ?: 0 }
+    // Total par essence (donut/récap) : union des essences paramétrées et de celles du journal
+    // (saisies libres hors matrice), sommées sur toutes leurs classes.
+    val ordreEssences = (contexte.essencesNoms + totaux.keys.map { it.essence }).distinct()
+    val parEssence = ordreEssences.map { nom ->
+        nom to totaux.entries.filter { it.key.essence == nom }.sumOf { it.value }
     }
     val total = parEssence.sumOf { it.second }
     val classes = contexte.axe.classes()
@@ -248,11 +278,13 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
     fun parcelleDe(t: Tige): ParcelleGpkg? =
         parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, t.position!!) }
 
-    fun essences(tiges: List<Tige>): List<Pair<String, Int>> =
-        contexte.essencesNoms.mapNotNull { nom ->
+    fun essences(tiges: List<Tige>): List<Pair<String, Int>> {
+        val noms = (contexte.essencesNoms + tiges.map { it.essence }).distinct()
+        return noms.mapNotNull { nom ->
             val n = tiges.filter { it.essence == nom }.sumOf { it.quantite }
             if (n > 0) nom to n else null
         }
+    }
 
     // Rattachement point-dans-polygone, puis regroupement Propriétaire → Forêt → Parcelle.
     val locale = LocalConfiguration.current.locales[0]
@@ -507,7 +539,7 @@ private fun Donut(parEssence: List<Pair<String, Int>>, couleurs: Map<String, Int
 }
 
 @Composable
-private fun OngletHistorique(contexte: Contexte, journal: List<Tige>) {
+private fun OngletHistorique(contexte: Contexte, journal: List<Tige>, onEdit: (Tige) -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
     val format = remember(locale) { SimpleDateFormat("dd/MM/yyyy HH:mm:ss", locale) }
     val evenements = journal.sortedByDescending { it.horodatage }
@@ -521,7 +553,7 @@ private fun OngletHistorique(contexte: Contexte, journal: List<Tige>) {
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(12.dp)) {
         items(evenements) { tige ->
             val signe = if (tige.action == ActionTige.PLUS) "+" else "−"
-            Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+            Column(Modifier.fillMaxWidth().clickable { onEdit(tige) }.padding(vertical = 6.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         "$signe${tige.quantite}",

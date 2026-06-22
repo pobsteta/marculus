@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Add / edit a stem -->
+    <string name="tige_saisir_titre">Add a stem</string>
+    <string name="tige_modifier_titre">Edit stem</string>
+    <string name="tige_action_plus">+ (mark)</string>
+    <string name="tige_action_moins">− (cancel)</string>
+    <string name="tige_essence">Species</string>
+    <string name="tige_classe">Class / diameter (cm)</string>
+    <string name="tige_quantite">Quantity</string>
+    <string name="tige_hauteur">Height (optional)</string>
+    <string name="tige_qualite">Quality (optional)</string>
+    <string name="tige_valider">Confirm</string>
+    <string name="tige_annuler">Cancel</string>
+
     <!-- AppRoot -->
     <string name="app_double_retour">Press back twice to close the context and quit the app</string>
     <string name="app_mode_diametre">Diameter</string>

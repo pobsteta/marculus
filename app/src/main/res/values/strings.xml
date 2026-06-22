@@ -2,6 +2,19 @@
 <resources>
     <string name="app_name">Marculus</string>
 
+    <!-- Saisie / édition d'une tige -->
+    <string name="tige_saisir_titre">Saisir une tige</string>
+    <string name="tige_modifier_titre">Modifier la tige</string>
+    <string name="tige_action_plus">+ (marquer)</string>
+    <string name="tige_action_moins">− (annuler)</string>
+    <string name="tige_essence">Essence</string>
+    <string name="tige_classe">Classe / diamètre (cm)</string>
+    <string name="tige_quantite">Quantité</string>
+    <string name="tige_hauteur">Hauteur (option)</string>
+    <string name="tige_qualite">Qualité (option)</string>
+    <string name="tige_valider">Valider</string>
+    <string name="tige_annuler">Annuler</string>
+
     <!-- AppRoot -->
     <string name="app_double_retour">Appuyer deux fois sur retour pour fermer le contexte et quitter l\'application</string>
     <string name="app_mode_diametre">Diamètre</string>

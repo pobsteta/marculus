@@ -218,6 +218,7 @@ fun AppRoot(
             gpkgRepository = gpkgRepository,
             contexteId = r.contexteId,
             seuils = seuils,
+            qualitesArbre = qualitesArbre,
             onRetour = { route = Route.Feuille(r.contexteId) },
         )
 
