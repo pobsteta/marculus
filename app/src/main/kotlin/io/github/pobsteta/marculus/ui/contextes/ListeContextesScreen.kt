@@ -1,7 +1,9 @@
 package io.github.pobsteta.marculus.ui.contextes
 
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,13 +49,16 @@ import fr.marculus.core.export.ExportCsv
 import io.github.pobsteta.marculus.R
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ResumeContexte
+import io.github.pobsteta.marculus.data.SauvegardeRepository
 import io.github.pobsteta.marculus.ui.libelle
 import kotlinx.coroutines.launch
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListeContextesScreen(
     repository: MartelageRepository,
+    sauvegardeRepository: SauvegardeRepository,
     onCreer: () -> Unit,
     onOuvrir: (String) -> Unit,
     onModifier: (String) -> Unit,
@@ -84,6 +89,24 @@ fun ListeContextesScreen(
                 }
                 repository.marquerExporte(id)
             }
+        }
+    }
+
+    // Partage d'un contexte pour la synchro (fichier .marsync via le partage système).
+    val titrePartage = stringResource(R.string.sync_partage_titre)
+    fun partagerContexte(id: String, nom: String) {
+        scope.launch {
+            val json = sauvegardeRepository.exporterContexteJson(id)
+            val nomFichier = nom.replace(Regex("[^A-Za-z0-9_-]"), "_").ifBlank { "contexte" }
+            val fichier = File(context.cacheDir, "$nomFichier.marsync")
+            fichier.writeText(json)
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", fichier)
+            val envoi = Intent(Intent.ACTION_SEND).apply {
+                type = "application/octet-stream"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(envoi, titrePartage))
         }
     }
 
@@ -149,6 +172,7 @@ fun ListeContextesScreen(
                             pendingExport = resume.contexte.id
                             exportLauncher.launch("${resume.contexte.nom}.csv")
                         },
+                        onPartager = { partagerContexte(resume.contexte.id, resume.contexte.nom) },
                     )
                 }
             }
@@ -206,6 +230,7 @@ private fun CarteContexte(
     onLire: () -> Unit,
     onDupliquer: () -> Unit,
     onExporter: () -> Unit,
+    onPartager: () -> Unit,
 ) {
     val contexte = resume.contexte
     var menuOuvert by remember { mutableStateOf(false) }
@@ -245,6 +270,7 @@ private fun CarteContexte(
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_lire)) }, onClick = { menuOuvert = false; onLire() })
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_dupliquer)) }, onClick = { menuOuvert = false; onDupliquer() })
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_exporter_csv)) }, onClick = { menuOuvert = false; onExporter() })
+                    DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_partager)) }, onClick = { menuOuvert = false; onPartager() })
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.liste_carte_menu_modifier)) },
                         enabled = !resume.verrouille,

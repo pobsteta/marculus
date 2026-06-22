@@ -46,6 +46,7 @@
     <string name="liste_carte_menu_lire">View</string>
     <string name="liste_carte_menu_dupliquer">Duplicate</string>
     <string name="liste_carte_menu_exporter_csv">Export (CSV)</string>
+    <string name="liste_carte_menu_partager">Share (sync)</string>
     <string name="liste_carte_menu_modifier">Edit</string>
     <string name="liste_carte_menu_supprimer">Delete</string>
 
@@ -149,7 +150,9 @@
     <string name="statut_tiges_sans_position_gnss">%1$d stem(s) with no GNSS position (unassigned).</string>
     <string name="statut_aucun_evenement">No events.</string>
     <string name="statut_filtre_tous">All</string>
-    <string name="statut_surface_densite">%1$s ha · %2$s stems/ha</string>
+    <string name="statut_surface_densite">%1$s ha · %2$s stems/ha · %3$s m²/ha</string>
+    <string name="statut_parcelle_rates">%1$s ha · %2$s stems/ha · %3$s m²/ha · %4$s m³/ha</string>
+    <string name="statut_surface_terriere_total">Basal area: %1$s m²</string>
     <string name="statut_export_csv">Land CSV</string>
     <string name="statut_volume_total">Total volume: %1$s m³</string>
     <string name="statut_volume_parcelle">%1$s m³ · %2$s m³/ha</string>
@@ -226,8 +229,9 @@
     <string name="param_voix_aucune">No voice available (install voice data in Android settings).</string>
     <string name="param_fermer">Close</string>
     <string name="sync_section">Sync (multi-operator)</string>
-    <string name="sync_desc">Merges marking from several operators (union by UUID, never overwriting local data). Share the .marsync file (Bluetooth, Nearby Share, USB…) then merge it on the other device.</string>
-    <string name="sync_operateur">Operator</string>
+    <string name="sync_desc">Merges marking from several operators (union by UUID, last-write-wins). Share a context from the list (⋮ → Share) via Bluetooth / Nearby Share, then merge the received .marsync file here.</string>
+    <string name="sync_operateur">Operator name</string>
+    <string name="sync_operateur_desc">Default identity (device): %1$s… — enter a name to override it.</string>
     <string name="sync_partager">Share (.marsync)</string>
     <string name="sync_fusionner">Merge</string>
     <string name="sync_msg_fusion">Sync merged.</string>

@@ -48,6 +48,7 @@
     <string name="liste_carte_menu_lire">Lire</string>
     <string name="liste_carte_menu_dupliquer">Dupliquer</string>
     <string name="liste_carte_menu_exporter_csv">Exporter (CSV)</string>
+    <string name="liste_carte_menu_partager">Partager (synchro)</string>
     <string name="liste_carte_menu_modifier">Modifier</string>
     <string name="liste_carte_menu_supprimer">Supprimer</string>
 
@@ -151,7 +152,9 @@
     <string name="statut_tiges_sans_position_gnss">%1$d tige(s) sans position GNSS (non rattachées).</string>
     <string name="statut_aucun_evenement">Aucun événement.</string>
     <string name="statut_filtre_tous">Tous</string>
-    <string name="statut_surface_densite">%1$s ha · %2$s tiges/ha</string>
+    <string name="statut_surface_densite">%1$s ha · %2$s tiges/ha · %3$s m²/ha</string>
+    <string name="statut_parcelle_rates">%1$s ha · %2$s tiges/ha · %3$s m²/ha · %4$s m³/ha</string>
+    <string name="statut_surface_terriere_total">Surface terrière : %1$s m²</string>
     <string name="statut_export_csv">CSV foncier</string>
     <string name="statut_volume_total">Volume total : %1$s m³</string>
     <string name="statut_volume_parcelle">%1$s m³ · %2$s m³/ha</string>
@@ -228,8 +231,9 @@
     <string name="param_voix_aucune">Aucune voix disponible (installez des données vocales dans les réglages Android).</string>
     <string name="param_fermer">Fermer</string>
     <string name="sync_section">Synchronisation (multi-opérateurs)</string>
-    <string name="sync_desc">Fusionne les martelages de plusieurs opérateurs (union par UUID, sans écraser le local). Partagez le fichier .marsync (Bluetooth, Partage à proximité, USB…) puis fusionnez-le sur l\'autre appareil.</string>
-    <string name="sync_operateur">Opérateur</string>
+    <string name="sync_desc">Fusionne les martelages de plusieurs opérateurs (union par UUID, dernière écriture gagne). Partagez un contexte depuis la liste (⋮ → Partager) via Bluetooth / Partage à proximité, puis fusionnez le fichier .marsync reçu ici.</string>
+    <string name="sync_operateur">Nom d\'opérateur</string>
+    <string name="sync_operateur_desc">Identité par défaut (appareil) : %1$s… — saisissez un nom pour la remplacer.</string>
     <string name="sync_partager">Partager (.marsync)</string>
     <string name="sync_fusionner">Fusionner</string>
     <string name="sync_msg_fusion">Synchronisation fusionnée.</string>

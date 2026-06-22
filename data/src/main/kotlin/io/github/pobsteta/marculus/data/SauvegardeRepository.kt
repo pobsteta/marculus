@@ -52,6 +52,16 @@ class SauvegardeRepository(
         }
     }
 
+    /** Exporte un seul contexte (contexte + ses tiges + ses avis) pour le partager. */
+    suspend fun exporterContexteJson(contexteId: String): String {
+        val root = JSONObject()
+        root.put("version", 1)
+        root.put("contextes", JSONArray().apply { contexteDao.parId(contexteId)?.let { put(it.toJson()) } })
+        root.put("tiges", JSONArray().apply { tigeDao.listeParContexte(contexteId).forEach { put(it.toJson()) } })
+        root.put("configs", JSONArray().apply { configDao.listeParContexte(contexteId).forEach { put(it.toJson()) } })
+        return root.toString(2)
+    }
+
     /**
      * Fusionne (synchro multi-opérateurs) le JSON d'un autre appareil : union par UUID des
      * contextes, tiges et avis, sans écraser le local. Atomique (transaction). Les référentiels

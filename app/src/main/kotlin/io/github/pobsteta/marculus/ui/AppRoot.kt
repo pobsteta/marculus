@@ -153,6 +153,7 @@ fun AppRoot(
     when (val r = route) {
         Route.Liste -> ListeContextesScreen(
             repository = repository,
+            sauvegardeRepository = sauvegardeRepository,
             onCreer = { route = Route.Creation },
             onOuvrir = { id -> ouvrir(id) },
             onModifier = { id -> route = Route.Edition(id) },

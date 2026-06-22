@@ -91,6 +91,7 @@ import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ParcelleGpkg
+import io.github.pobsteta.marculus.Appareil
 import io.github.pobsteta.marculus.ui.ToucheVolume
 import io.github.pobsteta.marculus.ui.tige.SaisieTigeDialog
 import kotlinx.coroutines.Dispatchers
@@ -168,6 +169,8 @@ fun FeuilleMartelageScreen(
 ) {
     val scope = rememberCoroutineScope()
     val androidContext = LocalContext.current
+    // Opérateur : nom saisi, sinon identité d'appareil (UUID) garantissant l'unicité.
+    val operateurEffectif = reglages.operateur?.takeIf { it.isNotBlank() } ?: Appareil.id(androidContext)
     val toneGen = remember { runCatching { ToneGenerator(AudioManager.STREAM_MUSIC, 90) }.getOrNull() }
     DisposableEffect(Unit) { onDispose { toneGen?.release() } }
     // Synthèse vocale (annonce du nombre / de l'étiquette), en français.
@@ -270,7 +273,7 @@ fun FeuilleMartelageScreen(
             scope.launch {
                 val uuid = repository.ajouterTige(
                     contexteId, essence, classe, quantite = ctx.increment,
-                    position = position, operateur = reglages.operateur, parcelle = parcelleLabel,
+                    position = position, operateur = operateurEffectif, parcelle = parcelleLabel,
                 )
                 derniereSaisie = DerniereSaisie(uuid, essence, classe)
             }
@@ -402,10 +405,10 @@ fun FeuilleMartelageScreen(
                         repository.ajouterTige(
                             contexteId, essence, classe, quantite = quantite,
                             hauteurTexte = hauteur, qualiteArbre = qualite, position = pos,
-                            operateur = reglages.operateur, parcelle = parcelleLabel,
+                            operateur = operateurEffectif, parcelle = parcelleLabel,
                         )
                     } else {
-                        repository.annulerTige(contexteId, essence, classe, quantite = quantite, operateur = reglages.operateur)
+                        repository.annulerTige(contexteId, essence, classe, quantite = quantite, operateur = operateurEffectif)
                     }
                 }
                 saisieLibre = false

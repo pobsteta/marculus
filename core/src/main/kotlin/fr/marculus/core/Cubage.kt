@@ -123,4 +123,12 @@ object Cubage {
     /** Volume d'une tige sur sa classe seule (tarifs une entrée), pour compatibilité. */
     fun volumeUnitaire(contexte: Contexte, classe: Int): Double =
         volumeUnitaireTige(contexte, "", classe, null)
+
+    /** Surface terrière (m²) d'une tige : g = π/4·D² (D = diamètre 1,30 m au centre de classe). */
+    fun surfaceTerriereUnitaire(contexte: Contexte, classe: Int): Double {
+        val centre = classe + contexte.axe.pas / 2.0
+        val dCm = if (contexte.mode == ModeMesure.CIRCONFERENCE) centre / PI else centre
+        val dM = dCm / 100.0
+        return PI / 4.0 * dM * dM
+    }
 }

@@ -2,10 +2,8 @@ package io.github.pobsteta.marculus.ui.parametres
 
 import android.Manifest
 import android.app.Activity
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.core.content.FileProvider
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -50,6 +48,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.model.Reglages
+import io.github.pobsteta.marculus.Appareil
 import io.github.pobsteta.marculus.Langue
 import io.github.pobsteta.marculus.R
 import io.github.pobsteta.marculus.data.ReglagesRepository
@@ -58,7 +57,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.Locale
 import java.time.format.DateTimeFormatter
-import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -95,7 +93,6 @@ fun ParametresScreen(
     val msgRestauration = stringResource(R.string.param_msg_restauration)
     val msgIllisible = stringResource(R.string.param_msg_illisible)
     val msgFusion = stringResource(R.string.sync_msg_fusion)
-    val titrePartage = stringResource(R.string.sync_partage_titre)
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/zip"),
@@ -139,21 +136,6 @@ fun ParametresScreen(
         }
     }
 
-    fun partagerSynchro() {
-        scope.launch {
-            val json = sauvegardeRepository.exporterJson()
-            val operateur = reglages.operateur?.takeIf { it.isNotBlank() }?.let { "-$it" } ?: ""
-            val fichier = File(context.cacheDir, "marculus$operateur-${LocalDateTime.now().format(FORMAT_HORODATAGE)}.marsync")
-            fichier.writeText(json)
-            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", fichier)
-            val envoi = Intent(Intent.ACTION_SEND).apply {
-                type = "application/octet-stream"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            context.startActivity(Intent.createChooser(envoi, titrePartage))
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -272,13 +254,12 @@ fun ParametresScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { partagerSynchro() }, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.sync_partager))
-                }
-                OutlinedButton(onClick = { fusionLauncher.launch(arrayOf("*/*")) }, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.sync_fusionner))
-                }
+            Text(
+                stringResource(R.string.sync_operateur_desc, Appareil.id(context).take(8)),
+                style = MaterialTheme.typography.bodySmall,
+            )
+            OutlinedButton(onClick = { fusionLauncher.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.sync_fusionner))
             }
         }
     }

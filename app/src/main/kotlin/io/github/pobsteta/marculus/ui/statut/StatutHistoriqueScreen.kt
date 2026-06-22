@@ -209,12 +209,22 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
     } else {
         0.0
     }
+    val surfaceTotale = totaux.entries.sumOf { (cle, n) -> Cubage.surfaceTerriereUnitaire(contexte, cle.classe) * n }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        if (total > 0) {
+            item {
+                Text(
+                    stringResource(R.string.statut_surface_terriere_total, String.format(locale, "%.2f", surfaceTotale)),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        }
         if (contexte.tarif != TarifCubage.AUCUN && total > 0) {
             item {
                 Text(
@@ -281,11 +291,23 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
     fun parcelleDe(t: Tige): ParcelleGpkg? =
         parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, t.position!!) }
 
-    fun essences(tiges: List<Tige>): List<Pair<String, Int>> {
+    fun essencesAvecVolume(tiges: List<Tige>): List<StatEssence> {
+        val avecTarif = contexte.tarif != TarifCubage.AUCUN
         val noms = (contexte.essencesNoms + tiges.map { it.essence }).distinct()
         return noms.mapNotNull { nom ->
-            val n = tiges.filter { it.essence == nom }.sumOf { it.quantite }
-            if (n > 0) nom to n else null
+            val lot = tiges.filter { it.essence == nom }
+            val n = lot.sumOf { it.quantite }
+            if (n > 0) {
+                val g = lot.sumOf { Cubage.surfaceTerriereUnitaire(contexte, it.classe) * it.quantite }
+                val v = if (avecTarif) {
+                    lot.sumOf { Cubage.volumeUnitaireTige(contexte, it.essence, it.classe, it.hauteurTexte) * it.quantite }
+                } else {
+                    null
+                }
+                StatEssence(nom, n, g, v)
+            } else {
+                null
+            }
         }
     }
 
@@ -293,6 +315,15 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
     val locale = LocalConfiguration.current.locales[0]
     val rattachees = geo.map { it to parcelleDe(it) }
     fun total(l: List<Pair<Tige, ParcelleGpkg?>>) = l.sumOf { it.first.quantite }
+    val tarifActif = contexte.tarif != TarifCubage.AUCUN
+    fun vol(l: List<Pair<Tige, ParcelleGpkg?>>): Double? =
+        if (tarifActif) {
+            l.sumOf { Cubage.volumeUnitaireTige(contexte, it.first.essence, it.first.classe, it.first.hauteurTexte) * it.first.quantite }
+        } else {
+            null
+        }
+    fun surf(l: List<Pair<Tige, ParcelleGpkg?>>): Double =
+        l.sumOf { Cubage.surfaceTerriereUnitaire(contexte, it.first.classe) * it.first.quantite }
     val parProp = rattachees
         .groupBy { (_, p) -> p?.proprietaire ?: if (p == null) strHorsParcelle else strSansProprietaire }
         .toList().sortedByDescending { (_, l) -> total(l) }
@@ -330,50 +361,49 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
         }
         items(affiches) { (prop, tigesProp) ->
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                LigneNiveau(prop, total(tigesProp), 0, MaterialTheme.typography.titleMedium)
+                LigneNiveau(prop, total(tigesProp), surf(tigesProp), vol(tigesProp), 0, MaterialTheme.typography.titleMedium, locale)
                 if (prop == strHorsParcelle) {
-                    essences(tigesProp.map { it.first }).forEach { (nom, n) -> LigneEssenceParc(nom, n, couleurs, 1) }
+                    essencesAvecVolume(tigesProp.map { it.first }).forEach { LigneEssenceParc(it, couleurs, 1, locale) }
                 } else {
                     tigesProp.groupBy { (_, p) -> p?.foret ?: "—" }
                         .toList().sortedByDescending { (_, l) -> total(l) }
                         .forEach { (foret, tigesForet) ->
-                            LigneNiveau(foret, total(tigesForet), 1, MaterialTheme.typography.titleSmall)
+                            LigneNiveau(foret, total(tigesForet), surf(tigesForet), vol(tigesForet), 1, MaterialTheme.typography.titleSmall, locale)
                             tigesForet.groupBy { (_, p) -> p }
                                 .toList().sortedByDescending { (_, l) -> total(l) }
                                 .forEach { (pcl, tigesParc) ->
                                     val libelle = pcl?.parcelleNom?.let { "$strParcelle $it" }
                                         ?: pcl?.let { "$strParcelle ${it.id}" } ?: "—"
                                     val tot = total(tigesParc)
-                                    LigneNiveau(libelle, tot, 2, MaterialTheme.typography.bodyMedium)
+                                    LigneNiveau(libelle, tot, surf(tigesParc), vol(tigesParc), 2, MaterialTheme.typography.bodyMedium, locale)
                                     val ha = pcl?.surfaceHa ?: 0.0
                                     if (ha > 0.0) {
-                                        Text(
+                                        val gHa = String.format(locale, "%.1f", surf(tigesParc) / ha)
+                                        val v = vol(tigesParc)
+                                        val texte = if (v != null) {
+                                            stringResource(
+                                                R.string.statut_parcelle_rates,
+                                                String.format(locale, "%.2f", ha),
+                                                String.format(locale, "%.1f", tot / ha),
+                                                gHa,
+                                                String.format(locale, "%.2f", v / ha),
+                                            )
+                                        } else {
                                             stringResource(
                                                 R.string.statut_surface_densite,
                                                 String.format(locale, "%.2f", ha),
                                                 String.format(locale, "%.1f", tot / ha),
-                                            ),
-                                            modifier = Modifier.padding(start = 36.dp),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.outline,
-                                        )
-                                    }
-                                    if (contexte.tarif != TarifCubage.AUCUN) {
-                                        val volParc = tigesParc.sumOf {
-                                            Cubage.volumeUnitaireTige(contexte, it.first.essence, it.first.classe, it.first.hauteurTexte) * it.first.quantite
+                                                gHa,
+                                            )
                                         }
                                         Text(
-                                            stringResource(
-                                                R.string.statut_volume_parcelle,
-                                                String.format(locale, "%.2f", volParc),
-                                                if (ha > 0.0) String.format(locale, "%.2f", volParc / ha) else "—",
-                                            ),
+                                            texte,
                                             modifier = Modifier.padding(start = 36.dp),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.outline,
                                         )
                                     }
-                                    essences(tigesParc.map { it.first }).forEach { (nom, n) -> LigneEssenceParc(nom, n, couleurs, 3) }
+                                    essencesAvecVolume(tigesParc.map { it.first }).forEach { LigneEssenceParc(it, couleurs, 3, locale) }
                                 }
                         }
                 }
@@ -404,24 +434,24 @@ private fun csvFoncier(
     fun champ(s: String) = s.replace(';', ' ').replace('\n', ' ')
     val sb = StringBuilder()
     val tarif = contexte.tarif != TarifCubage.AUCUN
-    sb.append("Proprietaire;Foret;Commune;Parcelle;Surface_ha;Essence;Classe;Nombre;Tiges_ha;Volume_m3;Volume_ha\n")
+    sb.append("Proprietaire;Foret;Commune;Parcelle;Surface_ha;Essence;Classe;Nombre;Tiges_ha;G_m2;G_ha;Volume_m3;Volume_ha\n")
     plus.groupBy { parcelleDe(it) }.forEach { (pcl, tiges) ->
         val ha = pcl?.surfaceHa ?: 0.0
         val totalParcelle = tiges.sumOf { it.quantite }
         val densite = if (ha > 0.0) String.format(locale, "%.1f", totalParcelle / ha) else ""
         val surface = if (ha > 0.0) String.format(locale, "%.4f", ha) else ""
+        val gParcelle = tiges.sumOf { Cubage.surfaceTerriereUnitaire(contexte, it.classe) * it.quantite }
+        val gHaStr = if (ha > 0.0) String.format(locale, "%.2f", gParcelle / ha) else ""
         val volumeParcelle = if (tarif) tiges.sumOf { Cubage.volumeUnitaireTige(contexte, it.essence, it.classe, it.hauteurTexte) * it.quantite } else 0.0
         val volHaStr = if (tarif && ha > 0.0) String.format(locale, "%.2f", volumeParcelle / ha) else ""
         for (essence in contexte.essencesNoms) {
             for (classe in contexte.axe.classes()) {
-                val n = tiges.filter { it.essence == essence && it.classe == classe }.sumOf { it.quantite }
+                val lot = tiges.filter { it.essence == essence && it.classe == classe }
+                val n = lot.sumOf { it.quantite }
                 if (n > 0) {
+                    val gRow = String.format(locale, "%.3f", lot.sumOf { Cubage.surfaceTerriereUnitaire(contexte, it.classe) * it.quantite })
                     val volRow = if (tarif) {
-                        String.format(
-                            locale, "%.3f",
-                            tiges.filter { it.essence == essence && it.classe == classe }
-                                .sumOf { Cubage.volumeUnitaireTige(contexte, it.essence, it.classe, it.hauteurTexte) * it.quantite },
-                        )
+                        String.format(locale, "%.3f", lot.sumOf { Cubage.volumeUnitaireTige(contexte, it.essence, it.classe, it.hauteurTexte) * it.quantite })
                     } else {
                         ""
                     }
@@ -434,6 +464,8 @@ private fun csvFoncier(
                         .append(classe).append(';')
                         .append(n).append(';')
                         .append(densite).append(';')
+                        .append(gRow).append(';')
+                        .append(gHaStr).append(';')
                         .append(volRow).append(';')
                         .append(volHaStr).append('\n')
                 }
@@ -443,9 +475,20 @@ private fun csvFoncier(
     return sb.toString()
 }
 
-/** Ligne d'un niveau de la hiérarchie (propriétaire/forêt/parcelle) avec son total, indentée. */
+/** Totaux par essence sous une parcelle. */
+private data class StatEssence(val nom: String, val nombre: Int, val surfaceTerriere: Double, val volume: Double?)
+
+/** Ligne d'un niveau (propriétaire/forêt/parcelle) : libellé, nb de tiges, surface terrière et volume. */
 @Composable
-private fun LigneNiveau(libelle: String, total: Int, niveau: Int, style: TextStyle) {
+private fun LigneNiveau(
+    libelle: String,
+    total: Int,
+    surfaceTerriere: Double,
+    volume: Double?,
+    niveau: Int,
+    style: TextStyle,
+    locale: java.util.Locale,
+) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = (niveau * 12).dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -453,20 +496,28 @@ private fun LigneNiveau(libelle: String, total: Int, niveau: Int, style: TextSty
     ) {
         Text(libelle, modifier = Modifier.weight(1f), style = style, fontWeight = if (niveau == 0) FontWeight.Bold else null)
         Text("$total", style = style, fontWeight = FontWeight.Bold)
+        Text(String.format(locale, "%.2f m²", surfaceTerriere), style = style, color = MaterialTheme.colorScheme.outline)
+        if (volume != null) {
+            Text(String.format(locale, "%.2f m³", volume), style = style, color = MaterialTheme.colorScheme.outline)
+        }
     }
 }
 
-/** Détail par essence (pastille couleur) sous une parcelle, indenté. */
+/** Détail par essence (pastille couleur) sous une parcelle : nb de tiges, surface terrière, volume. */
 @Composable
-private fun LigneEssenceParc(nom: String, n: Int, couleurs: Map<String, Int>, niveau: Int) {
+private fun LigneEssenceParc(stat: StatEssence, couleurs: Map<String, Int>, niveau: Int, locale: java.util.Locale) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = (niveau * 12).dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        Box(Modifier.size(12.dp).background(Color(couleurs[nom] ?: 0xFF888888.toInt())))
-        Text(nom, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
-        Text("$n", style = MaterialTheme.typography.bodySmall)
+        Box(Modifier.size(12.dp).background(Color(couleurs[stat.nom] ?: 0xFF888888.toInt())))
+        Text(stat.nom, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
+        Text("${stat.nombre}", style = MaterialTheme.typography.bodySmall)
+        Text(String.format(locale, "%.2f m²", stat.surfaceTerriere), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+        if (stat.volume != null) {
+            Text(String.format(locale, "%.2f m³", stat.volume), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+        }
     }
 }
 
