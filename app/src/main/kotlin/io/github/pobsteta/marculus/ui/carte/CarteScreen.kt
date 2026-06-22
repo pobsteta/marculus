@@ -6,6 +6,8 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,7 +52,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
+import fr.marculus.core.model.Position
+import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
+import io.github.pobsteta.marculus.data.ReferentielsRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
@@ -57,6 +66,7 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polygon
 
 private const val ZOOM_MAX = 19.0
 
@@ -74,15 +84,31 @@ private val SOURCE_SATELLITE: OnlineTileSourceBase = object : OnlineTileSourceBa
 fun CarteScreen(
     repository: MartelageRepository,
     contexteId: String,
+    gpkgRepository: GpkgRepository,
+    referentielsRepository: ReferentielsRepository,
     onRetour: () -> Unit,
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val contexte by produceState<Contexte?>(initialValue = null, contexteId) {
         value = repository.contexte(contexteId)
     }
     val journal by repository.journal(contexteId).collectAsStateWithLifecycle(emptyList())
     var satellite by remember { mutableStateOf(false) }
     var centre by remember { mutableStateOf(false) }
+
+    val cheminGpkg by referentielsRepository.cheminGpkg.collectAsStateWithLifecycle(null)
+    val parcelles by produceState(initialValue = emptyList<List<Position>>(), cheminGpkg) {
+        value = cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcelles(it) } } ?: emptyList()
+    }
+    val importGpkgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val chemin = withContext(Dispatchers.IO) { gpkgRepository.importer(uri) }
+                referentielsRepository.enregistrerCheminGpkg(chemin)
+            }
+        }
+    }
 
     val mapView = remember {
         MapView(context).apply {
@@ -108,11 +134,25 @@ fun CarteScreen(
     }
 
     val ctx = contexte
-    // Marqueurs : reconstruits seulement quand le contexte ou le journal change.
-    LaunchedEffect(ctx, journal) {
+    // Surcouches reconstruites quand contexte, journal ou parcelles changent.
+    LaunchedEffect(ctx, journal, parcelles) {
         if (ctx == null) return@LaunchedEffect
         val couleurs = ctx.essences.associate { it.nom to it.couleurFondArgb }
         mapView.overlays.clear()
+        // Parcelles (dessous).
+        parcelles.forEach { anneau ->
+            if (anneau.size >= 2) {
+                mapView.overlays.add(
+                    Polygon(mapView).apply {
+                        points = anneau.map { GeoPoint(it.latitude, it.longitude) }
+                        fillPaint.color = 0x22374742
+                        outlinePaint.color = 0xFF374742.toInt()
+                        outlinePaint.strokeWidth = 4f
+                    },
+                )
+            }
+        }
+        // Tiges (dessus).
         val points = mutableListOf<GeoPoint>()
         journal.filter { it.action == ActionTige.PLUS && it.position != null }.forEach { t ->
             val gp = GeoPoint(t.position!!.latitude, t.position!!.longitude)
@@ -126,17 +166,19 @@ fun CarteScreen(
                 },
             )
         }
-        if (!centre && points.isNotEmpty()) {
-            recadrerSur(mapView, points)
+        val cible = points.ifEmpty { parcelles.flatten().map { GeoPoint(it.latitude, it.longitude) } }
+        if (!centre && cible.isNotEmpty()) {
+            recadrerSur(mapView, cible)
             centre = true
         }
         mapView.invalidate()
     }
 
     fun recadrer() {
-        val points = journal.filter { it.action == ActionTige.PLUS && it.position != null }
+        val tiges = journal.filter { it.action == ActionTige.PLUS && it.position != null }
             .map { GeoPoint(it.position!!.latitude, it.position!!.longitude) }
-        recadrerSur(mapView, points)
+        val cible = tiges.ifEmpty { parcelles.flatten().map { GeoPoint(it.latitude, it.longitude) } }
+        recadrerSur(mapView, cible)
     }
 
     Scaffold(
@@ -152,6 +194,9 @@ fun CarteScreen(
                     }
                 },
                 actions = {
+                    TextButton(onClick = { importGpkgLauncher.launch(arrayOf("*/*")) }) {
+                        Text("GPKG", color = MaterialTheme.colorScheme.onPrimary)
+                    }
                     TextButton(onClick = { satellite = !satellite }) {
                         Text(if (satellite) "OSM" else "Satellite", color = MaterialTheme.colorScheme.onPrimary)
                     }

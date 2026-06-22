@@ -10,6 +10,7 @@ object MarculusData {
         val reglages: ReglagesRepository,
         val referentiels: ReferentielsRepository,
         val sauvegarde: SauvegardeRepository,
+        val gpkg: GpkgRepository,
     )
 
     fun creer(context: Context): Conteneur {
@@ -20,6 +21,7 @@ object MarculusData {
             reglages = ReglagesRepository(context),
             referentiels = referentiels,
             sauvegarde = SauvegardeRepository(db.contexteDao(), db.tigeDao(), db.compteurConfigDao(), referentiels),
+            gpkg = GpkgRepository(context),
         )
     }
 }

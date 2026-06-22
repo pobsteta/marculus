@@ -24,6 +24,13 @@ class ReferentielsRepository(context: Context) {
         val seuilPbBm = doublePreferencesKey("seuil_pb_bm")
         val seuilBmGb = doublePreferencesKey("seuil_bm_gb")
         val seuilGbTgb = doublePreferencesKey("seuil_gb_tgb")
+        val cheminGpkg = stringPreferencesKey("chemin_gpkg")
+    }
+
+    val cheminGpkg: Flow<String?> = ds.data.map { it[Cles.cheminGpkg] }
+
+    suspend fun enregistrerCheminGpkg(chemin: String?) {
+        ds.edit { if (chemin == null) it.remove(Cles.cheminGpkg) else it[Cles.cheminGpkg] = chemin }
     }
 
     private fun decode(s: String?, defaut: List<String>): List<String> = when {
