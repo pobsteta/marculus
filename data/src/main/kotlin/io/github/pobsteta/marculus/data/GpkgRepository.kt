@@ -43,6 +43,14 @@ class OrthoSource(
     }
 }
 
+/** Une parcelle lue du GPKG : identifiant, étiquette dérivée, attributs bruts et anneaux (WGS84). */
+data class ParcelleGpkg(
+    val id: Long,
+    val label: String,
+    val attributs: Map<String, String>,
+    val anneaux: List<List<Position>>,
+)
+
 /** Lecture d'un GeoPackage (parcelles vectorielles, reprojetées en WGS84 pour la carte). */
 class GpkgRepository(private val context: Context) {
 
@@ -94,6 +102,61 @@ class GpkgRepository(private val context: Context) {
         }
         Log.d("Marculus.Gpkg", "anneaux lus = ${anneaux.size}")
         return anneaux
+    }
+
+    /** Parcelles détaillées (attributs + anneaux WGS84), pour le rattachement spatial et la carte. */
+    fun parcellesDetail(chemin: String): List<ParcelleGpkg> {
+        val fichier = File(chemin)
+        if (!fichier.exists()) return emptyList()
+        val out = mutableListOf<ParcelleGpkg>()
+        try {
+            val manager = GeoPackageFactory.getManager(context)
+            val gpkg = manager.openExternal(fichier) ?: return emptyList()
+            try {
+                val wgs84 = ProjectionFactory.getProjection(ProjectionConstants.EPSG_WORLD_GEODETIC_SYSTEM.toLong())
+                for (table in gpkg.featureTables) {
+                    val dao = gpkg.getFeatureDao(table)
+                    val transform = dao.projection.getTransformation(wgs84)
+                    val geomCol = dao.geometryColumnName
+                    val colonnes = dao.columnNames.filter { it != geomCol }
+                    val rs = dao.queryForAll()
+                    try {
+                        while (rs.moveToNext()) {
+                            val row = rs.row
+                            val geom = row.geometry?.geometry ?: continue
+                            val anneaux = mutableListOf<List<Position>>()
+                            collecter(geom, transform, anneaux)
+                            if (anneaux.isEmpty()) continue
+                            val attrs = colonnes.mapNotNull { c ->
+                                val v = runCatching { row.getValue(c) }.getOrNull()
+                                if (v != null) c to v.toString() else null
+                            }.toMap()
+                            out.add(ParcelleGpkg(row.id, etiquette(row.id, attrs), attrs, anneaux))
+                        }
+                    } finally {
+                        rs.close()
+                    }
+                }
+            } finally {
+                gpkg.close()
+            }
+        } catch (e: Exception) {
+            Log.e("Marculus.Gpkg", "parcellesDetail", e)
+        }
+        return out
+    }
+
+    /** Étiquette générique : propriétaire · forêt · parcelle si détectés, sinon « Parcelle <id> ». */
+    private fun etiquette(id: Long, attrs: Map<String, String>): String {
+        fun trouver(vararg cles: String): String? =
+            attrs.entries.firstOrNull { e ->
+                cles.any { it.equals(e.key, ignoreCase = true) } && e.value.isNotBlank()
+            }?.value
+        val prop = trouver("proprietaire", "propriétaire", "owner", "prop")
+        val foret = trouver("foret", "forêt", "forest")
+        val parc = trouver("parcelle", "numero", "num", "n_parcelle", "id_parcelle", "idu", "section")
+        val parties = listOfNotNull(prop, foret, parc?.let { "Parc. $it" })
+        return if (parties.isEmpty()) "Parcelle $id" else parties.joinToString(" · ")
     }
 
     /** Ouvre l'ortho du GPKG, la reprojette en Web Mercator si besoin, et renvoie un fournisseur de tuiles. */

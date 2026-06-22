@@ -51,13 +51,18 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CategorieBois
 import fr.marculus.core.model.SeuilsCategories
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Tige
+import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
+import io.github.pobsteta.marculus.data.ParcelleGpkg
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -65,6 +70,7 @@ import java.util.Date
 @Composable
 fun StatutHistoriqueScreen(
     repository: MartelageRepository,
+    gpkgRepository: GpkgRepository,
     contexteId: String,
     seuils: SeuilsCategories,
     onRetour: () -> Unit,
@@ -74,6 +80,9 @@ fun StatutHistoriqueScreen(
     }
     val totaux by repository.totaux(contexteId).collectAsStateWithLifecycle(emptyMap())
     val journal by repository.journal(contexteId).collectAsStateWithLifecycle(emptyList())
+    val parcelles by produceState(initialValue = emptyList<ParcelleGpkg>(), contexte) {
+        value = contexte?.cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcellesDetail(it) } } ?: emptyList()
+    }
     var onglet by rememberSaveable { mutableIntStateOf(0) }
 
     Scaffold(
@@ -103,10 +112,12 @@ fun StatutHistoriqueScreen(
         Column(Modifier.padding(padding).fillMaxSize()) {
             TabRow(selectedTabIndex = onglet) {
                 Tab(selected = onglet == 0, onClick = { onglet = 0 }, text = { Text("Statut") })
-                Tab(selected = onglet == 1, onClick = { onglet = 1 }, text = { Text("Historique détaillé") })
+                Tab(selected = onglet == 1, onClick = { onglet = 1 }, text = { Text("Par parcelle") })
+                Tab(selected = onglet == 2, onClick = { onglet = 2 }, text = { Text("Historique") })
             }
             when (onglet) {
                 0 -> OngletStatut(ctx, totaux, seuils)
+                1 -> OngletParcelles(ctx, journal, parcelles)
                 else -> OngletHistorique(ctx, journal)
             }
         }
@@ -173,6 +184,69 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, seui
                     classesAvecTotal = classes.map { c -> c to (totaux[CompteurCle(essence, c)] ?: 0) },
                     couleurParClasse = couleurClasse,
                     maxEssence = maxEssence,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: List<ParcelleGpkg>) {
+    val couleurs = contexte.essences.associate { it.nom to it.couleurFondArgb }
+    val plus = journal.filter { it.action == ActionTige.PLUS }
+    val geo = plus.filter { it.position != null }
+    val sansPosition = plus.filter { it.position == null }.sumOf { it.quantite }
+
+    // Rattachement point-dans-polygone : on regroupe les tiges géolocalisées par parcelle.
+    val groupes = geo.groupBy { t ->
+        parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, t.position!!) }?.label ?: "Hors parcelle"
+    }
+    val stats = groupes.map { (label, tiges) ->
+        val parEssence = contexte.essencesNoms.mapNotNull { nom ->
+            val n = tiges.filter { it.essence == nom }.sumOf { it.quantite }
+            if (n > 0) nom to n else null
+        }
+        Triple(label, tiges.sumOf { it.quantite }, parEssence)
+    }.sortedByDescending { it.second }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        if (parcelles.isEmpty()) {
+            item {
+                Text(
+                    "Aucun GPKG rattaché à ce contexte (rattachement par parcelle indisponible).",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+        if (stats.isEmpty()) {
+            item { Text("Aucune tige géolocalisée.", style = MaterialTheme.typography.bodyMedium) }
+        }
+        items(stats) { (label, total, parEssence) ->
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleSmall)
+                    Text("$total", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                }
+                parEssence.forEach { (nom, n) ->
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Box(Modifier.size(12.dp).background(Color(couleurs[nom] ?: 0xFF888888.toInt())))
+                        Text(nom, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
+                        Text("$n", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+                HorizontalDivider(Modifier.padding(top = 4.dp))
+            }
+        }
+        if (sansPosition > 0) {
+            item {
+                Text(
+                    "$sansPosition tige(s) sans position GNSS (non rattachées).",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline,
                 )
             }
         }

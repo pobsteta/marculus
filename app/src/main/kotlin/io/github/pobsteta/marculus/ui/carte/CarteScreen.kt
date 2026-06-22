@@ -20,9 +20,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
@@ -64,6 +66,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
@@ -71,9 +74,13 @@ import fr.marculus.core.model.Position
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.OrthoSource
+import io.github.pobsteta.marculus.data.ParcelleGpkg
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.MapTileProviderArray
 import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.tileprovider.modules.MapTileApproximater
@@ -83,6 +90,7 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.util.MapTileIndex
+import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
@@ -122,8 +130,9 @@ fun CarteScreen(
     // Le GPKG est rattaché au contexte (modifiable via l'import depuis la carte).
     var cheminGpkg by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(contexte) { cheminGpkg = contexte?.cheminGpkg }
-    val parcelles by produceState(initialValue = emptyList<List<Position>>(), cheminGpkg) {
-        value = cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcelles(it) } } ?: emptyList()
+    var parcelleCentre by remember { mutableStateOf<String?>(null) }
+    val parcelles by produceState(initialValue = emptyList<ParcelleGpkg>(), cheminGpkg) {
+        value = cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcellesDetail(it) } } ?: emptyList()
     }
     val orthoSource by produceState<OrthoSource?>(initialValue = null, cheminGpkg) {
         value = null
@@ -154,6 +163,8 @@ fun CarteScreen(
         MapView(context).apply {
             setMultiTouchControls(true)
             setUseDataConnection(true)
+            // Masque les boutons +/- intégrés d'osmdroid (on a nos propres FAB Material).
+            zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
             setTileSource(TileSourceFactory.MAPNIK)
             minZoomLevel = 4.0
             maxZoomLevel = ZOOM_MAX // au-delà, plus de tuiles → fond blanc
@@ -196,22 +207,25 @@ fun CarteScreen(
         val couleurs = ctx.essences.associate { it.nom to it.couleurFondArgb }
         mapView.overlays.clear()
         // Parcelles (dessous).
-        parcelles.forEach { anneau ->
-            if (anneau.size >= 2) {
-                mapView.overlays.add(
-                    Polygon(mapView).apply {
-                        points = anneau.map { GeoPoint(it.latitude, it.longitude) }
-                        fillPaint.color = 0x22374742
-                        outlinePaint.color = 0xFF374742.toInt()
-                        outlinePaint.strokeWidth = 4f
-                    },
-                )
+        parcelles.forEach { pcl ->
+            pcl.anneaux.forEach { anneau ->
+                if (anneau.size >= 2) {
+                    mapView.overlays.add(
+                        Polygon(mapView).apply {
+                            points = anneau.map { GeoPoint(it.latitude, it.longitude) }
+                            fillPaint.color = 0x22374742
+                            outlinePaint.color = 0xFF374742.toInt()
+                            outlinePaint.strokeWidth = 4f
+                        },
+                    )
+                }
             }
         }
-        // Tiges (dessus).
+        // Tiges (dessus) : titre = essence/classe, sous-titre = parcelle (rattachement spatial).
         val points = mutableListOf<GeoPoint>()
         journal.filter { it.action == ActionTige.PLUS && it.position != null }.forEach { t ->
-            val gp = GeoPoint(t.position!!.latitude, t.position!!.longitude)
+            val pos = t.position ?: return@forEach
+            val gp = GeoPoint(pos.latitude, pos.longitude)
             points.add(gp)
             mapView.overlays.add(
                 Marker(mapView).apply {
@@ -219,10 +233,17 @@ fun CarteScreen(
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                     icon = marqueur(context, couleurs[t.essence] ?: 0xFF888888.toInt(), tailleMarqueur(ctx.axe.min, ctx.axe.max, t.classe))
                     title = "${t.essence} ${t.classe}"
+                    snippet = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, pos) }?.label
+                        ?: "Hors parcelle"
+                    val hq = buildList {
+                        t.hauteurTexte?.takeIf { it.isNotBlank() }?.let { add("H : $it") }
+                        t.qualiteArbre?.takeIf { it.isNotBlank() }?.let { add("Q : $it") }
+                    }
+                    if (hq.isNotEmpty()) subDescription = hq.joinToString(" · ")
                 },
             )
         }
-        val cible = points.ifEmpty { parcelles.flatten().map { GeoPoint(it.latitude, it.longitude) } }
+        val cible = points.ifEmpty { parcelles.flatMap { it.anneaux }.flatten().map { GeoPoint(it.latitude, it.longitude) } }
         if (!centre && cible.isNotEmpty()) {
             recadrerSur(mapView, cible)
             centre = true
@@ -231,10 +252,30 @@ fun CarteScreen(
     }
 
     fun recadrer() {
-        val tiges = journal.filter { it.action == ActionTige.PLUS && it.position != null }
-            .map { GeoPoint(it.position!!.latitude, it.position!!.longitude) }
-        val cible = tiges.ifEmpty { parcelles.flatten().map { GeoPoint(it.latitude, it.longitude) } }
+        val tiges = journal.filter { it.action == ActionTige.PLUS }
+            .mapNotNull { it.position?.let { p -> GeoPoint(p.latitude, p.longitude) } }
+        val cible = tiges.ifEmpty { parcelles.flatMap { it.anneaux }.flatten().map { GeoPoint(it.latitude, it.longitude) } }
         recadrerSur(mapView, cible)
+    }
+
+    fun majParcelleCentre() {
+        if (parcelles.isEmpty()) {
+            parcelleCentre = null
+            return
+        }
+        val c = mapView.mapCenter
+        val p = Position(c.latitude, c.longitude)
+        parcelleCentre = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label ?: "Hors parcelle"
+    }
+
+    DisposableEffect(parcelles) {
+        majParcelleCentre()
+        val listener = object : MapListener {
+            override fun onScroll(event: ScrollEvent?): Boolean { majParcelleCentre(); return false }
+            override fun onZoom(event: ZoomEvent?): Boolean { majParcelleCentre(); return false }
+        }
+        mapView.addMapListener(listener)
+        onDispose { mapView.removeMapListener(listener) }
     }
 
     Scaffold(
@@ -261,7 +302,7 @@ fun CarteScreen(
                 },
                 actions = {
                     TextButton(onClick = { importGpkgLauncher.launch(arrayOf("*/*")) }) {
-                        Text("GPKG", color = MaterialTheme.colorScheme.onPrimary)
+                        Text("Charge : gpkg", color = MaterialTheme.colorScheme.onPrimary)
                     }
                     TextButton(onClick = {
                         fond = when (fond) {
@@ -290,6 +331,20 @@ fun CarteScreen(
         }
         Box(Modifier.fillMaxSize().padding(padding)) {
             AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
+            parcelleCentre?.let { libelle ->
+                Card(
+                    modifier = Modifier.align(Alignment.TopCenter).padding(8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                    ),
+                ) {
+                    Text(
+                        "◎ $libelle",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            }
             LegendeEssences(
                 essences = ctx.essences,
                 ouverte = legendeOuverte,
@@ -317,7 +372,10 @@ private fun LegendeEssences(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
         ),
     ) {
-        Column(Modifier.padding(8.dp).widthIn(max = 200.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+        Column(
+            Modifier.padding(8.dp).width(IntrinsicSize.Max).widthIn(max = 180.dp),
+            verticalArrangement = Arrangement.spacedBy(3.dp),
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth().clickable { onToggle() },
                 verticalAlignment = Alignment.CenterVertically,

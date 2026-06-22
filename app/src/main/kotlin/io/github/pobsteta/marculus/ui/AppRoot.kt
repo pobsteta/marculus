@@ -93,6 +93,7 @@ fun AppRoot(
     var route: Route by rememberSaveable(stateSaver = RouteSaver) { mutableStateOf<Route>(Route.Liste) }
     val essences by referentielsRepository.essences.collectAsStateWithLifecycle(Referentiels.ESSENCES_DEFAUT)
     val qualitesArbre by referentielsRepository.qualitesArbre.collectAsStateWithLifecycle(Referentiels.QUALITE_ARBRE_DEFAUT)
+    val qualitesBois by referentielsRepository.qualitesBois.collectAsStateWithLifecycle(Referentiels.QUALITE_BOIS_DEFAUT)
     val seuils by referentielsRepository.seuils.collectAsStateWithLifecycle(SeuilsCategories.DEFAUT)
 
     val context = LocalContext.current
@@ -177,6 +178,7 @@ fun AppRoot(
             contexteId = r.contexteId,
             reglages = reglages,
             qualitesArbre = qualitesArbre,
+            qualitesBois = qualitesBois,
             onRetour = { route = Route.Liste },
             onStatut = { route = Route.Statut(r.contexteId) },
             onCarte = { route = Route.Carte(r.contexteId) },
@@ -184,6 +186,7 @@ fun AppRoot(
 
         is Route.Statut -> StatutHistoriqueScreen(
             repository = repository,
+            gpkgRepository = gpkgRepository,
             contexteId = r.contexteId,
             seuils = seuils,
             onRetour = { route = Route.Feuille(r.contexteId) },

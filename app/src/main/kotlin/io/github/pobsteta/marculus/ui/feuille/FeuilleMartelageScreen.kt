@@ -3,6 +3,8 @@ package io.github.pobsteta.marculus.ui.feuille
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -66,12 +69,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.text.DecimalFormatSymbols
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.HauteurParser
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Position
@@ -142,6 +148,7 @@ fun FeuilleMartelageScreen(
     contexteId: String,
     reglages: Reglages,
     qualitesArbre: List<String>,
+    qualitesBois: List<String>,
     onRetour: () -> Unit,
     onStatut: () -> Unit,
     onCarte: () -> Unit,
@@ -283,6 +290,7 @@ fun FeuilleMartelageScreen(
 
     when (val s = saisie) {
         is Saisie.Hauteur -> SaisieHauteurDialog(
+            qualitesBois = qualitesBois,
             onAnnuler = { saisie = null },
             onValider = { texte ->
                 scope.launch { repository.annoterHauteur(s.uuid, texte) }
@@ -416,17 +424,38 @@ private fun TriangleAlerte(signe: String) {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun SaisieHauteurDialog(onAnnuler: () -> Unit, onValider: (String) -> Unit) {
+private fun SaisieHauteurDialog(
+    qualitesBois: List<String>,
+    onAnnuler: () -> Unit,
+    onValider: (String) -> Unit,
+) {
     var hauteur by remember { mutableStateOf("") }
-    var decoupe by remember { mutableStateOf("") }
+    var decoupe by remember { mutableStateOf(TextFieldValue("")) }
     // Séparateur décimal de la langue de l'application (fr → « , », en → « . »).
     val separateur = DecimalFormatSymbols.getInstance(LocalConfiguration.current.locales[0]).decimalSeparator
+    // Validation non bloquante : codes qualité saisis absents du référentiel.
+    val connues = remember(qualitesBois) { qualitesBois.map { it.uppercase() }.toSet() }
+    val inconnues = remember(decoupe.text, connues) {
+        HauteurParser.parse("0-${decoupe.text}").segments.map { it.qualiteBois }.filter { it !in connues }.distinct()
+    }
+    // Insère un code à la position du curseur et place le curseur juste après.
+    fun insererCode(code: String) {
+        val texte = decoupe.text
+        val debut = decoupe.selection.min
+        val fin = decoupe.selection.max
+        val nouveau = texte.substring(0, debut) + code + texte.substring(fin)
+        decoupe = TextFieldValue(nouveau, selection = TextRange(debut + code.length))
+    }
     AlertDialog(
         onDismissRequest = onAnnuler,
         title = { Text("Hauteur de la dernière tige") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+            ) {
                 OutlinedTextField(
                     value = hauteur,
                     // Chiffres + un seul séparateur, normalisé sur celui de la locale.
@@ -453,6 +482,21 @@ private fun SaisieHauteurDialog(onAnnuler: () -> Unit, onValider: (String) -> Un
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
+                if (qualitesBois.isNotEmpty()) {
+                    Text("Qualités bois (appui pour insérer)", style = MaterialTheme.typography.labelSmall)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        qualitesBois.forEach { code ->
+                            AssistChip(onClick = { insererCode(code) }, label = { Text(code) })
+                        }
+                    }
+                }
+                if (inconnues.isNotEmpty()) {
+                    Text(
+                        "Codes hors référentiel : ${inconnues.joinToString(", ")} (non bloquant).",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
                 Text(
                     "La découpe associe longueurs et qualités bois (ex. 6 m de AB, 4 m de CD).",
                     style = MaterialTheme.typography.bodySmall,
@@ -462,7 +506,7 @@ private fun SaisieHauteurDialog(onAnnuler: () -> Unit, onValider: (String) -> Un
         confirmButton = {
             TextButton(onClick = {
                 val h = hauteur.trim()
-                val d = decoupe.trim()
+                val d = decoupe.text.trim()
                 onValider(if (d.isNotBlank()) "$h-$d" else h)
             }) { Text("Valider") }
         },
