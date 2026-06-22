@@ -87,6 +87,7 @@ class MartelageRepository(
         commentaire: String? = null,
         increment: Int = 1,
         operateur: String? = null,
+        cheminGpkg: String? = null,
     ): String {
         val id = UUID.randomUUID().toString()
         contexteDao.inserer(
@@ -103,6 +104,7 @@ class MartelageRepository(
                 exporte = false,
                 dateCreation = horloge(),
                 operateur = operateur,
+                cheminGpkg = cheminGpkg,
             ),
         )
         return id
@@ -116,6 +118,7 @@ class MartelageRepository(
         essences: List<EssenceColonne>,
         commentaire: String?,
         increment: Int,
+        cheminGpkg: String? = null,
     ) {
         val existant = contexteDao.parId(id) ?: return
         contexteDao.inserer(
@@ -128,8 +131,15 @@ class MartelageRepository(
                 essences = encodeEssences(essences),
                 commentaire = commentaire,
                 increment = increment,
+                cheminGpkg = cheminGpkg,
             ),
         )
+    }
+
+    /** Met à jour uniquement le GeoPackage rattaché à un contexte (import depuis la carte). */
+    suspend fun enregistrerCheminGpkg(contexteId: String, chemin: String?) {
+        val existant = contexteDao.parId(contexteId) ?: return
+        contexteDao.inserer(existant.copy(cheminGpkg = chemin))
     }
 
     suspend fun supprimerContexte(id: String) {
@@ -319,6 +329,7 @@ class MartelageRepository(
         commentaire = commentaire,
         increment = increment,
         exporte = exporte,
+        cheminGpkg = cheminGpkg,
     )
 
     private fun TigeEntity.versDomaine() = Tige(

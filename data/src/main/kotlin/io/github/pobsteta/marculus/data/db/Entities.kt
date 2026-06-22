@@ -18,6 +18,7 @@ data class ContexteEntity(
     val exporte: Boolean,
     val dateCreation: Long,
     val operateur: String?,
+    val cheminGpkg: String? = null,
 )
 
 @Entity(

@@ -57,6 +57,7 @@ class SauvegardeRepository(
         put("classeMin", classeMin); put("classeMax", classeMax); put("classePas", classePas)
         put("essences", essences); putOpt("commentaire", commentaire); put("increment", increment)
         put("exporte", exporte); put("dateCreation", dateCreation); putOpt("operateur", operateur)
+        putOpt("cheminGpkg", cheminGpkg)
     }
 
     private fun JSONObject.versContexte() = ContexteEntity(
@@ -65,6 +66,7 @@ class SauvegardeRepository(
         essences = optString("essences", ""), commentaire = texteOuNull("commentaire"),
         increment = getInt("increment"), exporte = getBoolean("exporte"),
         dateCreation = getLong("dateCreation"), operateur = texteOuNull("operateur"),
+        cheminGpkg = texteOuNull("cheminGpkg"),
     )
 
     private fun TigeEntity.toJson() = JSONObject().apply {

@@ -7,6 +7,7 @@ import fr.marculus.core.model.Position
 import mil.nga.geopackage.GeoPackage
 import mil.nga.geopackage.GeoPackageFactory
 import mil.nga.geopackage.tiles.reproject.TileReprojection
+import mil.nga.geopackage.tiles.reproject.TileReprojectionOptimize
 import mil.nga.geopackage.tiles.retriever.GeoPackageTileRetriever
 import mil.nga.proj.ProjectionConstants
 import mil.nga.proj.ProjectionFactory
@@ -47,9 +48,7 @@ class GpkgRepository(private val context: Context) {
 
     /** Copie le GPKG choisi dans le stockage privé (nom horodaté unique) et renvoie son chemin. */
     fun importer(uri: Uri): String? {
-        // Nettoie les anciens imports (un fichier ouvert reste valide jusqu'à sa fermeture).
-        context.filesDir.listFiles { f -> f.name.startsWith("parcelles") && f.name.endsWith(".gpkg") }
-            ?.forEach { it.delete() }
+        // Nom unique : chaque contexte garde son propre GPKG (pas de suppression globale).
         val dest = File(context.filesDir, "parcelles-${System.currentTimeMillis()}.gpkg")
         val ok = context.contentResolver.openInputStream(uri)?.use { entree ->
             dest.outputStream().use { sortie -> entree.copyTo(sortie); true }
@@ -110,11 +109,10 @@ class GpkgRepository(private val context: Context) {
                 return null
             }
             val source = tables.first()
-            val webMercator = ProjectionFactory.getProjection(ProjectionConstants.EPSG_WEB_MERCATOR.toLong())
-            val cible = source + "_3857"
+            val cible = source + "_wm"
             if (!gpkg.tileTables.contains(cible)) {
-                Log.d("Marculus.Gpkg", "Reprojection ortho $source -> $cible (Web Mercator)…")
-                TileReprojection.reproject(gpkg, source, cible, webMercator)
+                Log.d("Marculus.Gpkg", "Reprojection ortho $source -> $cible (grille Web Mercator standard)…")
+                TileReprojection.reproject(gpkg, source, cible, TileReprojectionOptimize.webMercator())
             }
             val tableFinale = if (gpkg.tileTables.contains(cible)) cible else source
             val dao = gpkg.getTileDao(tableFinale)

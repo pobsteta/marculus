@@ -59,6 +59,8 @@ data class Contexte(
     val commentaire: String? = null,
     val increment: Int = 1,
     val exporte: Boolean = false,
+    /** Chemin du GeoPackage (parcelles + ortho) rattaché à ce contexte, ou null. */
+    val cheminGpkg: String? = null,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 }

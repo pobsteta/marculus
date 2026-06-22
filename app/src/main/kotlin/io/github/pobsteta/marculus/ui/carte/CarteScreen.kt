@@ -8,12 +8,20 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -21,8 +29,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -32,6 +40,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +57,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -56,12 +71,12 @@ import fr.marculus.core.model.Position
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.OrthoSource
-import io.github.pobsteta.marculus.data.ReferentielsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.tileprovider.MapTileProviderArray
 import org.osmdroid.tileprovider.MapTileProviderBasic
+import org.osmdroid.tileprovider.modules.MapTileApproximater
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -91,7 +106,6 @@ fun CarteScreen(
     repository: MartelageRepository,
     contexteId: String,
     gpkgRepository: GpkgRepository,
-    referentielsRepository: ReferentielsRepository,
     onRetour: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -102,21 +116,36 @@ fun CarteScreen(
     val journal by repository.journal(contexteId).collectAsStateWithLifecycle(emptyList())
     var fond by remember { mutableStateOf(Fond.OSM) }
     var centre by remember { mutableStateOf(false) }
+    var chargement by remember { mutableStateOf(false) }
+    var legendeOuverte by remember { mutableStateOf(false) }
 
-    val cheminGpkg by referentielsRepository.cheminGpkg.collectAsStateWithLifecycle(null)
+    // Le GPKG est rattaché au contexte (modifiable via l'import depuis la carte).
+    var cheminGpkg by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(contexte) { cheminGpkg = contexte?.cheminGpkg }
     val parcelles by produceState(initialValue = emptyList<List<Position>>(), cheminGpkg) {
         value = cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcelles(it) } } ?: emptyList()
     }
     val orthoSource by produceState<OrthoSource?>(initialValue = null, cheminGpkg) {
-        val src = cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.ouvrirOrtho(it) } }
-        value = src
-        awaitDispose { src?.fermer() }
+        value = null
+        val chemin = cheminGpkg
+        if (chemin != null) {
+            chargement = true
+            val src = withContext(Dispatchers.IO) { gpkgRepository.ouvrirOrtho(chemin) }
+            value = src
+            chargement = false
+            awaitDispose { src?.fermer() }
+        } else {
+            awaitDispose { }
+        }
     }
     val importGpkgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             scope.launch {
+                chargement = true
                 val chemin = withContext(Dispatchers.IO) { gpkgRepository.importer(uri) }
-                referentielsRepository.enregistrerCheminGpkg(chemin)
+                repository.enregistrerCheminGpkg(contexteId, chemin)
+                if (chemin == null) chargement = false
+                cheminGpkg = chemin
             }
         }
     }
@@ -144,15 +173,19 @@ fun CarteScreen(
             Fond.OSM -> MapTileProviderBasic(context.applicationContext, TileSourceFactory.MAPNIK)
             Fond.SATELLITE -> MapTileProviderBasic(context.applicationContext, SOURCE_SATELLITE)
             Fond.ORTHO -> orthoSource?.let { src ->
+                // Tuiles natives jusqu'à src.zoomMax ; au-delà, l'approximateur les agrandit (overzoom).
+                val gpkgModule = GpkgTileModule(context, src)
+                val approximateur = MapTileApproximater().apply { addProvider(gpkgModule) }
                 MapTileProviderArray(
                     XYTileSource("ortho", src.zoomMin, src.zoomMax, 256, ".png", emptyArray()),
                     null,
-                    arrayOf(GpkgTileModule(context, src)),
+                    arrayOf(gpkgModule, approximateur),
                 )
             } ?: MapTileProviderBasic(context.applicationContext, TileSourceFactory.MAPNIK)
         }
         mapView.tileProvider = provider
-        mapView.maxZoomLevel = if (fond == Fond.ORTHO) (orthoSource?.zoomMax?.toDouble() ?: ZOOM_MAX) else ZOOM_MAX
+        // En ortho : overzoom autorisé au-delà de la résolution native (≈20 cm) jusqu'à +5 niveaux.
+        mapView.maxZoomLevel = if (fond == Fond.ORTHO) ((orthoSource?.zoomMax ?: 19) + 5).toDouble() else ZOOM_MAX
         mapView.invalidate()
     }
 
@@ -206,7 +239,17 @@ fun CarteScreen(
 
     Scaffold(
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { recadrer() }) { Text("Recentrer") }
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                SmallFloatingActionButton(onClick = { mapView.controller.zoomIn() }) {
+                    Icon(Icons.Filled.Add, contentDescription = "Zoom avant")
+                }
+                SmallFloatingActionButton(onClick = { mapView.controller.zoomOut() }) {
+                    Icon(Icons.Filled.Remove, contentDescription = "Zoom arrière")
+                }
+                SmallFloatingActionButton(onClick = { recadrer() }) {
+                    Icon(Icons.Filled.MyLocation, contentDescription = "Recentrer")
+                }
+            }
         },
         topBar = {
             TopAppBar(
@@ -249,14 +292,24 @@ fun CarteScreen(
             AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
             LegendeEssences(
                 essences = ctx.essences,
+                ouverte = legendeOuverte,
+                onToggle = { legendeOuverte = !legendeOuverte },
                 modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
             )
+            if (chargement) {
+                IndicateurImport(Modifier.align(Alignment.Center))
+            }
         }
     }
 }
 
 @Composable
-private fun LegendeEssences(essences: List<EssenceColonne>, modifier: Modifier = Modifier) {
+private fun LegendeEssences(
+    essences: List<EssenceColonne>,
+    ouverte: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     if (essences.isEmpty()) return
     Card(
         modifier = modifier,
@@ -265,13 +318,61 @@ private fun LegendeEssences(essences: List<EssenceColonne>, modifier: Modifier =
         ),
     ) {
         Column(Modifier.padding(8.dp).widthIn(max = 200.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            Text("Essences", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-            essences.forEach { e ->
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Box(Modifier.size(12.dp).background(Color(e.couleurFondArgb)))
-                    Text(e.nom, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+            Row(
+                modifier = Modifier.fillMaxWidth().clickable { onToggle() },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(
+                    "Essences",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    if (ouverte) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                    contentDescription = if (ouverte) "Replier la légende" else "Déplier la légende",
+                    modifier = Modifier.size(18.dp),
+                )
+            }
+            if (ouverte) {
+                essences.forEach { e ->
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Box(Modifier.size(12.dp).background(Color(e.couleurFondArgb)))
+                        Text(e.nom, style = MaterialTheme.typography.labelSmall, maxLines = 1)
+                    }
                 }
             }
+        }
+    }
+}
+
+/** Roue dentée animée affichée pendant l'import / la préparation du GPKG. */
+@Composable
+private fun IndicateurImport(modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "gpkg")
+    val angle by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(tween(1500, easing = LinearEasing), RepeatMode.Restart),
+        label = "rotation",
+    )
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f)),
+    ) {
+        Column(
+            Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Icon(
+                Icons.Filled.Settings,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(40.dp).rotate(angle),
+            )
+            Text("Import du GPKG…", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

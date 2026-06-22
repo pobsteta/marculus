@@ -1,5 +1,7 @@
 package io.github.pobsteta.marculus.ui.contextes
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -51,14 +53,18 @@ import fr.marculus.core.model.AxeClasses
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.ModeMesure
+import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.ui.libelle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreationContexteScreen(
     repository: MartelageRepository,
+    gpkgRepository: GpkgRepository,
     contexteExistant: Contexte?,
     essencesReferentiel: List<String>,
     onAnnuler: () -> Unit,
@@ -100,6 +106,12 @@ fun CreationContexteScreen(
     var picker by remember { mutableStateOf<Pair<String, Boolean>?>(null) } // (essence, true=fond)
     var ajoutOuvert by remember { mutableStateOf(false) }
     var infoOuvert by remember { mutableStateOf(false) }
+    var cheminGpkg by remember { mutableStateOf(contexteExistant?.cheminGpkg) }
+    val gpkgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            scope.launch { cheminGpkg = withContext(Dispatchers.IO) { gpkgRepository.importer(uri) } }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -176,6 +188,26 @@ fun CreationContexteScreen(
                 Text("+ Ajouter une essence")
             }
 
+            HorizontalDivider()
+            Text("Fond cartographique (GeoPackage)", style = MaterialTheme.typography.titleSmall)
+            Text(
+                "Parcelles + ortho rattachées à ce contexte (facultatif).",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { gpkgLauncher.launch(arrayOf("*/*")) }) {
+                    Text(if (cheminGpkg == null) "Choisir un GPKG" else "Remplacer")
+                }
+                Text(
+                    cheminGpkg?.substringAfterLast('/') ?: "Aucun fichier",
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.weight(1f),
+                )
+                if (cheminGpkg != null) {
+                    TextButton(onClick = { cheminGpkg = null }) { Text("Retirer") }
+                }
+            }
+
             erreur?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -203,13 +235,13 @@ fun CreationContexteScreen(
                                     if (edition) {
                                         repository.modifierContexte(
                                             contexteExistant!!.id, nom.trim(), mode,
-                                            AxeClasses(mi, ma, pa), essences, commentaireFinal, inc,
+                                            AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg,
                                         )
                                         onEnregistre(contexteExistant.id)
                                     } else {
                                         val id = repository.creerContexte(
                                             nom.trim(), mode, AxeClasses(mi, ma, pa),
-                                            essences, commentaireFinal, inc,
+                                            essences, commentaireFinal, inc, cheminGpkg = cheminGpkg,
                                         )
                                         onEnregistre(id)
                                     }

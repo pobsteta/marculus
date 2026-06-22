@@ -133,6 +133,7 @@ fun AppRoot(
 
         Route.Creation -> CreationContexteScreen(
             repository = repository,
+            gpkgRepository = gpkgRepository,
             contexteExistant = null,
             essencesReferentiel = essences,
             onAnnuler = { route = Route.Liste },
@@ -162,6 +163,7 @@ fun AppRoot(
             } else {
                 CreationContexteScreen(
                     repository = repository,
+                    gpkgRepository = gpkgRepository,
                     contexteExistant = ctx,
                     essencesReferentiel = essences,
                     onAnnuler = { route = Route.Liste },
@@ -191,7 +193,6 @@ fun AppRoot(
             repository = repository,
             contexteId = r.contexteId,
             gpkgRepository = gpkgRepository,
-            referentielsRepository = referentielsRepository,
             onRetour = { route = Route.Feuille(r.contexteId) },
         )
     }
