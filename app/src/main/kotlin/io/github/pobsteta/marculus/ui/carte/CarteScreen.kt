@@ -61,6 +61,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.tileprovider.MapTileProviderArray
+import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -137,39 +138,21 @@ fun CarteScreen(
         onDispose { mapView.onPause() }
     }
 
-    // Fournisseur en ligne d'origine (OSM/Satellite) ; fournisseur ortho hors-ligne (GPKG).
-    val providerBase = remember { mapView.tileProvider }
-    val providerOrtho = remember(orthoSource) {
-        orthoSource?.let { src ->
-            MapTileProviderArray(
-                XYTileSource("ortho", src.zoomMin, src.zoomMax, 256, ".png", emptyArray()),
-                null,
-                arrayOf(GpkgTileModule(context, src)),
-            )
+    // Bascule de fond : un fournisseur NEUF à chaque changement (osmdroid détache l'ancien).
+    LaunchedEffect(fond, orthoSource) {
+        val provider = when (fond) {
+            Fond.OSM -> MapTileProviderBasic(context.applicationContext, TileSourceFactory.MAPNIK)
+            Fond.SATELLITE -> MapTileProviderBasic(context.applicationContext, SOURCE_SATELLITE)
+            Fond.ORTHO -> orthoSource?.let { src ->
+                MapTileProviderArray(
+                    XYTileSource("ortho", src.zoomMin, src.zoomMax, 256, ".png", emptyArray()),
+                    null,
+                    arrayOf(GpkgTileModule(context, src)),
+                )
+            } ?: MapTileProviderBasic(context.applicationContext, TileSourceFactory.MAPNIK)
         }
-    }
-    // Bascule de fond : OSM / Satellite (en ligne) ou Ortho (GPKG hors-ligne, zoom jusqu'à sa résolution).
-    LaunchedEffect(fond, providerOrtho) {
-        when (fond) {
-            Fond.OSM -> {
-                mapView.tileProvider = providerBase
-                mapView.setTileSource(TileSourceFactory.MAPNIK)
-                mapView.maxZoomLevel = ZOOM_MAX
-            }
-            Fond.SATELLITE -> {
-                mapView.tileProvider = providerBase
-                mapView.setTileSource(SOURCE_SATELLITE)
-                mapView.maxZoomLevel = ZOOM_MAX
-            }
-            Fond.ORTHO -> {
-                val po = providerOrtho
-                if (po != null) {
-                    mapView.tileProvider = po
-                    mapView.setTileSource(po.tileSource)
-                    mapView.maxZoomLevel = orthoSource?.zoomMax?.toDouble() ?: ZOOM_MAX
-                }
-            }
-        }
+        mapView.tileProvider = provider
+        mapView.maxZoomLevel = if (fond == Fond.ORTHO) (orthoSource?.zoomMax?.toDouble() ?: ZOOM_MAX) else ZOOM_MAX
         mapView.invalidate()
     }
 

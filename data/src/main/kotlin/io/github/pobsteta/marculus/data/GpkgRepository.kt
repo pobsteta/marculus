@@ -45,9 +45,12 @@ class OrthoSource(
 /** Lecture d'un GeoPackage (parcelles vectorielles, reprojetées en WGS84 pour la carte). */
 class GpkgRepository(private val context: Context) {
 
-    /** Copie le GPKG choisi dans le stockage privé et renvoie son chemin. */
+    /** Copie le GPKG choisi dans le stockage privé (nom horodaté unique) et renvoie son chemin. */
     fun importer(uri: Uri): String? {
-        val dest = File(context.filesDir, "parcelles.gpkg")
+        // Nettoie les anciens imports (un fichier ouvert reste valide jusqu'à sa fermeture).
+        context.filesDir.listFiles { f -> f.name.startsWith("parcelles") && f.name.endsWith(".gpkg") }
+            ?.forEach { it.delete() }
+        val dest = File(context.filesDir, "parcelles-${System.currentTimeMillis()}.gpkg")
         val ok = context.contentResolver.openInputStream(uri)?.use { entree ->
             dest.outputStream().use { sortie -> entree.copyTo(sortie); true }
         } ?: false
