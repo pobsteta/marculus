@@ -59,6 +59,7 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.media.AudioManager
 import android.media.ToneGenerator
+import android.speech.tts.TextToSpeech
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
@@ -76,6 +77,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import java.text.DecimalFormatSymbols
+import java.util.Locale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.HauteurParser
 import fr.marculus.core.model.CompteurCle
@@ -83,6 +85,7 @@ import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Position
 import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.data.MartelageRepository
+import io.github.pobsteta.marculus.ui.ToucheVolume
 import kotlinx.coroutines.launch
 
 /** Position GPS courante du téléphone (null si inactif ou non autorisé). */
@@ -157,9 +160,25 @@ fun FeuilleMartelageScreen(
     val androidContext = LocalContext.current
     val toneGen = remember { runCatching { ToneGenerator(AudioManager.STREAM_MUSIC, 90) }.getOrNull() }
     DisposableEffect(Unit) { onDispose { toneGen?.release() } }
+    // Synthèse vocale (annonce du nombre / de l'étiquette), en français.
+    val tts = remember {
+        lateinit var moteur: TextToSpeech
+        moteur = TextToSpeech(androidContext.applicationContext) { statut ->
+            if (statut == TextToSpeech.SUCCESS) moteur.language = Locale.FRENCH
+        }
+        moteur
+    }
+    DisposableEffect(Unit) { onDispose { tts.stop(); tts.shutdown() } }
     fun retourSensoriel() {
         if (reglages.vibration) vibrer(androidContext)
         if (reglages.sonClic) toneGen?.startTone(ToneGenerator.TONE_PROP_BEEP, 80)
+    }
+    fun annoncer(essence: String, classe: Int, total: Int) {
+        val parties = buildList {
+            if (reglages.annonceEtiquette) add("$essence $classe")
+            if (reglages.annonceNombre) add(total.toString())
+        }
+        if (parties.isNotEmpty()) tts.speak(parties.joinToString(", "), TextToSpeech.QUEUE_FLUSH, null, "tige")
     }
     val contexte by produceState<Contexte?>(initialValue = null, contexteId) {
         value = repository.contexte(contexteId)
@@ -221,6 +240,44 @@ fun FeuilleMartelageScreen(
 
         val classes = ctx.axe.classes()
 
+        // Actions de comptage partagées (cellules + boutons de volume).
+        fun ajouter(essence: String, classe: Int) {
+            retourSensoriel()
+            annoncer(essence, classe, (totaux[CompteurCle(essence, classe)] ?: 0) + ctx.increment)
+            scope.launch {
+                val uuid = repository.ajouterTige(contexteId, essence, classe, quantite = ctx.increment, position = position)
+                derniereSaisie = DerniereSaisie(uuid, essence, classe)
+            }
+        }
+        fun retirer(essence: String, classe: Int) {
+            val total = totaux[CompteurCle(essence, classe)] ?: 0
+            if (total > 0) {
+                retourSensoriel()
+                val q = minOf(ctx.increment, total) // jamais en dessous de zéro
+                annoncer(essence, classe, total - q)
+                scope.launch { repository.annulerTige(contexteId, essence, classe, quantite = q) }
+                derniereSaisie = null // un − ferme la saisie en cours
+            }
+        }
+
+        // Comptage par boutons de volume : agit sur la cellule active (dernier +).
+        DisposableEffect(reglages.boutonsVolume, derniereSaisie, totaux) {
+            ToucheVolume.onVolume = if (reglages.boutonsVolume) {
+                { haut ->
+                    val cible = derniereSaisie
+                    if (cible != null) {
+                        if (haut) ajouter(cible.essence, cible.classe) else retirer(cible.essence, cible.classe)
+                        true
+                    } else {
+                        false
+                    }
+                }
+            } else {
+                null
+            }
+            onDispose { ToucheVolume.onVolume = null }
+        }
+
         // Plus d'en-tête ni de colonne de classes : chaque cellule porte son libellé.
         Column(
             Modifier
@@ -244,25 +301,8 @@ fun FeuilleMartelageScreen(
                             alerteMoins = cfg?.alerteMoins(total) ?: false,
                             alertePlus = cfg?.alertePlus(total) ?: false,
                             hqActif = estDerniere,
-                            onPlus = {
-                                retourSensoriel()
-                                scope.launch {
-                                    val uuid = repository.ajouterTige(
-                                        contexteId, e.nom, classe,
-                                        quantite = ctx.increment,
-                                        position = position,
-                                    )
-                                    derniereSaisie = DerniereSaisie(uuid, e.nom, classe)
-                                }
-                            },
-                            onMoins = {
-                                if (total > 0) {
-                                    retourSensoriel()
-                                    val q = minOf(ctx.increment, total) // jamais en dessous de zéro
-                                    scope.launch { repository.annulerTige(contexteId, e.nom, classe, quantite = q) }
-                                    derniereSaisie = null // un − ferme la saisie en cours
-                                }
-                            },
+                            onPlus = { ajouter(e.nom, classe) },
+                            onMoins = { retirer(e.nom, classe) },
                             onHauteur = { derniereSaisie?.let { saisie = Saisie.Hauteur(it.uuid) } },
                             onQualite = { derniereSaisie?.let { saisie = Saisie.Qualite(it.uuid) } },
                             onAvis = { saisie = Saisie.Avis(e.nom, classe) },

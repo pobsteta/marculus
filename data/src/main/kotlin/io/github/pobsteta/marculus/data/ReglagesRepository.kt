@@ -3,6 +3,7 @@ package io.github.pobsteta.marculus.data
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import fr.marculus.core.model.Reglages
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +22,11 @@ class ReglagesRepository(context: Context) {
         val sonClic = booleanPreferencesKey("son_clic")
         val themeSombre = booleanPreferencesKey("theme_sombre")
         val capturePosition = booleanPreferencesKey("capture_position")
+        val annonceNombre = booleanPreferencesKey("annonce_nombre")
+        val annonceEtiquette = booleanPreferencesKey("annonce_etiquette")
+        val boutonsVolume = booleanPreferencesKey("boutons_volume")
+        val rouvrirDernier = booleanPreferencesKey("rouvrir_dernier")
+        val dernierContexte = stringPreferencesKey("dernier_contexte")
     }
 
     val reglages: Flow<Reglages> = ds.data.map { p ->
@@ -31,6 +37,11 @@ class ReglagesRepository(context: Context) {
             sonClic = p[Cles.sonClic] ?: false,
             themeSombre = p[Cles.themeSombre] ?: false,
             capturePosition = p[Cles.capturePosition] ?: false,
+            annonceNombre = p[Cles.annonceNombre] ?: false,
+            annonceEtiquette = p[Cles.annonceEtiquette] ?: false,
+            boutonsVolume = p[Cles.boutonsVolume] ?: false,
+            rouvrirDernier = p[Cles.rouvrirDernier] ?: false,
+            dernierContexteId = p[Cles.dernierContexte],
         )
     }
 
@@ -42,6 +53,17 @@ class ReglagesRepository(context: Context) {
             p[Cles.sonClic] = r.sonClic
             p[Cles.themeSombre] = r.themeSombre
             p[Cles.capturePosition] = r.capturePosition
+            p[Cles.annonceNombre] = r.annonceNombre
+            p[Cles.annonceEtiquette] = r.annonceEtiquette
+            p[Cles.boutonsVolume] = r.boutonsVolume
+            p[Cles.rouvrirDernier] = r.rouvrirDernier
+            val id = r.dernierContexteId
+            if (id == null) p.remove(Cles.dernierContexte) else p[Cles.dernierContexte] = id
         }
+    }
+
+    /** Mémorise le dernier contexte ouvert (sans toucher aux autres réglages). */
+    suspend fun enregistrerDernierContexte(id: String) {
+        ds.edit { it[Cles.dernierContexte] = id }
     }
 }

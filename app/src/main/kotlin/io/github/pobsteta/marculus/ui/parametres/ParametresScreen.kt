@@ -144,6 +144,18 @@ fun ParametresScreen(
                     permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                 }
             }
+            LigneReglage("Annonce du nombre", "Lit le nouveau total à voix haute à chaque comptage.", reglages.annonceNombre) {
+                maj(reglages.copy(annonceNombre = it))
+            }
+            LigneReglage("Annonce de l'étiquette", "Lit « essence classe » à voix haute à chaque comptage.", reglages.annonceEtiquette) {
+                maj(reglages.copy(annonceEtiquette = it))
+            }
+            LigneReglage("Boutons de volume pour compter", "Volume + ajoute, volume − retire sur la cellule active.", reglages.boutonsVolume) {
+                maj(reglages.copy(boutonsVolume = it))
+            }
+            LigneReglage("Rouvrir le dernier contexte", "Au lancement, ouvre directement la dernière feuille utilisée.", reglages.rouvrirDernier) {
+                maj(reglages.copy(rouvrirDernier = it))
+            }
 
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
             Text("Sauvegarde / Restauration", style = MaterialTheme.typography.titleMedium)
@@ -165,10 +177,7 @@ fun ParametresScreen(
             }
 
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
-            Text(
-                "À venir : boutons de volume pour compter, annonce vocale, choix de la langue.",
-                style = MaterialTheme.typography.bodySmall,
-            )
+            Text("À venir : choix de la langue de l'application.", style = MaterialTheme.typography.bodySmall)
         }
     }
 

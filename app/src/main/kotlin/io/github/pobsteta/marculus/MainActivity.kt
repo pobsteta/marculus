@@ -1,6 +1,7 @@
 package io.github.pobsteta.marculus
 
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,6 +18,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.ui.AppRoot
+import io.github.pobsteta.marculus.ui.ToucheVolume
 import io.github.pobsteta.marculus.ui.theme.MarculusTheme
 
 class MainActivity : ComponentActivity() {
@@ -56,5 +58,24 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    // Comptage par boutons de volume : la feuille enregistre le relais quand le réglage est actif.
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            val consomme = ToucheVolume.onVolume?.invoke(keyCode == KeyEvent.KEYCODE_VOLUME_UP) ?: false
+            if (consomme) return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    // Consomme aussi le relâchement pour éviter l'OSD de volume du système.
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) &&
+            ToucheVolume.onVolume != null
+        ) {
+            return true
+        }
+        return super.onKeyUp(keyCode, event)
     }
 }

@@ -7,17 +7,21 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import fr.marculus.core.Referentiels
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.ModeMesure
@@ -91,6 +95,27 @@ fun AppRoot(
 ) {
     // rememberSaveable : la navigation survit aux rotations / recréations d'activité.
     var route: Route by rememberSaveable(stateSaver = RouteSaver) { mutableStateOf<Route>(Route.Liste) }
+    val scope = rememberCoroutineScope()
+
+    // Ouvre une feuille et mémorise le contexte (pour « rouvrir le dernier »).
+    fun ouvrir(id: String) {
+        scope.launch { reglagesRepository.enregistrerDernierContexte(id) }
+        route = Route.Feuille(id)
+    }
+
+    // Au tout premier affichage : rouvrir le dernier contexte si l'option est active.
+    var routageInitial by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        if (!routageInitial) {
+            routageInitial = true
+            val r = reglagesRepository.reglages.first()
+            val id = r.dernierContexteId
+            if (r.rouvrirDernier && id != null && route == Route.Liste && repository.contexte(id) != null) {
+                route = Route.Feuille(id)
+            }
+        }
+    }
+
     val essences by referentielsRepository.essences.collectAsStateWithLifecycle(Referentiels.ESSENCES_DEFAUT)
     val qualitesArbre by referentielsRepository.qualitesArbre.collectAsStateWithLifecycle(Referentiels.QUALITE_ARBRE_DEFAUT)
     val qualitesBois by referentielsRepository.qualitesBois.collectAsStateWithLifecycle(Referentiels.QUALITE_BOIS_DEFAUT)
@@ -126,7 +151,7 @@ fun AppRoot(
         Route.Liste -> ListeContextesScreen(
             repository = repository,
             onCreer = { route = Route.Creation },
-            onOuvrir = { id -> route = Route.Feuille(id) },
+            onOuvrir = { id -> ouvrir(id) },
             onModifier = { id -> route = Route.Edition(id) },
             onParametres = { route = Route.Parametres },
             onReferentiels = { route = Route.Referentiels },
@@ -138,7 +163,7 @@ fun AppRoot(
             contexteExistant = null,
             essencesReferentiel = essences,
             onAnnuler = { route = Route.Liste },
-            onEnregistre = { id -> route = Route.Feuille(id) },
+            onEnregistre = { id -> ouvrir(id) },
         )
 
         Route.Parametres -> ParametresScreen(
