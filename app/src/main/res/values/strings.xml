@@ -227,4 +227,11 @@
     <string name="param_voix_test">Test de la voix</string>
     <string name="param_voix_aucune">Aucune voix disponible (installez des données vocales dans les réglages Android).</string>
     <string name="param_fermer">Fermer</string>
+    <string name="sync_section">Synchronisation (multi-opérateurs)</string>
+    <string name="sync_desc">Fusionne les martelages de plusieurs opérateurs (union par UUID, sans écraser le local). Partagez le fichier .marsync (Bluetooth, Partage à proximité, USB…) puis fusionnez-le sur l\'autre appareil.</string>
+    <string name="sync_operateur">Opérateur</string>
+    <string name="sync_partager">Partager (.marsync)</string>
+    <string name="sync_fusionner">Fusionner</string>
+    <string name="sync_msg_fusion">Synchronisation fusionnée.</string>
+    <string name="sync_partage_titre">Partager la synchronisation</string>
 </resources>

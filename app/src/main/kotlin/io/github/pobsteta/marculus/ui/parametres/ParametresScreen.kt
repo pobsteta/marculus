@@ -2,8 +2,10 @@ package io.github.pobsteta.marculus.ui.parametres
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.core.content.FileProvider
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -27,6 +29,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -55,6 +58,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.Locale
 import java.time.format.DateTimeFormatter
+import java.io.File
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
@@ -90,6 +94,8 @@ fun ParametresScreen(
     val msgSauvegarde = stringResource(R.string.param_msg_sauvegarde)
     val msgRestauration = stringResource(R.string.param_msg_restauration)
     val msgIllisible = stringResource(R.string.param_msg_illisible)
+    val msgFusion = stringResource(R.string.sync_msg_fusion)
+    val titrePartage = stringResource(R.string.sync_partage_titre)
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/zip"),
@@ -116,6 +122,38 @@ fun ParametresScreen(
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { /* accordée ou non : si refusée, la position ne sera simplement pas capturée */ }
+
+    // Fusion (synchro multi-opérateurs) : union par UUID, atomique.
+    val fusionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val texte = runCatching {
+                    context.contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                }.getOrNull()
+                message = if (!texte.isNullOrBlank()) {
+                    runCatching { sauvegardeRepository.fusionnerJson(texte) }.fold({ msgFusion }, { msgIllisible })
+                } else {
+                    msgIllisible
+                }
+            }
+        }
+    }
+
+    fun partagerSynchro() {
+        scope.launch {
+            val json = sauvegardeRepository.exporterJson()
+            val operateur = reglages.operateur?.takeIf { it.isNotBlank() }?.let { "-$it" } ?: ""
+            val fichier = File(context.cacheDir, "marculus$operateur-${LocalDateTime.now().format(FORMAT_HORODATAGE)}.marsync")
+            fichier.writeText(json)
+            val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", fichier)
+            val envoi = Intent(Intent.ACTION_SEND).apply {
+                type = "application/octet-stream"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            context.startActivity(Intent.createChooser(envoi, titrePartage))
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -222,6 +260,25 @@ fun ParametresScreen(
                     onClick = { importLauncher.launch(arrayOf("application/zip", "application/octet-stream", "*/*")) },
                     modifier = Modifier.weight(1f),
                 ) { Text(stringResource(R.string.param_restaurer)) }
+            }
+
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            Text(stringResource(R.string.sync_section), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.sync_desc), style = MaterialTheme.typography.bodySmall)
+            OutlinedTextField(
+                value = reglages.operateur ?: "",
+                onValueChange = { maj(reglages.copy(operateur = it)) },
+                label = { Text(stringResource(R.string.sync_operateur)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = { partagerSynchro() }, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.sync_partager))
+                }
+                OutlinedButton(onClick = { fusionLauncher.launch(arrayOf("*/*")) }, modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.sync_fusionner))
+                }
             }
         }
     }

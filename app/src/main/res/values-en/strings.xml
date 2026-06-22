@@ -225,4 +225,11 @@
     <string name="param_voix_test">Voice test</string>
     <string name="param_voix_aucune">No voice available (install voice data in Android settings).</string>
     <string name="param_fermer">Close</string>
+    <string name="sync_section">Sync (multi-operator)</string>
+    <string name="sync_desc">Merges marking from several operators (union by UUID, never overwriting local data). Share the .marsync file (Bluetooth, Nearby Share, USB…) then merge it on the other device.</string>
+    <string name="sync_operateur">Operator</string>
+    <string name="sync_partager">Share (.marsync)</string>
+    <string name="sync_fusionner">Merge</string>
+    <string name="sync_msg_fusion">Sync merged.</string>
+    <string name="sync_partage_titre">Share the sync</string>
 </resources>

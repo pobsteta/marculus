@@ -62,6 +62,7 @@ class MartelageRepository(
                 nom = "${source.nom} (copie)",
                 exporte = false,
                 dateCreation = horloge(),
+                modifie = horloge(),
             ),
         )
         configDao.listeParContexte(id).forEach { configDao.upsert(it.copy(contexteId = nouvelId)) }
@@ -110,6 +111,7 @@ class MartelageRepository(
                 cheminGpkg = cheminGpkg,
                 tarif = tarif.name,
                 tarifNumero = tarifNumero,
+                modifie = horloge(),
             ),
         )
         return id
@@ -141,6 +143,7 @@ class MartelageRepository(
                 cheminGpkg = cheminGpkg,
                 tarif = tarif.name,
                 tarifNumero = tarifNumero,
+                modifie = horloge(),
             ),
         )
     }
@@ -148,7 +151,7 @@ class MartelageRepository(
     /** Met à jour uniquement le GeoPackage rattaché à un contexte (import depuis la carte). */
     suspend fun enregistrerCheminGpkg(contexteId: String, chemin: String?) {
         val existant = contexteDao.parId(contexteId) ?: return
-        contexteDao.inserer(existant.copy(cheminGpkg = chemin))
+        contexteDao.inserer(existant.copy(cheminGpkg = chemin, modifie = horloge()))
     }
 
     suspend fun supprimerContexte(id: String) {
@@ -197,6 +200,7 @@ class MartelageRepository(
                 longitude = position?.longitude,
                 operateur = operateur,
                 parcelle = parcelle,
+                modifie = horloge(),
             ),
         )
         marquerNonExporte(contexteId)
@@ -225,6 +229,7 @@ class MartelageRepository(
                 latitude = null,
                 longitude = null,
                 operateur = operateur,
+                modifie = horloge(),
             ),
         )
         marquerNonExporte(contexteId)
@@ -241,7 +246,7 @@ class MartelageRepository(
         hauteurTexte: String?,
         qualiteArbre: String?,
     ) {
-        tigeDao.majComplet(uuid, essence, classe, action.name, quantite, hauteurTexte, qualiteArbre)
+        tigeDao.majComplet(uuid, essence, classe, action.name, quantite, hauteurTexte, qualiteArbre, horloge())
         marquerNonExporte(contexteId)
     }
 
@@ -304,6 +309,7 @@ class MartelageRepository(
         latitude = null,
         longitude = null,
         operateur = null,
+        modifie = horodatage,
     )
 
     // --- Réglages par compteur (avis) ---

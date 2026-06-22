@@ -20,7 +20,7 @@ object MarculusData {
             repository = MartelageRepository(db.contexteDao(), db.tigeDao(), db.compteurConfigDao()),
             reglages = ReglagesRepository(context),
             referentiels = referentiels,
-            sauvegarde = SauvegardeRepository(db.contexteDao(), db.tigeDao(), db.compteurConfigDao(), referentiels),
+            sauvegarde = SauvegardeRepository(db.contexteDao(), db.tigeDao(), db.compteurConfigDao(), db.mergeDao(), referentiels),
             gpkg = GpkgRepository(context),
         )
     }

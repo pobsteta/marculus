@@ -269,7 +269,8 @@ fun FeuilleMartelageScreen(
             val parcelleLabel = position?.let { p -> parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label }
             scope.launch {
                 val uuid = repository.ajouterTige(
-                    contexteId, essence, classe, quantite = ctx.increment, position = position, parcelle = parcelleLabel,
+                    contexteId, essence, classe, quantite = ctx.increment,
+                    position = position, operateur = reglages.operateur, parcelle = parcelleLabel,
                 )
                 derniereSaisie = DerniereSaisie(uuid, essence, classe)
             }
@@ -400,10 +401,11 @@ fun FeuilleMartelageScreen(
                     if (action == ActionTige.PLUS) {
                         repository.ajouterTige(
                             contexteId, essence, classe, quantite = quantite,
-                            hauteurTexte = hauteur, qualiteArbre = qualite, position = pos, parcelle = parcelleLabel,
+                            hauteurTexte = hauteur, qualiteArbre = qualite, position = pos,
+                            operateur = reglages.operateur, parcelle = parcelleLabel,
                         )
                     } else {
-                        repository.annulerTige(contexteId, essence, classe, quantite = quantite)
+                        repository.annulerTige(contexteId, essence, classe, quantite = quantite, operateur = reglages.operateur)
                     }
                 }
                 saisieLibre = false

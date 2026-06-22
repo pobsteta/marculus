@@ -21,6 +21,8 @@ data class ContexteEntity(
     val cheminGpkg: String? = null,
     val tarif: String = "AUCUN",
     val tarifNumero: Int = 0,
+    /** Horodatage de dernière modification (synchro « dernière écriture gagne »). */
+    val modifie: Long = 0,
 )
 
 @Entity(
@@ -41,6 +43,8 @@ data class TigeEntity(
     val longitude: Double?,
     val operateur: String?,
     val parcelle: String? = null,
+    /** Horodatage de dernière modification (synchro « dernière écriture gagne »). */
+    val modifie: Long = 0,
 )
 
 /** Réglages par compteur (cellule) d'un contexte : avis si plus / si moins. */

@@ -20,4 +20,6 @@ data class Reglages(
     val dernierContexteId: String? = null,
     /** Nom de la voix de synthèse choisie (Voice.name), ou null = voix par défaut. */
     val voixTts: String? = null,
+    /** Nom de l'opérateur (attaché à chaque tige, pour la synchro multi-opérateurs). */
+    val operateur: String? = null,
 )

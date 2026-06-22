@@ -4,6 +4,7 @@ import io.github.pobsteta.marculus.data.db.CompteurConfigDao
 import io.github.pobsteta.marculus.data.db.CompteurConfigEntity
 import io.github.pobsteta.marculus.data.db.ContexteDao
 import io.github.pobsteta.marculus.data.db.ContexteEntity
+import io.github.pobsteta.marculus.data.db.MergeDao
 import io.github.pobsteta.marculus.data.db.TigeDao
 import io.github.pobsteta.marculus.data.db.TigeEntity
 import kotlinx.coroutines.flow.first
@@ -15,6 +16,7 @@ class SauvegardeRepository(
     private val contexteDao: ContexteDao,
     private val tigeDao: TigeDao,
     private val configDao: CompteurConfigDao,
+    private val mergeDao: MergeDao,
     private val referentiels: ReferentielsRepository,
 ) {
     suspend fun exporterJson(): String {
@@ -50,6 +52,22 @@ class SauvegardeRepository(
         }
     }
 
+    /**
+     * Fusionne (synchro multi-opérateurs) le JSON d'un autre appareil : union par UUID des
+     * contextes, tiges et avis, sans écraser le local. Atomique (transaction). Les référentiels
+     * ne sont pas fusionnés (chaque appareil garde les siens).
+     */
+    suspend fun fusionnerJson(json: String) {
+        val root = JSONObject(json)
+        val contextes = root.optJSONArray("contextes").objetsOuVide().map { it.versContexte() }
+        val tiges = root.optJSONArray("tiges").objetsOuVide().map { it.versTige() }
+        val configs = root.optJSONArray("configs").objetsOuVide().map { it.versConfig() }
+        mergeDao.fusionner(contextes, tiges, configs)
+    }
+
+    private fun JSONArray?.objetsOuVide(): List<JSONObject> =
+        if (this == null) emptyList() else (0 until length()).map { getJSONObject(it) }
+
     // --- Sérialisation des entités ---
 
     private fun ContexteEntity.toJson() = JSONObject().apply {
@@ -58,6 +76,7 @@ class SauvegardeRepository(
         put("essences", essences); putOpt("commentaire", commentaire); put("increment", increment)
         put("exporte", exporte); put("dateCreation", dateCreation); putOpt("operateur", operateur)
         putOpt("cheminGpkg", cheminGpkg); put("tarif", tarif); put("tarifNumero", tarifNumero)
+        put("modifie", modifie)
     }
 
     private fun JSONObject.versContexte() = ContexteEntity(
@@ -69,6 +88,7 @@ class SauvegardeRepository(
         cheminGpkg = texteOuNull("cheminGpkg"),
         tarif = if (has("tarif") && !isNull("tarif")) getString("tarif") else "AUCUN",
         tarifNumero = if (has("tarifNumero") && !isNull("tarifNumero")) getInt("tarifNumero") else 0,
+        modifie = if (has("modifie") && !isNull("modifie")) getLong("modifie") else 0,
     )
 
     private fun TigeEntity.toJson() = JSONObject().apply {
@@ -76,7 +96,7 @@ class SauvegardeRepository(
         put("action", action); put("horodatage", horodatage); put("quantite", quantite)
         putOpt("hauteurTexte", hauteurTexte); putOpt("qualiteArbre", qualiteArbre)
         putOpt("latitude", latitude); putOpt("longitude", longitude); putOpt("operateur", operateur)
-        putOpt("parcelle", parcelle)
+        putOpt("parcelle", parcelle); put("modifie", modifie)
     }
 
     private fun JSONObject.versTige() = TigeEntity(
@@ -86,6 +106,7 @@ class SauvegardeRepository(
         qualiteArbre = texteOuNull("qualiteArbre"), latitude = reelOuNull("latitude"),
         longitude = reelOuNull("longitude"), operateur = texteOuNull("operateur"),
         parcelle = texteOuNull("parcelle"),
+        modifie = if (has("modifie") && !isNull("modifie")) getLong("modifie") else 0,
     )
 
     private fun CompteurConfigEntity.toJson() = JSONObject().apply {

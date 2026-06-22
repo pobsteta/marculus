@@ -7,13 +7,14 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [ContexteEntity::class, TigeEntity::class, CompteurConfigEntity::class],
-    version = 7,
+    version = 8,
     exportSchema = false,
 )
 abstract class MarculusDatabase : RoomDatabase() {
     abstract fun contexteDao(): ContexteDao
     abstract fun tigeDao(): TigeDao
     abstract fun compteurConfigDao(): CompteurConfigDao
+    abstract fun mergeDao(): MergeDao
 
     companion object {
         fun creer(context: Context): MarculusDatabase =

@@ -54,7 +54,7 @@ interface TigeDao {
     /** Correction d'une tige (sans toucher à la position GNSS ni à la parcelle figée). */
     @Query(
         "UPDATE tige SET essence = :essence, classe = :classe, action = :action, " +
-            "quantite = :quantite, hauteurTexte = :hauteur, qualiteArbre = :qualite WHERE uuid = :uuid",
+            "quantite = :quantite, hauteurTexte = :hauteur, qualiteArbre = :qualite, modifie = :modifie WHERE uuid = :uuid",
     )
     suspend fun majComplet(
         uuid: String,
@@ -64,6 +64,7 @@ interface TigeDao {
         quantite: Int,
         hauteur: String?,
         qualite: String?,
+        modifie: Long,
     )
 
     @Query("UPDATE tige SET hauteurTexte = :hauteur WHERE uuid = :uuid")
