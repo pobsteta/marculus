@@ -4,7 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import fr.marculus.core.model.Position
+import mil.nga.geopackage.GeoPackage
 import mil.nga.geopackage.GeoPackageFactory
+import mil.nga.geopackage.tiles.reproject.TileReprojection
+import mil.nga.geopackage.tiles.retriever.GeoPackageTileRetriever
 import mil.nga.proj.ProjectionConstants
 import mil.nga.proj.ProjectionFactory
 import mil.nga.proj.ProjectionTransform
@@ -14,6 +17,30 @@ import mil.nga.sf.MultiPolygon
 import mil.nga.sf.Polygon
 import org.locationtech.proj4j.ProjCoordinate
 import java.io.File
+
+/** Fournisseur de tuiles ortho (reprojetées en Web Mercator), servi à osmdroid. À fermer après usage. */
+class OrthoSource(
+    private val gpkg: GeoPackage,
+    private val retriever: GeoPackageTileRetriever,
+    val zoomMin: Int,
+    val zoomMax: Int,
+) {
+    @Synchronized
+    fun tuile(zoom: Int, x: Int, y: Int): ByteArray? =
+        try {
+            retriever.getTile(x, y, zoom)?.data
+        } catch (e: Exception) {
+            null
+        }
+
+    @Synchronized
+    fun fermer() {
+        try {
+            gpkg.close()
+        } catch (_: Exception) {
+        }
+    }
+}
 
 /** Lecture d'un GeoPackage (parcelles vectorielles, reprojetées en WGS84 pour la carte). */
 class GpkgRepository(private val context: Context) {
@@ -65,6 +92,35 @@ class GpkgRepository(private val context: Context) {
         }
         Log.d("Marculus.Gpkg", "anneaux lus = ${anneaux.size}")
         return anneaux
+    }
+
+    /** Ouvre l'ortho du GPKG, la reprojette en Web Mercator si besoin, et renvoie un fournisseur de tuiles. */
+    fun ouvrirOrtho(chemin: String): OrthoSource? {
+        val fichier = File(chemin)
+        if (!fichier.exists()) return null
+        return try {
+            val manager = GeoPackageFactory.getManager(context)
+            val gpkg = manager.openExternal(fichier) ?: return null
+            val tables = gpkg.tileTables
+            if (tables.isEmpty()) {
+                gpkg.close()
+                return null
+            }
+            val source = tables.first()
+            val webMercator = ProjectionFactory.getProjection(ProjectionConstants.EPSG_WEB_MERCATOR.toLong())
+            val cible = source + "_3857"
+            if (!gpkg.tileTables.contains(cible)) {
+                Log.d("Marculus.Gpkg", "Reprojection ortho $source -> $cible (Web Mercator)…")
+                TileReprojection.reproject(gpkg, source, cible, webMercator)
+            }
+            val tableFinale = if (gpkg.tileTables.contains(cible)) cible else source
+            val dao = gpkg.getTileDao(tableFinale)
+            Log.d("Marculus.Gpkg", "Ortho prête: $tableFinale zoom ${dao.minZoom}..${dao.maxZoom}")
+            OrthoSource(gpkg, GeoPackageTileRetriever(dao), dao.minZoom.toInt(), dao.maxZoom.toInt())
+        } catch (e: Exception) {
+            Log.e("Marculus.Gpkg", "ouvrirOrtho", e)
+            null
+        }
     }
 
     private fun collecter(g: Geometry, transform: ProjectionTransform, sortie: MutableList<List<Position>>) {

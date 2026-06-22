@@ -55,11 +55,14 @@ import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.Position
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
+import io.github.pobsteta.marculus.data.OrthoSource
 import io.github.pobsteta.marculus.data.ReferentielsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.osmdroid.tileprovider.MapTileProviderArray
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
+import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
@@ -69,6 +72,8 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 
 private const val ZOOM_MAX = 19.0
+
+private enum class Fond(val libelle: String) { OSM("OSM"), SATELLITE("Satellite"), ORTHO("Ortho") }
 
 private val SOURCE_SATELLITE: OnlineTileSourceBase = object : OnlineTileSourceBase(
     "ESRI World Imagery", 0, 19, 256, "",
@@ -94,12 +99,17 @@ fun CarteScreen(
         value = repository.contexte(contexteId)
     }
     val journal by repository.journal(contexteId).collectAsStateWithLifecycle(emptyList())
-    var satellite by remember { mutableStateOf(false) }
+    var fond by remember { mutableStateOf(Fond.OSM) }
     var centre by remember { mutableStateOf(false) }
 
     val cheminGpkg by referentielsRepository.cheminGpkg.collectAsStateWithLifecycle(null)
     val parcelles by produceState(initialValue = emptyList<List<Position>>(), cheminGpkg) {
         value = cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcelles(it) } } ?: emptyList()
+    }
+    val orthoSource by produceState<OrthoSource?>(initialValue = null, cheminGpkg) {
+        val src = cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.ouvrirOrtho(it) } }
+        value = src
+        awaitDispose { src?.fermer() }
     }
     val importGpkgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
@@ -127,9 +137,39 @@ fun CarteScreen(
         onDispose { mapView.onPause() }
     }
 
-    // Fond de carte : ne change que sur bascule OSM/Satellite.
-    LaunchedEffect(satellite) {
-        mapView.setTileSource(if (satellite) SOURCE_SATELLITE else TileSourceFactory.MAPNIK)
+    // Fournisseur en ligne d'origine (OSM/Satellite) ; fournisseur ortho hors-ligne (GPKG).
+    val providerBase = remember { mapView.tileProvider }
+    val providerOrtho = remember(orthoSource) {
+        orthoSource?.let { src ->
+            MapTileProviderArray(
+                XYTileSource("ortho", src.zoomMin, src.zoomMax, 256, ".png", emptyArray()),
+                null,
+                arrayOf(GpkgTileModule(context, src)),
+            )
+        }
+    }
+    // Bascule de fond : OSM / Satellite (en ligne) ou Ortho (GPKG hors-ligne, zoom jusqu'à sa résolution).
+    LaunchedEffect(fond, providerOrtho) {
+        when (fond) {
+            Fond.OSM -> {
+                mapView.tileProvider = providerBase
+                mapView.setTileSource(TileSourceFactory.MAPNIK)
+                mapView.maxZoomLevel = ZOOM_MAX
+            }
+            Fond.SATELLITE -> {
+                mapView.tileProvider = providerBase
+                mapView.setTileSource(SOURCE_SATELLITE)
+                mapView.maxZoomLevel = ZOOM_MAX
+            }
+            Fond.ORTHO -> {
+                val po = providerOrtho
+                if (po != null) {
+                    mapView.tileProvider = po
+                    mapView.setTileSource(po.tileSource)
+                    mapView.maxZoomLevel = orthoSource?.zoomMax?.toDouble() ?: ZOOM_MAX
+                }
+            }
+        }
         mapView.invalidate()
     }
 
@@ -197,8 +237,14 @@ fun CarteScreen(
                     TextButton(onClick = { importGpkgLauncher.launch(arrayOf("*/*")) }) {
                         Text("GPKG", color = MaterialTheme.colorScheme.onPrimary)
                     }
-                    TextButton(onClick = { satellite = !satellite }) {
-                        Text(if (satellite) "OSM" else "Satellite", color = MaterialTheme.colorScheme.onPrimary)
+                    TextButton(onClick = {
+                        fond = when (fond) {
+                            Fond.OSM -> Fond.SATELLITE
+                            Fond.SATELLITE -> if (orthoSource != null) Fond.ORTHO else Fond.OSM
+                            Fond.ORTHO -> Fond.OSM
+                        }
+                    }) {
+                        Text("Fond : ${fond.libelle}", color = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
