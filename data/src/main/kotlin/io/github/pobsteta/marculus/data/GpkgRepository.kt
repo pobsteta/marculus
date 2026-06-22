@@ -2,6 +2,7 @@ package io.github.pobsteta.marculus.data
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import fr.marculus.core.model.Position
 import mil.nga.geopackage.GeoPackageFactory
 import mil.nga.proj.ProjectionConstants
@@ -29,28 +30,40 @@ class GpkgRepository(private val context: Context) {
     /** Anneaux (contours) de toutes les parcelles, en WGS84 : chaque anneau = liste de positions. */
     fun parcelles(chemin: String): List<List<Position>> {
         val fichier = File(chemin)
-        if (!fichier.exists()) return emptyList()
-        val manager = GeoPackageFactory.getManager(context)
-        val gpkg = manager.openExternal(fichier) ?: return emptyList()
+        if (!fichier.exists()) {
+            Log.w("Marculus.Gpkg", "Fichier absent: $chemin")
+            return emptyList()
+        }
         val anneaux = mutableListOf<List<Position>>()
         try {
-            val wgs84 = ProjectionFactory.getProjection(ProjectionConstants.EPSG_WORLD_GEODETIC_SYSTEM.toLong())
-            for (table in gpkg.featureTables) {
-                val dao = gpkg.getFeatureDao(table)
-                val transform = dao.projection.getTransformation(wgs84)
-                val rs = dao.queryForAll()
-                try {
-                    while (rs.moveToNext()) {
-                        val geom = rs.row.geometry?.geometry ?: continue
-                        collecter(geom, transform, anneaux)
-                    }
-                } finally {
-                    rs.close()
-                }
+            val manager = GeoPackageFactory.getManager(context)
+            val gpkg = manager.openExternal(fichier) ?: run {
+                Log.w("Marculus.Gpkg", "openExternal a renvoyé null pour $chemin")
+                return emptyList()
             }
-        } finally {
-            gpkg.close()
+            try {
+                Log.d("Marculus.Gpkg", "tables features=${gpkg.featureTables}, tiles=${gpkg.tileTables}")
+                val wgs84 = ProjectionFactory.getProjection(ProjectionConstants.EPSG_WORLD_GEODETIC_SYSTEM.toLong())
+                for (table in gpkg.featureTables) {
+                    val dao = gpkg.getFeatureDao(table)
+                    val transform = dao.projection.getTransformation(wgs84)
+                    val rs = dao.queryForAll()
+                    try {
+                        while (rs.moveToNext()) {
+                            val geom = rs.row.geometry?.geometry ?: continue
+                            collecter(geom, transform, anneaux)
+                        }
+                    } finally {
+                        rs.close()
+                    }
+                }
+            } finally {
+                gpkg.close()
+            }
+        } catch (e: Exception) {
+            Log.e("Marculus.Gpkg", "Erreur lecture GPKG", e)
         }
+        Log.d("Marculus.Gpkg", "anneaux lus = ${anneaux.size}")
         return anneaux
     }
 
