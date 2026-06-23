@@ -70,14 +70,15 @@ object Cubage {
         return v.coerceAtLeast(0.0)
     }
 
-    /** Volume bois fort tige (m³, découpe 7 cm) — modèle EMERGE pour une essence couverte. */
-    fun volumeEmergeTige(essence: String, c130cm: Double, htotM: Double): Double {
-        val k = coefEmerge(essence) ?: return 0.0
-        return emergeTige(k, c130cm, htotM)
-    }
+    /** Volumes EMERGE (m³) d'une tige : bois fort tige, houppier, total aérien (tige + houppier). */
+    data class VolumesEmerge(val tige: Double, val houppier: Double, val total: Double)
 
-    private fun emergeTige(k: CoefEmerge, c130cm: Double, htotM: Double): Double {
-        if (htotM <= 1.4 || c130cm <= 0.0) return 0.0
+    /** Volume bois fort tige (m³, découpe 7 cm) — modèle EMERGE pour une essence couverte. */
+    fun volumeEmergeTige(essence: String, c130cm: Double, htotM: Double): Double =
+        coefEmerge(essence)?.let { emergeVolumes(it, c130cm, htotM).tige } ?: 0.0
+
+    private fun emergeVolumes(k: CoefEmerge, c130cm: Double, htotM: Double): VolumesEmerge {
+        if (htotM <= 1.4 || c130cm <= 0.0) return VolumesEmerge(0.0, 0.0, 0.0)
         val hdec = 0.8 * htotM
         val logisHdec = ln(hdec / (htotM - hdec)) // = ln(4) avec hdec = 0,8·htot
         val c13 = c130cm / 100.0 // circonférence à 1,30 m, en m
@@ -91,7 +92,32 @@ object Cubage {
         if (fct > 0.95) fct = 0.8
         val formTige = formTot * fct
         val decTige = if (c13 > cDec) 1.0 - (cDec * corr130 / c13).pow(3) else 0.0
-        return (formTige * volCyl * decTige).coerceAtLeast(0.0)
+        val tige = (formTige * volCyl * decTige).coerceAtLeast(0.0)
+        // Houppier (couronne) : part de volume au-delà de la tige bois fort.
+        val unSurFct = 1.0 / fct - 1.0
+        var houppier = 0.0
+        if (unSurFct > 0.0 && k.alpha > 0.0) {
+            val cMax = (c13 / corr130) * ((3.0 - k.beta) * unSurFct / (3.0 * k.alpha)).pow(1.0 / 3.0)
+            val decHoup = if (cMax > cDec) {
+                1.0 - ((cDec / c13 * corr130) * (((3.0 - k.beta) / (3.0 * k.alpha)) * unSurFct).pow(-1.0 / 3.0)).pow(3.0 - k.beta)
+            } else {
+                0.0
+            }
+            houppier = ((formTot - formTige) * volCyl * decHoup)
+        }
+        if (!houppier.isFinite() || houppier < 0.0) houppier = 0.0
+        return VolumesEmerge(tige, houppier, tige + houppier)
+    }
+
+    /** Volumes (m³) d'une tige selon le contexte : tige bois fort, houppier (EMERGE seul), total. */
+    fun volumesUnitaire(contexte: Contexte, essence: String, classe: Int, hauteurTexte: String?): VolumesEmerge {
+        val tige = volumeUnitaireTige(contexte, essence, classe, hauteurTexte)
+        if (contexte.tarif != TarifCubage.EMERGE) return VolumesEmerge(tige, 0.0, tige)
+        val h = HauteurParser.parse(hauteurTexte ?: "").hauteurTotale ?: return VolumesEmerge(0.0, 0.0, 0.0)
+        val k = coefEmerge(essence) ?: return VolumesEmerge(tige, 0.0, tige) // repli coefficient de forme : pas de houppier
+        val centre = classe + contexte.axe.pas / 2.0
+        val cCm = if (contexte.mode == ModeMesure.CIRCONFERENCE) centre else centre * PI
+        return emergeVolumes(k, cCm, h)
     }
 
     /** Repli coefficient de forme : V = f·(π/4)·D²·H. */

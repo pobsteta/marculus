@@ -161,7 +161,10 @@
     <string name="statut_parcelle_rates">%1$s ha · %2$s stems/ha · %3$s m²/ha · %4$s m³/ha</string>
     <string name="statut_surface_terriere_total">Basal area: %1$s m²</string>
     <string name="statut_export_csv">Land CSV</string>
-    <string name="statut_volume_total">Total volume: %1$s m³</string>
+    <string name="statut_volume_total">Merchantable stem volume: %1$s m³</string>
+    <string name="statut_houp_total">crown %1$s m³ · total %2$s m³</string>
+    <string name="statut_volume_houppier">Crown volume: %1$s m³</string>
+    <string name="statut_volume_aerien">Total aboveground volume: %1$s m³</string>
     <string name="statut_volume_parcelle">%1$s m³ · %2$s m³/ha</string>
 
     <!-- Map -->
