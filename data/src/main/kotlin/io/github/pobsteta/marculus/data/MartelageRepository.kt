@@ -74,6 +74,16 @@ class MartelageRepository(
     suspend fun marquerExporte(id: String) {
         val existant = contexteDao.parId(id) ?: return
         contexteDao.inserer(existant.copy(exporte = true))
+        promouvoirStatutMin(id, EtatKanban.REALISEE) // export → au moins « Réalisée »
+    }
+
+    /** Remonte le statut Kanban au minimum imposé par l'avancement (jamais de rétrogradation). */
+    private suspend fun promouvoirStatutMin(contexteId: String, minimum: EtatKanban) {
+        val c = contexteDao.parId(contexteId) ?: return
+        val actuel = runCatching { EtatKanban.valueOf(c.statut) }.getOrDefault(EtatKanban.PROPOSEE)
+        if (actuel.ordinal < minimum.ordinal) {
+            contexteDao.inserer(c.copy(statut = minimum.name, modifie = horloge()))
+        }
     }
 
     /** Toute modification du journal repasse le contexte en « non exporté » (re-verrouillage). */
@@ -219,6 +229,7 @@ class MartelageRepository(
             ),
         )
         marquerNonExporte(contexteId)
+        promouvoirStatutMin(contexteId, EtatKanban.PLANIFIEE) // au moins une tige → au moins « Planifiée »
         return uuid
     }
 

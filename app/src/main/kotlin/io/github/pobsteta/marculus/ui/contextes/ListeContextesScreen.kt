@@ -225,7 +225,7 @@ fun ListeContextesScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             etats.forEachIndexed { index, etat ->
-                                val cartes = filtres.filter { it.contexte.statut == etat }
+                                val cartes = filtres.filter { colonneEffective(it) == etat }
                                 Column(
                                     Modifier.width(240.dp).fillMaxHeight()
                                         .onGloballyPositioned { colonneRects[index] = it.boundsInRoot() },
@@ -250,7 +250,10 @@ fun ListeContextesScreen(
                                                 onDragEnd = {
                                                     val cibleIdx = colonneRects.entries.firstOrNull { it.value.contains(dragPointer) }?.key
                                                     val nouvel = cibleIdx?.let { etats[it] }
-                                                    if (nouvel != null && nouvel != resume.contexte.statut) {
+                                                    // Respecte le plancher (tiges → Planifiée mini, export → Réalisée mini).
+                                                    if (nouvel != null && nouvel != resume.contexte.statut &&
+                                                        nouvel.ordinal >= plancherStatut(resume).ordinal
+                                                    ) {
                                                         scope.launch { repository.modifierStatut(resume.contexte.id, nouvel) }
                                                     }
                                                     dragResume = null
@@ -341,6 +344,19 @@ private fun normRecherche(s: String): String =
 private fun formatDateListe(millis: Long): String =
     java.time.Instant.ofEpochMilli(millis).atZone(java.time.ZoneOffset.UTC).toLocalDate()
         .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+
+/** Statut minimal imposé par l'avancement : tiges → Planifiée ; export → Réalisée. */
+private fun plancherStatut(r: ResumeContexte): EtatKanban = when {
+    r.contexte.exporte -> EtatKanban.REALISEE
+    r.nbEvenements > 0 -> EtatKanban.PLANIFIEE
+    else -> EtatKanban.PROPOSEE
+}
+
+/** Colonne réellement affichée : au moins le plancher, même si le statut stocké est inférieur. */
+private fun colonneEffective(r: ResumeContexte): EtatKanban {
+    val mini = plancherStatut(r)
+    return if (r.contexte.statut.ordinal < mini.ordinal) mini else r.contexte.statut
+}
 
 /** Libellé localisé d'une colonne Kanban. */
 @Composable
