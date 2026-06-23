@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.DropdownMenu
@@ -26,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -75,6 +77,7 @@ fun ListeContextesScreen(
     var aLire by remember { mutableStateOf<ResumeContexte?>(null) }
     var menuAppli by remember { mutableStateOf(false) }
     var pendingExport by remember { mutableStateOf<String?>(null) }
+    var recherche by remember { mutableStateOf("") }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("text/csv"),
@@ -150,36 +153,41 @@ fun ListeContextesScreen(
             }
         },
     ) { padding ->
-        if (resumes.isEmpty()) {
-            Box(
-                Modifier.fillMaxSize().padding(padding).padding(32.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    stringResource(R.string.liste_vide_message),
-                    textAlign = TextAlign.Center,
-                )
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                items(resumes, key = { it.contexte.id }) { resume ->
-                    CarteContexte(
-                        resume = resume,
-                        onOuvrir = { onOuvrir(resume.contexte.id) },
-                        onModifier = { onModifier(resume.contexte.id) },
-                        onSupprimer = { aSupprimer = resume },
-                        onLire = { aLire = resume },
-                        onDupliquer = { scope.launch { repository.dupliquerContexte(resume.contexte.id) } },
-                        onExporter = {
-                            pendingExport = resume.contexte.id
-                            exportLauncher.launch("${resume.contexte.nom}.csv")
-                        },
-                        onPartager = { partagerContexte(resume.contexte.id, resume.contexte.nom) },
-                    )
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            OutlinedTextField(
+                value = recherche,
+                onValueChange = { recherche = it },
+                label = { Text(stringResource(R.string.liste_recherche)) },
+                singleLine = true,
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            )
+            val filtres = if (recherche.isBlank()) resumes else resumes.filter { correspond(it, recherche) }
+            if (filtres.isEmpty()) {
+                Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                    Text(stringResource(R.string.liste_vide_message), textAlign = TextAlign.Center)
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(filtres, key = { it.contexte.id }) { resume ->
+                        CarteContexte(
+                            resume = resume,
+                            onOuvrir = { onOuvrir(resume.contexte.id) },
+                            onModifier = { onModifier(resume.contexte.id) },
+                            onSupprimer = { aSupprimer = resume },
+                            onLire = { aLire = resume },
+                            onDupliquer = { scope.launch { repository.dupliquerContexte(resume.contexte.id) } },
+                            onExporter = {
+                                pendingExport = resume.contexte.id
+                                exportLauncher.launch("${resume.contexte.nom}.csv")
+                            },
+                            onPartager = { partagerContexte(resume.contexte.id, resume.contexte.nom) },
+                        )
+                    }
                 }
             }
         }
@@ -227,6 +235,20 @@ fun ListeContextesScreen(
     }
 }
 
+private fun normRecherche(s: String): String =
+    java.text.Normalizer.normalize(s.trim().lowercase(), java.text.Normalizer.Form.NFD).replace(Regex("\\p{M}+"), "")
+
+private fun formatDateListe(millis: Long): String =
+    java.time.Instant.ofEpochMilli(millis).atZone(java.time.ZoneOffset.UTC).toLocalDate()
+        .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+
+private fun correspond(r: ResumeContexte, q: String): Boolean {
+    val n = normRecherche(q)
+    val c = r.contexte
+    val champs = listOfNotNull(c.nom, c.commentaire, c.dateMartelage?.let { formatDateListe(it) })
+    return champs.any { normRecherche(it).contains(n) }
+}
+
 @Composable
 private fun CarteContexte(
     resume: ResumeContexte,
@@ -267,6 +289,13 @@ private fun CarteContexte(
                     ) + if (resume.verrouille) stringResource(R.string.liste_carte_resume_verrouille) else "",
                     style = MaterialTheme.typography.bodyMedium,
                 )
+                contexte.dateMartelage?.let { d ->
+                    Text(
+                        "📅 ${formatDateListe(d)}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             Box {
                 IconButton(onClick = { menuOuvert = true }) {

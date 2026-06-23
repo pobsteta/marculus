@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 
 @Database(
     entities = [ContexteEntity::class, TigeEntity::class, CompteurConfigEntity::class],
-    version = 9,
+    version = 10,
     exportSchema = false,
 )
 abstract class MarculusDatabase : RoomDatabase() {

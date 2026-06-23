@@ -201,6 +201,9 @@ fun ParametresScreen(
             LigneReglage(stringResource(R.string.param_rouvrir_titre), stringResource(R.string.param_rouvrir_desc), reglages.rouvrirDernier) {
                 maj(reglages.copy(rouvrirDernier = it))
             }
+            LigneReglage(stringResource(R.string.param_code_essence_titre), stringResource(R.string.param_code_essence_desc), reglages.afficherCodeEssence) {
+                maj(reglages.copy(afficherCodeEssence = it))
+            }
 
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
             // Langue de l'application.

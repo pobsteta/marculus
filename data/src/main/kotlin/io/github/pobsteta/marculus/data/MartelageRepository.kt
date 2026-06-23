@@ -93,6 +93,7 @@ class MartelageRepository(
         tarif: TarifCubage = TarifCubage.AUCUN,
         tarifNumero: Int = 0,
         coefficientForme: Double = 0.5,
+        dateMartelage: Long? = null,
     ): String {
         val id = UUID.randomUUID().toString()
         contexteDao.inserer(
@@ -113,6 +114,7 @@ class MartelageRepository(
                 tarif = tarif.name,
                 tarifNumero = tarifNumero,
                 coefficientForme = coefficientForme,
+                dateMartelage = dateMartelage,
                 modifie = horloge(),
             ),
         )
@@ -131,6 +133,7 @@ class MartelageRepository(
         tarif: TarifCubage = TarifCubage.AUCUN,
         tarifNumero: Int = 0,
         coefficientForme: Double = 0.5,
+        dateMartelage: Long? = null,
     ) {
         val existant = contexteDao.parId(id) ?: return
         contexteDao.inserer(
@@ -147,6 +150,7 @@ class MartelageRepository(
                 tarif = tarif.name,
                 tarifNumero = tarifNumero,
                 coefficientForme = coefficientForme,
+                dateMartelage = dateMartelage,
                 modifie = horloge(),
             ),
         )
@@ -373,6 +377,7 @@ class MartelageRepository(
         tarif = runCatching { TarifCubage.valueOf(tarif) }.getOrDefault(TarifCubage.AUCUN),
         tarifNumero = tarifNumero,
         coefficientForme = coefficientForme,
+        dateMartelage = dateMartelage,
     )
 
     private fun TigeEntity.versDomaine() = Tige(

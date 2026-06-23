@@ -23,7 +23,10 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -92,6 +95,8 @@ fun CreationContexteScreen(
         mutableStateOf(contexteExistant?.tarifNumero?.takeIf { it > 0 }?.toString() ?: "")
     }
     var coefForme by remember { mutableStateOf((contexteExistant?.coefficientForme ?: 0.5).toString()) }
+    var dateMartelage by remember { mutableStateOf(contexteExistant?.dateMartelage) }
+    var datePickerOuvert by remember { mutableStateOf(false) }
 
     val essencesDisponibles = remember {
         mutableStateListOf<String>().apply {
@@ -167,6 +172,20 @@ fun CreationContexteScreen(
                 minLines = 2,
                 modifier = Modifier.fillMaxWidth(),
             )
+
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.creation_date_martelage), style = MaterialTheme.typography.titleSmall)
+                    Text(
+                        dateMartelage?.let { formatDateMartelage(it) } ?: stringResource(R.string.creation_date_aucune),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+                OutlinedButton(onClick = { datePickerOuvert = true }) { Text(stringResource(R.string.creation_date_choisir)) }
+                if (dateMartelage != null) {
+                    TextButton(onClick = { dateMartelage = null }) { Text(stringResource(R.string.creation_btn_retirer_gpkg)) }
+                }
+            }
 
             Text(stringResource(R.string.creation_section_mode_mesure), style = MaterialTheme.typography.titleSmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -300,14 +319,15 @@ fun CreationContexteScreen(
                                     if (edition) {
                                         repository.modifierContexte(
                                             contexteExistant!!.id, nom.trim(), mode,
-                                            AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg, tarif, numero, coef,
+                                            AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg, tarif, numero, coef, dateMartelage,
                                         )
                                         onEnregistre(contexteExistant.id)
                                     } else {
                                         val id = repository.creerContexte(
                                             nom.trim(), mode, AxeClasses(mi, ma, pa),
                                             essences, commentaireFinal, inc,
-                                            cheminGpkg = cheminGpkg, tarif = tarif, tarifNumero = numero, coefficientForme = coef,
+                                            cheminGpkg = cheminGpkg, tarif = tarif, tarifNumero = numero,
+                                            coefficientForme = coef, dateMartelage = dateMartelage,
                                         )
                                         onEnregistre(id)
                                     }
@@ -347,7 +367,26 @@ fun CreationContexteScreen(
     if (infoOuvert) {
         InfoCouleursDialog(onFermer = { infoOuvert = false })
     }
+
+    if (datePickerOuvert) {
+        val etat = rememberDatePickerState(initialSelectedDateMillis = dateMartelage)
+        DatePickerDialog(
+            onDismissRequest = { datePickerOuvert = false },
+            confirmButton = {
+                TextButton(onClick = { dateMartelage = etat.selectedDateMillis; datePickerOuvert = false }) {
+                    Text(stringResource(R.string.creation_date_ok))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { datePickerOuvert = false }) { Text(stringResource(R.string.creation_action_annuler)) }
+            },
+        ) { DatePicker(state = etat) }
+    }
 }
+
+private fun formatDateMartelage(millis: Long): String =
+    java.time.Instant.ofEpochMilli(millis).atZone(java.time.ZoneOffset.UTC).toLocalDate()
+        .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
 /** Description écologique d'une essence par défaut (BD Forêt V2), ou null. */
 @Composable

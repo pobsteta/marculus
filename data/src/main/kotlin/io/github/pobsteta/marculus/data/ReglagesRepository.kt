@@ -30,6 +30,7 @@ class ReglagesRepository(context: Context) {
         val voixTts = stringPreferencesKey("voix_tts")
         val operateur = stringPreferencesKey("operateur")
         val gnssPonctuel = booleanPreferencesKey("gnss_ponctuel")
+        val afficherCodeEssence = booleanPreferencesKey("afficher_code_essence")
     }
 
     val reglages: Flow<Reglages> = ds.data.map { p ->
@@ -48,6 +49,7 @@ class ReglagesRepository(context: Context) {
             voixTts = p[Cles.voixTts],
             operateur = p[Cles.operateur],
             gnssPonctuel = p[Cles.gnssPonctuel] ?: false,
+            afficherCodeEssence = p[Cles.afficherCodeEssence] ?: false,
         )
     }
 
@@ -70,6 +72,7 @@ class ReglagesRepository(context: Context) {
             val op = r.operateur
             if (op.isNullOrBlank()) p.remove(Cles.operateur) else p[Cles.operateur] = op
             p[Cles.gnssPonctuel] = r.gnssPonctuel
+            p[Cles.afficherCodeEssence] = r.afficherCodeEssence
         }
     }
 

@@ -24,4 +24,6 @@ data class Reglages(
     val operateur: String? = null,
     /** Acquisition GNSS ponctuelle (au clic) plutôt qu'en écoute continue (économie de batterie). */
     val gnssPonctuel: Boolean = false,
+    /** Afficher le code essence ONF (3 car.) en gros au lieu du nom complet dans les cellules. */
+    val afficherCodeEssence: Boolean = false,
 )

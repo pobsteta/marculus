@@ -73,6 +73,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import io.github.pobsteta.marculus.R
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -82,6 +83,7 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.AttributionSpatiale
+import fr.marculus.core.Cubage
 import fr.marculus.core.HauteurParser
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CompteurCle
@@ -353,7 +355,12 @@ fun FeuilleMartelageScreen(
                         val cfg = configs[cle]
                         val estDerniere = derniereSaisie?.let { it.essence == e.nom && it.classe == classe } ?: false
                         CelluleCompteur(
-                            libelle = "${e.nom} $classe",
+                            libelle = if (reglages.afficherCodeEssence) {
+                                "${Cubage.codeEssence(e.nom) ?: e.nom} $classe"
+                            } else {
+                                "${e.nom} $classe"
+                            },
+                            libelleGrand = reglages.afficherCodeEssence,
                             total = total,
                             fond = Color(e.couleurFondArgb),
                             texte = Color(e.couleurTexteArgb),
@@ -458,6 +465,7 @@ fun FeuilleMartelageScreen(
 @Composable
 private fun CelluleCompteur(
     libelle: String,
+    libelleGrand: Boolean,
     total: Int,
     fond: Color,
     texte: Color,
@@ -485,9 +493,10 @@ private fun CelluleCompteur(
                 Text(
                     libelle,
                     color = texte,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = if (libelleGrand) MaterialTheme.typography.titleLarge else MaterialTheme.typography.labelMedium,
+                    fontWeight = if (libelleGrand) FontWeight.Bold else null,
                     textAlign = TextAlign.Center,
-                    maxLines = 2,
+                    maxLines = if (libelleGrand) 1 else 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f).padding(horizontal = 2.dp),
                 )

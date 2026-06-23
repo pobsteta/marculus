@@ -26,6 +26,7 @@
     <string name="liste_menu_referentiels">Référentiels</string>
     <string name="liste_menu_parametres">Paramètres</string>
     <string name="liste_fab_nouveau_contexte">Nouveau contexte</string>
+    <string name="liste_recherche">Rechercher (nom, commentaire, date)</string>
     <string name="liste_vide_message">Aucun contexte. Touchez + pour créer une opération de martelage.</string>
     <string name="liste_dialog_supprimer_titre">Supprimer le contexte ?</string>
     <string name="liste_dialog_supprimer_texte">« %1$s » et tout son historique de martelage seront supprimés.</string>
@@ -105,6 +106,10 @@
     <string name="creation_tarif_emerge">EMERGE (2 entrées)</string>
     <string name="creation_coef_forme">Coefficient de forme f</string>
     <string name="creation_coef_forme_aide">Repli pour les essences hors table EMERGE : V = f·π/4·D²·H (≈ 0,5).</string>
+    <string name="creation_date_martelage">Date de martelage</string>
+    <string name="creation_date_aucune">Non renseignée</string>
+    <string name="creation_date_choisir">Choisir</string>
+    <string name="creation_date_ok">OK</string>
     <string name="creation_tarif_numero">Numéro de tarif (1–20)</string>
 
     <!-- Feuille de martelage -->
@@ -213,6 +218,8 @@
     <string name="param_volume_desc">Volume + ajoute, volume − retire sur la cellule active.</string>
     <string name="param_rouvrir_titre">Rouvrir le dernier contexte</string>
     <string name="param_rouvrir_desc">Au lancement, ouvre directement la dernière feuille utilisée.</string>
+    <string name="param_code_essence_titre">Code essence en gros</string>
+    <string name="param_code_essence_desc">Affiche le code ONF (3 lettres) + classe en grand au lieu du nom complet, pour une meilleure lisibilité.</string>
     <string name="param_langue_titre">Langue</string>
     <string name="param_langue_changer">Changer</string>
     <string name="param_langue_systeme">Système</string>

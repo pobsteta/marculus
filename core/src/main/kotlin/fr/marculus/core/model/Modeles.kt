@@ -70,6 +70,8 @@ data class Contexte(
     val tarifNumero: Int = 0,
     /** Coefficient de forme (repli EMERGE pour essence non couverte) : V = f·π/4·D²·H. */
     val coefficientForme: Double = 0.5,
+    /** Date de martelage (epoch millis, minuit UTC), ou null si non renseignée. */
+    val dateMartelage: Long? = null,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 }

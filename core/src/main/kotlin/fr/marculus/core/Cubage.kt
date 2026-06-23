@@ -49,6 +49,16 @@ object Cubage {
         return null
     }
 
+    /** Code ONF (3 caractères) de l'essence si reconnue (nom français ou latin), sinon null. */
+    fun codeEssence(essence: String): String? {
+        val n = normaliser(essence)
+        if (n.isEmpty()) return null
+        EMERGE_CODES[n]?.let { return it }
+        EMERGE_CODES.entries.firstOrNull { it.key.startsWith(n) || n.startsWith(it.key) }?.let { return it.value }
+        EMERGE_CODES.entries.firstOrNull { it.key.contains(n) || n.contains(it.key) }?.let { return it.value }
+        return null
+    }
+
     /** Volume (m³) Schaeffer d'une tige de diamètre `dCm` selon le tarif et son numéro. */
     fun volume(tarif: TarifCubage, numero: Int, dCm: Double): Double {
         val m = 0.8 + 0.1 * numero
