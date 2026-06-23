@@ -215,6 +215,12 @@
     <string name="param_annonce_nombre_desc">Reads the new total aloud on each count.</string>
     <string name="param_annonce_etiquette_titre">Announce the label</string>
     <string name="param_annonce_etiquette_desc">Reads \"species class\" aloud on each count.</string>
+    <string name="param_annonce_avis_moins_titre">Announce on alert −</string>
+    <string name="param_annonce_avis_moins_desc">When a − alert is set and the lower limit is not reached, announces \"Warning, the lower limit is not reached\".</string>
+    <string name="param_annonce_avis_plus_titre">Announce on alert +</string>
+    <string name="param_annonce_avis_plus_desc">When a + alert is set and the upper limit is exceeded, announces \"Warning, the upper limit is exceeded\".</string>
+    <string name="avis_annonce_moins">Warning, the lower limit is not reached</string>
+    <string name="avis_annonce_plus">Warning, the upper limit is exceeded</string>
     <string name="param_volume_titre">Count with volume buttons</string>
     <string name="param_volume_desc">Volume + adds, volume − removes on the active cell.</string>
     <string name="param_rouvrir_titre">Reopen last context</string>

@@ -195,6 +195,12 @@ fun ParametresScreen(
             LigneReglage(stringResource(R.string.param_annonce_etiquette_titre), stringResource(R.string.param_annonce_etiquette_desc), reglages.annonceEtiquette) {
                 maj(reglages.copy(annonceEtiquette = it))
             }
+            LigneReglage(stringResource(R.string.param_annonce_avis_moins_titre), stringResource(R.string.param_annonce_avis_moins_desc), reglages.annonceAvisMoins) {
+                maj(reglages.copy(annonceAvisMoins = it))
+            }
+            LigneReglage(stringResource(R.string.param_annonce_avis_plus_titre), stringResource(R.string.param_annonce_avis_plus_desc), reglages.annonceAvisPlus) {
+                maj(reglages.copy(annonceAvisPlus = it))
+            }
             LigneReglage(stringResource(R.string.param_volume_titre), stringResource(R.string.param_volume_desc), reglages.boutonsVolume) {
                 maj(reglages.copy(boutonsVolume = it))
             }

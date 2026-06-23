@@ -28,4 +28,8 @@ data class Reglages(
     val afficherCodeEssence: Boolean = false,
     /** Proposer la vue Kanban (À faire / En cours / Terminé) dans la liste des contextes. */
     val vueKanban: Boolean = false,
+    /** Annoncer vocalement quand un avis − est défini et la limite inférieure non atteinte. */
+    val annonceAvisMoins: Boolean = false,
+    /** Annoncer vocalement quand un avis + est défini et la limite supérieure dépassée. */
+    val annonceAvisPlus: Boolean = false,
 )

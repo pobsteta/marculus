@@ -32,6 +32,8 @@ class ReglagesRepository(context: Context) {
         val gnssPonctuel = booleanPreferencesKey("gnss_ponctuel")
         val afficherCodeEssence = booleanPreferencesKey("afficher_code_essence")
         val vueKanban = booleanPreferencesKey("vue_kanban")
+        val annonceAvisMoins = booleanPreferencesKey("annonce_avis_moins")
+        val annonceAvisPlus = booleanPreferencesKey("annonce_avis_plus")
     }
 
     val reglages: Flow<Reglages> = ds.data.map { p ->
@@ -52,6 +54,8 @@ class ReglagesRepository(context: Context) {
             gnssPonctuel = p[Cles.gnssPonctuel] ?: false,
             afficherCodeEssence = p[Cles.afficherCodeEssence] ?: false,
             vueKanban = p[Cles.vueKanban] ?: false,
+            annonceAvisMoins = p[Cles.annonceAvisMoins] ?: false,
+            annonceAvisPlus = p[Cles.annonceAvisPlus] ?: false,
         )
     }
 
@@ -76,6 +80,8 @@ class ReglagesRepository(context: Context) {
             p[Cles.gnssPonctuel] = r.gnssPonctuel
             p[Cles.afficherCodeEssence] = r.afficherCodeEssence
             p[Cles.vueKanban] = r.vueKanban
+            p[Cles.annonceAvisMoins] = r.annonceAvisMoins
+            p[Cles.annonceAvisPlus] = r.annonceAvisPlus
         }
     }
 

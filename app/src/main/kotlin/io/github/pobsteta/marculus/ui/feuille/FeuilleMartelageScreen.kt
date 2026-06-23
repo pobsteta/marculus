@@ -91,6 +91,7 @@ import fr.marculus.core.Cubage
 import fr.marculus.core.HauteurParser
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CompteurCle
+import fr.marculus.core.model.ConfigCompteur
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Position
 import fr.marculus.core.model.Reglages
@@ -223,6 +224,17 @@ fun FeuilleMartelageScreen(
             tts.speak(parties.joinToString(", "), TextToSpeech.QUEUE_FLUSH, null, "tige")
         }
     }
+    // Annonce vocale d'avis : limite inférieure non atteinte / limite supérieure dépassée.
+    fun annoncerAvis(cfg: ConfigCompteur, total: Int) {
+        val messages = buildList {
+            if (reglages.annonceAvisPlus && cfg.alertePlus(total)) add(androidContext.getString(R.string.avis_annonce_plus))
+            if (reglages.annonceAvisMoins && cfg.alerteMoins(total)) add(androidContext.getString(R.string.avis_annonce_moins))
+        }
+        if (messages.isNotEmpty()) {
+            reglages.voixTts?.let { nom -> tts.voices?.firstOrNull { it.name == nom }?.let { tts.voice = it } }
+            messages.forEach { tts.speak(it, TextToSpeech.QUEUE_ADD, null, "avis") }
+        }
+    }
     val contexte by produceState<Contexte?>(initialValue = null, contexteId) {
         value = repository.contexte(contexteId)
     }
@@ -305,7 +317,10 @@ fun FeuilleMartelageScreen(
         // Actions de comptage partagées (cellules + boutons de volume).
         fun ajouter(essence: String, classe: Int) {
             retourSensoriel()
-            annoncer(essence, classe, (totaux[CompteurCle(essence, classe)] ?: 0) + ctx.increment)
+            val cle = CompteurCle(essence, classe)
+            val nouveauTotal = (totaux[cle] ?: 0) + ctx.increment
+            annoncer(essence, classe, nouveauTotal)
+            configs[cle]?.let { annoncerAvis(it, nouveauTotal) }
             val parcelleLabel = position?.let { p -> parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label }
             scope.launch {
                 val uuid = repository.ajouterTige(
@@ -329,6 +344,7 @@ fun FeuilleMartelageScreen(
                 retourSensoriel()
                 val q = minOf(ctx.increment, total) // jamais en dessous de zéro
                 annoncer(essence, classe, total - q)
+                configs[CompteurCle(essence, classe)]?.let { annoncerAvis(it, total - q) }
                 scope.launch { repository.annulerTige(contexteId, essence, classe, quantite = q) }
                 derniereSaisie = null // un − ferme la saisie en cours
             }

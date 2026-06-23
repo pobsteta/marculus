@@ -217,6 +217,12 @@
     <string name="param_annonce_nombre_desc">Lit le nouveau total à voix haute à chaque comptage.</string>
     <string name="param_annonce_etiquette_titre">Annonce de l\'étiquette</string>
     <string name="param_annonce_etiquette_desc">Lit « essence classe » à voix haute à chaque comptage.</string>
+    <string name="param_annonce_avis_moins_titre">Annonce si avis −</string>
+    <string name="param_annonce_avis_moins_desc">Quand un avis − est défini et que la limite inférieure n\'est pas atteinte, annonce « Attention, la limite inférieure n\'est pas atteinte ».</string>
+    <string name="param_annonce_avis_plus_titre">Annonce si avis +</string>
+    <string name="param_annonce_avis_plus_desc">Quand un avis + est défini et que la limite supérieure est dépassée, annonce « Attention, la limite supérieure est dépassée ».</string>
+    <string name="avis_annonce_moins">Attention, la limite inférieure n\'est pas atteinte</string>
+    <string name="avis_annonce_plus">Attention, la limite supérieure est dépassée</string>
     <string name="param_volume_titre">Boutons de volume pour compter</string>
     <string name="param_volume_desc">Volume + ajoute, volume − retire sur la cellule active.</string>
     <string name="param_rouvrir_titre">Rouvrir le dernier contexte</string>
