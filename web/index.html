@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marculus — martelage forestier</title>
+  <style>
+    :root { --vert: #2e7d32; --fond: #f6f8f6; --carte: #fff; --texte: #1b2b1b; --gris: #5f6b5f; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+           background: var(--fond); color: var(--texte); line-height: 1.55; }
+    header { background: linear-gradient(135deg, #2e7d32, #1b5e20); color: #fff; padding: 3rem 1.5rem; text-align: center; }
+    header h1 { margin: 0 0 .4rem; font-size: 2.4rem; letter-spacing: .5px; }
+    header p { margin: 0; opacity: .92; font-size: 1.1rem; }
+    .badges { margin-top: 1.2rem; display: flex; gap: .4rem; flex-wrap: wrap; justify-content: center; }
+    main { max-width: 880px; margin: -1.5rem auto 3rem; padding: 0 1.2rem; }
+    .grille { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 1.5rem; }
+    .carte { background: var(--carte); border: 1px solid #e3e8e3; border-radius: 12px; padding: 1.2rem 1.3rem;
+             box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .carte h3 { margin: 0 0 .5rem; color: var(--vert); font-size: 1.1rem; }
+    .carte p { margin: 0; color: var(--gris); font-size: .95rem; }
+    .liens { display: flex; gap: .8rem; flex-wrap: wrap; margin-top: 1.6rem; justify-content: center; }
+    .bouton { display: inline-block; background: var(--vert); color: #fff; text-decoration: none;
+              padding: .7rem 1.3rem; border-radius: 999px; font-weight: 600; }
+    .bouton.secondaire { background: #fff; color: var(--vert); border: 1.5px solid var(--vert); }
+    ul { color: var(--gris); }
+    footer { text-align: center; color: var(--gris); font-size: .85rem; padding: 1.5rem; }
+    code { background: #eef2ee; padding: .1rem .35rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🌲 Marculus</h1>
+    <p>Application Android de martelage forestier — feuille essences × classes, traçable.</p>
+    <div class="badges">
+      <img alt="CI" src="https://github.com/pobsteta/marculus/actions/workflows/ci.yml/badge.svg">
+      <img alt="Version" src="https://img.shields.io/github/v/release/pobsteta/marculus?sort=semver&label=version">
+      <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&logoColor=white">
+      <img alt="Android" src="https://img.shields.io/badge/Android-min%2026-3DDC84?logo=android&logoColor=white">
+    </div>
+  </header>
+
+  <main>
+    <div class="liens">
+      <a class="bouton" href="https://github.com/pobsteta/marculus/releases/latest">⬇️ Dernière release (APK)</a>
+      <a class="bouton secondaire" href="./coverage/">📊 Rapport de couverture</a>
+      <a class="bouton secondaire" href="https://github.com/pobsteta/marculus">💻 Code source</a>
+    </div>
+
+    <div class="grille">
+      <div class="carte"><h3>Feuille de martelage</h3><p>Matrice essences × classes, journal append-only (UUID), hauteur/qualité, annonces vocales, code essence en gros.</p></div>
+      <div class="carte"><h3>Cubage</h3><p>Schaeffer (rapide/lent) et EMERGE : bois fort tige, houppier et total aérien (226 essences), surface terrière.</p></div>
+      <div class="carte"><h3>Carte &amp; foncier</h3><p>GeoPackage par contexte (parcelles + ortho), rattachement spatial, acquisition GNSS continue ou ponctuelle.</p></div>
+      <div class="carte"><h3>Organisation</h3><p>Recherche, date de martelage, vue Kanban 5 colonnes en glisser-déposer, tri par date.</p></div>
+      <div class="carte"><h3>Synchro multi-opérateurs</h3><p>Partage par contexte (.marsync), fusion par UUID idempotente, « dernière écriture gagne ».</p></div>
+      <div class="carte"><h3>Exports</h3><p>CSV contexte et foncier (Propriétaire → Forêt → Parcelle), colonnes G et volumes.</p></div>
+    </div>
+
+    <p style="margin-top:2rem;color:var(--gris);text-align:center">
+      Installation : télécharger l'APK depuis la release, autoriser les « sources inconnues », installer.
+    </p>
+  </main>
+
+  <footer>Marculus · généré automatiquement par GitHub Actions à chaque push sur <code>main</code>.</footer>
+</body>
+</html>

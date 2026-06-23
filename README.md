@@ -7,6 +7,7 @@
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-min%2026%20%C2%B7%20cible%2036-3DDC84?logo=android&logoColor=white)
 ![Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=jetpackcompose&logoColor=white)
+[![Site](https://img.shields.io/badge/site-GitHub%20Pages-2e7d32?logo=github)](https://pobsteta.github.io/marculus/)
 
 Application Android de **martelage forestier** (smartphones et tablettes), inspirée des
 compteurs multi-catégories mais transposée en véritable **feuille de martelage** : une
@@ -117,6 +118,11 @@ Le type de bump dépend du commit :
 
 ---
 
-## Documentation
+## Site & documentation
 
-Spécification v1 : [`docs/specs/2026-06-21-marculus-v1-spec.md`](docs/specs/2026-06-21-marculus-v1-spec.md).
+- **Site GitHub Pages** : <https://pobsteta.github.io/marculus/> — page d'accueil + lien APK +
+  **rapport de couverture HTML** (`/coverage/`), republié à chaque push par `pages.yml`.
+- Spécification v1 : [`docs/specs/2026-06-21-marculus-v1-spec.md`](docs/specs/2026-06-21-marculus-v1-spec.md).
+
+> Pour activer la publication : **Settings → Pages → Source = GitHub Actions** (une fois).
+> Note : GitHub Pages sur un dépôt **privé** nécessite un plan payant (Pro/Team).
