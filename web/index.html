@@ -19,6 +19,13 @@
              box-shadow: 0 1px 3px rgba(0,0,0,.05); }
     .carte h3 { margin: 0 0 .5rem; color: var(--vert); font-size: 1.1rem; }
     .carte p { margin: 0; color: var(--gris); font-size: .95rem; }
+    .galerie { display: flex; gap: 1rem; overflow-x: auto; padding: 1rem .2rem 1.4rem; scroll-snap-type: x mandatory; }
+    .galerie figure { flex: 0 0 auto; margin: 0; text-align: center; scroll-snap-align: start; }
+    .galerie img { height: 380px; width: auto; border: 1px solid #d3dad3; border-radius: 12px;
+                   box-shadow: 0 2px 8px rgba(0,0,0,.12); background: #000; }
+    .galerie figcaption { margin-top: .6rem; font-size: .9rem; color: var(--gris); font-weight: 600; }
+    h2.section { text-align: center; color: var(--vert); margin: 2.2rem 0 .3rem; }
+    h2.section + p { text-align: center; color: var(--gris); margin: 0; }
     .liens { display: flex; gap: .8rem; flex-wrap: wrap; margin-top: 1.6rem; justify-content: center; }
     .bouton { display: inline-block; background: var(--vert); color: #fff; text-decoration: none;
               padding: .7rem 1.3rem; border-radius: 999px; font-weight: 600; }
@@ -54,6 +61,19 @@
       <div class="carte"><h3>Organisation</h3><p>Recherche, date de martelage, vue Kanban 5 colonnes en glisser-déposer, tri par date.</p></div>
       <div class="carte"><h3>Synchro multi-opérateurs</h3><p>Partage par contexte (.marsync), fusion par UUID idempotente, « dernière écriture gagne ».</p></div>
       <div class="carte"><h3>Exports</h3><p>CSV contexte et foncier (Propriétaire → Forêt → Parcelle), colonnes G et volumes.</p></div>
+    </div>
+
+    <h2 class="section">Aperçu de l'application</h2>
+    <p>Faites défiler horizontalement →</p>
+    <div class="galerie">
+      <figure><img src="./screens/01-liste.png" alt="Liste des contextes"><figcaption>Liste des contextes</figcaption></figure>
+      <figure><img src="./screens/02-kanban.png" alt="Vue Kanban"><figcaption>Vue Kanban</figcaption></figure>
+      <figure><img src="./screens/03-creation.png" alt="Création de contexte"><figcaption>Création / édition</figcaption></figure>
+      <figure><img src="./screens/04-feuille.png" alt="Feuille de martelage"><figcaption>Feuille de martelage</figcaption></figure>
+      <figure><img src="./screens/05-carte.png" alt="Carte"><figcaption>Carte (parcelles + GNSS)</figcaption></figure>
+      <figure><img src="./screens/06-statut.png" alt="Statut"><figcaption>Statut (volumes + donut)</figcaption></figure>
+      <figure><img src="./screens/07-parparcelle.png" alt="Par parcelle"><figcaption>Par parcelle (foncier)</figcaption></figure>
+      <figure><img src="./screens/08-parametres.png" alt="Paramètres"><figcaption>Paramètres</figcaption></figure>
     </div>
 
     <p style="margin-top:2rem;color:var(--gris);text-align:center">
