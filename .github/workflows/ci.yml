@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurer JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Configurer le SDK Android
+        uses: android-actions/setup-android@v3
+
+      - name: Configurer Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Tests unitaires + couverture (:core)
+        run: ./gradlew :core:test :core:jacocoTestReport --no-daemon
+
+      - name: Compiler l'APK debug
+        run: ./gradlew :app:assembleDebug --no-daemon
+
+      - name: Générer le badge de couverture
+        if: github.event_name == 'push'
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          jacoco-csv-file: core/build/reports/jacoco/jacoco.csv
+          badges-directory: .github/badges
+          generate-coverage-badge: true
+          coverage-badge-filename: jacoco.svg
+
+      - name: Publier le badge mis à jour
+        if: github.event_name == 'push'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: mise à jour du badge de couverture [skip ci]"
+          file_pattern: .github/badges/*.svg

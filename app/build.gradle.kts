@@ -13,8 +13,9 @@ android {
         applicationId = "io.github.pobsteta.marculus"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        // Version injectée par la CI (-PappVersionName / -PappVersionCode) ; valeurs de repli en local.
+        versionCode = (project.findProperty("appVersionCode") as String?)?.toIntOrNull() ?: 1
+        versionName = (project.findProperty("appVersionName") as String?) ?: "0.1.0"
     }
 
     buildTypes {
