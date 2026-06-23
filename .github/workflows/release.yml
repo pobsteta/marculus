@@ -52,9 +52,13 @@ jobs:
           -PappVersionName=${{ steps.tag.outputs.new_version }}
           -PappVersionCode=${{ github.run_number }}
 
-      - name: Renommer l'APK
+      - name: Nommer l'APK (préfixe marculus + version + horodatage UTC)
         if: steps.tag.outputs.new_tag != ''
-        run: cp app/build/outputs/apk/release/app-release.apk marculus-${{ steps.tag.outputs.new_tag }}.apk
+        id: apk
+        run: |
+          NAME="marculus-${{ steps.tag.outputs.new_tag }}-$(date -u +%Y%m%d-%H%M).apk"
+          cp app/build/outputs/apk/release/app-release.apk "$NAME"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
 
       - name: Créer la release GitHub
         if: steps.tag.outputs.new_tag != ''
@@ -63,4 +67,4 @@ jobs:
           tag_name: ${{ steps.tag.outputs.new_tag }}
           name: Marculus ${{ steps.tag.outputs.new_tag }}
           body: ${{ steps.tag.outputs.changelog }}
-          files: marculus-${{ steps.tag.outputs.new_tag }}.apk
+          files: ${{ steps.apk.outputs.name }}

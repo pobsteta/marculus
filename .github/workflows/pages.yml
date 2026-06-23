@@ -19,10 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Activer / configurer Pages
+      - name: Configurer Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Configurer JDK 21
         uses: actions/setup-java@v4
