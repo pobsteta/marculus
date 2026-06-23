@@ -29,6 +29,7 @@ import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.Reglages
 import fr.marculus.core.model.SeuilsCategories
+import io.github.pobsteta.marculus.Appareil
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ReferentielsRepository
@@ -154,6 +155,7 @@ fun AppRoot(
         Route.Liste -> ListeContextesScreen(
             repository = repository,
             sauvegardeRepository = sauvegardeRepository,
+            operateur = reglages.operateur?.takeIf { it.isNotBlank() } ?: Appareil.id(context),
             onCreer = { route = Route.Creation },
             onOuvrir = { id -> ouvrir(id) },
             onModifier = { id -> route = Route.Edition(id) },

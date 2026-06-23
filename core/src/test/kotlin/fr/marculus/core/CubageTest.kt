@@ -24,10 +24,10 @@ class CubageTest {
     }
 
     @Test
-    fun `emerge volume plausible et repli forme`() {
-        val v = Cubage.volumeEmerge("Chêne", 125.0, 20.0) // ~40 cm DBH, 20 m
-        assertTrue(v in 1.0..2.5, "EMERGE chêne attendu ~1,6 m³, obtenu $v")
-        assertEquals(0.0, Cubage.volumeEmerge("Essence inconnue", 125.0, 20.0))
+    fun `emerge bois fort tige plausible et repli forme`() {
+        val v = Cubage.volumeEmergeTige("Chêne", 125.0, 20.0) // ~40 cm DBH, 20 m
+        assertTrue(v in 0.9..1.8, "EMERGE bois fort tige chêne attendu ~1,3 m³, obtenu $v")
+        assertEquals(0.0, Cubage.volumeEmergeTige("Essence inconnue", 125.0, 20.0)) // non couverte
         assertTrue(Cubage.volumeForme(40.0, 20.0) > 0.0)
     }
 

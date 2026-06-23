@@ -96,7 +96,7 @@
     <string name="creation_dialog_ajout_essence_label">Species name</string>
     <string name="creation_btn_ajouter">Add</string>
     <string name="creation_tarif_section">Volume tariff</string>
-    <string name="creation_tarif_aide">Estimates stem volume (class centre; EMERGE = 2-input total aboveground volume, uses the entered height).</string>
+    <string name="creation_tarif_aide">Estimates stem volume (class centre; EMERGE = 2-input merchantable stem volume, uses the entered height).</string>
     <string name="creation_tarif_aucun">None</string>
     <string name="creation_tarif_rapide">Schaeffer fast</string>
     <string name="creation_tarif_lent">Schaeffer slow</string>

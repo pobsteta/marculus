@@ -98,7 +98,7 @@
     <string name="creation_dialog_ajout_essence_label">Nom de l\'essence</string>
     <string name="creation_btn_ajouter">Ajouter</string>
     <string name="creation_tarif_section">Tarif de cubage</string>
-    <string name="creation_tarif_aide">Estime le volume des tiges (centre de classe ; EMERGE = volume total aérien à 2 entrées, utilise la hauteur saisie).</string>
+    <string name="creation_tarif_aide">Estime le volume des tiges (centre de classe ; EMERGE = volume bois fort tige à 2 entrées, utilise la hauteur saisie).</string>
     <string name="creation_tarif_aucun">Aucun</string>
     <string name="creation_tarif_rapide">Schaeffer rapide</string>
     <string name="creation_tarif_lent">Schaeffer lent</string>

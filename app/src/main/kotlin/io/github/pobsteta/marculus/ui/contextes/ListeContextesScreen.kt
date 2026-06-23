@@ -53,12 +53,15 @@ import io.github.pobsteta.marculus.data.SauvegardeRepository
 import io.github.pobsteta.marculus.ui.libelle
 import kotlinx.coroutines.launch
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListeContextesScreen(
     repository: MartelageRepository,
     sauvegardeRepository: SauvegardeRepository,
+    operateur: String,
     onCreer: () -> Unit,
     onOuvrir: (String) -> Unit,
     onModifier: (String) -> Unit,
@@ -97,8 +100,11 @@ fun ListeContextesScreen(
     fun partagerContexte(id: String, nom: String) {
         scope.launch {
             val json = sauvegardeRepository.exporterContexteJson(id)
-            val nomFichier = nom.replace(Regex("[^A-Za-z0-9_-]"), "_").ifBlank { "contexte" }
-            val fichier = File(context.cacheDir, "$nomFichier.marsync")
+            fun assainir(s: String) = s.replace(Regex("[^A-Za-z0-9_-]"), "_")
+            val nomCtx = assainir(nom).ifBlank { "contexte" }
+            val op = assainir(operateur).take(16)
+            val horodatage = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmm"))
+            val fichier = File(context.cacheDir, "$nomCtx-$op-$horodatage.marsync")
             fichier.writeText(json)
             val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", fichier)
             val envoi = Intent(Intent.ACTION_SEND).apply {
