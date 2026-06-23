@@ -91,6 +91,7 @@ fun CreationContexteScreen(
     var tarifNumero by remember {
         mutableStateOf(contexteExistant?.tarifNumero?.takeIf { it > 0 }?.toString() ?: "")
     }
+    var coefForme by remember { mutableStateOf((contexteExistant?.coefficientForme ?: 0.5).toString()) }
 
     val essencesDisponibles = remember {
         mutableStateListOf<String>().apply {
@@ -256,6 +257,17 @@ fun CreationContexteScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
+            if (tarif == TarifCubage.EMERGE) {
+                OutlinedTextField(
+                    value = coefForme,
+                    onValueChange = { saisie -> coefForme = saisie.filter { it.isDigit() || it == '.' || it == ',' } },
+                    label = { Text(stringResource(R.string.creation_coef_forme)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(stringResource(R.string.creation_coef_forme_aide), style = MaterialTheme.typography.bodySmall)
+            }
 
             erreur?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
@@ -283,18 +295,19 @@ fun CreationContexteScreen(
                                     .map { EssenceColonne(it, fond(it), texte(it)) }
                                 val commentaireFinal = commentaire.trim().ifBlank { null }
                                 val numero = tarifNumero.toIntOrNull() ?: 0
+                                val coef = coefForme.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 } ?: 0.5
                                 scope.launch {
                                     if (edition) {
                                         repository.modifierContexte(
                                             contexteExistant!!.id, nom.trim(), mode,
-                                            AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg, tarif, numero,
+                                            AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg, tarif, numero, coef,
                                         )
                                         onEnregistre(contexteExistant.id)
                                     } else {
                                         val id = repository.creerContexte(
                                             nom.trim(), mode, AxeClasses(mi, ma, pa),
                                             essences, commentaireFinal, inc,
-                                            cheminGpkg = cheminGpkg, tarif = tarif, tarifNumero = numero,
+                                            cheminGpkg = cheminGpkg, tarif = tarif, tarifNumero = numero, coefficientForme = coef,
                                         )
                                         onEnregistre(id)
                                     }

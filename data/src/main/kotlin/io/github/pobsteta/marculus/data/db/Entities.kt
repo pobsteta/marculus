@@ -21,6 +21,7 @@ data class ContexteEntity(
     val cheminGpkg: String? = null,
     val tarif: String = "AUCUN",
     val tarifNumero: Int = 0,
+    val coefficientForme: Double = 0.5,
     /** Horodatage de dernière modification (synchro « dernière écriture gagne »). */
     val modifie: Long = 0,
 )

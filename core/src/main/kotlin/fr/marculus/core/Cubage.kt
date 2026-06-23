@@ -127,7 +127,7 @@ object Cubage {
                 when {
                     h == null -> 0.0
                     coefEmerge(essence) != null -> volumeEmergeTige(essence, cCm, h)
-                    else -> volumeForme(dCm, h)
+                    else -> volumeForme(dCm, h, contexte.coefficientForme)
                 }
             }
             TarifCubage.AUCUN -> 0.0

@@ -86,7 +86,7 @@ class SauvegardeRepository(
         put("essences", essences); putOpt("commentaire", commentaire); put("increment", increment)
         put("exporte", exporte); put("dateCreation", dateCreation); putOpt("operateur", operateur)
         putOpt("cheminGpkg", cheminGpkg); put("tarif", tarif); put("tarifNumero", tarifNumero)
-        put("modifie", modifie)
+        put("coefficientForme", coefficientForme); put("modifie", modifie)
     }
 
     private fun JSONObject.versContexte() = ContexteEntity(
@@ -98,6 +98,7 @@ class SauvegardeRepository(
         cheminGpkg = texteOuNull("cheminGpkg"),
         tarif = if (has("tarif") && !isNull("tarif")) getString("tarif") else "AUCUN",
         tarifNumero = if (has("tarifNumero") && !isNull("tarifNumero")) getInt("tarifNumero") else 0,
+        coefficientForme = if (has("coefficientForme") && !isNull("coefficientForme")) getDouble("coefficientForme") else 0.5,
         modifie = if (has("modifie") && !isNull("modifie")) getLong("modifie") else 0,
     )
 

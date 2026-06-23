@@ -103,6 +103,8 @@
     <string name="creation_tarif_rapide">Schaeffer rapide</string>
     <string name="creation_tarif_lent">Schaeffer lent</string>
     <string name="creation_tarif_emerge">EMERGE (2 entrées)</string>
+    <string name="creation_coef_forme">Coefficient de forme f</string>
+    <string name="creation_coef_forme_aide">Repli pour les essences hors table EMERGE : V = f·π/4·D²·H (≈ 0,5).</string>
     <string name="creation_tarif_numero">Numéro de tarif (1–20)</string>
 
     <!-- Feuille de martelage -->

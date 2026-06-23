@@ -68,6 +68,8 @@ data class Contexte(
     val tarif: TarifCubage = TarifCubage.AUCUN,
     /** Numéro de tarif (1..20) : fixe M = 0,8 + 0,1·N (volume de l'arbre de 45 cm). */
     val tarifNumero: Int = 0,
+    /** Coefficient de forme (repli EMERGE pour essence non couverte) : V = f·π/4·D²·H. */
+    val coefficientForme: Double = 0.5,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 }

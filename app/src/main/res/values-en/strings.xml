@@ -101,6 +101,8 @@
     <string name="creation_tarif_rapide">Schaeffer fast</string>
     <string name="creation_tarif_lent">Schaeffer slow</string>
     <string name="creation_tarif_emerge">EMERGE (2 inputs)</string>
+    <string name="creation_coef_forme">Form factor f</string>
+    <string name="creation_coef_forme_aide">Fallback for species outside the EMERGE table: V = f·π/4·D²·H (≈ 0.5).</string>
     <string name="creation_tarif_numero">Tariff number (1–20)</string>
 
     <!-- Tree marking sheet -->
