@@ -9,6 +9,9 @@ enum class TarifCubage { AUCUN, SCHAEFFER_RAPIDE, SCHAEFFER_LENT, EMERGE }
 /** Un `+` ajoute une tige ; un `−` enregistre une annulation (jamais d'effacement). */
 enum class ActionTige { PLUS, ANNULATION }
 
+/** Colonne Kanban / workflow d'un contexte de martelage. */
+enum class EtatKanban { PROPOSEE, VALIDEE, PLANIFIEE, REALISEE, ABANDONNEE }
+
 /** Position GPS brute (pas de carte en v1). */
 data class Position(val latitude: Double, val longitude: Double)
 
@@ -72,6 +75,8 @@ data class Contexte(
     val coefficientForme: Double = 0.5,
     /** Date de martelage (epoch millis, minuit UTC), ou null si non renseignée. */
     val dateMartelage: Long? = null,
+    /** Colonne Kanban (workflow) du contexte. */
+    val statut: EtatKanban = EtatKanban.PROPOSEE,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 }

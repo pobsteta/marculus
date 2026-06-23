@@ -23,6 +23,7 @@ data class ContexteEntity(
     val tarifNumero: Int = 0,
     val coefficientForme: Double = 0.5,
     val dateMartelage: Long? = null,
+    val statut: String = "PROPOSEE",   // EtatKanban.name
     /** Horodatage de dernière modification (synchro « dernière écriture gagne »). */
     val modifie: Long = 0,
 )

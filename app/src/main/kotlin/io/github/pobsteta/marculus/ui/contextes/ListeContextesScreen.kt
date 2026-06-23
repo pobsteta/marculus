@@ -4,9 +4,12 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,21 +44,31 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.export.ExportCsv
 import io.github.pobsteta.marculus.R
+import fr.marculus.core.model.EtatKanban
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ResumeContexte
 import io.github.pobsteta.marculus.data.SauvegardeRepository
@@ -87,6 +100,10 @@ fun ListeContextesScreen(
     var pendingExport by remember { mutableStateOf<String?>(null) }
     var recherche by remember { mutableStateOf("") }
     var modeKanban by remember { mutableStateOf(false) }
+    // Glisser-déposer Kanban : carte tirée + position du doigt (coord. racine) + rectangles des colonnes.
+    var dragResume by remember { mutableStateOf<ResumeContexte?>(null) }
+    var dragPointer by remember { mutableStateOf(Offset.Zero) }
+    val colonneRects = remember { mutableStateMapOf<Int, Rect>() }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("text/csv"),
@@ -201,30 +218,64 @@ fun ListeContextesScreen(
                     }
                 }
                 vueKanban && modeKanban -> {
-                    val colonnes = listOf(
-                        R.string.kanban_a_faire to 0,
-                        R.string.kanban_en_cours to 1,
-                        R.string.kanban_termine to 2,
-                    )
-                    Row(
-                        Modifier.fillMaxSize().horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        colonnes.forEach { (titreRes, etat) ->
-                            val cartes = filtres.filter { statutContexte(it) == etat }
-                            Column(Modifier.width(300.dp).fillMaxHeight()) {
+                    val etats = EtatKanban.entries
+                    Box(Modifier.fillMaxSize()) {
+                        Row(
+                            Modifier.fillMaxSize().horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            etats.forEachIndexed { index, etat ->
+                                val cartes = filtres.filter { it.contexte.statut == etat }
+                                Column(
+                                    Modifier.width(240.dp).fillMaxHeight()
+                                        .onGloballyPositioned { colonneRects[index] = it.boundsInRoot() },
+                                ) {
+                                    Text(
+                                        "${labelEtat(etat)} (${cartes.size})",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(8.dp),
+                                    )
+                                    LazyColumn(
+                                        contentPadding = PaddingValues(bottom = 80.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        items(cartes, key = { it.contexte.id }) { resume ->
+                                            KanbanCarte(
+                                                resume = resume,
+                                                estTiree = dragResume?.contexte?.id == resume.contexte.id,
+                                                onOuvrir = { onOuvrir(resume.contexte.id) },
+                                                onDragStart = { p -> dragResume = resume; dragPointer = p },
+                                                onDrag = { p -> dragPointer = p },
+                                                onDragEnd = {
+                                                    val cibleIdx = colonneRects.entries.firstOrNull { it.value.contains(dragPointer) }?.key
+                                                    val nouvel = cibleIdx?.let { etats[it] }
+                                                    if (nouvel != null && nouvel != resume.contexte.statut) {
+                                                        scope.launch { repository.modifierStatut(resume.contexte.id, nouvel) }
+                                                    }
+                                                    dragResume = null
+                                                },
+                                                onDragCancel = { dragResume = null },
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        dragResume?.let { r ->
+                            ElevatedCard(
+                                Modifier
+                                    .offset { IntOffset((dragPointer.x - 110.dp.toPx()).roundToInt(), (dragPointer.y - 24.dp.toPx()).roundToInt()) }
+                                    .width(220.dp),
+                            ) {
                                 Text(
-                                    "${stringResource(titreRes)} (${cartes.size})",
+                                    r.contexte.nom,
+                                    modifier = Modifier.padding(10.dp),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(8.dp),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
                                 )
-                                LazyColumn(
-                                    contentPadding = PaddingValues(bottom = 80.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    items(cartes, key = { it.contexte.id }) { resume -> carte(resume) }
-                                }
                             }
                         }
                     }
@@ -291,11 +342,63 @@ private fun formatDateListe(millis: Long): String =
     java.time.Instant.ofEpochMilli(millis).atZone(java.time.ZoneOffset.UTC).toLocalDate()
         .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
 
-/** Colonne Kanban d'un contexte : 0 = à faire (0 tige), 1 = en cours, 2 = terminé (exporté). */
-private fun statutContexte(r: ResumeContexte): Int = when {
-    r.contexte.exporte -> 2
-    r.nbEvenements > 0 -> 1
-    else -> 0
+/** Libellé localisé d'une colonne Kanban. */
+@Composable
+private fun labelEtat(etat: EtatKanban): String = stringResource(
+    when (etat) {
+        EtatKanban.PROPOSEE -> R.string.kanban_proposee
+        EtatKanban.VALIDEE -> R.string.kanban_validee
+        EtatKanban.PLANIFIEE -> R.string.kanban_planifiee
+        EtatKanban.REALISEE -> R.string.kanban_realisee
+        EtatKanban.ABANDONNEE -> R.string.kanban_abandonnee
+    },
+)
+
+/** Carte compacte d'un contexte dans le Kanban, déplaçable par appui long + glissé. */
+@Composable
+private fun KanbanCarte(
+    resume: ResumeContexte,
+    estTiree: Boolean,
+    onOuvrir: () -> Unit,
+    onDragStart: (Offset) -> Unit,
+    onDrag: (Offset) -> Unit,
+    onDragEnd: () -> Unit,
+    onDragCancel: () -> Unit,
+) {
+    var coin by remember { mutableStateOf(Offset.Zero) }
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { coin = it.boundsInRoot().topLeft }
+            .graphicsLayer { alpha = if (estTiree) 0.3f else 1f }
+            .pointerInput(resume.contexte.id) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = { offset -> onDragStart(coin + offset) },
+                    onDrag = { change, _ -> change.consume(); onDrag(coin + change.position) },
+                    onDragEnd = { onDragEnd() },
+                    onDragCancel = { onDragCancel() },
+                )
+            }
+            .clickable { onOuvrir() },
+    ) {
+        Column(Modifier.padding(10.dp)) {
+            Text(
+                resume.contexte.nom,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            resume.contexte.dateMartelage?.let { d ->
+                Text("📅 ${formatDateListe(d)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Text(
+                stringResource(R.string.liste_detail_tiges, resume.nbEvenements),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
 }
 
 private fun correspond(r: ResumeContexte, q: String): Boolean {

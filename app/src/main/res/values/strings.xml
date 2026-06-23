@@ -236,6 +236,11 @@
     <string name="kanban_termine">Terminé</string>
     <string name="liste_vue_liste">Vue liste</string>
     <string name="liste_vue_kanban">Vue Kanban</string>
+    <string name="kanban_proposee">Proposée</string>
+    <string name="kanban_validee">Validée</string>
+    <string name="kanban_planifiee">Planifiée</string>
+    <string name="kanban_realisee">Réalisée</string>
+    <string name="kanban_abandonnee">Abandonnée</string>
     <string name="param_langue_titre">Langue</string>
     <string name="param_langue_changer">Changer</string>
     <string name="param_langue_systeme">Système</string>

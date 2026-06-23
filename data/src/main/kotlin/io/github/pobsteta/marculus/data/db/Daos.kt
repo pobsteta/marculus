@@ -11,7 +11,8 @@ interface ContexteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun inserer(contexte: ContexteEntity)
 
-    @Query("SELECT * FROM contexte ORDER BY dateCreation DESC")
+    // Décroissant sur la date de martelage (contextes sans date en fin), puis date de création.
+    @Query("SELECT * FROM contexte ORDER BY dateMartelage IS NULL, dateMartelage DESC, dateCreation DESC")
     fun observerTous(): Flow<List<ContexteEntity>>
 
     @Query("SELECT * FROM contexte WHERE id = :id")

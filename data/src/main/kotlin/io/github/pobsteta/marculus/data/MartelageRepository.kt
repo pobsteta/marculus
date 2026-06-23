@@ -7,6 +7,7 @@ import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.ConfigCompteur
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
+import fr.marculus.core.model.EtatKanban
 import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.Position
 import fr.marculus.core.model.TarifCubage
@@ -160,6 +161,12 @@ class MartelageRepository(
     suspend fun enregistrerCheminGpkg(contexteId: String, chemin: String?) {
         val existant = contexteDao.parId(contexteId) ?: return
         contexteDao.inserer(existant.copy(cheminGpkg = chemin, modifie = horloge()))
+    }
+
+    /** Change la colonne Kanban (statut) d'un contexte. */
+    suspend fun modifierStatut(contexteId: String, statut: EtatKanban) {
+        val existant = contexteDao.parId(contexteId) ?: return
+        contexteDao.inserer(existant.copy(statut = statut.name, modifie = horloge()))
     }
 
     suspend fun supprimerContexte(id: String) {
@@ -378,6 +385,7 @@ class MartelageRepository(
         tarifNumero = tarifNumero,
         coefficientForme = coefficientForme,
         dateMartelage = dateMartelage,
+        statut = runCatching { EtatKanban.valueOf(statut) }.getOrDefault(EtatKanban.PROPOSEE),
     )
 
     private fun TigeEntity.versDomaine() = Tige(

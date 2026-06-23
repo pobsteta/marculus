@@ -86,7 +86,8 @@ class SauvegardeRepository(
         put("essences", essences); putOpt("commentaire", commentaire); put("increment", increment)
         put("exporte", exporte); put("dateCreation", dateCreation); putOpt("operateur", operateur)
         putOpt("cheminGpkg", cheminGpkg); put("tarif", tarif); put("tarifNumero", tarifNumero)
-        put("coefficientForme", coefficientForme); putOpt("dateMartelage", dateMartelage); put("modifie", modifie)
+        put("coefficientForme", coefficientForme); putOpt("dateMartelage", dateMartelage)
+        put("statut", statut); put("modifie", modifie)
     }
 
     private fun JSONObject.versContexte() = ContexteEntity(
@@ -100,6 +101,7 @@ class SauvegardeRepository(
         tarifNumero = if (has("tarifNumero") && !isNull("tarifNumero")) getInt("tarifNumero") else 0,
         coefficientForme = if (has("coefficientForme") && !isNull("coefficientForme")) getDouble("coefficientForme") else 0.5,
         dateMartelage = if (has("dateMartelage") && !isNull("dateMartelage")) getLong("dateMartelage") else null,
+        statut = if (has("statut") && !isNull("statut")) getString("statut") else "PROPOSEE",
         modifie = if (has("modifie") && !isNull("modifie")) getLong("modifie") else 0,
     )
 
