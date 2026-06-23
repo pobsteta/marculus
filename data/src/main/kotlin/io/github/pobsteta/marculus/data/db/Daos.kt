@@ -70,6 +70,9 @@ interface TigeDao {
     @Query("UPDATE tige SET hauteurTexte = :hauteur WHERE uuid = :uuid")
     suspend fun majHauteur(uuid: String, hauteur: String?)
 
+    @Query("UPDATE tige SET latitude = :lat, longitude = :lon, parcelle = :parcelle, modifie = :modifie WHERE uuid = :uuid")
+    suspend fun majPosition(uuid: String, lat: Double?, lon: Double?, parcelle: String?, modifie: Long)
+
     @Query("UPDATE tige SET qualiteArbre = :qualite WHERE uuid = :uuid")
     suspend fun majQualite(uuid: String, qualite: String?)
 

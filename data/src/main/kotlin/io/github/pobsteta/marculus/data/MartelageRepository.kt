@@ -250,6 +250,10 @@ class MartelageRepository(
         marquerNonExporte(contexteId)
     }
 
+    /** Renseigne la position GNSS (et la parcelle déduite) d'une tige a posteriori — acquisition ponctuelle. */
+    suspend fun annoterPosition(uuid: String, position: Position, parcelle: String?) =
+        tigeDao.majPosition(uuid, position.latitude, position.longitude, parcelle, horloge())
+
     /** Annote une tige précise (par uuid) : la hauteur. */
     suspend fun annoterHauteur(uuid: String, hauteurTexte: String?) = tigeDao.majHauteur(uuid, hauteurTexte)
 

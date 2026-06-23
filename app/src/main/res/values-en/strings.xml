@@ -199,6 +199,8 @@
     <string name="param_son_desc">Plays a sound on each count.</string>
     <string name="param_gnss_titre">Record GNSS position</string>
     <string name="param_gnss_desc">Attaches the phone position to each stem (if permission is granted).</string>
+    <string name="param_gnss_ponctuel_titre">One-shot GNSS</string>
+    <string name="param_gnss_ponctuel_desc">Captures the position on tap (saves battery) instead of continuous tracking; the fix may arrive with a slight delay.</string>
     <string name="param_annonce_nombre_titre">Announce the count</string>
     <string name="param_annonce_nombre_desc">Reads the new total aloud on each count.</string>
     <string name="param_annonce_etiquette_titre">Announce the label</string>

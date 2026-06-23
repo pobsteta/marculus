@@ -22,4 +22,6 @@ data class Reglages(
     val voixTts: String? = null,
     /** Nom de l'opérateur (attaché à chaque tige, pour la synchro multi-opérateurs). */
     val operateur: String? = null,
+    /** Acquisition GNSS ponctuelle (au clic) plutôt qu'en écoute continue (économie de batterie). */
+    val gnssPonctuel: Boolean = false,
 )

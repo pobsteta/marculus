@@ -132,6 +132,27 @@ private fun positionActuelle(active: Boolean): Position? {
     return etat.value
 }
 
+/** Capture une position GNSS unique (one-shot) — acquisition ponctuelle au clic. */
+private fun capturerPositionPonctuelle(context: Context, onResult: (Position?) -> Unit) {
+    val lm = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+    val autorise = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+        PackageManager.PERMISSION_GRANTED
+    if (lm == null || !autorise) {
+        onResult(null)
+        return
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        runCatching {
+            lm.getCurrentLocation(LocationManager.GPS_PROVIDER, null, context.mainExecutor) { loc ->
+                onResult(loc?.let { Position(it.latitude, it.longitude) })
+            }
+        }.onFailure { onResult(null) }
+    } else {
+        val loc = runCatching { lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) }.getOrNull()
+        onResult(loc?.let { Position(it.latitude, it.longitude) })
+    }
+}
+
 private fun vibrer(context: Context) {
     val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
@@ -201,7 +222,8 @@ fun FeuilleMartelageScreen(
     }
     val totaux by repository.totaux(contexteId).collectAsStateWithLifecycle(emptyMap())
     val configs by repository.configs(contexteId).collectAsStateWithLifecycle(emptyMap())
-    val position = positionActuelle(reglages.capturePosition)
+    // Écoute continue seulement si la capture est active ET pas en mode ponctuel.
+    val position = positionActuelle(reglages.capturePosition && !reglages.gnssPonctuel)
     // Parcelles du contexte : pour figer le rattachement spatial dans la tige au moment du martelage.
     val parcelles by produceState(initialValue = emptyList<ParcelleGpkg>(), contexte) {
         value = contexte?.cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcellesDetail(it) } } ?: emptyList()
@@ -276,6 +298,14 @@ fun FeuilleMartelageScreen(
                     position = position, operateur = operateurEffectif, parcelle = parcelleLabel,
                 )
                 derniereSaisie = DerniereSaisie(uuid, essence, classe)
+                if (reglages.capturePosition && reglages.gnssPonctuel) {
+                    capturerPositionPonctuelle(androidContext) { pos ->
+                        if (pos != null) {
+                            val pcl = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, pos) }?.label
+                            scope.launch { repository.annoterPosition(uuid, pos, pcl) }
+                        }
+                    }
+                }
             }
         }
         fun retirer(essence: String, classe: Int) {
@@ -402,11 +432,19 @@ fun FeuilleMartelageScreen(
                 }
                 scope.launch {
                     if (action == ActionTige.PLUS) {
-                        repository.ajouterTige(
+                        val uuid = repository.ajouterTige(
                             contexteId, essence, classe, quantite = quantite,
                             hauteurTexte = hauteur, qualiteArbre = qualite, position = pos,
                             operateur = operateurEffectif, parcelle = parcelleLabel,
                         )
+                        if (reglages.capturePosition && reglages.gnssPonctuel) {
+                            capturerPositionPonctuelle(androidContext) { p2 ->
+                                if (p2 != null) {
+                                    val pcl = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p2) }?.label
+                                    scope.launch { repository.annoterPosition(uuid, p2, pcl) }
+                                }
+                            }
+                        }
                     } else {
                         repository.annulerTige(contexteId, essence, classe, quantite = quantite, operateur = operateurEffectif)
                     }
