@@ -4,20 +4,26 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ViewColumn
+import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.DropdownMenu
@@ -43,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -64,6 +71,7 @@ fun ListeContextesScreen(
     repository: MartelageRepository,
     sauvegardeRepository: SauvegardeRepository,
     operateur: String,
+    vueKanban: Boolean = false,
     onCreer: () -> Unit,
     onOuvrir: (String) -> Unit,
     onModifier: (String) -> Unit,
@@ -78,6 +86,7 @@ fun ListeContextesScreen(
     var menuAppli by remember { mutableStateOf(false) }
     var pendingExport by remember { mutableStateOf<String?>(null) }
     var recherche by remember { mutableStateOf("") }
+    var modeKanban by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("text/csv"),
@@ -124,6 +133,14 @@ fun ListeContextesScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.liste_app_title)) },
                 actions = {
+                    if (vueKanban) {
+                        IconButton(onClick = { modeKanban = !modeKanban }) {
+                            Icon(
+                                if (modeKanban) Icons.Filled.ViewList else Icons.Filled.ViewColumn,
+                                contentDescription = stringResource(if (modeKanban) R.string.liste_vue_liste else R.string.liste_vue_kanban),
+                            )
+                        }
+                    }
                     Box {
                         IconButton(onClick = { menuAppli = true }) {
                             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.liste_menu_content_desc))
@@ -163,30 +180,62 @@ fun ListeContextesScreen(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             )
             val filtres = if (recherche.isBlank()) resumes else resumes.filter { correspond(it, recherche) }
-            if (filtres.isEmpty()) {
-                Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                    Text(stringResource(R.string.liste_vide_message), textAlign = TextAlign.Center)
+            @Composable
+            fun carte(resume: ResumeContexte) = CarteContexte(
+                resume = resume,
+                onOuvrir = { onOuvrir(resume.contexte.id) },
+                onModifier = { onModifier(resume.contexte.id) },
+                onSupprimer = { aSupprimer = resume },
+                onLire = { aLire = resume },
+                onDupliquer = { scope.launch { repository.dupliquerContexte(resume.contexte.id) } },
+                onExporter = {
+                    pendingExport = resume.contexte.id
+                    exportLauncher.launch("${resume.contexte.nom}.csv")
+                },
+                onPartager = { partagerContexte(resume.contexte.id, resume.contexte.nom) },
+            )
+            when {
+                filtres.isEmpty() -> {
+                    Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
+                        Text(stringResource(R.string.liste_vide_message), textAlign = TextAlign.Center)
+                    }
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(filtres, key = { it.contexte.id }) { resume ->
-                        CarteContexte(
-                            resume = resume,
-                            onOuvrir = { onOuvrir(resume.contexte.id) },
-                            onModifier = { onModifier(resume.contexte.id) },
-                            onSupprimer = { aSupprimer = resume },
-                            onLire = { aLire = resume },
-                            onDupliquer = { scope.launch { repository.dupliquerContexte(resume.contexte.id) } },
-                            onExporter = {
-                                pendingExport = resume.contexte.id
-                                exportLauncher.launch("${resume.contexte.nom}.csv")
-                            },
-                            onPartager = { partagerContexte(resume.contexte.id, resume.contexte.nom) },
-                        )
+                vueKanban && modeKanban -> {
+                    val colonnes = listOf(
+                        R.string.kanban_a_faire to 0,
+                        R.string.kanban_en_cours to 1,
+                        R.string.kanban_termine to 2,
+                    )
+                    Row(
+                        Modifier.fillMaxSize().horizontalScroll(rememberScrollState()).padding(horizontal = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        colonnes.forEach { (titreRes, etat) ->
+                            val cartes = filtres.filter { statutContexte(it) == etat }
+                            Column(Modifier.width(300.dp).fillMaxHeight()) {
+                                Text(
+                                    "${stringResource(titreRes)} (${cartes.size})",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(8.dp),
+                                )
+                                LazyColumn(
+                                    contentPadding = PaddingValues(bottom = 80.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    items(cartes, key = { it.contexte.id }) { resume -> carte(resume) }
+                                }
+                            }
+                        }
+                    }
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(filtres, key = { it.contexte.id }) { resume -> carte(resume) }
                     }
                 }
             }
@@ -241,6 +290,13 @@ private fun normRecherche(s: String): String =
 private fun formatDateListe(millis: Long): String =
     java.time.Instant.ofEpochMilli(millis).atZone(java.time.ZoneOffset.UTC).toLocalDate()
         .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+
+/** Colonne Kanban d'un contexte : 0 = à faire (0 tige), 1 = en cours, 2 = terminé (exporté). */
+private fun statutContexte(r: ResumeContexte): Int = when {
+    r.contexte.exporte -> 2
+    r.nbEvenements > 0 -> 1
+    else -> 0
+}
 
 private fun correspond(r: ResumeContexte, q: String): Boolean {
     val n = normRecherche(q)

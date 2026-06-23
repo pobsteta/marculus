@@ -79,6 +79,10 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -224,6 +228,15 @@ fun FeuilleMartelageScreen(
     }
     val totaux by repository.totaux(contexteId).collectAsStateWithLifecycle(emptyMap())
     val configs by repository.configs(contexteId).collectAsStateWithLifecycle(emptyMap())
+    // Demande la permission de localisation à l'exécution dès que la capture GNSS est activée.
+    val permLocalisation = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    LaunchedEffect(reglages.capturePosition) {
+        if (reglages.capturePosition &&
+            ContextCompat.checkSelfPermission(androidContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        ) {
+            permLocalisation.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
     // Écoute continue seulement si la capture est active ET pas en mode ponctuel.
     val position = positionActuelle(reglages.capturePosition && !reglages.gnssPonctuel)
     // Parcelles du contexte : pour figer le rattachement spatial dans la tige au moment du martelage.
@@ -356,7 +369,7 @@ fun FeuilleMartelageScreen(
                         val estDerniere = derniereSaisie?.let { it.essence == e.nom && it.classe == classe } ?: false
                         CelluleCompteur(
                             libelle = if (reglages.afficherCodeEssence) {
-                                "${Cubage.codeEssence(e.nom) ?: e.nom} $classe"
+                                "${Cubage.codeEssence(e.nom) ?: e.nom.uppercase().take(3)} $classe"
                             } else {
                                 "${e.nom} $classe"
                             },
@@ -496,8 +509,10 @@ private fun CelluleCompteur(
                     style = if (libelleGrand) MaterialTheme.typography.titleLarge else MaterialTheme.typography.labelMedium,
                     fontWeight = if (libelleGrand) FontWeight.Bold else null,
                     textAlign = TextAlign.Center,
-                    maxLines = if (libelleGrand) 1 else 2,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
+                    // En mode code : auto-dimensionnement pour remplir la cellule sans jamais tronquer.
+                    autoSize = if (libelleGrand) TextAutoSize.StepBased(minFontSize = 12.sp, maxFontSize = 24.sp) else null,
                     modifier = Modifier.weight(1f).padding(horizontal = 2.dp),
                 )
                 IconButton(onClick = onQualite, enabled = hqActif, modifier = Modifier.size(32.dp)) {

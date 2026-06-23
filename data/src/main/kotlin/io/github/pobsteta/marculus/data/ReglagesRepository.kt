@@ -31,6 +31,7 @@ class ReglagesRepository(context: Context) {
         val operateur = stringPreferencesKey("operateur")
         val gnssPonctuel = booleanPreferencesKey("gnss_ponctuel")
         val afficherCodeEssence = booleanPreferencesKey("afficher_code_essence")
+        val vueKanban = booleanPreferencesKey("vue_kanban")
     }
 
     val reglages: Flow<Reglages> = ds.data.map { p ->
@@ -50,6 +51,7 @@ class ReglagesRepository(context: Context) {
             operateur = p[Cles.operateur],
             gnssPonctuel = p[Cles.gnssPonctuel] ?: false,
             afficherCodeEssence = p[Cles.afficherCodeEssence] ?: false,
+            vueKanban = p[Cles.vueKanban] ?: false,
         )
     }
 
@@ -73,6 +75,7 @@ class ReglagesRepository(context: Context) {
             if (op.isNullOrBlank()) p.remove(Cles.operateur) else p[Cles.operateur] = op
             p[Cles.gnssPonctuel] = r.gnssPonctuel
             p[Cles.afficherCodeEssence] = r.afficherCodeEssence
+            p[Cles.vueKanban] = r.vueKanban
         }
     }
 

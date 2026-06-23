@@ -26,4 +26,6 @@ data class Reglages(
     val gnssPonctuel: Boolean = false,
     /** Afficher le code essence ONF (3 car.) en gros au lieu du nom complet dans les cellules. */
     val afficherCodeEssence: Boolean = false,
+    /** Proposer la vue Kanban (À faire / En cours / Terminé) dans la liste des contextes. */
+    val vueKanban: Boolean = false,
 )

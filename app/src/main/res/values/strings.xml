@@ -223,6 +223,13 @@
     <string name="param_rouvrir_desc">Au lancement, ouvre directement la dernière feuille utilisée.</string>
     <string name="param_code_essence_titre">Code essence en gros</string>
     <string name="param_code_essence_desc">Affiche le code ONF (3 lettres) + classe en grand au lieu du nom complet, pour une meilleure lisibilité.</string>
+    <string name="param_kanban_titre">Vue Kanban des contextes</string>
+    <string name="param_kanban_desc">Ajoute un mode Kanban (À faire / En cours / Terminé) dans la liste des contextes.</string>
+    <string name="kanban_a_faire">À faire</string>
+    <string name="kanban_en_cours">En cours</string>
+    <string name="kanban_termine">Terminé</string>
+    <string name="liste_vue_liste">Vue liste</string>
+    <string name="liste_vue_kanban">Vue Kanban</string>
     <string name="param_langue_titre">Langue</string>
     <string name="param_langue_changer">Changer</string>
     <string name="param_langue_systeme">Système</string>

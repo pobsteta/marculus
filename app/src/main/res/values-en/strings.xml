@@ -221,6 +221,13 @@
     <string name="param_rouvrir_desc">On launch, open the last used sheet directly.</string>
     <string name="param_code_essence_titre">Large species code</string>
     <string name="param_code_essence_desc">Shows the ONF code (3 letters) + class in large text instead of the full name, for better readability.</string>
+    <string name="param_kanban_titre">Kanban view for contexts</string>
+    <string name="param_kanban_desc">Adds a Kanban mode (To do / In progress / Done) to the contexts list.</string>
+    <string name="kanban_a_faire">To do</string>
+    <string name="kanban_en_cours">In progress</string>
+    <string name="kanban_termine">Done</string>
+    <string name="liste_vue_liste">List view</string>
+    <string name="liste_vue_kanban">Kanban view</string>
     <string name="param_langue_titre">Language</string>
     <string name="param_langue_changer">Change</string>
     <string name="param_langue_systeme">System</string>

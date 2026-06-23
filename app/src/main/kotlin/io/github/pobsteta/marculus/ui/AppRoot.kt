@@ -156,6 +156,7 @@ fun AppRoot(
             repository = repository,
             sauvegardeRepository = sauvegardeRepository,
             operateur = reglages.operateur?.takeIf { it.isNotBlank() } ?: Appareil.id(context),
+            vueKanban = reglages.vueKanban,
             onCreer = { route = Route.Creation },
             onOuvrir = { id -> ouvrir(id) },
             onModifier = { id -> route = Route.Edition(id) },

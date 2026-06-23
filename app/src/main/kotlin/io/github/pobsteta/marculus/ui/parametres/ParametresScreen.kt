@@ -204,6 +204,9 @@ fun ParametresScreen(
             LigneReglage(stringResource(R.string.param_code_essence_titre), stringResource(R.string.param_code_essence_desc), reglages.afficherCodeEssence) {
                 maj(reglages.copy(afficherCodeEssence = it))
             }
+            LigneReglage(stringResource(R.string.param_kanban_titre), stringResource(R.string.param_kanban_desc), reglages.vueKanban) {
+                maj(reglages.copy(vueKanban = it))
+            }
 
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
             // Langue de l'application.
