@@ -28,6 +28,11 @@ tasks.named<Test>("test") {
 
 tasks.named<JacocoReport>("jacocoTestReport") {
     dependsOn("test")
+    // Exclut la table de coefficients EMERGE générée (données, pas de logique à tester) :
+    // sa simple initialisation gonflerait artificiellement la couverture.
+    classDirectories.setFrom(
+        files(classDirectories.files.map { fileTree(it) { exclude("**/EmergeCoefsKt.class") } }),
+    )
     reports {
         xml.required.set(true)
         csv.required.set(true)
