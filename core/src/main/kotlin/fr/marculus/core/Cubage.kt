@@ -27,46 +27,25 @@ object Cubage {
 
     private const val DECOUPE_BOIS_FORT_CM = 7.0
 
-    /** Coefficients EMERGE : a,b,c (volume total) et d,e,f,g (part de tige). Source : gftools::ListTarEmerge. */
-    private data class CoefEmerge(
-        val a: Double, val b: Double, val c: Double,
-        val d: Double, val e: Double, val f: Double, val g: Double,
-    )
-
-    private val EMERGE_FEUILLUS = CoefEmerge(0.52196, 0.66107, -0.00166, 0.75738, 0.08902, -3.62468, 0.06723)
-    private val EMERGE_RESINEUX = CoefEmerge(0.35639, 1.75592, 0.00173, 0.73796, 0.07128, -2.46468, 0.04462)
-
-    private val EMERGE = mapOf(
-        "chene" to CoefEmerge(0.56104, 0.66107, -0.00235, 0.90955, 0.06998, -4.24117, 0.02852),
-        "chene sessile" to CoefEmerge(0.56104, 0.66107, -0.00235, 0.90955, 0.06998, -4.24117, 0.02852),
-        "chene pedoncule" to CoefEmerge(0.56104, 0.66107, -0.00235, 0.89821, 0.06695, -4.05873, 0.02452),
-        "hetre" to CoefEmerge(0.54187, 0.66107, -0.00150, 0.87721, 0.06488, -4.11764, 0.02298),
-        "charme" to CoefEmerge(0.53321, 0.66107, -0.00150, 0.72119, 0.13227, -3.93900, 0.08058),
-        "frene" to CoefEmerge(0.50864, 0.66107, -0.00097, 0.85751, 0.06899, -3.38930, 0.03003),
-        "chataignier" to CoefEmerge(0.52196, 0.66107, -0.00166, 0.66167, 0.10312, -2.54073, 0.08169),
-        "bouleau" to CoefEmerge(0.49335, 0.66107, -0.00159, 0.70973, 0.12597, -4.29785, 0.10620),
-        "sapin" to CoefEmerge(0.39790, 1.75592, 0.00168, 0.88412, 0.05671, -4.03079, 0.03243),
-        "epicea" to CoefEmerge(0.30342, 1.75592, 0.00390, 0.80828, 0.08902, -3.39626, 0.04733),
-        "douglas" to CoefEmerge(0.23501, 1.75592, 0.00389, 0.71074, 0.18144, -3.06943, 0.10053),
-        "meleze" to CoefEmerge(0.37658, 1.75592, 0.00107, 0.83717, 0.06521, -4.27466, 0.06594),
-        "pin sylvestre" to CoefEmerge(0.37161, 1.75592, 0.00064, 0.84501, 0.05908, -3.00829, 0.03301),
-        "pin maritime" to CoefEmerge(0.39581, 1.75592, -0.00186, 1.07374, 0.05706, -6.30588, 0.08522),
-    )
-
+    // Normalisation identique à celle utilisée pour générer EMERGE_COEFS (EmergeCoefs.kt) :
+    // minuscules, sans accent, caractères non alphanumériques → espace, espaces compactés.
     private fun normaliser(s: String): String =
-        Normalizer.normalize(s.trim().lowercase(), Normalizer.Form.NFD).replace(Regex("\\p{M}+"), "")
+        Normalizer.normalize(s.trim().lowercase(), Normalizer.Form.NFD)
+            .replace(Regex("\\p{M}+"), "")
+            .replace(Regex("[^a-z0-9 ]"), " ")
+            .replace(Regex(" +"), " ")
+            .trim()
 
     private fun coefEmerge(essence: String): CoefEmerge? {
         val n = normaliser(essence)
-        EMERGE[n]?.let { return it }
-        if (n.contains("resineux") || n.contains("conifere") || n.startsWith("pin") ||
-            n.contains("epicea") || n.contains("sapin") || n.contains("cedre") || n.contains("if ")
-        ) {
-            EMERGE.entries.firstOrNull { n.contains(it.key) }?.let { return it.value }
-            return EMERGE_RESINEUX
-        }
+        if (n.isEmpty()) return null
+        EMERGE_COEFS[n]?.let { return it }
+        // Correspondance partielle : l'essence saisie commence par / est préfixe d'un nom de la table.
+        EMERGE_COEFS.entries.firstOrNull { it.key.startsWith(n) || n.startsWith(it.key) }?.let { return it.value }
+        EMERGE_COEFS.entries.firstOrNull { it.key.contains(n) || n.contains(it.key) }?.let { return it.value }
+        // Repli par grand groupe.
+        if (n.contains("resineux") || n.contains("conifere")) return EMERGE_RESINEUX
         if (n.contains("feuillu")) return EMERGE_FEUILLUS
-        EMERGE.entries.firstOrNull { n.startsWith(it.key) || n.contains(it.key) }?.let { return it.value }
         return null
     }
 
