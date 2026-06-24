@@ -289,4 +289,11 @@
     <string name="rtk_motdepasse">Password</string>
     <string name="rtk_tester">Test</string>
     <string name="rtk_arreter">Stop</string>
+
+    <!-- About -->
+    <string name="liste_menu_apropos">About</string>
+    <string name="apropos_titre">About Marculus</string>
+    <string name="apropos_version">Version %1$s</string>
+    <string name="apropos_desc">Forest marking app — tallying, volume estimation and RTK positioning.</string>
+    <string name="apropos_github">Open on GitHub</string>
 </resources>

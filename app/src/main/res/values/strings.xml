@@ -291,4 +291,11 @@
     <string name="rtk_motdepasse">Mot de passe</string>
     <string name="rtk_tester">Tester</string>
     <string name="rtk_arreter">Arrêter</string>
+
+    <!-- À propos -->
+    <string name="liste_menu_apropos">À propos</string>
+    <string name="apropos_titre">À propos de Marculus</string>
+    <string name="apropos_version">Version %1$s</string>
+    <string name="apropos_desc">Application de martelage forestier — comptage, cubage et géolocalisation RTK.</string>
+    <string name="apropos_github">Ouvrir sur GitHub</string>
 </resources>

@@ -1,6 +1,7 @@
 package io.github.pobsteta.marculus.ui.contextes
 
 import android.content.Intent
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
@@ -78,6 +79,9 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/** Dépôt GitHub de Marculus (lien « À propos »). */
+private const val URL_GITHUB = "https://github.com/pobsteta/marculus"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListeContextesScreen(
@@ -97,6 +101,7 @@ fun ListeContextesScreen(
     var aSupprimer by remember { mutableStateOf<ResumeContexte?>(null) }
     var aLire by remember { mutableStateOf<ResumeContexte?>(null) }
     var menuAppli by remember { mutableStateOf(false) }
+    var aProposOuvert by remember { mutableStateOf(false) }
     var pendingExport by remember { mutableStateOf<String?>(null) }
     var recherche by remember { mutableStateOf("") }
     var modeKanban by remember { mutableStateOf(false) }
@@ -170,6 +175,10 @@ fun ListeContextesScreen(
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.liste_menu_parametres)) },
                                 onClick = { menuAppli = false; onParametres() },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.liste_menu_apropos)) },
+                                onClick = { menuAppli = false; aProposOuvert = true },
                             )
                         }
                     }
@@ -308,6 +317,29 @@ fun ListeContextesScreen(
                 }) { Text(stringResource(R.string.liste_dialog_supprimer_confirmer)) }
             },
             dismissButton = { TextButton(onClick = { aSupprimer = null }) { Text(stringResource(R.string.liste_dialog_annuler)) } },
+        )
+    }
+
+    if (aProposOuvert) {
+        val versionNom = remember {
+            runCatching { context.packageManager.getPackageInfo(context.packageName, 0).versionName }.getOrNull() ?: ""
+        }
+        AlertDialog(
+            onDismissRequest = { aProposOuvert = false },
+            title = { Text(stringResource(R.string.apropos_titre)) },
+            text = {
+                Column {
+                    Text(stringResource(R.string.apropos_version, versionNom ?: ""))
+                    Text(stringResource(R.string.apropos_desc))
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(URL_GITHUB))) }
+                    aProposOuvert = false
+                }) { Text(stringResource(R.string.apropos_github)) }
+            },
+            dismissButton = { TextButton(onClick = { aProposOuvert = false }) { Text(stringResource(R.string.liste_dialog_fermer)) } },
         )
     }
 
