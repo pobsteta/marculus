@@ -22,6 +22,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -80,26 +82,31 @@ class ServiceGnssRtk : Service() {
         _etat.value = EtatRtk()
         collecte?.cancel()
         collecte = scope.launch {
-            // runCatching : un échec de connexion (BT/TCP/NTRIP) termine le flux sans crasher.
-            runCatching {
-                pont.evenements().collect { ev ->
-                    when (ev) {
-                        is EvenementRtk.Octets ->
-                            _etat.update { it.copy(connecte = true, octetsRecus = it.octetsRecus + ev.n) }
-                        is EvenementRtk.Trame ->
-                            _etat.update { it.copy(tramesRecues = it.tramesRecues + 1, derniereTrame = ev.ligne) }
-                        is EvenementRtk.Fix -> {
-                            _fixCourant.value = ev.fix
-                            _etat.update { it.copy(fix = ev.fix) }
-                            majPremierPlan(ev.fix)
+            // Boucle de reconnexion : une micro-coupure du lien ne stoppe pas le service,
+            // on rouvre la connexion après un court délai (jusqu'à arrêt explicite).
+            while (isActive) {
+                runCatching {
+                    pont.evenements().collect { ev ->
+                        when (ev) {
+                            is EvenementRtk.Octets ->
+                                _etat.update { it.copy(connecte = true, erreur = null, octetsRecus = it.octetsRecus + ev.n) }
+                            is EvenementRtk.Trame ->
+                                _etat.update { it.copy(tramesRecues = it.tramesRecues + 1, derniereTrame = ev.ligne) }
+                            is EvenementRtk.Fix -> {
+                                _fixCourant.value = ev.fix
+                                _etat.update { it.copy(fix = ev.fix) }
+                                majPremierPlan(ev.fix)
+                            }
+                            is EvenementRtk.Rtcm ->
+                                _etat.update { it.copy(rtcmEnvoye = it.rtcmEnvoye + ev.n) }
                         }
-                        is EvenementRtk.Rtcm ->
-                            _etat.update { it.copy(rtcmEnvoye = it.rtcmEnvoye + ev.n) }
                     }
-                }
-            }.onFailure { e -> _etat.update { it.copy(erreur = e.message ?: "erreur de connexion") } }
-            _fixCourant.value = null
-            stopSelf()
+                }.onFailure { e -> _etat.update { it.copy(erreur = e.message ?: "erreur de connexion") } }
+                if (!isActive) break
+                _fixCourant.value = null
+                _etat.update { it.copy(connecte = false) }
+                delay(RECONNEXION_MS)
+            }
         }
         return START_STICKY
     }
@@ -140,6 +147,7 @@ class ServiceGnssRtk : Service() {
     companion object {
         private const val CANAL = "gnss_rtk"
         private const val ID_NOTIF = 1001
+        private const val RECONNEXION_MS = 2000L
         private const val ACTION_ARRET = "io.github.pobsteta.marculus.gnss.ARRET"
 
         /** Pont à exécuter, posé par l'appelant juste avant [demarrer]. */

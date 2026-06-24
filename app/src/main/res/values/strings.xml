@@ -310,7 +310,8 @@
     <string name="etat_latitude">Latitude</string>
     <string name="etat_longitude">Longitude</string>
     <string name="etat_altitude">Altitude</string>
-    <string name="etat_satellites">Satellites</string>
+    <string name="etat_satellites_utilises">Satellites utilisés</string>
+    <string name="etat_satellites_vus">Satellites en vue</string>
     <string name="etat_hdop">HDOP</string>
     <string name="etat_pdop">PDOP</string>
     <string name="etat_vdop">VDOP</string>
