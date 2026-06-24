@@ -110,7 +110,8 @@ autonome/DGPS (pas encore RTK).*
   - *Bluetooth Classic SPP* : `BluetoothSocket` (UUID `00001101-0000-1000-8000-00805F9B34FB`),
     appareil parmi `BluetoothAdapter.bondedDevices`. Permissions `BLUETOOTH_CONNECT` (API 31+) /
     legacy `BLUETOOTH`/`BLUETOOTH_ADMIN`.
-  - *TCP/WiFi* : `Socket(host, port)` vers la carte porteuse (le plus simple à coder/tester).
+  - *TCP/WiFi* (`TransportTcp`, fait) : `Socket(host, port)` vers une carte à interface IP
+    (mosaic-X5) ou un compagnon WiFi (ESP32). Le plus simple à coder **et à tester** (cf. §9).
   - *USB série* (CDC/FTDI) ou *BLE* : implémentations ultérieures si besoin.
   - En topologie (A), G1 suffit déjà à afficher un fix **RTK fixe** (le récepteur corrige seul).
 - **Parser NMEA en domaine pur** (`:core`, TDD) :
@@ -216,3 +217,18 @@ et testable immédiatement, indépendamment du matériel.
   confirmant le **renvoi périodique de la GGA** par le client (cf. G2).
 - **Apps de référence** (comportement à imiter) : Lefebure NTRIP Client, **Bluetooth GNSS**
   (open-source — utile pour le parsing NMEA u-blox/NTRIP), SW Maps, QField.
+
+## 9. Test sans matériel (rejeu NMEA par TCP)
+
+`TransportTcp` permet de valider toute la chaîne (transport → `SourcePositionExterne` → badge →
+trace sur la tige) **sans récepteur ni Bluetooth**, en rejouant un log NMEA depuis un PC :
+
+1. Enregistrer (ou fabriquer) un fichier `trame.nmea` avec des `$..GGA`/`$..GST` valides
+   (ex. les vecteurs de `NmeaParserTest`, RTK fixe inclus).
+2. Sur le PC (même réseau que le téléphone) : `nc -l 5000 < trame.nmea` (ou en boucle :
+   `while true; do nc -l 5000 < trame.nmea; done`).
+3. Dans Marculus, choisir le transport **TCP** et pointer `Socket(<ip-du-pc>, 5000)`.
+4. Vérifier le **badge de fix** (RTK fixe + précision) et la **position figée** sur une tige.
+
+Couvre aussi le cas terrain mosaic-X5/ESP32 servant le NMEA sur un socket TCP. Le **Bluetooth SPP
+reste le transport de terrain par défaut** (point-à-point, data cellulaire libre pour le caster).
