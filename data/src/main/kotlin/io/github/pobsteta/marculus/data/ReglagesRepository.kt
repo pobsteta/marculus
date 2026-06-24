@@ -3,9 +3,12 @@ package io.github.pobsteta.marculus.data
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import fr.marculus.core.model.ConfigRtk
 import fr.marculus.core.model.Reglages
+import fr.marculus.core.model.TransportRtk
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -34,6 +37,18 @@ class ReglagesRepository(context: Context) {
         val vueKanban = booleanPreferencesKey("vue_kanban")
         val annonceAvisMoins = booleanPreferencesKey("annonce_avis_moins")
         val annonceAvisPlus = booleanPreferencesKey("annonce_avis_plus")
+        val rtkActif = booleanPreferencesKey("rtk_actif")
+        val rtkTransport = stringPreferencesKey("rtk_transport")
+        val rtkAppareilBt = stringPreferencesKey("rtk_appareil_bt")
+        val rtkAppareilBtNom = stringPreferencesKey("rtk_appareil_bt_nom")
+        val rtkHoteTcp = stringPreferencesKey("rtk_hote_tcp")
+        val rtkPortTcp = intPreferencesKey("rtk_port_tcp")
+        val rtkPontNtrip = booleanPreferencesKey("rtk_pont_ntrip")
+        val rtkCasterHote = stringPreferencesKey("rtk_caster_hote")
+        val rtkCasterPort = intPreferencesKey("rtk_caster_port")
+        val rtkMountpoint = stringPreferencesKey("rtk_mountpoint")
+        val rtkUtilisateur = stringPreferencesKey("rtk_utilisateur")
+        val rtkMotDePasse = stringPreferencesKey("rtk_motdepasse")
     }
 
     val reglages: Flow<Reglages> = ds.data.map { p ->
@@ -56,6 +71,20 @@ class ReglagesRepository(context: Context) {
             vueKanban = p[Cles.vueKanban] ?: false,
             annonceAvisMoins = p[Cles.annonceAvisMoins] ?: false,
             annonceAvisPlus = p[Cles.annonceAvisPlus] ?: false,
+            rtk = ConfigRtk(
+                actif = p[Cles.rtkActif] ?: false,
+                transport = if (p[Cles.rtkTransport] == "TCP") TransportRtk.TCP else TransportRtk.BLUETOOTH,
+                appareilBt = p[Cles.rtkAppareilBt],
+                appareilBtNom = p[Cles.rtkAppareilBtNom],
+                hoteTcp = p[Cles.rtkHoteTcp] ?: "",
+                portTcp = p[Cles.rtkPortTcp] ?: 5000,
+                pontNtrip = p[Cles.rtkPontNtrip] ?: false,
+                casterHote = p[Cles.rtkCasterHote] ?: "caster.centipede.fr",
+                casterPort = p[Cles.rtkCasterPort] ?: 2101,
+                mountpoint = p[Cles.rtkMountpoint] ?: "",
+                utilisateur = p[Cles.rtkUtilisateur] ?: "centipede",
+                motDePasse = p[Cles.rtkMotDePasse] ?: "centipede",
+            ),
         )
     }
 
@@ -82,6 +111,18 @@ class ReglagesRepository(context: Context) {
             p[Cles.vueKanban] = r.vueKanban
             p[Cles.annonceAvisMoins] = r.annonceAvisMoins
             p[Cles.annonceAvisPlus] = r.annonceAvisPlus
+            p[Cles.rtkActif] = r.rtk.actif
+            p[Cles.rtkTransport] = r.rtk.transport.name
+            r.rtk.appareilBt.let { if (it == null) p.remove(Cles.rtkAppareilBt) else p[Cles.rtkAppareilBt] = it }
+            r.rtk.appareilBtNom.let { if (it == null) p.remove(Cles.rtkAppareilBtNom) else p[Cles.rtkAppareilBtNom] = it }
+            p[Cles.rtkHoteTcp] = r.rtk.hoteTcp
+            p[Cles.rtkPortTcp] = r.rtk.portTcp
+            p[Cles.rtkPontNtrip] = r.rtk.pontNtrip
+            p[Cles.rtkCasterHote] = r.rtk.casterHote
+            p[Cles.rtkCasterPort] = r.rtk.casterPort
+            p[Cles.rtkMountpoint] = r.rtk.mountpoint
+            p[Cles.rtkUtilisateur] = r.rtk.utilisateur
+            p[Cles.rtkMotDePasse] = r.rtk.motDePasse
         }
     }
 

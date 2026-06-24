@@ -202,8 +202,10 @@ par défaut) pour obtenir un fix RTK FIXE. Sautable si le récepteur corrige dé
    mapping, insertion/annotation `annoterPosition`, sauvegarde JSON, **colonnes CSV** QualiteFix /
    Precision_m) ; **orchestrateur `PontRtk`** (montant NMEA→fix, descendant RTCM→récepteur, renvoi
    GGA VRS) ; **`ServiceGnssRtk`** de premier plan (`foregroundServiceType=location`, expose
-   `fixCourant`, démarrer/arrêter). **Reste** : réglages (appareil BT/TCP, source corrections,
-   caster Centipede, bouton Tester) + câblage badge/position RTK dans la feuille/carte + i18n.
+   `fixCourant`, démarrer/arrêter) ; **réglages RTK** (`ConfigRtk` persisté DataStore + section
+   Paramètres : transport BT/TCP, choix appareil appairé, source corrections, caster Centipede
+   pré-rempli, bouton **Tester** branché sur le service + `BadgeFix` en direct ; i18n fr/en).
+   **Reste** : câblage du badge + capture de la position RTK au `+` dans la feuille/carte.
    Validation bout-en-bout = rejeu TCP (§9) puis **matériel**.
 
 G0 (mock location) abandonné. Chaque étape est démontrable seule ; le parser NMEA est livrable

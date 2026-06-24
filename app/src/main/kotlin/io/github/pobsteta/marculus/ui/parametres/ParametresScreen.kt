@@ -276,6 +276,9 @@ fun ParametresScreen(
             OutlinedButton(onClick = { fusionLauncher.launch(arrayOf("*/*")) }, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.sync_fusionner))
             }
+
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            SectionRtk(reglages) { maj(it) }
         }
     }
 

@@ -1,5 +1,30 @@
 package fr.marculus.core.model
 
+/** Lien physique vers le récepteur GNSS externe. */
+enum class TransportRtk { BLUETOOTH, TCP }
+
+/**
+ * Configuration du récepteur GNSS externe RTK et du caster NTRIP. [pontNtrip] = false signifie que
+ * le récepteur (ou son compagnon) fait lui-même les corrections (topologie A) ; true = l'application
+ * tire le RTCM du caster et le renvoie au récepteur (topologie B). Caster pré-rempli Centipede.
+ */
+data class ConfigRtk(
+    val actif: Boolean = false,
+    val transport: TransportRtk = TransportRtk.BLUETOOTH,
+    /** Adresse de l'appareil Bluetooth appairé (MAC), ou null. */
+    val appareilBt: String? = null,
+    /** Nom lisible de l'appareil Bluetooth choisi (affichage). */
+    val appareilBtNom: String? = null,
+    val hoteTcp: String = "",
+    val portTcp: Int = 5000,
+    val pontNtrip: Boolean = false,
+    val casterHote: String = "caster.centipede.fr",
+    val casterPort: Int = 2101,
+    val mountpoint: String = "",
+    val utilisateur: String = "centipede",
+    val motDePasse: String = "centipede",
+)
+
 /** Réglages de l'application (persistés via DataStore). */
 data class Reglages(
     val antiVeille: Boolean = false,
@@ -32,4 +57,6 @@ data class Reglages(
     val annonceAvisMoins: Boolean = false,
     /** Annoncer vocalement quand un avis + est défini et la limite supérieure dépassée. */
     val annonceAvisPlus: Boolean = false,
+    /** Récepteur GNSS externe RTK + caster NTRIP. */
+    val rtk: ConfigRtk = ConfigRtk(),
 )

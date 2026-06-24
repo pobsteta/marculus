@@ -270,4 +270,25 @@
     <string name="sync_fusionner">Fusionner</string>
     <string name="sync_msg_fusion">Synchronisation fusionnée.</string>
     <string name="sync_partage_titre">Partager la synchronisation</string>
+
+    <!-- GNSS externe RTK -->
+    <string name="rtk_section">GNSS externe (RTK)</string>
+    <string name="rtk_actif_titre">Récepteur externe RTK</string>
+    <string name="rtk_actif_desc">Utiliser un récepteur GNSS externe (mosaic-X5, UM980…) au lieu du GNSS interne.</string>
+    <string name="rtk_transport_bt">Bluetooth</string>
+    <string name="rtk_transport_tcp">TCP / WiFi</string>
+    <string name="rtk_choisir_appareil">Choisir l\'appareil</string>
+    <string name="rtk_aucun_appareil">Aucun appareil sélectionné</string>
+    <string name="rtk_appareils_titre">Appareils Bluetooth appairés</string>
+    <string name="rtk_permission_bt">Autorisez le Bluetooth pour choisir un appareil appairé.</string>
+    <string name="rtk_hote">Hôte</string>
+    <string name="rtk_port">Port</string>
+    <string name="rtk_source_titre">Corrections par l\'application (pont NTRIP)</string>
+    <string name="rtk_source_desc">Activé : l\'application tire le RTCM du caster et le renvoie au récepteur. Désactivé : le récepteur se corrige seul.</string>
+    <string name="rtk_caster">Caster</string>
+    <string name="rtk_mountpoint">Point de montage</string>
+    <string name="rtk_utilisateur">Identifiant</string>
+    <string name="rtk_motdepasse">Mot de passe</string>
+    <string name="rtk_tester">Tester</string>
+    <string name="rtk_arreter">Arrêter</string>
 </resources>

@@ -268,4 +268,25 @@
     <string name="sync_fusionner">Merge</string>
     <string name="sync_msg_fusion">Sync merged.</string>
     <string name="sync_partage_titre">Share the sync</string>
+
+    <!-- External RTK GNSS -->
+    <string name="rtk_section">External GNSS (RTK)</string>
+    <string name="rtk_actif_titre">External RTK receiver</string>
+    <string name="rtk_actif_desc">Use an external GNSS receiver (mosaic-X5, UM980…) instead of the internal GNSS.</string>
+    <string name="rtk_transport_bt">Bluetooth</string>
+    <string name="rtk_transport_tcp">TCP / WiFi</string>
+    <string name="rtk_choisir_appareil">Choose device</string>
+    <string name="rtk_aucun_appareil">No device selected</string>
+    <string name="rtk_appareils_titre">Paired Bluetooth devices</string>
+    <string name="rtk_permission_bt">Allow Bluetooth to choose a paired device.</string>
+    <string name="rtk_hote">Host</string>
+    <string name="rtk_port">Port</string>
+    <string name="rtk_source_titre">Corrections via the app (NTRIP bridge)</string>
+    <string name="rtk_source_desc">On: the app pulls RTCM from the caster and forwards it to the receiver. Off: the receiver corrects itself.</string>
+    <string name="rtk_caster">Caster</string>
+    <string name="rtk_mountpoint">Mount point</string>
+    <string name="rtk_utilisateur">Username</string>
+    <string name="rtk_motdepasse">Password</string>
+    <string name="rtk_tester">Test</string>
+    <string name="rtk_arreter">Stop</string>
 </resources>
