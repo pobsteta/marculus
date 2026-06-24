@@ -1,9 +1,11 @@
 package io.github.pobsteta.marculus.gnss
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
@@ -11,7 +13,9 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import fr.marculus.core.model.ConfigRtk
 import fr.marculus.core.model.FixGnss
+import fr.marculus.core.model.TransportRtk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -111,6 +115,33 @@ class ServiceGnssRtk : Service() {
         fun demarrer(contexte: Context, pont: PontRtk) {
             pontCourant = pont
             ContextCompat.startForegroundService(contexte, Intent(contexte, ServiceGnssRtk::class.java))
+        }
+
+        /**
+         * Construit le pont depuis une [ConfigRtk] (transport BT/TCP + caster éventuel) et démarre
+         * le service. Renvoie false si la configuration ne permet pas d'ouvrir un transport.
+         */
+        @SuppressLint("MissingPermission")
+        fun demarrerDepuis(contexte: Context, rtk: ConfigRtk): Boolean {
+            val transport: Transport = when (rtk.transport) {
+                TransportRtk.BLUETOOTH -> {
+                    val adresse = rtk.appareilBt ?: return false
+                    val adaptateur = contexte.getSystemService(BluetoothManager::class.java)?.adapter
+                    val appareil = runCatching { adaptateur?.getRemoteDevice(adresse) }.getOrNull() ?: return false
+                    TransportBluetoothSpp(appareil)
+                }
+                TransportRtk.TCP -> {
+                    if (rtk.hoteTcp.isBlank()) return false
+                    TransportTcp(rtk.hoteTcp, rtk.portTcp)
+                }
+            }
+            val ntrip = if (rtk.pontNtrip) {
+                ClientNtrip(rtk.casterHote, rtk.casterPort, rtk.mountpoint, rtk.utilisateur, rtk.motDePasse)
+            } else {
+                null
+            }
+            demarrer(contexte, PontRtk(transport, ntrip))
+            return true
         }
 
         /** Demande l'arrêt du service. */

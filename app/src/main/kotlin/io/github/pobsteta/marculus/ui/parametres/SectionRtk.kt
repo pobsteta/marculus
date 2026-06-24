@@ -37,12 +37,7 @@ import fr.marculus.core.model.ConfigRtk
 import fr.marculus.core.model.Reglages
 import fr.marculus.core.model.TransportRtk
 import io.github.pobsteta.marculus.R
-import io.github.pobsteta.marculus.gnss.ClientNtrip
-import io.github.pobsteta.marculus.gnss.PontRtk
 import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
-import io.github.pobsteta.marculus.gnss.Transport
-import io.github.pobsteta.marculus.gnss.TransportBluetoothSpp
-import io.github.pobsteta.marculus.gnss.TransportTcp
 import io.github.pobsteta.marculus.ui.gnss.BadgeFix
 
 /** Section « GNSS externe (RTK) » de l'écran Paramètres : transport, caster, test en direct. */
@@ -166,7 +161,7 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
         ) {
-            Button(onClick = { demarrerService(context, rtk) }) { Text(stringResource(R.string.rtk_tester)) }
+            Button(onClick = { ServiceGnssRtk.demarrerDepuis(context, rtk) }) { Text(stringResource(R.string.rtk_tester)) }
             OutlinedButton(onClick = { ServiceGnssRtk.arreter(context) }) { Text(stringResource(R.string.rtk_arreter)) }
             BadgeFix(fix)
         }
@@ -218,25 +213,6 @@ private fun LigneSwitch(titre: String, description: String, valeur: Boolean, onC
         }
         Switch(checked = valeur, onCheckedChange = onChange)
     }
-}
-
-/** Construit le pont depuis la config et démarre le service de premier plan. */
-@SuppressLint("MissingPermission")
-private fun demarrerService(context: Context, rtk: ConfigRtk) {
-    val transport: Transport? = when (rtk.transport) {
-        TransportRtk.BLUETOOTH -> rtk.appareilBt?.let { adresse ->
-            val adaptateur = context.getSystemService(BluetoothManager::class.java)?.adapter
-            runCatching { adaptateur?.getRemoteDevice(adresse) }.getOrNull()?.let { TransportBluetoothSpp(it) }
-        }
-        TransportRtk.TCP -> if (rtk.hoteTcp.isNotBlank()) TransportTcp(rtk.hoteTcp, rtk.portTcp) else null
-    }
-    if (transport == null) return
-    val ntrip = if (rtk.pontNtrip) {
-        ClientNtrip(rtk.casterHote, rtk.casterPort, rtk.mountpoint, rtk.utilisateur, rtk.motDePasse)
-    } else {
-        null
-    }
-    ServiceGnssRtk.demarrer(context, PontRtk(transport, ntrip))
 }
 
 /** Appareils Bluetooth appairés (nom, adresse). Vide si la permission n'est pas accordée. */

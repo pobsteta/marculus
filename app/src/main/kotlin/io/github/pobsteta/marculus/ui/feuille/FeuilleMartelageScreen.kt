@@ -99,7 +99,9 @@ import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ParcelleGpkg
 import io.github.pobsteta.marculus.Appareil
+import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
 import io.github.pobsteta.marculus.ui.ToucheVolume
+import io.github.pobsteta.marculus.ui.gnss.BadgeFix
 import io.github.pobsteta.marculus.ui.tige.SaisieTigeDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -251,6 +253,14 @@ fun FeuilleMartelageScreen(
     }
     // Écoute continue seulement si la capture est active ET pas en mode ponctuel.
     val position = positionActuelle(reglages.capturePosition && !reglages.gnssPonctuel)
+    // Source RTK externe (service de premier plan) : prioritaire quand elle est activée.
+    val fixRtk by ServiceGnssRtk.fixCourant.collectAsStateWithLifecycle()
+    val rtkActif = reglages.rtk.actif
+    LaunchedEffect(rtkActif) {
+        if (rtkActif) ServiceGnssRtk.demarrerDepuis(androidContext, reglages.rtk)
+    }
+    // Position retenue pour figer la tige : RTK si actif (et disponible), sinon GNSS interne.
+    val positionEffective = if (rtkActif) fixRtk?.position else position
     // Parcelles du contexte : pour figer le rattachement spatial dans la tige au moment du martelage.
     val parcelles by produceState(initialValue = emptyList<ParcelleGpkg>(), contexte) {
         value = contexte?.cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcellesDetail(it) } } ?: emptyList()
@@ -271,6 +281,9 @@ fun FeuilleMartelageScreen(
                     }
                 },
                 actions = {
+                    if (rtkActif) {
+                        BadgeFix(fixRtk, Modifier.padding(end = 8.dp))
+                    }
                     Box {
                         IconButton(onClick = { menuReset = true }) {
                             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.feuille_menu))
@@ -321,14 +334,17 @@ fun FeuilleMartelageScreen(
             val nouveauTotal = (totaux[cle] ?: 0) + ctx.increment
             annoncer(essence, classe, nouveauTotal)
             configs[cle]?.let { annoncerAvis(it, nouveauTotal) }
-            val parcelleLabel = position?.let { p -> parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label }
+            val fix = if (rtkActif) fixRtk else null
+            val pos = positionEffective
+            val parcelleLabel = pos?.let { p -> parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label }
             scope.launch {
                 val uuid = repository.ajouterTige(
                     contexteId, essence, classe, quantite = ctx.increment,
-                    position = position, operateur = operateurEffectif, parcelle = parcelleLabel,
+                    position = pos, operateur = operateurEffectif, parcelle = parcelleLabel,
+                    qualiteFix = fix?.qualite, precisionM = fix?.precisionHorizontaleM,
                 )
                 derniereSaisie = DerniereSaisie(uuid, essence, classe)
-                if (reglages.capturePosition && reglages.gnssPonctuel) {
+                if (!rtkActif && reglages.capturePosition && reglages.gnssPonctuel) {
                     capturerPositionPonctuelle(androidContext) { pos ->
                         if (pos != null) {
                             val pcl = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, pos) }?.label
@@ -462,7 +478,8 @@ fun FeuilleMartelageScreen(
             quantiteInitiale = (ctxLibre?.increment ?: 1).toString(),
             onAnnuler = { saisieLibre = false },
             onValider = { action, essence, classe, quantite, hauteur, qualite ->
-                val pos = position
+                val fix = if (rtkActif) fixRtk else null
+                val pos = positionEffective
                 val parcelleLabel = pos?.let { p ->
                     parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label
                 }
@@ -472,8 +489,9 @@ fun FeuilleMartelageScreen(
                             contexteId, essence, classe, quantite = quantite,
                             hauteurTexte = hauteur, qualiteArbre = qualite, position = pos,
                             operateur = operateurEffectif, parcelle = parcelleLabel,
+                            qualiteFix = fix?.qualite, precisionM = fix?.precisionHorizontaleM,
                         )
-                        if (reglages.capturePosition && reglages.gnssPonctuel) {
+                        if (!rtkActif && reglages.capturePosition && reglages.gnssPonctuel) {
                             capturerPositionPonctuelle(androidContext) { p2 ->
                                 if (p2 != null) {
                                     val pcl = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p2) }?.label

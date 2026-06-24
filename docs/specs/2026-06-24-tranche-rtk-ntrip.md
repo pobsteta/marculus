@@ -198,15 +198,17 @@ par défaut) pour obtenir un fix RTK FIXE. Sautable si le récepteur corrige dé
    statut ; 6 tests JVM) + `ClientNtrip` `:app` (TCP, en-tête, flux RTCM, `envoyerGga`), permissions
    FOREGROUND_SERVICE. **Reste (→ G3)** : pont RTCM↔récepteur + service de premier plan (cycle de
    vie lié au démarrage/arrêt depuis l'UI).
-4. 🟡 **`G3`** — fait : **trace `qualiteFix`/`precisionM` sur la tige** (modèle, **Room v12**,
+4. ✅ **`G3`** — fait : **trace `qualiteFix`/`precisionM` sur la tige** (modèle, **Room v12**,
    mapping, insertion/annotation `annoterPosition`, sauvegarde JSON, **colonnes CSV** QualiteFix /
    Precision_m) ; **orchestrateur `PontRtk`** (montant NMEA→fix, descendant RTCM→récepteur, renvoi
    GGA VRS) ; **`ServiceGnssRtk`** de premier plan (`foregroundServiceType=location`, expose
    `fixCourant`, démarrer/arrêter) ; **réglages RTK** (`ConfigRtk` persisté DataStore + section
    Paramètres : transport BT/TCP, choix appareil appairé, source corrections, caster Centipede
-   pré-rempli, bouton **Tester** branché sur le service + `BadgeFix` en direct ; i18n fr/en).
-   **Reste** : câblage du badge + capture de la position RTK au `+` dans la feuille/carte.
-   Validation bout-en-bout = rejeu TCP (§9) puis **matériel**.
+   pré-rempli, bouton **Tester** branché sur le service + `BadgeFix` en direct ; i18n fr/en) ;
+   **câblage feuille de martelage** : quand le RTK est actif, le service est auto-démarré, la
+   **position figée au `+`** (cellules, boutons volume, saisie libre) provient du fix RTK avec sa
+   **qualité/précision**, et le **badge** est affiché en permanence dans la barre.
+   **Tranche RTK complète** — validation bout-en-bout = rejeu TCP (§9) puis **matériel**.
 
 G0 (mock location) abandonné. Chaque étape est démontrable seule ; le parser NMEA est livrable
 et testable immédiatement, indépendamment du matériel.
