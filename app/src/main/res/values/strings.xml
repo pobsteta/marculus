@@ -295,6 +295,21 @@
     <string name="rtk_aucun_mountpoint">Aucun point de montage trouvé (caster injoignable ?).</string>
     <string name="rtk_corrections_ok">Corrections NTRIP reçues (âge %1$s s) — le récepteur est alimenté.</string>
     <string name="rtk_corrections_attente">En attente de corrections NTRIP (badge RTK = preuve que ça marche).</string>
+    <string name="rtk_etat_gnss">État GNSS</string>
+    <!-- Panneau État GNSS -->
+    <string name="etat_gnss_titre">État GNSS</string>
+    <string name="etat_gnss_aucun">Aucune donnée GNSS (récepteur non connecté).</string>
+    <string name="etat_fix">Type de fix</string>
+    <string name="etat_precision">Précision horizontale</string>
+    <string name="etat_latitude">Latitude</string>
+    <string name="etat_longitude">Longitude</string>
+    <string name="etat_altitude">Altitude</string>
+    <string name="etat_satellites">Satellites</string>
+    <string name="etat_hdop">HDOP</string>
+    <string name="etat_pdop">PDOP</string>
+    <string name="etat_vdop">VDOP</string>
+    <string name="etat_age">Âge des corrections</string>
+    <string name="etat_station">Station de référence</string>
 
     <!-- À propos -->
     <string name="liste_menu_apropos">À propos</string>

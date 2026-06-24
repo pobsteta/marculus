@@ -39,4 +39,8 @@ data class FixGnss(
     val altitudeM: Double?,
     val ageCorrectionsS: Double?,
     val precisionHorizontaleM: Double?,
+    val pdop: Double? = null,
+    val vdop: Double? = null,
+    /** Identifiant de la station de référence des corrections (champ 14 de la GGA). */
+    val stationRef: String? = null,
 )

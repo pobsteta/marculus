@@ -47,6 +47,7 @@ import io.github.pobsteta.marculus.R
 import io.github.pobsteta.marculus.gnss.ClientNtrip
 import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
 import io.github.pobsteta.marculus.ui.gnss.BadgeFix
+import io.github.pobsteta.marculus.ui.gnss.DialogueEtatGnss
 import kotlinx.coroutines.launch
 
 /** Section « GNSS externe (RTK) » de l'écran Paramètres : transport, caster, test en direct. */
@@ -61,6 +62,7 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
     var mountpoints by remember { mutableStateOf<List<EntreeSourcetable>>(emptyList()) }
     var menuMountpoints by remember { mutableStateOf(false) }
     var chargementMountpoints by remember { mutableStateOf(false) }
+    var etatGnssOuvert by remember { mutableStateOf(false) }
 
     val demandePermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
         if (ok) choixAppareil = true
@@ -168,8 +170,9 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
         ) {
             Button(onClick = { ServiceGnssRtk.demarrerDepuis(context, rtk) }) { Text(stringResource(R.string.rtk_tester)) }
             OutlinedButton(onClick = { ServiceGnssRtk.arreter(context) }) { Text(stringResource(R.string.rtk_arreter)) }
-            BadgeFix(fix)
+            BadgeFix(fix) { etatGnssOuvert = true }
         }
+        OutlinedButton(onClick = { etatGnssOuvert = true }) { Text(stringResource(R.string.rtk_etat_gnss)) }
         // Indicateur NTRIP : l'âge des corrections (trame GGA) prouve que le récepteur est alimenté.
         if (rtk.pontNtrip) {
             val age = fix?.ageCorrectionsS
@@ -206,6 +209,10 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
                 }
             },
         )
+    }
+
+    if (etatGnssOuvert) {
+        DialogueEtatGnss(fix) { etatGnssOuvert = false }
     }
 }
 

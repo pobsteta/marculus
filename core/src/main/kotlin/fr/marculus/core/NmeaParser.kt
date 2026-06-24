@@ -13,7 +13,11 @@ data class TrameGga(
     val hdop: Double?,
     val altitudeM: Double?,
     val ageCorrectionsS: Double?,
+    val stationRef: String? = null,
 )
+
+/** Trame GSA décodée : dilutions de précision (position, horizontale, verticale). */
+data class TrameGsa(val pdop: Double?, val hdop: Double?, val vdop: Double?)
 
 /** Trame GST décodée : écarts-types de position (m) → précision horizontale estimée. */
 data class TrameGst(
@@ -69,6 +73,7 @@ object NmeaParser {
             hdop = f.getOrNull(8)?.toDoubleOrNull(),
             altitudeM = f.getOrNull(9)?.toDoubleOrNull(),
             ageCorrectionsS = f.getOrNull(13)?.toDoubleOrNull(),
+            stationRef = f.getOrNull(14)?.takeIf { it.isNotBlank() },
         )
     }
 
@@ -81,15 +86,29 @@ object NmeaParser {
         return TrameGst(lat, lon)
     }
 
-    /** Assemble un fix complet depuis une GGA et (optionnellement) la dernière GST connue. */
-    fun fixDepuis(gga: TrameGga, gst: TrameGst? = null): FixGnss = FixGnss(
+    /** Décode une trame GSA ; null si ce n'est pas une GSA valide. PDOP/HDOP/VDOP en fin de trame. */
+    fun parseGsa(phrase: String): TrameGsa? {
+        val f = champs(phrase) ?: return null
+        if (f.isEmpty() || !f[0].endsWith("GSA")) return null
+        return TrameGsa(
+            pdop = f.getOrNull(15)?.toDoubleOrNull(),
+            hdop = f.getOrNull(16)?.toDoubleOrNull(),
+            vdop = f.getOrNull(17)?.toDoubleOrNull(),
+        )
+    }
+
+    /** Assemble un fix complet depuis une GGA et (optionnellement) les dernières GST et GSA. */
+    fun fixDepuis(gga: TrameGga, gst: TrameGst? = null, gsa: TrameGsa? = null): FixGnss = FixGnss(
         position = gga.position,
         qualite = gga.qualite,
         nbSatellites = gga.nbSatellites,
-        hdop = gga.hdop,
+        hdop = gga.hdop ?: gsa?.hdop,
         altitudeM = gga.altitudeM,
         ageCorrectionsS = gga.ageCorrectionsS,
         precisionHorizontaleM = gst?.precisionHorizontaleM,
+        pdop = gsa?.pdop,
+        vdop = gsa?.vdop,
+        stationRef = gga.stationRef,
     )
 
     /** Convertit une coordonnée NMEA `ddmm.mmmm` + hémisphère en degrés décimaux signés. */

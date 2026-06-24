@@ -1,6 +1,7 @@
 package io.github.pobsteta.marculus.ui.gnss
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,7 +21,7 @@ import fr.marculus.core.model.QualiteFix
  * libellé issu de [QualiteFix.libelle] et précision horizontale (cm ou m) si disponible.
  */
 @Composable
-fun BadgeFix(fix: FixGnss?, modifier: Modifier = Modifier) {
+fun BadgeFix(fix: FixGnss?, modifier: Modifier = Modifier, onClick: (() -> Unit)? = null) {
     val qualite = fix?.qualite ?: QualiteFix.INVALIDE
     val couleur = when (qualite) {
         QualiteFix.RTK_FIXE -> Color(0xFF2E7D32)
@@ -33,6 +34,7 @@ fun BadgeFix(fix: FixGnss?, modifier: Modifier = Modifier) {
     Row(
         modifier
             .clip(RoundedCornerShape(50))
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .background(couleur)
             .padding(horizontal = 10.dp, vertical = 4.dp),
     ) {

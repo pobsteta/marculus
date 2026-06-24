@@ -102,6 +102,7 @@ import io.github.pobsteta.marculus.Appareil
 import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
 import io.github.pobsteta.marculus.ui.ToucheVolume
 import io.github.pobsteta.marculus.ui.gnss.BadgeFix
+import io.github.pobsteta.marculus.ui.gnss.DialogueEtatGnss
 import io.github.pobsteta.marculus.ui.tige.SaisieTigeDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -271,6 +272,7 @@ fun FeuilleMartelageScreen(
     var menuReset by remember { mutableStateOf(false) }
     var confirmerReset by remember { mutableStateOf(false) }
     var saisieLibre by remember { mutableStateOf(false) }
+    var etatGnssOuvert by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -283,7 +285,7 @@ fun FeuilleMartelageScreen(
                 },
                 actions = {
                     if (rtkActif) {
-                        BadgeFix(fixRtk, Modifier.padding(end = 8.dp))
+                        BadgeFix(fixRtk, Modifier.padding(end = 8.dp)) { etatGnssOuvert = true }
                     }
                     Box {
                         IconButton(onClick = { menuReset = true }) {
@@ -507,6 +509,10 @@ fun FeuilleMartelageScreen(
                 saisieLibre = false
             },
         )
+    }
+
+    if (etatGnssOuvert) {
+        DialogueEtatGnss(fixRtk) { etatGnssOuvert = false }
     }
 }
 

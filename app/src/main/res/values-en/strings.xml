@@ -293,6 +293,21 @@
     <string name="rtk_aucun_mountpoint">No mount point found (caster unreachable?).</string>
     <string name="rtk_corrections_ok">NTRIP corrections received (age %1$s s) — receiver is being fed.</string>
     <string name="rtk_corrections_attente">Waiting for NTRIP corrections (the RTK badge proves it works).</string>
+    <string name="rtk_etat_gnss">GNSS status</string>
+    <!-- GNSS status panel -->
+    <string name="etat_gnss_titre">GNSS status</string>
+    <string name="etat_gnss_aucun">No GNSS data (receiver not connected).</string>
+    <string name="etat_fix">Fix type</string>
+    <string name="etat_precision">Horizontal accuracy</string>
+    <string name="etat_latitude">Latitude</string>
+    <string name="etat_longitude">Longitude</string>
+    <string name="etat_altitude">Altitude</string>
+    <string name="etat_satellites">Satellites</string>
+    <string name="etat_hdop">HDOP</string>
+    <string name="etat_pdop">PDOP</string>
+    <string name="etat_vdop">VDOP</string>
+    <string name="etat_age">Corrections age</string>
+    <string name="etat_station">Reference station</string>
 
     <!-- About -->
     <string name="liste_menu_apropos">About</string>

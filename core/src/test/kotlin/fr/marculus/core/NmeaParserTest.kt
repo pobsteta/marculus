@@ -17,6 +17,7 @@ class NmeaParserTest {
     private val ggaSansFix = "\$GNGGA,235947.00,,,,,0,00,99.99,,M,,M,,*76"
     private val gst = "\$GPGST,172814.0,0.006,0.023,0.020,273.6,0.023,0.020,0.031*6A"
     private val gsv = "\$GPGSV,3,1,11,03,03,111,00,04,15,270,00*7F"
+    private val gsa = "\$GNGSA,A,3,01,02,03,04,05,06,07,08,09,10,11,12,1.21,0.65,1.02*1D"
 
     private fun proche(attendu: Double, obtenu: Double?, tol: Double = 1e-5) =
         assertTrue(obtenu != null && kotlin.math.abs(attendu - obtenu) <= tol, "attendu ~$attendu, obtenu $obtenu")
@@ -107,5 +108,32 @@ class NmeaParserTest {
     @Test
     fun `fixDepuis sans GST laisse la precision nulle`() {
         assertNull(NmeaParser.fixDepuis(NmeaParser.parseGga(ggaAutonome)!!).precisionHorizontaleM)
+    }
+
+    @Test
+    fun `GGA RTK fixe expose la station de reference`() {
+        assertEquals("0000", NmeaParser.parseGga(ggaRtkFixe)!!.stationRef)
+        assertNull(NmeaParser.parseGga(ggaAutonome)!!.stationRef)
+    }
+
+    @Test
+    fun `GSA decode PDOP HDOP VDOP`() {
+        val t = NmeaParser.parseGsa(gsa)!!
+        proche(1.21, t.pdop!!, 1e-6)
+        proche(0.65, t.hdop!!, 1e-6)
+        proche(1.02, t.vdop!!, 1e-6)
+        assertNull(NmeaParser.parseGsa(ggaAutonome))
+    }
+
+    @Test
+    fun `fixDepuis integre la GSA (PDOP VDOP)`() {
+        val fix = NmeaParser.fixDepuis(
+            NmeaParser.parseGga(ggaRtkFixe)!!,
+            NmeaParser.parseGst(gst)!!,
+            NmeaParser.parseGsa(gsa)!!,
+        )
+        proche(1.21, fix.pdop!!, 1e-6)
+        proche(1.02, fix.vdop!!, 1e-6)
+        assertEquals("0000", fix.stationRef)
     }
 }
