@@ -172,7 +172,7 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
             OutlinedButton(onClick = { ServiceGnssRtk.arreter(context) }) { Text(stringResource(R.string.rtk_arreter)) }
             BadgeFix(fix) { etatGnssOuvert = true }
         }
-        OutlinedButton(onClick = { etatGnssOuvert = true }) { Text(stringResource(R.string.rtk_etat_gnss)) }
+        Text(stringResource(R.string.rtk_badge_indice), style = MaterialTheme.typography.bodySmall)
         // Indicateur NTRIP : l'âge des corrections (trame GGA) prouve que le récepteur est alimenté.
         if (rtk.pontNtrip) {
             val age = fix?.ageCorrectionsS
