@@ -64,6 +64,10 @@ Deux voies pour amener le RTK dans Marculus, d'effort très différent :
 Si elle suffit, G1/G2 deviennent inutiles et il ne reste que la **trace de qualité sur la tige**
 (une partie de G3). N'engager la Voie 2 que si l'expérience mono-app est jugée nécessaire.
 
+> **Décision 2026-06-24 : VOIE 2 retenue** (intégration mono-app dans Marculus). On développe
+> G1 → G2 → G3. G0 (mock location) abandonné. Ordre d'attaque : commencer par le **parser NMEA
+> en `:core` (TDD, sans matériel)**, puis la liaison Bluetooth, puis le client NTRIP.
+
 ### 3.1 — Décisions techniques (ne valent que pour la Voie 2)
 
 1. **Matériel cible** : récepteur Centipede actuel = **Septentrio mosaic-X5** ou **Unicore UM980**
