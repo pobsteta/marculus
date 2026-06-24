@@ -22,12 +22,14 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -92,19 +94,12 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
             }
 
             TransportRtk.TCP -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = rtk.hoteTcp,
-                    onValueChange = { majRtk(rtk.copy(hoteTcp = it)) },
-                    label = { Text(stringResource(R.string.rtk_hote)) },
-                    singleLine = true,
-                    modifier = Modifier.weight(2f),
-                )
-                OutlinedTextField(
-                    value = rtk.portTcp.toString(),
-                    onValueChange = { majRtk(rtk.copy(portTcp = it.toIntOrNull() ?: rtk.portTcp)) },
-                    label = { Text(stringResource(R.string.rtk_port)) },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
+                ChampPersistant(rtk.hoteTcp, { majRtk(rtk.copy(hoteTcp = it)) }, stringResource(R.string.rtk_hote), Modifier.weight(2f))
+                ChampPersistant(
+                    rtk.portTcp.toString(),
+                    { majRtk(rtk.copy(portTcp = it.toIntOrNull() ?: rtk.portTcp)) },
+                    stringResource(R.string.rtk_port),
+                    Modifier.weight(1f),
                 )
             }
         }
@@ -115,43 +110,18 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
         }
         if (rtk.pontNtrip) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = rtk.casterHote,
-                    onValueChange = { majRtk(rtk.copy(casterHote = it)) },
-                    label = { Text(stringResource(R.string.rtk_caster)) },
-                    singleLine = true,
-                    modifier = Modifier.weight(2f),
-                )
-                OutlinedTextField(
-                    value = rtk.casterPort.toString(),
-                    onValueChange = { majRtk(rtk.copy(casterPort = it.toIntOrNull() ?: rtk.casterPort)) },
-                    label = { Text(stringResource(R.string.rtk_port)) },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
+                ChampPersistant(rtk.casterHote, { majRtk(rtk.copy(casterHote = it)) }, stringResource(R.string.rtk_caster), Modifier.weight(2f))
+                ChampPersistant(
+                    rtk.casterPort.toString(),
+                    { majRtk(rtk.copy(casterPort = it.toIntOrNull() ?: rtk.casterPort)) },
+                    stringResource(R.string.rtk_port),
+                    Modifier.weight(1f),
                 )
             }
-            OutlinedTextField(
-                value = rtk.mountpoint,
-                onValueChange = { majRtk(rtk.copy(mountpoint = it)) },
-                label = { Text(stringResource(R.string.rtk_mountpoint)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            ChampPersistant(rtk.mountpoint, { majRtk(rtk.copy(mountpoint = it)) }, stringResource(R.string.rtk_mountpoint), Modifier.fillMaxWidth())
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = rtk.utilisateur,
-                    onValueChange = { majRtk(rtk.copy(utilisateur = it)) },
-                    label = { Text(stringResource(R.string.rtk_utilisateur)) },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                )
-                OutlinedTextField(
-                    value = rtk.motDePasse,
-                    onValueChange = { majRtk(rtk.copy(motDePasse = it)) },
-                    label = { Text(stringResource(R.string.rtk_motdepasse)) },
-                    singleLine = true,
-                    modifier = Modifier.weight(1f),
-                )
+                ChampPersistant(rtk.utilisateur, { majRtk(rtk.copy(utilisateur = it)) }, stringResource(R.string.rtk_utilisateur), Modifier.weight(1f))
+                ChampPersistant(rtk.motDePasse, { majRtk(rtk.copy(motDePasse = it)) }, stringResource(R.string.rtk_motdepasse), Modifier.weight(1f))
             }
         }
 
@@ -190,6 +160,24 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
             },
         )
     }
+}
+
+/**
+ * Champ texte piloté par un état local (le curseur ne saute pas malgré l'aller-retour
+ * asynchrone par DataStore) ; resynchronisé depuis [valeur] uniquement hors édition.
+ */
+@Composable
+private fun ChampPersistant(valeur: String, onChange: (String) -> Unit, label: String, modifier: Modifier = Modifier) {
+    var texte by remember { mutableStateOf(valeur) }
+    var enEdition by remember { mutableStateOf(false) }
+    LaunchedEffect(valeur, enEdition) { if (!enEdition) texte = valeur }
+    OutlinedTextField(
+        value = texte,
+        onValueChange = { texte = it; onChange(it) },
+        label = { Text(label) },
+        singleLine = true,
+        modifier = modifier.onFocusChanged { enEdition = it.isFocused },
+    )
 }
 
 @Composable

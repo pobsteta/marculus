@@ -36,6 +36,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +44,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -262,12 +264,24 @@ fun ParametresScreen(
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
             Text(stringResource(R.string.sync_section), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.sync_desc), style = MaterialTheme.typography.bodySmall)
+            // État local : évite que le curseur saute (l'aller-retour par DataStore est asynchrone).
+            // On resynchronise depuis les réglages seulement quand le champ n'est pas en édition.
+            var operateurTexte by remember { mutableStateOf(reglages.operateur ?: "") }
+            var operateurEnEdition by remember { mutableStateOf(false) }
+            LaunchedEffect(reglages.operateur, operateurEnEdition) {
+                if (!operateurEnEdition) operateurTexte = reglages.operateur ?: ""
+            }
             OutlinedTextField(
-                value = reglages.operateur ?: "",
-                onValueChange = { maj(reglages.copy(operateur = it)) },
+                value = operateurTexte,
+                onValueChange = {
+                    operateurTexte = it
+                    maj(reglages.copy(operateur = it))
+                },
                 label = { Text(stringResource(R.string.sync_operateur)) },
                 singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged { operateurEnEdition = it.isFocused },
             )
             Text(
                 stringResource(R.string.sync_operateur_desc, Appareil.id(context).take(8)),
