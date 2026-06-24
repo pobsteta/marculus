@@ -3,6 +3,7 @@ package io.github.pobsteta.marculus.ui.gnss
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -46,6 +47,15 @@ fun DialogueEtatGnss(fix: FixGnss?, onFermer: () -> Unit) {
                     Ligne(stringResource(R.string.etat_vdop), fix.vdop?.let { fmt(it, 2) })
                     Ligne(stringResource(R.string.etat_age), fix.ageCorrectionsS?.let { "${fmt(it, 0)} s" })
                     Ligne(stringResource(R.string.etat_station), fix.stationRef)
+                    if (fix.satellites.isNotEmpty()) {
+                        Text(
+                            stringResource(R.string.etat_skyplot),
+                            style = MaterialTheme.typography.titleSmall,
+                            modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                        )
+                        Skyplot(fix.satellites, Modifier.fillMaxWidth().heightIn(max = 240.dp))
+                        BarresSnr(fix.satellites, Modifier.fillMaxWidth().padding(top = 8.dp))
+                    }
                 }
             }
         },

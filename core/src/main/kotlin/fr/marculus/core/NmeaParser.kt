@@ -3,6 +3,7 @@ package fr.marculus.core
 import fr.marculus.core.model.FixGnss
 import fr.marculus.core.model.Position
 import fr.marculus.core.model.QualiteFix
+import fr.marculus.core.model.SatelliteGsv
 import kotlin.math.sqrt
 
 /** Trame GGA décodée : position + qualité du fix + métadonnées de qualité. */
@@ -18,6 +19,15 @@ data class TrameGga(
 
 /** Trame GSA décodée : dilutions de précision (position, horizontale, verticale). */
 data class TrameGsa(val pdop: Double?, val hdop: Double?, val vdop: Double?)
+
+/** Une trame GSV (un message d'une séquence) : satellites en vue d'un système. */
+data class TrameGsv(
+    val systeme: String,
+    val nbMessages: Int,
+    val numMessage: Int,
+    val satellitesEnVue: Int,
+    val satellites: List<SatelliteGsv>,
+)
 
 /** Trame GST décodée : écarts-types de position (m) → précision horizontale estimée. */
 data class TrameGst(
@@ -95,6 +105,30 @@ object NmeaParser {
             hdop = f.getOrNull(16)?.toDoubleOrNull(),
             vdop = f.getOrNull(17)?.toDoubleOrNull(),
         )
+    }
+
+    /** Décode une trame GSV (satellites en vue) ; null si ce n'est pas une GSV valide. */
+    fun parseGsv(phrase: String): TrameGsv? {
+        val f = champs(phrase) ?: return null
+        if (f.isEmpty() || !f[0].endsWith("GSV")) return null
+        val systeme = f[0].dropLast(3)
+        val nbMessages = f.getOrNull(1)?.toIntOrNull() ?: return null
+        val numMessage = f.getOrNull(2)?.toIntOrNull() ?: return null
+        val enVue = f.getOrNull(3)?.toIntOrNull() ?: 0
+        val sats = mutableListOf<SatelliteGsv>()
+        var i = 4
+        while (i < f.size) { // groupes de 4 (PRN, élévation, azimut, SNR) ; SNR final parfois absent
+            val prn = f.getOrNull(i)?.toIntOrNull() ?: break
+            sats += SatelliteGsv(
+                prn = prn,
+                elevation = f.getOrNull(i + 1)?.toIntOrNull(),
+                azimut = f.getOrNull(i + 2)?.toIntOrNull(),
+                snr = f.getOrNull(i + 3)?.toIntOrNull(),
+                systeme = systeme,
+            )
+            i += 4
+        }
+        return TrameGsv(systeme, nbMessages, numMessage, enVue, sats)
     }
 
     /** Assemble un fix complet depuis une GGA et (optionnellement) les dernières GST et GSA. */

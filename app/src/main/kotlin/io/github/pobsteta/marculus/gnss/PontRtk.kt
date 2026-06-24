@@ -1,5 +1,6 @@
 package io.github.pobsteta.marculus.gnss
 
+import fr.marculus.core.AccumulateurSkyplot
 import fr.marculus.core.NmeaDecoupeur
 import fr.marculus.core.NmeaParser
 import fr.marculus.core.TrameGsa
@@ -32,6 +33,7 @@ class PontRtk(
         val decoupeur = NmeaDecoupeur()
         var derniereGst: TrameGst? = null
         var derniereGsa: TrameGsa? = null
+        val skyplot = AccumulateurSkyplot()
         val derniereGgaBrute = AtomicReference<String?>(null)
 
         clientNtrip?.let { ntrip ->
@@ -51,9 +53,10 @@ class PontRtk(
             for (trame in decoupeur.pousser(octets.toString(Charsets.US_ASCII))) {
                 NmeaParser.parseGst(trame)?.let { derniereGst = it }
                 NmeaParser.parseGsa(trame)?.let { derniereGsa = it }
+                NmeaParser.parseGsv(trame)?.let { skyplot.pousser(it) }
                 NmeaParser.parseGga(trame)?.let { gga ->
                     derniereGgaBrute.set(trame)
-                    send(NmeaParser.fixDepuis(gga, derniereGst, derniereGsa))
+                    send(NmeaParser.fixDepuis(gga, derniereGst, derniereGsa).copy(satellites = skyplot.satellites()))
                 }
             }
         }

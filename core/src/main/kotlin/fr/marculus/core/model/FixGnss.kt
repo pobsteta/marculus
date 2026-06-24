@@ -27,6 +27,18 @@ enum class QualiteFix(val codeNmea: Int, val libelle: String) {
 }
 
 /**
+ * Un satellite vu par le récepteur (trame GSV) : numéro, élévation (°), azimut (°), rapport
+ * signal/bruit (dB-Hz), et système (talker NMEA : GP, GL, GA, GB…).
+ */
+data class SatelliteGsv(
+    val prn: Int,
+    val elevation: Int?,
+    val azimut: Int?,
+    val snr: Int?,
+    val systeme: String,
+)
+
+/**
  * Fix GNSS instantané dérivé des trames NMEA (GGA + GST). Représente une position issue d'une
  * source « externe » (récepteur RTK) ou interne ; l'UI s'appuie dessus sans connaître l'origine.
  * Les champs nullables sont absents quand la trame ne les fournit pas.
@@ -43,4 +55,6 @@ data class FixGnss(
     val vdop: Double? = null,
     /** Identifiant de la station de référence des corrections (champ 14 de la GGA). */
     val stationRef: String? = null,
+    /** Satellites en vue (toutes constellations), pour le skyplot. */
+    val satellites: List<SatelliteGsv> = emptyList(),
 )

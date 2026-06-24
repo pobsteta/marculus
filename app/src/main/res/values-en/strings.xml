@@ -308,6 +308,7 @@
     <string name="etat_vdop">VDOP</string>
     <string name="etat_age">Corrections age</string>
     <string name="etat_station">Reference station</string>
+    <string name="etat_skyplot">Satellites (skyplot)</string>
 
     <!-- About -->
     <string name="liste_menu_apropos">About</string>
