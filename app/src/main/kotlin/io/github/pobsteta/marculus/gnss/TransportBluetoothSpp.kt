@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import java.io.IOException
 import java.io.OutputStream
 import java.util.UUID
 
@@ -24,9 +25,8 @@ class TransportBluetoothSpp(private val device: BluetoothDevice) : Transport {
 
     @SuppressLint("MissingPermission")
     override fun lire(): Flow<ByteArray> = flow {
-        val socket: BluetoothSocket = device.createRfcommSocketToServiceRecord(UUID_SPP)
+        val socket: BluetoothSocket = ouvrirSocket()
         try {
-            socket.connect()
             sortie = socket.outputStream
             val entree = socket.inputStream
             val tampon = ByteArray(TAILLE_TAMPON)
@@ -43,6 +43,32 @@ class TransportBluetoothSpp(private val device: BluetoothDevice) : Transport {
 
     override suspend fun ecrire(donnees: ByteArray) {
         runCatching { sortie?.apply { write(donnees); flush() } }
+    }
+
+    /**
+     * Ouvre le canal RFCOMM en essayant successivement : socket sécurisé sur l'UUID SPP, socket
+     * non sécurisé, puis canal RFCOMM 1 par réflexion — contourne l'échec fréquent
+     * « read failed, socket might closed or timeout, read ret: -1 » de `connect()`.
+     */
+    @SuppressLint("MissingPermission")
+    private fun ouvrirSocket(): BluetoothSocket {
+        val fabriques: List<() -> BluetoothSocket> = listOf(
+            { device.createRfcommSocketToServiceRecord(UUID_SPP) },
+            { device.createInsecureRfcommSocketToServiceRecord(UUID_SPP) },
+            { device.javaClass.getMethod("createRfcommSocket", Int::class.javaPrimitiveType).invoke(device, 1) as BluetoothSocket },
+        )
+        var derniere: Exception? = null
+        for (fabrique in fabriques) {
+            val socket = runCatching { fabrique() }.getOrElse { derniere = it as? Exception; null } ?: continue
+            try {
+                socket.connect()
+                return socket
+            } catch (e: Exception) {
+                derniere = e
+                runCatching { socket.close() }
+            }
+        }
+        throw derniere ?: IOException("Connexion Bluetooth impossible")
     }
 
     private companion object {
