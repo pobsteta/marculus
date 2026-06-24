@@ -189,7 +189,10 @@ par défaut) pour obtenir un fix RTK FIXE. Sautable si le récepteur corrige dé
 
 1. ✅ **Parser NMEA en `:core`** (TDD, sans matériel) — GGA/GST → `FixGnss` + checksum
    (`NmeaParser`, `QualiteFix`, `FixGnss` ; 12 tests JVM).
-2. **`G1`** — `Transport` BT SPP + abstraction `SourcePosition` (interne/externe), badge de fix.
+2. 🟡 **`G1`** — couche faite : `NmeaDecoupeur` (`:core`, testé), `Transport`/`TransportBluetoothSpp`,
+   `SourcePosition` + `SourcePositionInterne`/`SourcePositionExterne`, `BadgeFix`, permissions BT
+   au manifeste. **Reste (→ G3)** : sélection de l'appareil + bascule interne/externe + câblage
+   dans la feuille/carte (dépend des réglages).
 3. **`G2`** — client NTRIP (caster Centipede, GGA renvoyée pour VRS), pont RTCM, service avant-plan.
 4. **`G3`** — réglages complets, trace `qualiteFix`/`precisionM` sur la tige (migration Room),
    export CSV, i18n.
