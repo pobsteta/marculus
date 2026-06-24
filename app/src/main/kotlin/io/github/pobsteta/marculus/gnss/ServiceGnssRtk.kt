@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import fr.marculus.core.model.ConfigRtk
 import fr.marculus.core.model.FixGnss
 import fr.marculus.core.model.TransportRtk
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,7 +37,9 @@ import kotlinx.coroutines.launch
  */
 class ServiceGnssRtk : Service() {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    // Filet de sécurité : une exception non rattrapée (échec BT/TCP/NTRIP) ne doit pas crasher l'app.
+    private val gestionnaireErreurs = CoroutineExceptionHandler { _, _ -> _fixCourant.value = null }
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default + gestionnaireErreurs)
     private var collecte: Job? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -52,22 +55,33 @@ class ServiceGnssRtk : Service() {
             arreterInterne()
             return START_NOT_STICKY
         }
-        passerPremierPlan(null)
+        // Si le passage en premier plan échoue (ex. permission localisation absente sur Android 14+),
+        // on arrête proprement au lieu de laisser l'OS tuer le processus.
+        if (!majPremierPlan(null)) {
+            arreterInterne()
+            return START_NOT_STICKY
+        }
         val pont = pontCourant ?: run {
             arreterInterne()
             return START_NOT_STICKY
         }
         collecte?.cancel()
         collecte = scope.launch {
-            pont.fixs().collect { fix ->
-                _fixCourant.value = fix
-                passerPremierPlan(fix)
+            // runCatching : un échec de connexion (BT/TCP/NTRIP) termine le flux sans crasher.
+            runCatching {
+                pont.fixs().collect { fix ->
+                    _fixCourant.value = fix
+                    majPremierPlan(fix)
+                }
             }
+            _fixCourant.value = null
+            stopSelf()
         }
         return START_STICKY
     }
 
-    private fun passerPremierPlan(fix: FixGnss?) {
+    /** Met à jour la notification de premier plan. Renvoie false si `startForeground` échoue. */
+    private fun majPremierPlan(fix: FixGnss?): Boolean {
         val texte = fix?.let { "${it.qualite.libelle}${it.precisionHorizontaleM?.let { p -> " · ${"%.2f".format(p)} m" } ?: ""}" }
             ?: "Connexion au récepteur…"
         val notif: Notification = NotificationCompat.Builder(this, CANAL)
@@ -76,11 +90,13 @@ class ServiceGnssRtk : Service() {
             .setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
             .setOngoing(true)
             .build()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(ID_NOTIF, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
-        } else {
-            startForeground(ID_NOTIF, notif)
-        }
+        return runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(ID_NOTIF, notif, ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION)
+            } else {
+                startForeground(ID_NOTIF, notif)
+            }
+        }.isSuccess
     }
 
     private fun arreterInterne() {

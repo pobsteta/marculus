@@ -58,6 +58,7 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
     Text(stringResource(R.string.rtk_section), style = MaterialTheme.typography.titleMedium)
     LigneSwitch(stringResource(R.string.rtk_actif_titre), stringResource(R.string.rtk_actif_desc), rtk.actif) {
         majRtk(rtk.copy(actif = it))
+        if (!it) ServiceGnssRtk.arreter(context) // décocher → couper la connexion en cours
     }
 
     if (rtk.actif) {
