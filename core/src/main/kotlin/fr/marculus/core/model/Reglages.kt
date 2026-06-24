@@ -15,12 +15,12 @@ data class ConfigRtk(
     val appareilBt: String? = null,
     /** Nom lisible de l'appareil Bluetooth choisi (affichage). */
     val appareilBtNom: String? = null,
-    val hoteTcp: String = "",
-    val portTcp: Int = 5000,
+    val hoteTcp: String = "192.168.4.1",
+    val portTcp: Int = 2947,
     val pontNtrip: Boolean = false,
-    val casterHote: String = "caster.centipede.fr",
+    val casterHote: String = "crtk.net",
     val casterPort: Int = 2101,
-    val mountpoint: String = "",
+    val mountpoint: String = "NEAR",
     val utilisateur: String = "centipede",
     val motDePasse: String = "centipede",
 )
