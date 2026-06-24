@@ -17,9 +17,10 @@
   des tiges aux parcelles, **GNSS** ponctuel, **synchro multi-opérateurs**.
   - ✅ Import/affichage GPKG + carte, rattachement point-dans-polygone, aires géodésiques.
   - ✅ GNSS ponctuel (acquisition à la demande, permission, terminologie « GNSS »).
+  - ✅ Fonds de carte **OSM + satellite ESRI** en ligne + **ortho GPKG** hors-ligne (bascule).
   - ✅ Synchro multi-opérateurs **par fichier** (`.marsync`, fusion « dernière écriture gagne »).
-  - 🔜 GNSS externe **RTK/NTRIP** (type projet Centipede) ; fonds **OSM + satellite** en ligne ;
-    synchro **temps réel / réseau** entre appareils.
+  - 🔜 GNSS externe **RTK/NTRIP** (type projet Centipede) ; synchro **temps réel / réseau**
+    entre appareils.
 - Contraintes : **hors-ligne total**, **sans publicité**. Le partage reste **par fichier**
   (pas de serveur).
 
@@ -144,7 +145,8 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 
 ## 10. Reste à faire
 
-- 🔜 **GNSS externe RTK/NTRIP** (type projet Centipede) pour la précision centimétrique.
-- 🔜 Fonds de carte **en ligne** (OSM + satellite) en complément des tuiles GPKG hors-ligne.
+- 🔜 **GNSS externe RTK/NTRIP** (type projet Centipede, récepteur Bluetooth) pour la
+  précision centimétrique — **principal reste à faire**.
 - 🔜 Synchro **temps réel / réseau** multi-opérateurs (au-delà du fichier `.marsync`).
-- 🔜 Foncier structuré complet (`Propriétaire → Forêt → Parcelle`) au-delà de l'emprise.
+- 🔜 Foncier structuré complet (`Propriétaire → Forêt → Parcelle` géré en propre) au-delà
+  de l'attribution déduite du GPKG.
