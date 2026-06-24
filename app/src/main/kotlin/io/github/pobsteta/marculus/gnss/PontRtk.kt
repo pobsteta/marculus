@@ -25,6 +25,9 @@ sealed interface EvenementRtk {
 
     /** Un fix complet a été décodé (présence d'une GGA). */
     data class Fix(val fix: FixGnss) : EvenementRtk
+
+    /** Des octets RTCM (corrections) ont été renvoyés vers le récepteur (sens téléphone → GNSS). */
+    data class Rtcm(val n: Int) : EvenementRtk
 }
 
 /**
@@ -46,7 +49,12 @@ class PontRtk(
         val derniereGgaBrute = AtomicReference<String?>(null)
 
         clientNtrip?.let { ntrip ->
-            launch(Dispatchers.IO) { ntrip.corrections().collect { transport.ecrire(it) } }
+            launch(Dispatchers.IO) {
+                ntrip.corrections().collect { rtcm ->
+                    transport.ecrire(rtcm)
+                    send(EvenementRtk.Rtcm(rtcm.size))
+                }
+            }
             launch {
                 while (isActive) {
                     delay(intervalleGgaMs)

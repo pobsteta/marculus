@@ -299,6 +299,7 @@
     <string name="rtk_diag_octets_sans_nmea">Link active: %1$d bytes received, but no NMEA sentence. Is the receiver actually sending NMEA (not binary SBF/Unicore)?</string>
     <string name="rtk_diag_trames">Communication OK: %1$d NMEA sentences received (%2$d bytes).</string>
     <string name="rtk_diag_derniere">Last sentence: %1$s</string>
+    <string name="rtk_diag_rtcm">RTCM forwarded to receiver: %1$d bytes (phone → GNSS).</string>
     <!-- GNSS status panel -->
     <string name="etat_gnss_titre">GNSS status</string>
     <string name="etat_gnss_aucun">No GNSS data (receiver not connected).</string>

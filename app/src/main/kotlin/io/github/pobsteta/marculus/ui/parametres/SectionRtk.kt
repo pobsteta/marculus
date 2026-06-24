@@ -187,6 +187,10 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
         etat.derniereTrame?.let {
             Text(stringResource(R.string.rtk_diag_derniere, it), style = MaterialTheme.typography.labelSmall)
         }
+        // Sens téléphone → GNSS : RTCM renvoyé au récepteur (uniquement en mode pont NTRIP).
+        if (rtk.pontNtrip) {
+            Text(stringResource(R.string.rtk_diag_rtcm, etat.rtcmEnvoye), style = MaterialTheme.typography.bodySmall)
+        }
         // Indicateur NTRIP : l'âge des corrections (trame GGA) prouve que le récepteur est alimenté.
         if (rtk.pontNtrip) {
             val age = fix?.ageCorrectionsS

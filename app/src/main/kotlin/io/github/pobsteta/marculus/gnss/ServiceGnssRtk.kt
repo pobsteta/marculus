@@ -34,6 +34,7 @@ data class EtatRtk(
     val octetsRecus: Long = 0,
     val tramesRecues: Long = 0,
     val derniereTrame: String? = null,
+    val rtcmEnvoye: Long = 0,
     val fix: FixGnss? = null,
     val erreur: String? = null,
 )
@@ -92,6 +93,8 @@ class ServiceGnssRtk : Service() {
                             _etat.update { it.copy(fix = ev.fix) }
                             majPremierPlan(ev.fix)
                         }
+                        is EvenementRtk.Rtcm ->
+                            _etat.update { it.copy(rtcmEnvoye = it.rtcmEnvoye + ev.n) }
                     }
                 }
             }.onFailure { e -> _etat.update { it.copy(erreur = e.message ?: "erreur de connexion") } }

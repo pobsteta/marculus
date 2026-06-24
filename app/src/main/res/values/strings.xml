@@ -301,6 +301,7 @@
     <string name="rtk_diag_octets_sans_nmea">Lien actif : %1$d octets reçus, mais aucune trame NMEA. Le récepteur émet-il bien du NMEA (pas du binaire SBF/Unicore) ?</string>
     <string name="rtk_diag_trames">Communication OK : %1$d trames NMEA reçues (%2$d octets).</string>
     <string name="rtk_diag_derniere">Dernière trame : %1$s</string>
+    <string name="rtk_diag_rtcm">RTCM renvoyé au récepteur : %1$d octets (sens téléphone → GNSS).</string>
     <!-- Panneau État GNSS -->
     <string name="etat_gnss_titre">État GNSS</string>
     <string name="etat_gnss_aucun">Aucune donnée GNSS (récepteur non connecté).</string>
