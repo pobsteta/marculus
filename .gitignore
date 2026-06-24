@@ -10,3 +10,5 @@
 .idea/
 *.keystore
 !debug.keystore
+# Sidecars de statistiques générés par GDAL/QGIS (dérivés, non versionnés)
+*.aux.xml
