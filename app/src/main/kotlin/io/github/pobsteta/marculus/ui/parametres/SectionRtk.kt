@@ -57,6 +57,7 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
     val rtk = reglages.rtk
     fun majRtk(nouveau: ConfigRtk) = onMaj(reglages.copy(rtk = nouveau))
     val fix by ServiceGnssRtk.fixCourant.collectAsStateWithLifecycle()
+    val etat by ServiceGnssRtk.etat.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     var choixAppareil by remember { mutableStateOf(false) }
     var mountpoints by remember { mutableStateOf<List<EntreeSourcetable>>(emptyList()) }
@@ -173,6 +174,19 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
             BadgeFix(fix) { etatGnssOuvert = true }
         }
         Text(stringResource(R.string.rtk_badge_indice), style = MaterialTheme.typography.bodySmall)
+
+        // Diagnostic du lien : permet de distinguer « BT non connecté » / « connecté mais aucune
+        // donnée » / « données non‑NMEA » / « communication OK ».
+        val diagnostic = when {
+            etat.erreur != null -> stringResource(R.string.rtk_diag_erreur, etat.erreur ?: "")
+            etat.octetsRecus == 0L -> stringResource(R.string.rtk_diag_connexion)
+            etat.tramesRecues == 0L -> stringResource(R.string.rtk_diag_octets_sans_nmea, etat.octetsRecus)
+            else -> stringResource(R.string.rtk_diag_trames, etat.tramesRecues, etat.octetsRecus)
+        }
+        Text(diagnostic, style = MaterialTheme.typography.bodySmall)
+        etat.derniereTrame?.let {
+            Text(stringResource(R.string.rtk_diag_derniere, it), style = MaterialTheme.typography.labelSmall)
+        }
         // Indicateur NTRIP : l'âge des corrections (trame GGA) prouve que le récepteur est alimenté.
         if (rtk.pontNtrip) {
             val age = fix?.ageCorrectionsS

@@ -296,6 +296,11 @@
     <string name="rtk_corrections_ok">Corrections NTRIP reçues (âge %1$s s) — le récepteur est alimenté.</string>
     <string name="rtk_corrections_attente">En attente de corrections NTRIP. Tant que le badge affiche « Pas de fix » ou « Autonome », le RTK ne fonctionne pas encore ; il marche quand il passe « RTK flottant » puis « RTK fixe ».</string>
     <string name="rtk_badge_indice">Touchez le badge pour l\'état GNSS détaillé.</string>
+    <string name="rtk_diag_connexion">Lien : connexion au récepteur… (aucune donnée reçue pour l\'instant).</string>
+    <string name="rtk_diag_erreur">Lien : échec — %1$s</string>
+    <string name="rtk_diag_octets_sans_nmea">Lien actif : %1$d octets reçus, mais aucune trame NMEA. Le récepteur émet-il bien du NMEA (pas du binaire SBF/Unicore) ?</string>
+    <string name="rtk_diag_trames">Communication OK : %1$d trames NMEA reçues (%2$d octets).</string>
+    <string name="rtk_diag_derniere">Dernière trame : %1$s</string>
     <!-- Panneau État GNSS -->
     <string name="etat_gnss_titre">État GNSS</string>
     <string name="etat_gnss_aucun">Aucune donnée GNSS (récepteur non connecté).</string>

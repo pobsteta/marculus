@@ -25,7 +25,18 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+/** État détaillé du lien RTK, pour suivi et diagnostic dans l'UI. */
+data class EtatRtk(
+    val connecte: Boolean = false,
+    val octetsRecus: Long = 0,
+    val tramesRecues: Long = 0,
+    val derniereTrame: String? = null,
+    val fix: FixGnss? = null,
+    val erreur: String? = null,
+)
 
 /**
  * Service de **premier plan** maintenant la connexion GNSS/RTK active hors écran et au-delà des
@@ -65,15 +76,25 @@ class ServiceGnssRtk : Service() {
             arreterInterne()
             return START_NOT_STICKY
         }
+        _etat.value = EtatRtk()
         collecte?.cancel()
         collecte = scope.launch {
             // runCatching : un échec de connexion (BT/TCP/NTRIP) termine le flux sans crasher.
             runCatching {
-                pont.fixs().collect { fix ->
-                    _fixCourant.value = fix
-                    majPremierPlan(fix)
+                pont.evenements().collect { ev ->
+                    when (ev) {
+                        is EvenementRtk.Octets ->
+                            _etat.update { it.copy(connecte = true, octetsRecus = it.octetsRecus + ev.n) }
+                        is EvenementRtk.Trame ->
+                            _etat.update { it.copy(tramesRecues = it.tramesRecues + 1, derniereTrame = ev.ligne) }
+                        is EvenementRtk.Fix -> {
+                            _fixCourant.value = ev.fix
+                            _etat.update { it.copy(fix = ev.fix) }
+                            majPremierPlan(ev.fix)
+                        }
+                    }
                 }
-            }
+            }.onFailure { e -> _etat.update { it.copy(erreur = e.message ?: "erreur de connexion") } }
             _fixCourant.value = null
             stopSelf()
         }
@@ -102,6 +123,7 @@ class ServiceGnssRtk : Service() {
     private fun arreterInterne() {
         collecte?.cancel()
         _fixCourant.value = null
+        _etat.value = EtatRtk()
         pontCourant = null
         ServiceCompat_stopForeground(this)
         stopSelf()
@@ -126,6 +148,11 @@ class ServiceGnssRtk : Service() {
 
         /** Dernier fix publié par le service (null si arrêté ou pas encore de fix). */
         val fixCourant: StateFlow<FixGnss?> = _fixCourant.asStateFlow()
+
+        private val _etat = MutableStateFlow(EtatRtk())
+
+        /** État détaillé du lien (connexion, octets/trames reçus, fix, erreur) pour le diagnostic. */
+        val etat: StateFlow<EtatRtk> = _etat.asStateFlow()
 
         /** Démarre le service de premier plan avec le pont donné. */
         fun demarrer(contexte: Context, pont: PontRtk) {

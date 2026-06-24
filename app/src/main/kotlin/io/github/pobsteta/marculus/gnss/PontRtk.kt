@@ -15,21 +15,30 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicReference
 
+/** Événements remontés par le pont, pour le suivi et le diagnostic du lien. */
+sealed interface EvenementRtk {
+    /** Des octets bruts ont été reçus du récepteur (preuve que le lien BT/TCP est actif). */
+    data class Octets(val n: Int) : EvenementRtk
+
+    /** Une trame NMEA complète a été reçue (telle quelle). */
+    data class Trame(val ligne: String) : EvenementRtk
+
+    /** Un fix complet a été décodé (présence d'une GGA). */
+    data class Fix(val fix: FixGnss) : EvenementRtk
+}
+
 /**
  * Orchestrateur RTK reliant un [Transport] (récepteur) et, en topologie B, un [ClientNtrip].
- * Trois flux concurrents :
- *  - **montant** : NMEA du récepteur → [FixGnss] émis ;
- *  - **descendant** : corrections RTCM du caster → écrites vers le récepteur ;
- *  - **VRS** : renvoi périodique de la dernière trame GGA du récepteur au caster.
- *
- * Sans [clientNtrip] (topologie A : récepteur autonome), seul le flux montant tourne.
+ * Émet un flux d'[EvenementRtk] : octets reçus (lien actif), trames NMEA brutes (communication),
+ * et fix décodés. Trois flux concurrents : montant (NMEA→événements), descendant (RTCM→récepteur),
+ * VRS (renvoi périodique de la GGA au caster).
  */
 class PontRtk(
     private val transport: Transport,
     private val clientNtrip: ClientNtrip? = null,
     private val intervalleGgaMs: Long = 10_000L,
 ) {
-    fun fixs(): Flow<FixGnss?> = channelFlow {
+    fun evenements(): Flow<EvenementRtk> = channelFlow {
         val decoupeur = NmeaDecoupeur()
         var derniereGst: TrameGst? = null
         var derniereGsa: TrameGsa? = null
@@ -37,9 +46,7 @@ class PontRtk(
         val derniereGgaBrute = AtomicReference<String?>(null)
 
         clientNtrip?.let { ntrip ->
-            // Descendant : RTCM du caster → récepteur.
             launch(Dispatchers.IO) { ntrip.corrections().collect { transport.ecrire(it) } }
-            // VRS : renvoi périodique de la GGA courante du récepteur au caster.
             launch {
                 while (isActive) {
                     delay(intervalleGgaMs)
@@ -48,15 +55,16 @@ class PontRtk(
             }
         }
 
-        // Montant : NMEA du récepteur → FixGnss.
         transport.lire().collect { octets ->
+            send(EvenementRtk.Octets(octets.size))
             for (trame in decoupeur.pousser(octets.toString(Charsets.US_ASCII))) {
+                send(EvenementRtk.Trame(trame))
                 NmeaParser.parseGst(trame)?.let { derniereGst = it }
                 NmeaParser.parseGsa(trame)?.let { derniereGsa = it }
                 NmeaParser.parseGsv(trame)?.let { skyplot.pousser(it) }
                 NmeaParser.parseGga(trame)?.let { gga ->
                     derniereGgaBrute.set(trame)
-                    send(NmeaParser.fixDepuis(gga, derniereGst, derniereGsa).copy(satellites = skyplot.satellites()))
+                    send(EvenementRtk.Fix(NmeaParser.fixDepuis(gga, derniereGst, derniereGsa).copy(satellites = skyplot.satellites())))
                 }
             }
         }
