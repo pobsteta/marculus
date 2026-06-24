@@ -15,6 +15,10 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
 
+    <!-- Service de premier plan maintenant la connexion GNSS + NTRIP (G2/G3). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
     <application
         android:name=".MarculusApplication"
         android:allowBackup="true"

@@ -193,7 +193,10 @@ par défaut) pour obtenir un fix RTK FIXE. Sautable si le récepteur corrige dé
    `SourcePosition` + `SourcePositionInterne`/`SourcePositionExterne`, `BadgeFix`, permissions BT
    au manifeste. **Reste (→ G3)** : sélection de l'appareil + bascule interne/externe + câblage
    dans la feuille/carte (dépend des réglages).
-3. **`G2`** — client NTRIP (caster Centipede, GGA renvoyée pour VRS), pont RTCM, service avant-plan.
+3. 🟡 **`G2`** — fait : protocole NTRIP `:core` (`Ntrip` : requête GET/Basic, GGA VRS, sourcetable,
+   statut ; 6 tests JVM) + `ClientNtrip` `:app` (TCP, en-tête, flux RTCM, `envoyerGga`), permissions
+   FOREGROUND_SERVICE. **Reste (→ G3)** : pont RTCM↔récepteur + service de premier plan (cycle de
+   vie lié au démarrage/arrêt depuis l'UI).
 4. **`G3`** — réglages complets, trace `qualiteFix`/`precisionM` sur la tige (migration Room),
    export CSV, i18n.
 

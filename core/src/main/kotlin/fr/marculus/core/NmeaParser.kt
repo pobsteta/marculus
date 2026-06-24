@@ -32,15 +32,20 @@ data class TrameGst(
  */
 object NmeaParser {
 
+    /** Somme de contrôle NMEA (XOR des octets du corps, hors `$` et `*hh`) en hexa deux chiffres. */
+    fun sommeControle(corps: String): String {
+        var c = 0
+        for (ch in corps) c = c xor ch.code
+        return "%02X".format(c)
+    }
+
     /** Vrai si la somme de contrôle `*hh` (XOR des octets entre `$` et `*`) est correcte. */
     fun checksumValide(phrase: String): Boolean {
         val debut = phrase.indexOf('$')
         val etoile = phrase.lastIndexOf('*')
         if (debut < 0 || etoile < debut + 1 || etoile + 3 > phrase.length) return false
-        var calc = 0
-        for (i in debut + 1 until etoile) calc = calc xor phrase[i].code
-        val attendu = phrase.substring(etoile + 1, etoile + 3).toIntOrNull(16) ?: return false
-        return calc == attendu
+        val attendu = phrase.substring(etoile + 1, etoile + 3)
+        return sommeControle(phrase.substring(debut + 1, etoile)).equals(attendu, ignoreCase = true)
     }
 
     /** Champs d'une trame valide (sans `$` ni `*hh`), ou null si la somme de contrôle est mauvaise. */
