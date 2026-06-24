@@ -79,8 +79,8 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-/** Dépôt GitHub de Marculus (lien « À propos »). */
-private const val URL_GITHUB = "https://github.com/pobsteta/marculus"
+/** Site GitHub Pages de Marculus (lien « À propos »). */
+private const val URL_GITHUB = "https://pobsteta.github.io/marculus/"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
