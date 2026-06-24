@@ -5,6 +5,8 @@ import fr.marculus.core.model.AxeClasses
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.ModeMesure
+import fr.marculus.core.model.Position
+import fr.marculus.core.model.QualiteFix
 import fr.marculus.core.model.Tige
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -35,6 +37,19 @@ class ExportCsvTest {
         assertTrue(csv.contains("JOURNAL"))
         assertTrue(csv.contains("Chêne;20;2")) // total dérivé
         assertTrue(csv.contains("Parcelle 12"))
+    }
+
+    @Test
+    fun `le journal exporte la qualite de fix et la precision`() {
+        val tige = Tige(
+            uuid = "u1", contexteId = "c1", essence = "Chêne", classe = 20,
+            action = ActionTige.PLUS, horodatage = 1000L,
+            position = Position(47.0, 8.0), qualiteFix = QualiteFix.RTK_FIXE, precisionM = 0.02,
+        )
+        val csv = ExportCsv.contexteCsv(contexte, listOf(tige))
+        assertTrue(csv.contains("QualiteFix${";"}Precision_m"))
+        assertTrue(csv.contains("RTK fixe"))
+        assertTrue(csv.contains("0.02"))
     }
 
     @Test

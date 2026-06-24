@@ -46,6 +46,10 @@ data class TigeEntity(
     val longitude: Double?,
     val operateur: String?,
     val parcelle: String? = null,
+    /** Qualité du fix GNSS au martelage (QualiteFix.name), ou null. */
+    val qualiteFix: String? = null,
+    /** Précision horizontale (m) au martelage, ou null. */
+    val precisionM: Double? = null,
     /** Horodatage de dernière modification (synchro « dernière écriture gagne »). */
     val modifie: Long = 0,
 )

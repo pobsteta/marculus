@@ -110,7 +110,8 @@ class SauvegardeRepository(
         put("action", action); put("horodatage", horodatage); put("quantite", quantite)
         putOpt("hauteurTexte", hauteurTexte); putOpt("qualiteArbre", qualiteArbre)
         putOpt("latitude", latitude); putOpt("longitude", longitude); putOpt("operateur", operateur)
-        putOpt("parcelle", parcelle); put("modifie", modifie)
+        putOpt("parcelle", parcelle); putOpt("qualiteFix", qualiteFix); putOpt("precisionM", precisionM)
+        put("modifie", modifie)
     }
 
     private fun JSONObject.versTige() = TigeEntity(
@@ -120,6 +121,7 @@ class SauvegardeRepository(
         qualiteArbre = texteOuNull("qualiteArbre"), latitude = reelOuNull("latitude"),
         longitude = reelOuNull("longitude"), operateur = texteOuNull("operateur"),
         parcelle = texteOuNull("parcelle"),
+        qualiteFix = texteOuNull("qualiteFix"), precisionM = reelOuNull("precisionM"),
         modifie = if (has("modifie") && !isNull("modifie")) getLong("modifie") else 0,
     )
 

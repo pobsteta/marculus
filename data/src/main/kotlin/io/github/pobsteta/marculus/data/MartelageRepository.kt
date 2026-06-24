@@ -2,6 +2,7 @@ package io.github.pobsteta.marculus.data
 
 import fr.marculus.core.TotauxMartelage
 import fr.marculus.core.model.ActionTige
+import fr.marculus.core.model.QualiteFix
 import fr.marculus.core.model.AxeClasses
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.ConfigCompteur
@@ -208,6 +209,8 @@ class MartelageRepository(
         position: Position? = null,
         operateur: String? = null,
         parcelle: String? = null,
+        qualiteFix: QualiteFix? = null,
+        precisionM: Double? = null,
     ): String {
         val uuid = UUID.randomUUID().toString()
         tigeDao.inserer(
@@ -225,6 +228,8 @@ class MartelageRepository(
                 longitude = position?.longitude,
                 operateur = operateur,
                 parcelle = parcelle,
+                qualiteFix = qualiteFix?.name,
+                precisionM = precisionM,
                 modifie = horloge(),
             ),
         )
@@ -276,9 +281,16 @@ class MartelageRepository(
         marquerNonExporte(contexteId)
     }
 
-    /** Renseigne la position GNSS (et la parcelle déduite) d'une tige a posteriori — acquisition ponctuelle. */
-    suspend fun annoterPosition(uuid: String, position: Position, parcelle: String?) =
-        tigeDao.majPosition(uuid, position.latitude, position.longitude, parcelle, horloge())
+    /** Renseigne la position GNSS (parcelle déduite + qualité/précision du fix) d'une tige a posteriori. */
+    suspend fun annoterPosition(
+        uuid: String,
+        position: Position,
+        parcelle: String?,
+        qualiteFix: QualiteFix? = null,
+        precisionM: Double? = null,
+    ) = tigeDao.majPosition(
+        uuid, position.latitude, position.longitude, parcelle, qualiteFix?.name, precisionM, horloge(),
+    )
 
     /** Annote une tige précise (par uuid) : la hauteur. */
     suspend fun annoterHauteur(uuid: String, hauteurTexte: String?) = tigeDao.majHauteur(uuid, hauteurTexte)
@@ -412,5 +424,7 @@ class MartelageRepository(
         position = if (latitude != null && longitude != null) Position(latitude, longitude) else null,
         operateur = operateur,
         parcelle = parcelle,
+        qualiteFix = qualiteFix?.let { runCatching { QualiteFix.valueOf(it) }.getOrNull() },
+        precisionM = precisionM,
     )
 }

@@ -100,4 +100,8 @@ data class Tige(
     val operateur: String? = null,
     /** Parcelle attribuée au moment du martelage (instantané figé), ou null. */
     val parcelle: String? = null,
+    /** Qualité du fix GNSS au moment du martelage (RTK fixe/flottant…), ou null. */
+    val qualiteFix: QualiteFix? = null,
+    /** Précision horizontale (m) au moment du martelage, ou null. */
+    val precisionM: Double? = null,
 )

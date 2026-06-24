@@ -34,6 +34,7 @@ object ExportCsv {
             listOf(
                 "Horodatage", "Essence", "Classe", "Action", "Quantite",
                 "Hauteur", "QualiteArbre", "Latitude", "Longitude", "Operateur",
+                "QualiteFix", "Precision_m",
             ).joinToString(SEP),
         )
         journal.sortedBy { it.horodatage }.forEach { t ->
@@ -49,6 +50,8 @@ object ExportCsv {
                     t.position?.latitude?.toString() ?: "",
                     t.position?.longitude?.toString() ?: "",
                     t.operateur ?: "",
+                    t.qualiteFix?.libelle ?: "",
+                    t.precisionM?.toString() ?: "",
                 ).joinToString(SEP) { champ(it) },
             )
         }
