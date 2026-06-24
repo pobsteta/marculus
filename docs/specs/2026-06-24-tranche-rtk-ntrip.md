@@ -200,9 +200,11 @@ par défaut) pour obtenir un fix RTK FIXE. Sautable si le récepteur corrige dé
    vie lié au démarrage/arrêt depuis l'UI).
 4. 🟡 **`G3`** — fait : **trace `qualiteFix`/`precisionM` sur la tige** (modèle, **Room v12**,
    mapping, insertion/annotation `annoterPosition`, sauvegarde JSON, **colonnes CSV** QualiteFix /
-   Precision_m). **Reste** : pont RTCM↔récepteur + service de premier plan, réglages (appareil BT,
-   source corrections, caster Centipede, bouton Tester), câblage badge/position RTK dans la
-   feuille/carte, i18n. Validation = **matériel requis**.
+   Precision_m) ; **orchestrateur `PontRtk`** (montant NMEA→fix, descendant RTCM→récepteur, renvoi
+   GGA VRS) ; **`ServiceGnssRtk`** de premier plan (`foregroundServiceType=location`, expose
+   `fixCourant`, démarrer/arrêter). **Reste** : réglages (appareil BT/TCP, source corrections,
+   caster Centipede, bouton Tester) + câblage badge/position RTK dans la feuille/carte + i18n.
+   Validation bout-en-bout = rejeu TCP (§9) puis **matériel**.
 
 G0 (mock location) abandonné. Chaque étape est démontrable seule ; le parser NMEA est livrable
 et testable immédiatement, indépendamment du matériel.
