@@ -291,6 +291,10 @@
     <string name="rtk_motdepasse">Mot de passe</string>
     <string name="rtk_tester">Tester</string>
     <string name="rtk_arreter">Arrêter</string>
+    <string name="rtk_charger_mountpoints">Charger</string>
+    <string name="rtk_aucun_mountpoint">Aucun point de montage trouvé (caster injoignable ?).</string>
+    <string name="rtk_corrections_ok">Corrections NTRIP reçues (âge %1$s s) — le récepteur est alimenté.</string>
+    <string name="rtk_corrections_attente">En attente de corrections NTRIP (badge RTK = preuve que ça marche).</string>
 
     <!-- À propos -->
     <string name="liste_menu_apropos">À propos</string>

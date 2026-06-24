@@ -9,12 +9,15 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -26,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,9 +42,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.model.ConfigRtk
 import fr.marculus.core.model.Reglages
 import fr.marculus.core.model.TransportRtk
+import fr.marculus.core.EntreeSourcetable
 import io.github.pobsteta.marculus.R
+import io.github.pobsteta.marculus.gnss.ClientNtrip
 import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
 import io.github.pobsteta.marculus.ui.gnss.BadgeFix
+import kotlinx.coroutines.launch
 
 /** Section « GNSS externe (RTK) » de l'écran Paramètres : transport, caster, test en direct. */
 @Composable
@@ -49,7 +56,11 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
     val rtk = reglages.rtk
     fun majRtk(nouveau: ConfigRtk) = onMaj(reglages.copy(rtk = nouveau))
     val fix by ServiceGnssRtk.fixCourant.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
     var choixAppareil by remember { mutableStateOf(false) }
+    var mountpoints by remember { mutableStateOf<List<EntreeSourcetable>>(emptyList()) }
+    var menuMountpoints by remember { mutableStateOf(false) }
+    var chargementMountpoints by remember { mutableStateOf(false) }
 
     val demandePermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
         if (ok) choixAppareil = true
@@ -119,7 +130,30 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
                     Modifier.weight(1f),
                 )
             }
-            ChampPersistant(rtk.mountpoint, { majRtk(rtk.copy(mountpoint = it)) }, stringResource(R.string.rtk_mountpoint), Modifier.fillMaxWidth())
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                ChampPersistant(rtk.mountpoint, { majRtk(rtk.copy(mountpoint = it)) }, stringResource(R.string.rtk_mountpoint), Modifier.weight(1f))
+                Box {
+                    OutlinedButton(
+                        enabled = !chargementMountpoints,
+                        onClick = {
+                            chargementMountpoints = true
+                            scope.launch {
+                                mountpoints = ClientNtrip.chargerMountpoints(rtk.casterHote, rtk.casterPort)
+                                chargementMountpoints = false
+                                menuMountpoints = mountpoints.isNotEmpty()
+                            }
+                        },
+                    ) { Text(stringResource(R.string.rtk_charger_mountpoints)) }
+                    DropdownMenu(expanded = menuMountpoints, onDismissRequest = { menuMountpoints = false }) {
+                        mountpoints.forEach { e ->
+                            DropdownMenuItem(
+                                text = { Text("${e.mountpoint} · ${e.format}") },
+                                onClick = { majRtk(rtk.copy(mountpoint = e.mountpoint)); menuMountpoints = false },
+                            )
+                        }
+                    }
+                }
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ChampPersistant(rtk.utilisateur, { majRtk(rtk.copy(utilisateur = it)) }, stringResource(R.string.rtk_utilisateur), Modifier.weight(1f))
                 ChampPersistant(rtk.motDePasse, { majRtk(rtk.copy(motDePasse = it)) }, stringResource(R.string.rtk_motdepasse), Modifier.weight(1f))
@@ -135,6 +169,18 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
             Button(onClick = { ServiceGnssRtk.demarrerDepuis(context, rtk) }) { Text(stringResource(R.string.rtk_tester)) }
             OutlinedButton(onClick = { ServiceGnssRtk.arreter(context) }) { Text(stringResource(R.string.rtk_arreter)) }
             BadgeFix(fix)
+        }
+        // Indicateur NTRIP : l'âge des corrections (trame GGA) prouve que le récepteur est alimenté.
+        if (rtk.pontNtrip) {
+            val age = fix?.ageCorrectionsS
+            Text(
+                if (age != null) {
+                    stringResource(R.string.rtk_corrections_ok, age.toInt().toString())
+                } else {
+                    stringResource(R.string.rtk_corrections_attente)
+                },
+                style = MaterialTheme.typography.bodySmall,
+            )
         }
     }
 
