@@ -45,8 +45,25 @@ jobs:
         if: steps.tag.outputs.new_tag != ''
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Compiler l'APK release (signé debug)
+      - name: Préparer la clé de signature release
         if: steps.tag.outputs.new_tag != ''
+        env:
+          KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            echo "RELEASE_KEYSTORE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+            echo "Clé release détectée → APK signé release (mises à jour possibles)."
+          else
+            echo "Aucune clé release (secret RELEASE_KEYSTORE_BASE64 absent) → repli signature debug."
+          fi
+
+      - name: Compiler l'APK release
+        if: steps.tag.outputs.new_tag != ''
+        env:
+          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: >
           ./gradlew :app:assembleRelease --no-daemon
           -PappVersionName=${{ steps.tag.outputs.new_version }}

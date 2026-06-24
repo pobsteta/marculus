@@ -18,11 +18,29 @@ android {
         versionName = (project.findProperty("appVersionName") as String?) ?: "0.1.0"
     }
 
+    // Clé de signature release : depuis l'environnement (CI, secrets) ou les propriétés Gradle.
+    // À défaut de keystore, on retombe sur la signature debug (builds locaux sans clé).
+    val cheminKeystore = System.getenv("RELEASE_KEYSTORE") ?: (project.findProperty("releaseKeystore") as String?)
+    val keystoreExiste = cheminKeystore != null && file(cheminKeystore).exists()
+
+    signingConfigs {
+        if (keystoreExiste) {
+            create("release") {
+                storeFile = file(cheminKeystore!!)
+                storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD") ?: (project.findProperty("releaseKeystorePassword") as String?)
+                keyAlias = System.getenv("RELEASE_KEY_ALIAS") ?: (project.findProperty("releaseKeyAlias") as String?)
+                keyPassword = System.getenv("RELEASE_KEY_PASSWORD") ?: (project.findProperty("releaseKeyPassword") as String?)
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("debug")
+            // Clé release stable si configurée, sinon repli debug (les mises à jour ne marchent
+            // qu'entre APK signés par la MÊME clé release).
+            signingConfig = signingConfigs.getByName(if (keystoreExiste) "release" else "debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
