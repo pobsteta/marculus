@@ -244,8 +244,9 @@ fun FeuilleMartelageScreen(
     val configs by repository.configs(contexteId).collectAsStateWithLifecycle(emptyMap())
     // Demande la permission de localisation à l'exécution dès que la capture GNSS est activée.
     val permLocalisation = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
-    LaunchedEffect(reglages.capturePosition) {
-        if (reglages.capturePosition &&
+    // La permission est requise pour le GNSS interne ET pour le service RTK (type « location » sur Android 14+).
+    LaunchedEffect(reglages.capturePosition, reglages.rtk.actif) {
+        if ((reglages.capturePosition || reglages.rtk.actif) &&
             ContextCompat.checkSelfPermission(androidContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) {
             permLocalisation.launch(Manifest.permission.ACCESS_FINE_LOCATION)

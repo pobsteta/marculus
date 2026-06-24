@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.io.OutputStream
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -37,15 +38,18 @@ class ClientNtrip(
             out.flush()
             sortie = out
             val entree = socket.getInputStream()
-            // En-tête de réponse NTRIP/2.0 : lire jusqu'à la ligne vide, contrôler le statut.
-            val enTete = StringBuilder()
-            while (!enTete.endsWith("\r\n\r\n") && enTete.length < TAILLE_ENTETE_MAX) {
-                val b = entree.read()
-                if (b < 0) break
-                enTete.append(b.toChar())
-            }
-            if (Ntrip.statutReponse(enTete.lineSequence().firstOrNull().orEmpty()) != StatutNtrip.OK) {
-                return@flow
+            // Ligne de statut (compatible v1 « ICY 200 OK » et v2 « HTTP/1.1 200 OK »).
+            val statutLigne = lireLigne(entree)
+            if (Ntrip.statutReponse(statutLigne) != StatutNtrip.OK) return@flow
+            // NTRIP v2 (HTTP) : consommer les en-têtes jusqu'à la ligne vide.
+            // NTRIP v1 (ICY) : pas d'en-têtes, le flux RTCM suit directement.
+            if (!statutLigne.startsWith("ICY")) {
+                var total = 0
+                while (total < TAILLE_ENTETE_MAX) {
+                    val ligne = lireLigne(entree)
+                    total += ligne.length + 2
+                    if (ligne.isEmpty()) break
+                }
             }
             val tampon = ByteArray(TAILLE_TAMPON)
             while (true) {
@@ -62,6 +66,17 @@ class ClientNtrip(
     /** Renvoie une trame GGA au caster (sélection VRS). Sans effet si la connexion n'est pas ouverte. */
     suspend fun envoyerGga(phrase: String) {
         runCatching { sortie?.apply { write((phrase + "\r\n").toByteArray(Charsets.US_ASCII)); flush() } }
+    }
+
+    /** Lit une ligne (jusqu'au LF) sans le CRLF final ; renvoie "" en fin de flux. */
+    private fun lireLigne(entree: InputStream): String {
+        val sb = StringBuilder()
+        while (sb.length < 1024) {
+            val b = entree.read()
+            if (b < 0 || b == '\n'.code) break
+            if (b != '\r'.code) sb.append(b.toChar())
+        }
+        return sb.toString()
     }
 
     companion object {
