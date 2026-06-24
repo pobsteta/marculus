@@ -117,6 +117,15 @@ class NmeaParserTest {
     }
 
     @Test
+    fun `qualite approchee depuis la precision`() {
+        assertEquals(QualiteFix.INVALIDE, QualiteFix.depuisPrecision(null))
+        assertEquals(QualiteFix.RTK_FIXE, QualiteFix.depuisPrecision(0.02))
+        assertEquals(QualiteFix.RTK_FLOAT, QualiteFix.depuisPrecision(0.3))
+        assertEquals(QualiteFix.DGPS, QualiteFix.depuisPrecision(2.0))
+        assertEquals(QualiteFix.AUTONOME, QualiteFix.depuisPrecision(8.0))
+    }
+
+    @Test
     fun `GSA decode PDOP HDOP VDOP`() {
         val t = NmeaParser.parseGsa(gsa)!!
         proche(1.21, t.pdop!!, 1e-6)

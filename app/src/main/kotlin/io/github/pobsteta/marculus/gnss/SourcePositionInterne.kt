@@ -50,23 +50,12 @@ class SourcePositionInterne(private val context: Context) : SourcePosition {
         val precision = if (loc.hasAccuracy()) loc.accuracy.toDouble() else null
         return FixGnss(
             position = Position(loc.latitude, loc.longitude),
-            qualite = qualiteDepuisPrecision(precision),
+            qualite = QualiteFix.depuisPrecision(precision),
             nbSatellites = 0,
             hdop = null,
             altitudeM = if (loc.hasAltitude()) loc.altitude else null,
             ageCorrectionsS = null,
             precisionHorizontaleM = precision,
         )
-    }
-
-    private companion object {
-        /** Qualité approchée depuis la précision horizontale (m), faute de champ dédié côté Android. */
-        fun qualiteDepuisPrecision(precisionM: Double?): QualiteFix = when {
-            precisionM == null -> QualiteFix.INVALIDE
-            precisionM <= 0.05 -> QualiteFix.RTK_FIXE
-            precisionM <= 0.5 -> QualiteFix.RTK_FLOAT
-            precisionM <= 3.0 -> QualiteFix.DGPS
-            else -> QualiteFix.AUTONOME
-        }
     }
 }

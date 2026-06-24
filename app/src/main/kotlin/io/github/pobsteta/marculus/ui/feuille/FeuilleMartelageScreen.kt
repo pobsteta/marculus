@@ -91,6 +91,8 @@ import fr.marculus.core.Cubage
 import fr.marculus.core.HauteurParser
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CompteurCle
+import fr.marculus.core.model.FixGnss
+import fr.marculus.core.model.QualiteFix
 import fr.marculus.core.model.ConfigCompteur
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Position
@@ -108,11 +110,25 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/** Position GPS courante du téléphone (null si inactif ou non autorisé). */
+/** Convertit une position Android (GNSS interne) en FixGnss : qualité dérivée de la précision. */
+private fun fixDepuisLocation(loc: Location): FixGnss {
+    val precision = if (loc.hasAccuracy()) loc.accuracy.toDouble() else null
+    return FixGnss(
+        position = Position(loc.latitude, loc.longitude),
+        qualite = QualiteFix.depuisPrecision(precision),
+        nbSatellites = 0,
+        hdop = null,
+        altitudeM = if (loc.hasAltitude()) loc.altitude else null,
+        ageCorrectionsS = null,
+        precisionHorizontaleM = precision,
+    )
+}
+
+/** Fix GNSS interne courant du téléphone (null si inactif ou non autorisé). */
 @Composable
-private fun positionActuelle(active: Boolean): Position? {
+private fun positionActuelle(active: Boolean): FixGnss? {
     val context = LocalContext.current
-    val etat = remember { mutableStateOf<Position?>(null) }
+    val etat = remember { mutableStateOf<FixGnss?>(null) }
     DisposableEffect(active) {
         val lm = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
         val autorise = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
@@ -121,7 +137,7 @@ private fun positionActuelle(active: Boolean): Position? {
         if (active && lm != null && autorise) {
             val l = object : LocationListener {
                 override fun onLocationChanged(location: Location) {
-                    etat.value = Position(location.latitude, location.longitude)
+                    etat.value = fixDepuisLocation(location)
                 }
                 override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
                 override fun onProviderEnabled(provider: String) {}
@@ -129,9 +145,7 @@ private fun positionActuelle(active: Boolean): Position? {
             }
             listener = l
             runCatching {
-                lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.let {
-                    etat.value = Position(it.latitude, it.longitude)
-                }
+                lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.let { etat.value = fixDepuisLocation(it) }
                 lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000L, 1f, l)
             }
         } else {
@@ -142,8 +156,8 @@ private fun positionActuelle(active: Boolean): Position? {
     return etat.value
 }
 
-/** Capture une position GNSS unique (one-shot) — acquisition ponctuelle au clic. */
-private fun capturerPositionPonctuelle(context: Context, onResult: (Position?) -> Unit) {
+/** Capture un fix GNSS interne unique (one-shot) — acquisition ponctuelle au clic. */
+private fun capturerPositionPonctuelle(context: Context, onResult: (FixGnss?) -> Unit) {
     val lm = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
     val autorise = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
         PackageManager.PERMISSION_GRANTED
@@ -154,12 +168,12 @@ private fun capturerPositionPonctuelle(context: Context, onResult: (Position?) -
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
         runCatching {
             lm.getCurrentLocation(LocationManager.GPS_PROVIDER, null, context.mainExecutor) { loc ->
-                onResult(loc?.let { Position(it.latitude, it.longitude) })
+                onResult(loc?.let(::fixDepuisLocation))
             }
         }.onFailure { onResult(null) }
     } else {
         val loc = runCatching { lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) }.getOrNull()
-        onResult(loc?.let { Position(it.latitude, it.longitude) })
+        onResult(loc?.let(::fixDepuisLocation))
     }
 }
 
@@ -262,15 +276,15 @@ fun FeuilleMartelageScreen(
     LaunchedEffect(rtkActif) {
         if (rtkActif) ServiceGnssRtk.demarrerDepuis(androidContext, reglages.rtk)
     }
-    // Position retenue pour figer la tige. « Enregistrer la position GNSS » (capturePosition) est
-    // le maître-interrupteur : décoché → AUCUNE position sur la tige, même avec un RTK connecté.
-    // Coché → RTK si actif (et disponible), sinon GNSS interne.
-    val fixTige = if (reglages.capturePosition && rtkActif) fixRtk else null
-    val positionEffective = when {
+    // Fix retenu pour figer la tige (position + qualité + précision). « Enregistrer la position
+    // GNSS » est le maître-interrupteur : décoché → AUCUN fix, même avec un RTK connecté.
+    // Coché → RTK si actif, sinon GNSS interne. La qualité est enregistrée dans les deux cas.
+    val fixTige = when {
         !reglages.capturePosition -> null
-        rtkActif -> fixRtk?.position
+        rtkActif -> fixRtk
         else -> position
     }
+    val positionEffective = fixTige?.position
     // Parcelles du contexte : pour figer le rattachement spatial dans la tige au moment du martelage.
     val parcelles by produceState(initialValue = emptyList<ParcelleGpkg>(), contexte) {
         value = contexte?.cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcellesDetail(it) } } ?: emptyList()
@@ -356,10 +370,10 @@ fun FeuilleMartelageScreen(
                 )
                 derniereSaisie = DerniereSaisie(uuid, essence, classe)
                 if (!rtkActif && reglages.capturePosition && reglages.gnssPonctuel) {
-                    capturerPositionPonctuelle(androidContext) { pos ->
-                        if (pos != null) {
-                            val pcl = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, pos) }?.label
-                            scope.launch { repository.annoterPosition(uuid, pos, pcl) }
+                    capturerPositionPonctuelle(androidContext) { fixP ->
+                        if (fixP != null) {
+                            val pcl = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, fixP.position) }?.label
+                            scope.launch { repository.annoterPosition(uuid, fixP.position, pcl, fixP.qualite, fixP.precisionHorizontaleM) }
                         }
                     }
                 }
@@ -503,10 +517,10 @@ fun FeuilleMartelageScreen(
                             qualiteFix = fix?.qualite, precisionM = fix?.precisionHorizontaleM,
                         )
                         if (!rtkActif && reglages.capturePosition && reglages.gnssPonctuel) {
-                            capturerPositionPonctuelle(androidContext) { p2 ->
-                                if (p2 != null) {
-                                    val pcl = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p2) }?.label
-                                    scope.launch { repository.annoterPosition(uuid, p2, pcl) }
+                            capturerPositionPonctuelle(androidContext) { fixP ->
+                                if (fixP != null) {
+                                    val pcl = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, fixP.position) }?.label
+                                    scope.launch { repository.annoterPosition(uuid, fixP.position, pcl, fixP.qualite, fixP.precisionHorizontaleM) }
                                 }
                             }
                         }

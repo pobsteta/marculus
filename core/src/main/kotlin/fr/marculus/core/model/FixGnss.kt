@@ -23,6 +23,18 @@ enum class QualiteFix(val codeNmea: Int, val libelle: String) {
     companion object {
         /** Qualité correspondant au code NMEA ; INVALIDE pour tout code inconnu. */
         fun depuisCode(code: Int): QualiteFix = entries.firstOrNull { it.codeNmea == code } ?: INVALIDE
+
+        /**
+         * Qualité approchée depuis la précision horizontale (m), faute de champ NMEA dédié
+         * (cas du GNSS interne ou d'une position fournie par « mock location »).
+         */
+        fun depuisPrecision(precisionM: Double?): QualiteFix = when {
+            precisionM == null -> INVALIDE
+            precisionM <= 0.05 -> RTK_FIXE
+            precisionM <= 0.5 -> RTK_FLOAT
+            precisionM <= 3.0 -> DGPS
+            else -> AUTONOME
+        }
     }
 }
 
