@@ -15,9 +15,10 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
 
-    <!-- Service de premier plan maintenant la connexion GNSS + NTRIP (G2/G3). -->
+    <!-- Service de premier plan maintenant la connexion au récepteur GNSS (BT/réseau).
+         Type « connectedDevice » : pas besoin de la permission de localisation. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
 
     <application
         android:name=".MarculusApplication"
@@ -55,6 +56,6 @@
         <service
             android:name=".gnss.ServiceGnssRtk"
             android:exported="false"
-            android:foregroundServiceType="location" />
+            android:foregroundServiceType="connectedDevice" />
     </application>
 </manifest>
