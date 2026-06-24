@@ -116,6 +116,23 @@ Le type de bump dépend du commit :
 > **Secrets / prérequis** : `GITHUB_TOKEN` (fourni automatiquement) suffit pour les tags et
 > releases. Le badge de couverture est généré et commité par la CI (aucun service externe requis).
 
+### Signature des releases
+
+L'APK release est signé avec une **clé stable** pour permettre les **mises à jour in-place**
+(« Mettre à jour » sans désinstaller). La clé est fournie à la CI via 4 secrets de dépôt :
+
+| Secret                      | Contenu                                  |
+|-----------------------------|------------------------------------------|
+| `RELEASE_KEYSTORE_BASE64`   | keystore (`.keystore`) encodé en base64  |
+| `RELEASE_KEYSTORE_PASSWORD` | mot de passe du keystore                 |
+| `RELEASE_KEY_ALIAS`         | alias de la clé                          |
+| `RELEASE_KEY_PASSWORD`      | mot de passe de la clé                   |
+
+À défaut de ces secrets (ou en build local sans clé), l'APK retombe sur la **signature debug**
+(les mises à jour ne fonctionnent qu'entre APK signés par la **même** clé). Le fichier `.keystore`
+n'est **pas** versionné (cf. `.gitignore`) : le perdre rend toute future mise à jour impossible —
+le sauvegarder hors dépôt.
+
 ---
 
 ## Site & documentation
