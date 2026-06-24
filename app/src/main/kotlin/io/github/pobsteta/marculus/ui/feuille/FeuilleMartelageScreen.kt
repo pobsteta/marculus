@@ -261,8 +261,15 @@ fun FeuilleMartelageScreen(
     LaunchedEffect(rtkActif) {
         if (rtkActif) ServiceGnssRtk.demarrerDepuis(androidContext, reglages.rtk)
     }
-    // Position retenue pour figer la tige : RTK si actif (et disponible), sinon GNSS interne.
-    val positionEffective = if (rtkActif) fixRtk?.position else position
+    // Position retenue pour figer la tige. « Enregistrer la position GNSS » (capturePosition) est
+    // le maître-interrupteur : décoché → AUCUNE position sur la tige, même avec un RTK connecté.
+    // Coché → RTK si actif (et disponible), sinon GNSS interne.
+    val fixTige = if (reglages.capturePosition && rtkActif) fixRtk else null
+    val positionEffective = when {
+        !reglages.capturePosition -> null
+        rtkActif -> fixRtk?.position
+        else -> position
+    }
     // Parcelles du contexte : pour figer le rattachement spatial dans la tige au moment du martelage.
     val parcelles by produceState(initialValue = emptyList<ParcelleGpkg>(), contexte) {
         value = contexte?.cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcellesDetail(it) } } ?: emptyList()
@@ -337,7 +344,7 @@ fun FeuilleMartelageScreen(
             val nouveauTotal = (totaux[cle] ?: 0) + ctx.increment
             annoncer(essence, classe, nouveauTotal)
             configs[cle]?.let { annoncerAvis(it, nouveauTotal) }
-            val fix = if (rtkActif) fixRtk else null
+            val fix = fixTige
             val pos = positionEffective
             val parcelleLabel = pos?.let { p -> parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label }
             scope.launch {
@@ -481,7 +488,7 @@ fun FeuilleMartelageScreen(
             quantiteInitiale = (ctxLibre?.increment ?: 1).toString(),
             onAnnuler = { saisieLibre = false },
             onValider = { action, essence, classe, quantite, hauteur, qualite ->
-                val fix = if (rtkActif) fixRtk else null
+                val fix = fixTige
                 val pos = positionEffective
                 val parcelleLabel = pos?.let { p ->
                     parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label
