@@ -149,12 +149,12 @@ par défaut) pour obtenir un fix RTK FIXE. Sautable si le récepteur corrige dé
 
 - **Paramètres** → section « GNSS externe (RTK) » :
   - bascule interne / externe ; choix du récepteur (appareil BT appairé ou host:port TCP) ;
-  - **source des corrections** : *récepteur (ESP32 en WiFi)* — défaut — ou *application (pont NTRIP)* ;
+  - **source des corrections** : *application (pont NTRIP)* — défaut — ou *récepteur autonome* ;
   - **config caster** pré-remplie Centipede (`caster.centipede.fr:2101`), mountpoint
     (idéalement liste depuis la *sourcetable*), identifiant, mot de passe — visible seulement
     si « pont NTRIP » ;
   - bouton **Tester** (état de connexion + qualité de fix en direct).
-  - Persistance dans `Reglages`/DataStore (adresse ESP32, source corrections, caster).
+  - Persistance dans `Reglages`/DataStore (adresse récepteur BT, source corrections, caster).
     `ReglagesRepository`.
 - **Feuille / carte** : l'indicateur de fix conditionne le martelage (option : avertir si le
   fix n'est pas RTK FIXE au moment du `+`).
@@ -185,11 +185,24 @@ par défaut) pour obtenir un fix RTK FIXE. Sautable si le récepteur corrige dé
 - **Découpe domaine pur** : NMEA et framing NTRIP en `:core` (TDD) ; I/O (BT, sockets, service)
   hors `:core`.
 
-## 7. Ordre de livraison conseillé
+## 7. Ordre de livraison (Voie 2 retenue)
 
-1. **`G0` (Voie 1, mock location)** + la **trace tige** de G3 → le plus court chemin vers un
-   RTK exploitable et certifié, quasi sans code. **À tester en premier sur le terrain.**
-2. Si une expérience mono-app est jugée nécessaire : **`G1` → `G2` → `G3`** (Voie 2). Chaque
-   sous-tranche est démontrable seule (G1 = récepteur lu ; cas A = déjà RTK ; G2 = pont NTRIP).
+1. **Parser NMEA en `:core`** (TDD, sans matériel) — GGA/GST → `FixGnss` + checksum. Démarrage.
+2. **`G1`** — `Transport` BT SPP + abstraction `SourcePosition` (interne/externe), badge de fix.
+3. **`G2`** — client NTRIP (caster Centipede, GGA renvoyée pour VRS), pont RTCM, service avant-plan.
+4. **`G3`** — réglages complets, trace `qualiteFix`/`precisionM` sur la tige (migration Room),
+   export CSV, i18n.
 
-Décider G0 vs G1+G2 **après** un essai terrain de la Voie 1.
+G0 (mock location) abandonné. Chaque étape est démontrable seule ; le parser NMEA est livrable
+et testable immédiatement, indépendamment du matériel.
+
+## 8. Références
+
+- **Doc apps rover Centipede** — `docs.centipede-rtk.org/rover/smartphone-rover-apps.html`
+  (transport BT, app = client NTRIP, NMEA, mock location).
+- **millipede-caster** — `github.com/CentipedeRTK/millipede-caster` : le **caster** (serveur C,
+  côté réseau Centipede), *pas* réutilisable comme client mais **référence de protocole** :
+  format de la **sourcetable**, auth `Basic` (`source.auth`/`host.auth`), mode **VRS/« NEAR »**
+  confirmant le **renvoi périodique de la GGA** par le client (cf. G2).
+- **Apps de référence** (comportement à imiter) : Lefebure NTRIP Client, **Bluetooth GNSS**
+  (open-source — utile pour le parsing NMEA u-blox/NTRIP), SW Maps, QField.
