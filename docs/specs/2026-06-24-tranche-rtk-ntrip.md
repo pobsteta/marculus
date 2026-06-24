@@ -37,35 +37,78 @@
 - Les **données de martelage restent hors-ligne** ; seul le **flux de corrections** exige du
   réseau — inhérent au RTK, donc acceptable comme exception ciblée.
 
-## 3. Décisions figées (2026-06-24)
+## 3. Décisions à figer (2026-06-24)
 
-1. **Matériel cible** : **u-blox ZED-F9P piloté par un ESP32** (rover Centipede DIY).
-   - **Transport = Bluetooth Classic SPP** : la quasi-totalité des firmwares ESP32 Centipede
-     exposent le F9P en série-sur-Bluetooth (comme attendu par SW Maps / Lefebure NTRIP Client).
-     UUID SPP `00001101-0000-1000-8000-00805F9B34FB`. USB/BLE écartés pour l'instant.
-   - **Conséquence majeure — qui fait le NTRIP ?** Deux topologies, l'app supporte les deux :
-     - **(A) ESP32 corrigé en WiFi** : l'ESP32 fait lui-même le client NTRIP et alimente le F9P ;
-       le téléphone **n'a qu'à lire le NMEA** (GGA donne déjà fix=4 RTK fixe). → **G2 devient
-       optionnel**, juste de la config côté ESP32.
-     - **(B) Téléphone = pont NTRIP** : l'ESP32 ne sert que le NMEA ; l'app tire le RTCM du
-       caster et le **renvoie au F9P via le même lien Bluetooth**. → **G2 requis**.
-     Le réglage « source des corrections » bascule entre *récepteur (ESP32)* et *application (pont)*.
+> Source : doc officielle Centipede `docs.centipede-rtk.org/rover/smartphone-rover-apps.html`.
+> Elle confirme : **Bluetooth Classic** comme transport, **l'app mobile comme client NTRIP**
+> (pont des corrections vers le récepteur), retour **NMEA**, et met en avant le **« mock
+> location »** (Lefebure NTRIP Client / Bluetooth GNSS) pour partager la position RTK à toutes
+> les apps Android.
+
+### 3.0 — Stratégie d'intégration (LE choix structurant, à trancher en premier)
+
+Deux voies pour amener le RTK dans Marculus, d'effort très différent :
+
+- **Voie 1 — Déléguer via « mock location »** *(recommandée Centipede, effort minime)* :
+  l'utilisateur lance une app tierce (**Lefebure NTRIP Client** ou **Bluetooth GNSS** open-source)
+  qui connecte le récepteur (BT), fait le NTRIP et **injecte la position RTK dans le fournisseur
+  de localisation Android**. Marculus la lit **par son `LocationManager` actuel, sans rien
+  changer** — il suffit d'exploiter `Location.getAccuracy()` (précision en m, ~0,02 m en RTK
+  fixe) pour afficher/figer la qualité. **Quasi zéro dev** ; contrepartie : une 2ᵉ app à
+  installer/configurer (et l'option « application de position fictive » des options dév.).
+- **Voie 2 — Intégrer dans Marculus** *(tout-en-un, effort important)* : Marculus fait lui-même
+  BT SPP + parser NMEA + client NTRIP (sous-tranches G1→G3 ci-dessous). Expérience mono-app
+  soignée, mais c'est le gros du travail et c'est dépendant du matériel pour la validation.
+
+**Recommandation** : tester d'abord la **Voie 1** sur le terrain (Lefebure + mock location).
+Si elle suffit, G1/G2 deviennent inutiles et il ne reste que la **trace de qualité sur la tige**
+(une partie de G3). N'engager la Voie 2 que si l'expérience mono-app est jugée nécessaire.
+
+### 3.1 — Décisions techniques (ne valent que pour la Voie 2)
+
+1. **Matériel cible** : récepteur Centipede actuel = **Septentrio mosaic-X5** ou **Unicore UM980**
+   (multi-bandes, classe géodésique ; le F9P/ESP32 n'est plus la cible).
+   - **Point clé pour l'app** : les deux modules **sortent du NMEA** (GGA/GST/RMC) et **acceptent
+     du RTCM3** en entrée ; ils **calculent eux-mêmes la solution RTK**. L'app reste donc un
+     **pont/lecteur**, indépendamment du module. (Formats binaires natifs — Septentrio **SBF**,
+     **Unicore binary** — ignorés : on n'exploite que le NMEA.)
+   - **Transport = Bluetooth Classic SPP** (norme confirmée par la doc Centipede ; USB série en
+     option ultérieure). On isole tout de même un **`Transport`** abstrait (lecture/écriture
+     d'octets) pour garder USB/TCP ouverts.
+   - **NTRIP : l'app fait le pont (topologie B), c'est le défaut documenté Centipede** — l'app
+     tire le RTCM du caster et le **renvoie au récepteur via le lien BT** ; le récepteur renvoie
+     le NMEA corrigé. *(Cas A — récepteur/compagnon WiFi autonome qui corrige seul — reste
+     supporté gratuitement : l'app lit alors juste le NMEA déjà en fix=4.)*
 2. **Tige enrichie = OUI** : `qualiteFix` + `precisionM` figées au martelage → **migration Room**
-   + colonnes export CSV (certifie qu'un point a été pris en RTK FIXE).
+   + colonnes export CSV (certifie qu'un point a été pris en RTK FIXE). **Vaut pour les deux
+   voies** (en Voie 1, on figerait `Location.accuracy`).
 3. **Caster par défaut = OUI, Centipede** : champs pré-remplis (`caster.centipede.fr:2101`),
    l'utilisateur n'ajuste que le mountpoint et ses identifiants.
 
 ## 4. Sous-tranches
 
-### G1 — Liaison récepteur + NMEA (sans corrections) 🔜
+### G0 — Voie 1 : qualité de fix via mock location 🔜 *(chemin court, à évaluer d'abord)*
+*But : exploiter une position RTK déjà injectée par Lefebure/Bluetooth GNSS, sans coder BT/NTRIP.*
+
+- Documenter le réglage terrain (app tierce + « application de position fictive » des options dév.).
+- Lire `Location.getAccuracy()` (+ `hasAccuracy()`) sur le chemin `LocationManager` **existant** ;
+  en dériver un `QualiteFix` approché (ex. < 0,05 m ⇒ RTK fixe, < 0,5 m ⇒ float/DGPS, sinon
+  autonome) faute de champ NMEA brut.
+- Afficher le badge de qualité + **figer `precisionM` sur la tige** (cf. G3, migration Room).
+- **Si la Voie 1 suffit, G1/G2 ne sont pas développés.**
+
+### G1 — Voie 2 : liaison récepteur + NMEA (sans corrections) 🔜
 *But : lire la position d'un récepteur externe et l'afficher avec sa qualité, en fix
 autonome/DGPS (pas encore RTK).*
 
-- **Transport Bluetooth Classic SPP** : `BluetoothSocket` SPP (UUID
-  `00001101-0000-1000-8000-00805F9B34FB`), appareil choisi parmi `BluetoothAdapter.bondedDevices`
-  (ESP32 déjà appairé au niveau système). Lecture du flux d'octets sur l'`InputStream`.
-  - Permissions runtime : `BLUETOOTH_CONNECT` (API 31+) ; legacy `BLUETOOTH`/`BLUETOOTH_ADMIN`.
-  - En topologie (A), G1 suffit déjà à afficher un fix **RTK fixe** (l'ESP32 corrige tout seul).
+- **`Transport` abstrait** (lecture/écriture d'octets) ; première implémentation selon le lien
+  confirmé (§3.1) :
+  - *Bluetooth Classic SPP* : `BluetoothSocket` (UUID `00001101-0000-1000-8000-00805F9B34FB`),
+    appareil parmi `BluetoothAdapter.bondedDevices`. Permissions `BLUETOOTH_CONNECT` (API 31+) /
+    legacy `BLUETOOTH`/`BLUETOOTH_ADMIN`.
+  - *TCP/WiFi* : `Socket(host, port)` vers la carte porteuse (le plus simple à coder/tester).
+  - *USB série* (CDC/FTDI) ou *BLE* : implémentations ultérieures si besoin.
+  - En topologie (A), G1 suffit déjà à afficher un fix **RTK fixe** (le récepteur corrige seul).
 - **Parser NMEA en domaine pur** (`:core`, TDD) :
   - `$--GGA` → lat/lon, **qualité de fix** (0 invalide · 1 autonome · 2 DGPS · 4 RTK fixe ·
     5 RTK float), altitude, HDOP, nb satellites ;
@@ -80,9 +123,9 @@ autonome/DGPS (pas encore RTK).*
 - **UI minimale** : badge de qualité de fix (couleur + libellé + précision + nb sats) sur la
   feuille/carte.
 
-### G2 — Client NTRIP + corrections → RTK 🔜 *(requis seulement en topologie B)*
-*But : quand l'ESP32 ne fait pas lui-même le NTRIP, l'app tire le RTCM du caster et le renvoie
-au F9P pour obtenir un fix RTK FIXE. Inutile si l'ESP32 corrige déjà en WiFi (topologie A).*
+### G2 — Voie 2 : client NTRIP + corrections → RTK 🔜
+*But : l'app tire le RTCM du caster Centipede et le renvoie au récepteur (pont, topologie B
+par défaut) pour obtenir un fix RTK FIXE. Sautable si le récepteur corrige déjà seul (cas A).*
 
 - **Client NTRIP** (réseau, `:data` ou module dédié) :
   - connexion TCP au caster, requête NTRIP (GET mountpoint, `Authorization: Basic`,
@@ -101,7 +144,7 @@ au F9P pour obtenir un fix RTK FIXE. Inutile si l'ESP32 corrige déjà en WiFi (
 *But : configurable bout en bout et tracé dans les données.*
 
 - **Paramètres** → section « GNSS externe (RTK) » :
-  - bascule interne / externe ; choix du récepteur ESP32 (liste des appareils appairés) ;
+  - bascule interne / externe ; choix du récepteur (appareil BT appairé ou host:port TCP) ;
   - **source des corrections** : *récepteur (ESP32 en WiFi)* — défaut — ou *application (pont NTRIP)* ;
   - **config caster** pré-remplie Centipede (`caster.centipede.fr:2101`), mountpoint
     (idéalement liste depuis la *sourcetable*), identifiant, mot de passe — visible seulement
@@ -125,10 +168,11 @@ au F9P pour obtenir un fix RTK FIXE. Inutile si l'ESP32 corrige déjà en WiFi (
 
 ## 6. Risques / points de vigilance
 
-- **Validation = matériel réel obligatoire** (ESP32 + F9P) : impossible à tester sur émulateur.
-  Prévoir un mode « rejeu » d'un fichier NMEA/RTCM enregistré pour les tests UI.
-- **Firmware ESP32** : confirmer qu'il expose bien le F9P en **BT Classic SPP** et s'il fait
-  son propre NTRIP (topologie A) ou non (B) ; format NMEA (talker GN/GP/GL), débit série.
+- **Validation = matériel réel obligatoire** (mosaic-X5 / UM980) : impossible à tester sur
+  émulateur. Prévoir un mode « rejeu » d'un fichier NMEA/RTCM enregistré pour les tests UI.
+- **Lien à confirmer** : transport exact de la carte porteuse (BT SPP / BLE / USB / TCP-WiFi) et
+  si elle fait son propre NTRIP (topologie A) ou non (B) ; format/cadence NMEA (talker GN/GP/GL),
+  débit. mosaic-X5 et UM980 peuvent sortir leur binaire natif (SBF / Unicore) — forcer le **NMEA**.
 - **VRS vs station unique** : la GGA renvoyée est obligatoire pour le VRS, inutile pour une base
   fixe — gérer les deux.
 - **Batterie / chaleur** : BT + réseau + service continu ; bouton d'arrêt explicite.
@@ -139,7 +183,9 @@ au F9P pour obtenir un fix RTK FIXE. Inutile si l'ESP32 corrige déjà en WiFi (
 
 ## 7. Ordre de livraison conseillé
 
-`G1 (lire + afficher un fix externe)` → `G2 (pont NTRIP, topologie B seulement)` →
-`G3 (réglages, trace, export)`. Chaque sous-tranche est démontrable seule. **En topologie A
-(ESP32 corrigé en WiFi), G1 livre déjà le RTK centimétrique** — G2 peut être différé voire
-sauté. Tester d'abord l'ESP32 en mode A pour décider si G2 est nécessaire.
+1. **`G0` (Voie 1, mock location)** + la **trace tige** de G3 → le plus court chemin vers un
+   RTK exploitable et certifié, quasi sans code. **À tester en premier sur le terrain.**
+2. Si une expérience mono-app est jugée nécessaire : **`G1` → `G2` → `G3`** (Voie 2). Chaque
+   sous-tranche est démontrable seule (G1 = récepteur lu ; cas A = déjà RTK ; G2 = pont NTRIP).
+
+Décider G0 vs G1+G2 **après** un essai terrain de la Voie 1.
