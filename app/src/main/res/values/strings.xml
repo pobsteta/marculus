@@ -294,13 +294,19 @@
     <string name="rtk_charger_mountpoints">Charger</string>
     <string name="rtk_aucun_mountpoint">Aucun point de montage trouvé (caster injoignable ?).</string>
     <string name="rtk_corrections_ok">Corrections NTRIP reçues (âge %1$s s) — le récepteur est alimenté.</string>
-    <string name="rtk_badge_indice">Touchez le badge pour l\'état GNSS détaillé.</string>
-    <string name="rtk_diag_connexion">Lien : connexion au récepteur… (aucune donnée reçue pour l\'instant).</string>
+    <string name="rtk_diag_connexion">Lien : connexion au récepteur… (aucune donnée reçue pour l\'instant) (sens GNSS → téléphone).</string>
     <string name="rtk_diag_erreur">Lien : échec — %1$s</string>
-    <string name="rtk_diag_octets_sans_nmea">Lien actif : %1$d octets reçus, mais aucune trame NMEA. Le récepteur émet-il bien du NMEA (pas du binaire SBF/Unicore) ?</string>
-    <string name="rtk_diag_trames">Communication OK : %1$d trames NMEA reçues (%2$d octets).</string>
+    <string name="rtk_diag_octets_sans_nmea">Lien actif : %1$d octets reçus (sens GNSS → téléphone), mais aucune trame NMEA. Le récepteur émet-il bien du NMEA (pas du binaire SBF/Unicore) ?</string>
+    <string name="rtk_diag_trames">Communication OK : %1$d trames NMEA reçues (%2$d octets) (sens GNSS → téléphone).</string>
     <string name="rtk_diag_derniere">Dernière trame : %1$s</string>
     <string name="rtk_diag_rtcm">RTCM renvoyé au récepteur : %1$d octets (sens téléphone → GNSS).</string>
+    <string name="rtk_ntrip_connexion">NTRIP : connexion au caster…</string>
+    <string name="rtk_ntrip_ok">NTRIP : connecté au caster ✓ (corrections en cours d\'envoi).</string>
+    <string name="rtk_ntrip_401">NTRIP : identifiants refusés (401) — vérifiez l\'utilisateur et le mot de passe.</string>
+    <string name="rtk_ntrip_sourcetable">NTRIP : point de montage introuvable (le caster a renvoyé sa liste) — vérifiez le mountpoint.</string>
+    <string name="rtk_ntrip_inconnu">NTRIP : réponse inattendue du caster.</string>
+    <string name="rtk_ntrip_erreur">NTRIP : erreur — %1$s</string>
+    <string name="rtk_station_connectee">Station de référence connectée : %1$s (NEAR : base la plus proche).</string>
     <!-- Panneau État GNSS -->
     <string name="etat_gnss_titre">État GNSS</string>
     <string name="etat_gnss_aucun">Aucune donnée GNSS (récepteur non connecté).</string>

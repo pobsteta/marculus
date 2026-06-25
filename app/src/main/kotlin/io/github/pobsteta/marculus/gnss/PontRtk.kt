@@ -3,10 +3,13 @@ package io.github.pobsteta.marculus.gnss
 import fr.marculus.core.AccumulateurSkyplot
 import fr.marculus.core.NmeaDecoupeur
 import fr.marculus.core.NmeaParser
+import fr.marculus.core.Ntrip
+import fr.marculus.core.StatutNtrip
 import fr.marculus.core.TrameGsa
 import fr.marculus.core.TrameGst
 import fr.marculus.core.TrameRmc
 import fr.marculus.core.model.FixGnss
+import fr.marculus.core.model.Position
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +32,9 @@ sealed interface EvenementRtk {
 
     /** Des octets RTCM (corrections) ont été renvoyés vers le récepteur (sens téléphone → GNSS). */
     data class Rtcm(val n: Int) : EvenementRtk
+
+    /** État de la connexion au caster NTRIP ([statut] renvoyé, ou [message] d'erreur réseau). */
+    data class Ntrip(val statut: StatutNtrip?, val message: String? = null) : EvenementRtk
 }
 
 /**
@@ -40,6 +46,9 @@ sealed interface EvenementRtk {
 class PontRtk(
     private val transport: Transport,
     private val clientNtrip: ClientNtrip? = null,
+    /** Position approchée du rover pour amorcer un mountpoint VRS/NEAR quand le récepteur n'a pas
+     *  encore émis de GGA (typiquement la dernière position connue du GNSS interne du téléphone). */
+    private val positionRover: () -> Position? = { null },
     private val intervalleGgaMs: Long = 10_000L,
 ) {
     fun evenements(): Flow<EvenementRtk> = channelFlow {
@@ -52,15 +61,30 @@ class PontRtk(
 
         clientNtrip?.let { ntrip ->
             launch(Dispatchers.IO) {
-                ntrip.corrections().collect { rtcm ->
-                    transport.ecrire(rtcm)
-                    send(EvenementRtk.Rtcm(rtcm.size))
-                }
+                // Une erreur NTRIP (caster injoignable, 401…) ne doit pas tuer le lien récepteur :
+                // on l'isole et on la remonte comme événement de diagnostic.
+                runCatching {
+                    ntrip.corrections { statut -> trySend(EvenementRtk.Ntrip(statut)) }.collect { rtcm ->
+                        transport.ecrire(rtcm)
+                        send(EvenementRtk.Rtcm(rtcm.size))
+                    }
+                }.onFailure { e -> trySend(EvenementRtk.Ntrip(null, e.message ?: "erreur NTRIP")) }
             }
+            // Renvoi de la GGA au caster (sélection VRS/NEAR). On envoie DÈS que la connexion est
+            // ouverte (sans attendre 10 s) : la GGA du récepteur si disponible, sinon une GGA
+            // synthétisée depuis la position du rover, pour amorcer un mountpoint NEAR même avant
+            // que le récepteur ait un fix. Cadence rapide jusqu'au premier envoi, puis périodique.
             launch {
+                var amorce = false
                 while (isActive) {
-                    delay(intervalleGgaMs)
-                    derniereGgaBrute.get()?.let { ntrip.envoyerGga(it) }
+                    if (ntrip.connecte) {
+                        val gga = derniereGgaBrute.get() ?: positionRover()?.let { Ntrip.gga(it) }
+                        if (gga != null) {
+                            ntrip.envoyerGga(gga)
+                            amorce = true
+                        }
+                    }
+                    delay(if (amorce) intervalleGgaMs else 500L)
                 }
             }
         }

@@ -13,8 +13,11 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import android.location.LocationManager
+import fr.marculus.core.StatutNtrip
 import fr.marculus.core.model.ConfigRtk
 import fr.marculus.core.model.FixGnss
+import fr.marculus.core.model.Position
 import fr.marculus.core.model.TransportRtk
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -39,6 +42,10 @@ data class EtatRtk(
     val rtcmEnvoye: Long = 0,
     val fix: FixGnss? = null,
     val erreur: String? = null,
+    /** Statut renvoyé par le caster NTRIP (null tant que pas de réponse). */
+    val ntripStatut: StatutNtrip? = null,
+    /** Message d'erreur NTRIP éventuel (caster injoignable, etc.). */
+    val ntripErreur: String? = null,
 )
 
 /**
@@ -99,6 +106,8 @@ class ServiceGnssRtk : Service() {
                             }
                             is EvenementRtk.Rtcm ->
                                 _etat.update { it.copy(rtcmEnvoye = it.rtcmEnvoye + ev.n) }
+                            is EvenementRtk.Ntrip ->
+                                _etat.update { it.copy(ntripStatut = ev.statut, ntripErreur = ev.message) }
                         }
                     }
                 }.onFailure { e -> _etat.update { it.copy(erreur = e.message ?: "erreur de connexion") } }
@@ -194,8 +203,23 @@ class ServiceGnssRtk : Service() {
             } else {
                 null
             }
-            demarrer(contexte, PontRtk(transport, ntrip))
+            demarrer(contexte, PontRtk(transport, ntrip, positionRover = positionConnueTelephone(contexte)))
             return true
+        }
+
+        /**
+         * Fournit la dernière position connue du GNSS interne du téléphone, pour amorcer un
+         * mountpoint VRS/NEAR avant que le récepteur ait un fix. Renvoie null si la localisation
+         * n'est pas autorisée/disponible (sans effet : on retombe alors sur la GGA du récepteur).
+         */
+        @SuppressLint("MissingPermission")
+        private fun positionConnueTelephone(contexte: Context): () -> Position? = {
+            runCatching {
+                val lm = contexte.getSystemService(LocationManager::class.java)
+                val loc = lm?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                    ?: lm?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                loc?.let { Position(it.latitude, it.longitude) }
+            }.getOrNull()
         }
 
         /** Demande l'arrêt du service. */

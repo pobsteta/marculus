@@ -67,6 +67,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -147,6 +148,8 @@ fun CarteScreen(
     var centre by remember { mutableStateOf(false) }
     var chargement by remember { mutableStateOf(false) }
     var legendeOuverte by remember { mutableStateOf(false) }
+    // Hauteur mesurée de la légende des essences (px) : sert à remonter l'échelle juste au-dessus.
+    var hauteurLegendePx by remember { mutableStateOf(0) }
 
     // Le GPKG est rattaché au contexte (modifiable via l'import depuis la carte).
     var cheminGpkg by remember { mutableStateOf<String?>(null) }
@@ -210,6 +213,14 @@ fun CarteScreen(
             setEnableAdjustLength(true)
             setScaleBarOffset((12 * densite).toInt(), (12 * densite).toInt())
         }
+    }
+    // L'échelle (overlay osmdroid) et la légende (Compose) occupent toutes deux le coin bas-gauche :
+    // on décale l'échelle vers le haut de la hauteur de la légende pour qu'elle s'affiche juste
+    // au-dessus, au lieu d'être masquée par la carte Compose.
+    LaunchedEffect(hauteurLegendePx, densite) {
+        val decalageBas = hauteurLegendePx + ((8 + 8) * densite).toInt() // 8dp marge légende + 8dp écart
+        echelleOverlay.setScaleBarOffset((12 * densite).toInt(), decalageBas)
+        mapView.invalidate()
     }
 
     // Permission de localisation (le GNSS interne alimente le point quand le RTK n'est pas actif).
@@ -459,7 +470,8 @@ fun CarteScreen(
                 essences = ctx.essences,
                 ouverte = legendeOuverte,
                 onToggle = { legendeOuverte = !legendeOuverte },
-                modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
+                modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)
+                    .onSizeChanged { hauteurLegendePx = it.height },
             )
             if (chargement) {
                 IndicateurImport(Modifier.align(Alignment.Center))

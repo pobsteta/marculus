@@ -29,8 +29,15 @@ class ClientNtrip(
 ) {
     @Volatile private var sortie: OutputStream? = null
 
-    /** Flux des corrections RTCM3 ; se termine si l'authentification échoue ou à la fermeture. */
-    fun corrections(): Flow<ByteArray> = flow {
+    /** Vrai quand la connexion au caster est ouverte (sortie disponible pour renvoyer la GGA). */
+    val connecte: Boolean get() = sortie != null
+
+    /**
+     * Flux des corrections RTCM3 ; se termine si l'authentification échoue ou à la fermeture.
+     * [onStatut] est appelé avec le statut renvoyé par le caster (OK, 401, sourcetable…), pour le
+     * diagnostic dans l'UI.
+     */
+    fun corrections(onStatut: (StatutNtrip) -> Unit = {}): Flow<ByteArray> = flow {
         val socket = Socket(hote, port)
         try {
             val out = socket.getOutputStream()
@@ -40,7 +47,9 @@ class ClientNtrip(
             val entree = socket.getInputStream()
             // Ligne de statut (compatible v1 « ICY 200 OK » et v2 « HTTP/1.1 200 OK »).
             val statutLigne = lireLigne(entree)
-            if (Ntrip.statutReponse(statutLigne) != StatutNtrip.OK) return@flow
+            val statut = Ntrip.statutReponse(statutLigne)
+            onStatut(statut)
+            if (statut != StatutNtrip.OK) return@flow
             // NTRIP v2 (HTTP) : consommer les en-têtes jusqu'à la ligne vide.
             // NTRIP v1 (ICY) : pas d'en-têtes, le flux RTCM suit directement.
             if (!statutLigne.startsWith("ICY")) {

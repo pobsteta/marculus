@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.StatutNtrip
 import fr.marculus.core.model.ConfigRtk
 import fr.marculus.core.model.OrigineFix
 import fr.marculus.core.model.Reglages
@@ -174,7 +175,6 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
             OutlinedButton(onClick = { ServiceGnssRtk.arreter(context) }) { Text(stringResource(R.string.rtk_arreter)) }
             BadgeFix(fix) { etatGnssOuvert = true }
         }
-        Text(stringResource(R.string.rtk_badge_indice), style = MaterialTheme.typography.bodySmall)
 
         // Diagnostic du lien : permet de distinguer « BT non connecté » / « connecté mais aucune
         // donnée » / « données non‑NMEA » / « communication OK ».
@@ -192,6 +192,17 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
         // (diagnostic de ce qui PART du téléphone, indépendant de l'état du fix).
         if (rtk.pontNtrip) {
             Text(stringResource(R.string.rtk_diag_rtcm, etat.rtcmEnvoye), style = MaterialTheme.typography.bodySmall)
+            // Statut du caster NTRIP : rend visibles les échecs (401, mountpoint inconnu, caster
+            // injoignable) au lieu de laisser deviner devant un compteur RTCM à 0.
+            val statutNtrip = when {
+                etat.ntripErreur != null -> stringResource(R.string.rtk_ntrip_erreur, etat.ntripErreur ?: "")
+                etat.ntripStatut == StatutNtrip.OK -> stringResource(R.string.rtk_ntrip_ok)
+                etat.ntripStatut == StatutNtrip.NON_AUTORISE -> stringResource(R.string.rtk_ntrip_401)
+                etat.ntripStatut == StatutNtrip.SOURCETABLE -> stringResource(R.string.rtk_ntrip_sourcetable)
+                etat.ntripStatut == StatutNtrip.INCONNU -> stringResource(R.string.rtk_ntrip_inconnu)
+                else -> stringResource(R.string.rtk_ntrip_connexion)
+            }
+            Text(statutNtrip, style = MaterialTheme.typography.bodySmall)
         }
         // Sens GNSS → téléphone : âge des corrections reçues. Affiché uniquement quand le récepteur
         // EXTERNE fournit réellement un fix corrigé (âge présent). Un fix interne (origine INTERNE)
@@ -199,6 +210,12 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
         val age = fix?.ageCorrectionsS
         if (rtk.pontNtrip && fix?.origine == OrigineFix.EXTERNE && age != null) {
             Text(stringResource(R.string.rtk_corrections_ok, age.toInt().toString()), style = MaterialTheme.typography.bodySmall)
+        }
+        // Station de référence sélectionnée (NEAR/VRS : la base la plus proche), issue du champ 14
+        // de la trame GGA dès que le récepteur calcule une solution corrigée.
+        val station = fix?.stationRef
+        if (rtk.pontNtrip && fix?.origine == OrigineFix.EXTERNE && !station.isNullOrBlank()) {
+            Text(stringResource(R.string.rtk_station_connectee, station), style = MaterialTheme.typography.bodySmall)
         }
     }
 
