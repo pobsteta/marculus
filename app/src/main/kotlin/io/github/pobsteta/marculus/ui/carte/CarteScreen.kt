@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
@@ -67,7 +68,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -106,7 +106,11 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
-import org.osmdroid.views.overlay.ScaleBarOverlay
+import java.util.Locale
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
 
 private const val ZOOM_MAX = 19.0
 
@@ -148,8 +152,9 @@ fun CarteScreen(
     var centre by remember { mutableStateOf(false) }
     var chargement by remember { mutableStateOf(false) }
     var legendeOuverte by remember { mutableStateOf(false) }
-    // Hauteur mesurée de la légende des essences (px) : sert à remonter l'échelle juste au-dessus.
-    var hauteurLegendePx by remember { mutableStateOf(0) }
+    // Résolution au sol (mètres/pixel) du centre de la carte, recalculée à chaque scroll/zoom :
+    // sert à dessiner l'échelle (barre Compose en bas-centre).
+    var metresParPixel by remember { mutableStateOf(0.0) }
 
     // Le GPKG est rattaché au contexte (modifiable via l'import depuis la carte).
     var cheminGpkg by remember { mutableStateOf<String?>(null) }
@@ -205,22 +210,9 @@ fun CarteScreen(
     // === Indicateur « ma position » : point bleu + cercle de précision + cône de direction ===
     val densite = context.resources.displayMetrics.density
     val positionOverlay = remember { PositionOverlay(densite) }
-    val echelleOverlay = remember {
-        ScaleBarOverlay(mapView).apply {
-            setAlignBottom(true)
-            setAlignRight(false)
-            drawLatitudeScale(false)
-            setEnableAdjustLength(true)
-            setScaleBarOffset((12 * densite).toInt(), (12 * densite).toInt())
-        }
-    }
-    // L'échelle (overlay osmdroid) et la légende (Compose) occupent toutes deux le coin bas-gauche :
-    // on décale l'échelle vers le haut de la hauteur de la légende pour qu'elle s'affiche juste
-    // au-dessus, au lieu d'être masquée par la carte Compose.
-    LaunchedEffect(hauteurLegendePx, densite) {
-        val decalageBas = hauteurLegendePx + ((8 + 8) * densite).toInt() // 8dp marge légende + 8dp écart
-        echelleOverlay.setScaleBarOffset((12 * densite).toInt(), decalageBas)
-        mapView.invalidate()
+    // Résolution au sol du centre de la carte (m/pixel) pour l'échelle Compose (bas-centre).
+    fun majEchelle() {
+        metresParPixel = resolutionAuSol(mapView.mapCenter.latitude, mapView.zoomLevelDouble)
     }
 
     // Permission de localisation (le GNSS interne alimente le point quand le RTK n'est pas actif).
@@ -361,8 +353,7 @@ fun CarteScreen(
                 },
             )
         }
-        // Surcouches persistantes (échelle + ma position), ré-ajoutées après le clear, au-dessus.
-        mapView.overlays.add(echelleOverlay)
+        // Surcouche persistante (ma position), ré-ajoutée après le clear, au-dessus.
         mapView.overlays.add(positionOverlay)
         val cible = points.ifEmpty { parcelles.flatMap { it.anneaux }.flatten().map { GeoPoint(it.latitude, it.longitude) } }
         if (!centre && cible.isNotEmpty()) {
@@ -391,9 +382,10 @@ fun CarteScreen(
 
     DisposableEffect(parcelles) {
         majParcelleCentre()
+        majEchelle()
         val listener = object : MapListener {
-            override fun onScroll(event: ScrollEvent?): Boolean { majParcelleCentre(); return false }
-            override fun onZoom(event: ZoomEvent?): Boolean { majParcelleCentre(); return false }
+            override fun onScroll(event: ScrollEvent?): Boolean { majParcelleCentre(); majEchelle(); return false }
+            override fun onZoom(event: ZoomEvent?): Boolean { majParcelleCentre(); majEchelle(); return false }
         }
         mapView.addMapListener(listener)
         onDispose { mapView.removeMapListener(listener) }
@@ -470,8 +462,12 @@ fun CarteScreen(
                 essences = ctx.essences,
                 ouverte = legendeOuverte,
                 onToggle = { legendeOuverte = !legendeOuverte },
-                modifier = Modifier.align(Alignment.BottomStart).padding(8.dp)
-                    .onSizeChanged { hauteurLegendePx = it.height },
+                modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
+            )
+            EchelleCarte(
+                metresParPixel = metresParPixel,
+                densite = densite,
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp),
             )
             if (chargement) {
                 IndicateurImport(Modifier.align(Alignment.Center))
@@ -479,6 +475,55 @@ fun CarteScreen(
         }
     }
 }
+
+/**
+ * Échelle cartographique (barre + distance) en bas-centre, lisible sur tout fond (carte translucide).
+ * Choisit une distance « ronde » (1/2/5 × 10ⁿ) proche d'une largeur cible, et dessine la barre à la
+ * largeur correspondante au zoom courant. Masquée tant que la résolution n'est pas connue.
+ */
+@Composable
+private fun EchelleCarte(metresParPixel: Double, densite: Float, modifier: Modifier = Modifier) {
+    if (metresParPixel <= 0.0) return
+    val largeurCiblePx = 90f * densite
+    val metresJolis = distanceRonde(metresParPixel * largeurCiblePx)
+    if (metresJolis <= 0.0) return
+    val largeurDp = ((metresJolis / metresParPixel) / densite).toFloat()
+    val libelle = if (metresJolis >= 1000) "${(metresJolis / 1000).let { if (it == it.toInt().toDouble()) it.toInt().toString() else String.format(Locale.ROOT, "%.1f", it) }} km"
+    else "${metresJolis.toInt()} m"
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)),
+    ) {
+        Column(
+            Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(libelle, style = MaterialTheme.typography.labelSmall)
+            Box(
+                Modifier.padding(top = 2.dp).width(largeurDp.dp).height(3.dp)
+                    .background(MaterialTheme.colorScheme.onSurface),
+            )
+        }
+    }
+}
+
+/** Plus grande distance « ronde » (1, 2 ou 5 × 10ⁿ) inférieure ou égale à [metres]. */
+private fun distanceRonde(metres: Double): Double {
+    if (metres <= 0.0) return 0.0
+    val exposant = floor(log10(metres))
+    val base = 10.0.pow(exposant)
+    val facteur = metres / base
+    val joli = when {
+        facteur >= 5.0 -> 5.0
+        facteur >= 2.0 -> 2.0
+        else -> 1.0
+    }
+    return joli * base
+}
+
+/** Résolution au sol (m/pixel) en projection Web Mercator, pour [latitude] (°) et [zoom] (osmdroid). */
+private fun resolutionAuSol(latitude: Double, zoom: Double): Double =
+    156543.03392 * cos(Math.toRadians(latitude)) / 2.0.pow(zoom)
 
 @Composable
 private fun LegendeEssences(
