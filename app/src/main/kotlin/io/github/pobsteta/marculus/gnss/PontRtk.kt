@@ -5,6 +5,7 @@ import fr.marculus.core.NmeaDecoupeur
 import fr.marculus.core.NmeaParser
 import fr.marculus.core.TrameGsa
 import fr.marculus.core.TrameGst
+import fr.marculus.core.TrameRmc
 import fr.marculus.core.model.FixGnss
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -45,6 +46,7 @@ class PontRtk(
         val decoupeur = NmeaDecoupeur()
         var derniereGst: TrameGst? = null
         var derniereGsa: TrameGsa? = null
+        var derniereRmc: TrameRmc? = null
         val skyplot = AccumulateurSkyplot()
         val derniereGgaBrute = AtomicReference<String?>(null)
 
@@ -69,10 +71,11 @@ class PontRtk(
                 send(EvenementRtk.Trame(trame))
                 NmeaParser.parseGst(trame)?.let { derniereGst = it }
                 NmeaParser.parseGsa(trame)?.let { derniereGsa = it }
+                NmeaParser.parseRmc(trame)?.let { derniereRmc = it }
                 NmeaParser.parseGsv(trame)?.let { skyplot.pousser(it) }
                 NmeaParser.parseGga(trame)?.let { gga ->
                     derniereGgaBrute.set(trame)
-                    send(EvenementRtk.Fix(NmeaParser.fixDepuis(gga, derniereGst, derniereGsa).copy(satellites = skyplot.satellites())))
+                    send(EvenementRtk.Fix(NmeaParser.fixDepuis(gga, derniereGst, derniereGsa, derniereRmc).copy(satellites = skyplot.satellites())))
                 }
             }
         }

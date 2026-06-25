@@ -67,6 +67,10 @@ data class FixGnss(
     val vdop: Double? = null,
     /** Identifiant de la station de référence des corrections (champ 14 de la GGA). */
     val stationRef: String? = null,
+    /** Cap sur le fond (°, 0 = nord, sens horaire), issu de la trame RMC. Absent à l'arrêt. */
+    val capDeg: Double? = null,
+    /** Vitesse sur le fond (m/s), issue de la trame RMC. */
+    val vitesseMs: Double? = null,
     /** Satellites en vue (toutes constellations), pour le skyplot. */
     val satellites: List<SatelliteGsv> = emptyList(),
 )

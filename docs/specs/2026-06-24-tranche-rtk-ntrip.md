@@ -70,12 +70,15 @@ Si elle suffit, G1/G2 deviennent inutiles et il ne reste que la **trace de quali
 
 ### 3.1 — Décisions techniques (ne valent que pour la Voie 2)
 
-1. **Matériel cible** : récepteur Centipede actuel = **Septentrio mosaic-X5** ou **Unicore UM980**
-   (multi-bandes, classe géodésique ; le F9P/ESP32 n'est plus la cible).
-   - **Point clé pour l'app** : les deux modules **sortent du NMEA** (GGA/GST/RMC) et **acceptent
+1. **Matériel cible — priorité au u-blox ZED-F9P** *(révision 2026-06-24)* : la cible **prioritaire**
+   est le **u-blox ZED-F9P** (bi-bande L1/L2, base la plus répandue du réseau Centipede, montages
+   économiques type **ESP32**). Les modules de classe géodésique **Septentrio mosaic-X5** et
+   **Unicore UM980** restent **supportés** mais en cible secondaire.
+   - **Point clé pour l'app** : les trois modules **sortent du NMEA** (GGA/GST/RMC) et **acceptent
      du RTCM3** en entrée ; ils **calculent eux-mêmes la solution RTK**. L'app reste donc un
-     **pont/lecteur**, indépendamment du module. (Formats binaires natifs — Septentrio **SBF**,
-     **Unicore binary** — ignorés : on n'exploite que le NMEA.)
+     **pont/lecteur**, indépendamment du module. (Formats binaires natifs — u-blox **UBX**,
+     Septentrio **SBF**, **Unicore binary** — ignorés : on n'exploite que le NMEA, à forcer dans la
+     config du récepteur.)
    - **Transport = Bluetooth Classic SPP** (norme confirmée par la doc Centipede ; USB série en
      option ultérieure). On isole tout de même un **`Transport`** abstrait (lecture/écriture
      d'octets) pour garder USB/TCP ouverts.
@@ -110,8 +113,9 @@ autonome/DGPS (pas encore RTK).*
   - *Bluetooth Classic SPP* : `BluetoothSocket` (UUID `00001101-0000-1000-8000-00805F9B34FB`),
     appareil parmi `BluetoothAdapter.bondedDevices`. Permissions `BLUETOOTH_CONNECT` (API 31+) /
     legacy `BLUETOOTH`/`BLUETOOTH_ADMIN`.
-  - *TCP/WiFi* (`TransportTcp`, fait) : `Socket(host, port)` vers une carte à interface IP
-    (mosaic-X5) ou un compagnon WiFi (ESP32). Le plus simple à coder **et à tester** (cf. §9).
+  - *TCP/WiFi* (`TransportTcp`, fait) : `Socket(host, port)` vers un compagnon WiFi (**ESP32 +
+    F9P**, montage Centipede courant) ou une carte à interface IP (mosaic-X5). Le plus simple à
+    coder **et à tester** (cf. §9).
   - *USB série* (CDC/FTDI) ou *BLE* : implémentations ultérieures si besoin.
   - En topologie (A), G1 suffit déjà à afficher un fix **RTK fixe** (le récepteur corrige seul).
 - **Parser NMEA en domaine pur** (`:core`, TDD) :
@@ -173,11 +177,12 @@ par défaut) pour obtenir un fix RTK FIXE. Sautable si le récepteur corrige dé
 
 ## 6. Risques / points de vigilance
 
-- **Validation = matériel réel obligatoire** (mosaic-X5 / UM980) : impossible à tester sur
+- **Validation = matériel réel obligatoire** (en priorité **F9P** ; aussi mosaic-X5 / UM980) : impossible à tester sur
   émulateur. Prévoir un mode « rejeu » d'un fichier NMEA/RTCM enregistré pour les tests UI.
 - **Lien à confirmer** : transport exact de la carte porteuse (BT SPP / BLE / USB / TCP-WiFi) et
   si elle fait son propre NTRIP (topologie A) ou non (B) ; format/cadence NMEA (talker GN/GP/GL),
-  débit. mosaic-X5 et UM980 peuvent sortir leur binaire natif (SBF / Unicore) — forcer le **NMEA**.
+  débit. Le F9P (cible prioritaire) peut sortir son binaire natif **UBX** — comme mosaic-X5 (SBF)
+  et UM980 (Unicore) — : **forcer le NMEA** dans la config du récepteur.
 - **VRS vs station unique** : la GGA renvoyée est obligatoire pour le VRS, inutile pour une base
   fixe — gérer les deux.
 - **Batterie / chaleur** : BT + réseau + service continu ; bouton d'arrêt explicite.
@@ -236,5 +241,5 @@ trace sur la tige) **sans récepteur ni Bluetooth**, en rejouant un log NMEA dep
 3. Dans Marculus, choisir le transport **TCP** et pointer `Socket(<ip-du-pc>, 5000)`.
 4. Vérifier le **badge de fix** (RTK fixe + précision) et la **position figée** sur une tige.
 
-Couvre aussi le cas terrain mosaic-X5/ESP32 servant le NMEA sur un socket TCP. Le **Bluetooth SPP
+Couvre aussi le cas terrain **ESP32 + F9P** (ou mosaic-X5) servant le NMEA sur un socket TCP. Le **Bluetooth SPP
 reste le transport de terrain par défaut** (point-à-point, data cellulaire libre pour le caster).
