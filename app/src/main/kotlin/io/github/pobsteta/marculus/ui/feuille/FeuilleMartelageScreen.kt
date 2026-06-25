@@ -92,6 +92,7 @@ import fr.marculus.core.HauteurParser
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.FixGnss
+import fr.marculus.core.model.OrigineFix
 import fr.marculus.core.model.QualiteFix
 import fr.marculus.core.model.ConfigCompteur
 import fr.marculus.core.model.Contexte
@@ -121,6 +122,7 @@ private fun fixDepuisLocation(loc: Location): FixGnss {
         altitudeM = if (loc.hasAltitude()) loc.altitude else null,
         ageCorrectionsS = null,
         precisionHorizontaleM = precision,
+        origine = OrigineFix.INTERNE,
     )
 }
 

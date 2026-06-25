@@ -10,6 +10,7 @@ import android.location.LocationManager
 import android.os.Bundle
 import androidx.core.content.ContextCompat
 import fr.marculus.core.model.FixGnss
+import fr.marculus.core.model.OrigineFix
 import fr.marculus.core.model.Position
 import fr.marculus.core.model.QualiteFix
 import kotlinx.coroutines.channels.awaitClose
@@ -58,6 +59,7 @@ class SourcePositionInterne(private val context: Context) : SourcePosition {
             precisionHorizontaleM = precision,
             capDeg = if (loc.hasBearing()) loc.bearing.toDouble() else null,
             vitesseMs = if (loc.hasSpeed()) loc.speed.toDouble() else null,
+            origine = OrigineFix.INTERNE,
         )
     }
 }

@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.model.ConfigRtk
+import fr.marculus.core.model.OrigineFix
 import fr.marculus.core.model.Reglages
 import fr.marculus.core.model.TransportRtk
 import fr.marculus.core.EntreeSourcetable
@@ -187,21 +188,17 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
         etat.derniereTrame?.let {
             Text(stringResource(R.string.rtk_diag_derniere, it), style = MaterialTheme.typography.labelSmall)
         }
-        // Sens téléphone → GNSS : RTCM renvoyé au récepteur (uniquement en mode pont NTRIP).
+        // Sens téléphone → GNSS : RTCM renvoyé au récepteur. Toujours visible en mode pont NTRIP
+        // (diagnostic de ce qui PART du téléphone, indépendant de l'état du fix).
         if (rtk.pontNtrip) {
             Text(stringResource(R.string.rtk_diag_rtcm, etat.rtcmEnvoye), style = MaterialTheme.typography.bodySmall)
         }
-        // Indicateur NTRIP : l'âge des corrections (trame GGA) prouve que le récepteur est alimenté.
-        if (rtk.pontNtrip) {
-            val age = fix?.ageCorrectionsS
-            Text(
-                if (age != null) {
-                    stringResource(R.string.rtk_corrections_ok, age.toInt().toString())
-                } else {
-                    stringResource(R.string.rtk_corrections_attente)
-                },
-                style = MaterialTheme.typography.bodySmall,
-            )
+        // Sens GNSS → téléphone : âge des corrections reçues. Affiché uniquement quand le récepteur
+        // EXTERNE fournit réellement un fix corrigé (âge présent). Un fix interne (origine INTERNE)
+        // ou autonome n'a pas d'âge : masqué, pour ne pas laisser croire à un RTK NTRIP inexistant.
+        val age = fix?.ageCorrectionsS
+        if (rtk.pontNtrip && fix?.origine == OrigineFix.EXTERNE && age != null) {
+            Text(stringResource(R.string.rtk_corrections_ok, age.toInt().toString()), style = MaterialTheme.typography.bodySmall)
         }
     }
 

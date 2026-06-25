@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import fr.marculus.core.model.FixGnss
+import fr.marculus.core.model.OrigineFix
 import io.github.pobsteta.marculus.R
 import java.util.Locale
 
@@ -46,8 +47,11 @@ fun DialogueEtatGnss(fix: FixGnss?, onFermer: () -> Unit) {
                     Ligne(stringResource(R.string.etat_hdop), fix.hdop?.let { fmt(it, 2) })
                     Ligne(stringResource(R.string.etat_pdop), fix.pdop?.let { fmt(it, 2) })
                     Ligne(stringResource(R.string.etat_vdop), fix.vdop?.let { fmt(it, 2) })
-                    Ligne(stringResource(R.string.etat_age), fix.ageCorrectionsS?.let { "${fmt(it, 0)} s" })
-                    Ligne(stringResource(R.string.etat_station), fix.stationRef)
+                    // Lignes propres au RTK/NTRIP : sans objet pour un fix du GNSS interne.
+                    if (fix.origine == OrigineFix.EXTERNE) {
+                        Ligne(stringResource(R.string.etat_age), fix.ageCorrectionsS?.let { "${fmt(it, 0)} s" })
+                        Ligne(stringResource(R.string.etat_station), fix.stationRef)
+                    }
                     if (fix.satellites.isNotEmpty()) {
                         Text(
                             stringResource(R.string.etat_skyplot),

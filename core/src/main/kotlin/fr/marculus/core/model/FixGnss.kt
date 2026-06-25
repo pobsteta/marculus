@@ -39,6 +39,13 @@ enum class QualiteFix(val codeNmea: Int, val libelle: String) {
 }
 
 /**
+ * Origine d'un [FixGnss] : récepteur GNSS **externe** (trames NMEA, RTK possible) ou GNSS
+ * **interne** du téléphone (`LocationManager`, jamais corrigé NTRIP). Permet à l'UI de
+ * n'afficher les indicateurs propres au RTK/NTRIP que pour une source externe.
+ */
+enum class OrigineFix { INTERNE, EXTERNE }
+
+/**
  * Un satellite vu par le récepteur (trame GSV) : numéro, élévation (°), azimut (°), rapport
  * signal/bruit (dB-Hz), et système (talker NMEA : GP, GL, GA, GB…).
  */
@@ -73,4 +80,6 @@ data class FixGnss(
     val vitesseMs: Double? = null,
     /** Satellites en vue (toutes constellations), pour le skyplot. */
     val satellites: List<SatelliteGsv> = emptyList(),
+    /** Origine du fix ; [OrigineFix.EXTERNE] par défaut (cas des trames NMEA d'un récepteur). */
+    val origine: OrigineFix = OrigineFix.EXTERNE,
 )

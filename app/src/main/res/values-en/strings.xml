@@ -292,7 +292,6 @@
     <string name="rtk_charger_mountpoints">Load</string>
     <string name="rtk_aucun_mountpoint">No mount point found (caster unreachable?).</string>
     <string name="rtk_corrections_ok">NTRIP corrections received (age %1$s s) — receiver is being fed.</string>
-    <string name="rtk_corrections_attente">Waiting for NTRIP corrections. While the badge shows “No fix” or “Autonomous”, RTK is not working yet; it works once it turns “RTK float” then “RTK fixed”.</string>
     <string name="rtk_badge_indice">Tap the badge for detailed GNSS status.</string>
     <string name="rtk_diag_connexion">Link: connecting to receiver… (no data received yet).</string>
     <string name="rtk_diag_erreur">Link: failed — %1$s</string>
