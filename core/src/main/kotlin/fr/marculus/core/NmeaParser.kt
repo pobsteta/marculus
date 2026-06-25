@@ -20,6 +20,12 @@ data class TrameGga(
 /** Trame GSA décodée : dilutions de précision (position, horizontale, verticale). */
 data class TrameGsa(val pdop: Double?, val hdop: Double?, val vdop: Double?)
 
+/**
+ * Trame RMC décodée : cap et vitesse **sur le fond** (déplacement). [capDeg] absent à l'arrêt
+ * (champ vide), [vitesseMs] convertie depuis les nœuds. Sert à orienter le cône de direction.
+ */
+data class TrameRmc(val capDeg: Double?, val vitesseMs: Double?)
+
 /** Une trame GSV (un message d'une séquence) : satellites en vue d'un système. */
 data class TrameGsv(
     val systeme: String,
@@ -45,6 +51,9 @@ data class TrameGst(
  * talker (GP/GN/GL…) est ignoré. Tout est pur — testable en JVM, sans E/S ni dépendance Android.
  */
 object NmeaParser {
+
+    /** Un nœud (mille marin par heure) en mètres par seconde. */
+    private const val NOEUD_EN_MS = 0.514444
 
     /** Somme de contrôle NMEA (XOR des octets du corps, hors `$` et `*hh`) en hexa deux chiffres. */
     fun sommeControle(corps: String): String {
@@ -107,6 +116,20 @@ object NmeaParser {
         )
     }
 
+    /**
+     * Décode une trame RMC ; null si ce n'est pas une RMC valide. Champs : 7 = vitesse fond (nœuds),
+     * 8 = cap fond (° vrais). Le cap n'est défini que si le récepteur se déplace.
+     */
+    fun parseRmc(phrase: String): TrameRmc? {
+        val f = champs(phrase) ?: return null
+        if (f.isEmpty() || !f[0].endsWith("RMC")) return null
+        val vitesseNoeuds = f.getOrNull(7)?.toDoubleOrNull()
+        return TrameRmc(
+            capDeg = f.getOrNull(8)?.toDoubleOrNull(),
+            vitesseMs = vitesseNoeuds?.let { it * NOEUD_EN_MS },
+        )
+    }
+
     /** Décode une trame GSV (satellites en vue) ; null si ce n'est pas une GSV valide. */
     fun parseGsv(phrase: String): TrameGsv? {
         val f = champs(phrase) ?: return null
@@ -131,8 +154,13 @@ object NmeaParser {
         return TrameGsv(systeme, nbMessages, numMessage, enVue, sats)
     }
 
-    /** Assemble un fix complet depuis une GGA et (optionnellement) les dernières GST et GSA. */
-    fun fixDepuis(gga: TrameGga, gst: TrameGst? = null, gsa: TrameGsa? = null): FixGnss = FixGnss(
+    /** Assemble un fix complet depuis une GGA et (optionnellement) les dernières GST, GSA et RMC. */
+    fun fixDepuis(
+        gga: TrameGga,
+        gst: TrameGst? = null,
+        gsa: TrameGsa? = null,
+        rmc: TrameRmc? = null,
+    ): FixGnss = FixGnss(
         position = gga.position,
         qualite = gga.qualite,
         nbSatellites = gga.nbSatellites,
@@ -143,6 +171,8 @@ object NmeaParser {
         pdop = gsa?.pdop,
         vdop = gsa?.vdop,
         stationRef = gga.stationRef,
+        capDeg = rmc?.capDeg,
+        vitesseMs = rmc?.vitesseMs,
     )
 
     /** Convertit une coordonnée NMEA `ddmm.mmmm` + hémisphère en degrés décimaux signés. */

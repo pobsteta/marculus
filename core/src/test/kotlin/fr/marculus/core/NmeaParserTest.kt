@@ -18,6 +18,9 @@ class NmeaParserTest {
     private val gst = "\$GPGST,172814.0,0.006,0.023,0.020,273.6,0.023,0.020,0.031*6A"
     private val gsv = "\$GPGSV,3,1,11,03,03,111,00,04,15,270,00*7F"
     private val gsa = "\$GNGSA,A,3,01,02,03,04,05,06,07,08,09,10,11,12,1.21,0.65,1.02*1D"
+    // RMC en mouvement : 022.4 nœuds, cap 084.4° ; et à l'arrêt (vitesse/cap vides).
+    private val rmcMouvement = "\$GPRMC,123519,A,4807.038,N,01131.000,E,022.4,084.4,230394,003.1,W*6A"
+    private val rmcArret = "\$GNRMC,141322.00,A,4717.112671,N,00833.914843,E,,,250624,,,R*5F"
 
     private fun proche(attendu: Double, obtenu: Double?, tol: Double = 1e-5) =
         assertTrue(obtenu != null && kotlin.math.abs(attendu - obtenu) <= tol, "attendu ~$attendu, obtenu $obtenu")
@@ -132,6 +135,31 @@ class NmeaParserTest {
         proche(0.65, t.hdop!!, 1e-6)
         proche(1.02, t.vdop!!, 1e-6)
         assertNull(NmeaParser.parseGsa(ggaAutonome))
+    }
+
+    @Test
+    fun `RMC en mouvement decode cap et vitesse`() {
+        val t = NmeaParser.parseRmc(rmcMouvement)!!
+        proche(84.4, t.capDeg!!, 1e-6)
+        proche(022.4 * 0.514444, t.vitesseMs!!, 1e-4) // nœuds → m/s
+        assertNull(NmeaParser.parseRmc(ggaAutonome))
+    }
+
+    @Test
+    fun `RMC a l'arret a un cap et une vitesse nuls`() {
+        val t = NmeaParser.parseRmc(rmcArret)!!
+        assertNull(t.capDeg)
+        assertNull(t.vitesseMs)
+    }
+
+    @Test
+    fun `fixDepuis integre la RMC (cap et vitesse)`() {
+        val fix = NmeaParser.fixDepuis(
+            NmeaParser.parseGga(ggaRtkFixe)!!,
+            rmc = NmeaParser.parseRmc(rmcMouvement)!!,
+        )
+        proche(84.4, fix.capDeg!!, 1e-6)
+        proche(022.4 * 0.514444, fix.vitesseMs!!, 1e-4)
     }
 
     @Test

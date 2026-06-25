@@ -1,11 +1,17 @@
 package io.github.pobsteta.marculus.ui.carte
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.LinearEasing
@@ -66,6 +72,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import io.github.pobsteta.marculus.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.AttributionSpatiale
@@ -77,6 +84,8 @@ import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.OrthoSource
 import io.github.pobsteta.marculus.data.ParcelleGpkg
+import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
+import io.github.pobsteta.marculus.gnss.SourcePositionInterne
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -96,8 +105,12 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
+import org.osmdroid.views.overlay.ScaleBarOverlay
 
 private const val ZOOM_MAX = 19.0
+
+/** Au-delà de cette vitesse (m/s ≈ 2,9 km/h), on oriente le cône par le cap GNSS plutôt que la boussole. */
+private const val SEUIL_VITESSE_MS = 0.8
 
 /** Palette de couleurs distinctes pour colorer les parcelles par propriétaire. */
 private val PALETTE_FONCIER = listOf(
@@ -186,6 +199,73 @@ fun CarteScreen(
         onDispose { mapView.onPause() }
     }
 
+    // === Indicateur « ma position » : point bleu + cercle de précision + cône de direction ===
+    val densite = context.resources.displayMetrics.density
+    val positionOverlay = remember { PositionOverlay(densite) }
+    val echelleOverlay = remember {
+        ScaleBarOverlay(mapView).apply {
+            setAlignBottom(true)
+            setAlignRight(false)
+            drawLatitudeScale(false)
+            setEnableAdjustLength(true)
+            setScaleBarOffset((12 * densite).toInt(), (12 * densite).toInt())
+        }
+    }
+
+    // Permission de localisation (le GNSS interne alimente le point quand le RTK n'est pas actif).
+    val permLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    LaunchedEffect(Unit) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            permLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    // Source de position : fix RTK du service s'il tourne, sinon GNSS interne du téléphone.
+    val fixRtk by ServiceGnssRtk.fixCourant.collectAsStateWithLifecycle()
+    val sourceInterne = remember { SourcePositionInterne(context) }
+    val fixInterne by remember { sourceInterne.fixs() }.collectAsStateWithLifecycle(initialValue = null)
+    val fix = fixRtk ?: fixInterne
+
+    // Boussole (rotation vector) : oriente le cône à l'arrêt, avec un léger lissage anti-tremblement.
+    var azimutBoussole by remember { mutableStateOf<Float?>(null) }
+    DisposableEffect(Unit) {
+        val sm = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+        val capteur = sm?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+        val matrice = FloatArray(9)
+        val orientation = FloatArray(3)
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                SensorManager.getRotationMatrixFromVector(matrice, event.values)
+                SensorManager.getOrientation(matrice, orientation)
+                val deg = ((Math.toDegrees(orientation[0].toDouble()).toFloat()) + 360f) % 360f
+                azimutBoussole = azimutBoussole?.let { lisserAngle(it, deg, 0.15f) } ?: deg
+            }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+        if (capteur != null) sm.registerListener(listener, capteur, SensorManager.SENSOR_DELAY_UI)
+        onDispose { sm?.unregisterListener(listener) }
+    }
+
+    // Cap effectif : GNSS en mouvement (cap fiable), boussole à l'arrêt (comme les apps de navigation).
+    val capEffectif: Float? = run {
+        val vitesse = fix?.vitesseMs ?: 0.0
+        val capGnss = fix?.capDeg
+        if (vitesse >= SEUIL_VITESSE_MS && capGnss != null) capGnss.toFloat() else azimutBoussole
+    }
+
+    // Met à jour la surcouche et redessine quand la position ou le cap changent.
+    LaunchedEffect(fix, capEffectif) {
+        val pos = fix?.position
+        positionOverlay.maj(
+            point = pos?.let { GeoPoint(it.latitude, it.longitude) },
+            precisionM = fix?.precisionHorizontaleM ?: 0.0,
+            capDeg = capEffectif,
+        )
+        mapView.invalidate()
+    }
+
     // Bascule de fond : un fournisseur NEUF à chaque changement (osmdroid détache l'ancien).
     LaunchedEffect(fond, orthoSource) {
         val provider = when (fond) {
@@ -270,6 +350,9 @@ fun CarteScreen(
                 },
             )
         }
+        // Surcouches persistantes (échelle + ma position), ré-ajoutées après le clear, au-dessus.
+        mapView.overlays.add(echelleOverlay)
+        mapView.overlays.add(positionOverlay)
         val cible = points.ifEmpty { parcelles.flatMap { it.anneaux }.flatten().map { GeoPoint(it.latitude, it.longitude) } }
         if (!centre && cible.isNotEmpty()) {
             recadrerSur(mapView, cible)
@@ -460,6 +543,12 @@ private fun IndicateurImport(modifier: Modifier = Modifier) {
             Text(stringResource(R.string.carte_import_gpkg), style = MaterialTheme.typography.bodyMedium)
         }
     }
+}
+
+/** Lissage exponentiel d'un cap (°), en empruntant le plus court arc (gère le passage 359°→0°). */
+private fun lisserAngle(precedent: Float, nouveau: Float, alpha: Float): Float {
+    val delta = ((nouveau - precedent + 540f) % 360f) - 180f
+    return ((precedent + alpha * delta) % 360f + 360f) % 360f
 }
 
 private fun recadrerSur(map: MapView, points: List<GeoPoint>) {

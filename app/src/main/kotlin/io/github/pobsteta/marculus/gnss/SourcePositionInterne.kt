@@ -56,6 +56,8 @@ class SourcePositionInterne(private val context: Context) : SourcePosition {
             altitudeM = if (loc.hasAltitude()) loc.altitude else null,
             ageCorrectionsS = null,
             precisionHorizontaleM = precision,
+            capDeg = if (loc.hasBearing()) loc.bearing.toDouble() else null,
+            vitesseMs = if (loc.hasSpeed()) loc.speed.toDouble() else null,
         )
     }
 }
