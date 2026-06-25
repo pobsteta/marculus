@@ -477,9 +477,9 @@ fun CarteScreen(
 }
 
 /**
- * Échelle cartographique (barre + distance) en bas-centre, lisible sur tout fond (carte translucide).
- * Choisit une distance « ronde » (1/2/5 × 10ⁿ) proche d'une largeur cible, et dessine la barre à la
- * largeur correspondante au zoom courant. Masquée tant que la résolution n'est pas connue.
+ * Échelle cartographique (barre + distance) en bas-centre, **fond transparent**. Choisit une
+ * distance « ronde » (1/2/5 × 10ⁿ) proche d'une largeur cible, et dessine la barre à la largeur
+ * correspondante au zoom courant. Masquée tant que la résolution n'est pas connue.
  */
 @Composable
 private fun EchelleCarte(metresParPixel: Double, densite: Float, modifier: Modifier = Modifier) {
@@ -490,20 +490,15 @@ private fun EchelleCarte(metresParPixel: Double, densite: Float, modifier: Modif
     val largeurDp = ((metresJolis / metresParPixel) / densite).toFloat()
     val libelle = if (metresJolis >= 1000) "${(metresJolis / 1000).let { if (it == it.toInt().toDouble()) it.toInt().toString() else String.format(Locale.ROOT, "%.1f", it) }} km"
     else "${metresJolis.toInt()} m"
-    Card(
+    Column(
         modifier = modifier,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(libelle, style = MaterialTheme.typography.labelSmall)
-            Box(
-                Modifier.padding(top = 2.dp).width(largeurDp.dp).height(3.dp)
-                    .background(MaterialTheme.colorScheme.onSurface),
-            )
-        }
+        Text(libelle, style = MaterialTheme.typography.labelSmall)
+        Box(
+            Modifier.padding(top = 2.dp).width(largeurDp.dp).height(3.dp)
+                .background(MaterialTheme.colorScheme.onSurface),
+        )
     }
 }
 
