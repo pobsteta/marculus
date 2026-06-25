@@ -297,9 +297,10 @@
     <string name="rtk_diag_octets_sans_nmea">Link active: %1$d bytes received (direction GNSS → phone), but no NMEA sentence. Is the receiver actually sending NMEA (not binary SBF/Unicore)?</string>
     <string name="rtk_diag_trames">Communication OK: %1$d NMEA sentences received (%2$d bytes) (direction GNSS → phone).</string>
     <string name="rtk_diag_derniere">Last sentence: %1$s</string>
+    <string name="rtk_diag_gga">GGA sent to caster: %1$d bytes (phone → caster, NEAR selection).</string>
     <string name="rtk_diag_rtcm">RTCM forwarded to receiver: %1$d bytes (phone → GNSS).</string>
     <string name="rtk_ntrip_connexion">NTRIP: connecting to caster…</string>
-    <string name="rtk_ntrip_ok">NTRIP: connected to caster ✓ (corrections being sent).</string>
+    <string name="rtk_ntrip_ok">NTRIP: connected to caster ✓</string>
     <string name="rtk_ntrip_401">NTRIP: credentials rejected (401) — check username and password.</string>
     <string name="rtk_ntrip_sourcetable">NTRIP: mountpoint not found (caster returned its list) — check the mountpoint.</string>
     <string name="rtk_ntrip_inconnu">NTRIP: unexpected response from caster.</string>

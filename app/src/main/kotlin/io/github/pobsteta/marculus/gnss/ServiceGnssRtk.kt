@@ -46,6 +46,8 @@ data class EtatRtk(
     val ntripStatut: StatutNtrip? = null,
     /** Message d'erreur NTRIP éventuel (caster injoignable, etc.). */
     val ntripErreur: String? = null,
+    /** Octets de GGA envoyés au caster (sens téléphone → caster, sélection NEAR/VRS). */
+    val ggaEnvoye: Long = 0,
 )
 
 /**
@@ -108,6 +110,8 @@ class ServiceGnssRtk : Service() {
                                 _etat.update { it.copy(rtcmEnvoye = it.rtcmEnvoye + ev.n) }
                             is EvenementRtk.Ntrip ->
                                 _etat.update { it.copy(ntripStatut = ev.statut, ntripErreur = ev.message) }
+                            is EvenementRtk.Gga ->
+                                _etat.update { it.copy(ggaEnvoye = it.ggaEnvoye + ev.n) }
                         }
                     }
                 }.onFailure { e -> _etat.update { it.copy(erreur = e.message ?: "erreur de connexion") } }

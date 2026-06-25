@@ -299,9 +299,10 @@
     <string name="rtk_diag_octets_sans_nmea">Lien actif : %1$d octets reçus (sens GNSS → téléphone), mais aucune trame NMEA. Le récepteur émet-il bien du NMEA (pas du binaire SBF/Unicore) ?</string>
     <string name="rtk_diag_trames">Communication OK : %1$d trames NMEA reçues (%2$d octets) (sens GNSS → téléphone).</string>
     <string name="rtk_diag_derniere">Dernière trame : %1$s</string>
+    <string name="rtk_diag_gga">GGA envoyée au caster : %1$d octets (sens téléphone → caster, sélection NEAR).</string>
     <string name="rtk_diag_rtcm">RTCM renvoyé au récepteur : %1$d octets (sens téléphone → GNSS).</string>
     <string name="rtk_ntrip_connexion">NTRIP : connexion au caster…</string>
-    <string name="rtk_ntrip_ok">NTRIP : connecté au caster ✓ (corrections en cours d\'envoi).</string>
+    <string name="rtk_ntrip_ok">NTRIP : connecté au caster ✓</string>
     <string name="rtk_ntrip_401">NTRIP : identifiants refusés (401) — vérifiez l\'utilisateur et le mot de passe.</string>
     <string name="rtk_ntrip_sourcetable">NTRIP : point de montage introuvable (le caster a renvoyé sa liste) — vérifiez le mountpoint.</string>
     <string name="rtk_ntrip_inconnu">NTRIP : réponse inattendue du caster.</string>

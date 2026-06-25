@@ -72,9 +72,13 @@ class ClientNtrip(
         }
     }.flowOn(Dispatchers.IO)
 
-    /** Renvoie une trame GGA au caster (sélection VRS). Sans effet si la connexion n'est pas ouverte. */
-    suspend fun envoyerGga(phrase: String) {
-        runCatching { sortie?.apply { write((phrase + "\r\n").toByteArray(Charsets.US_ASCII)); flush() } }
+    /**
+     * Renvoie une trame GGA au caster (sélection VRS/NEAR). Renvoie le nombre d'octets écrits
+     * (0 si la connexion n'est pas ouverte ou en cas d'échec d'écriture).
+     */
+    suspend fun envoyerGga(phrase: String): Int {
+        val donnees = (phrase + "\r\n").toByteArray(Charsets.US_ASCII)
+        return runCatching { sortie?.let { it.write(donnees); it.flush(); donnees.size } ?: 0 }.getOrDefault(0)
     }
 
     /** Lit une ligne (jusqu'au LF) sans le CRLF final ; renvoie "" en fin de flux. */

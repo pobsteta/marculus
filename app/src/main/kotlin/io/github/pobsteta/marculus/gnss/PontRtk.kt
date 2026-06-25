@@ -35,6 +35,9 @@ sealed interface EvenementRtk {
 
     /** État de la connexion au caster NTRIP ([statut] renvoyé, ou [message] d'erreur réseau). */
     data class Ntrip(val statut: StatutNtrip?, val message: String? = null) : EvenementRtk
+
+    /** Une trame GGA a été envoyée au caster (sens téléphone → caster, sélection NEAR/VRS). */
+    data class Gga(val n: Int) : EvenementRtk
 }
 
 /**
@@ -80,8 +83,11 @@ class PontRtk(
                     if (ntrip.connecte) {
                         val gga = derniereGgaBrute.get() ?: positionRover()?.let { Ntrip.gga(it) }
                         if (gga != null) {
-                            ntrip.envoyerGga(gga)
-                            amorce = true
+                            val n = ntrip.envoyerGga(gga)
+                            if (n > 0) {
+                                trySend(EvenementRtk.Gga(n))
+                                amorce = true
+                            }
                         }
                     }
                     delay(if (amorce) intervalleGgaMs else 500L)

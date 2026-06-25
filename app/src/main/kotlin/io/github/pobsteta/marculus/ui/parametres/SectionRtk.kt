@@ -191,6 +191,9 @@ fun SectionRtk(reglages: Reglages, onMaj: (Reglages) -> Unit) {
         // Sens téléphone → GNSS : RTCM renvoyé au récepteur. Toujours visible en mode pont NTRIP
         // (diagnostic de ce qui PART du téléphone, indépendant de l'état du fix).
         if (rtk.pontNtrip) {
+            // Sens téléphone → caster : GGA envoyée (position du rover), indispensable pour qu'un
+            // mountpoint NEAR/VRS sélectionne une base et commence à streamer du RTCM.
+            Text(stringResource(R.string.rtk_diag_gga, etat.ggaEnvoye), style = MaterialTheme.typography.bodySmall)
             Text(stringResource(R.string.rtk_diag_rtcm, etat.rtcmEnvoye), style = MaterialTheme.typography.bodySmall)
             // Statut du caster NTRIP : rend visibles les échecs (401, mountpoint inconnu, caster
             // injoignable) au lieu de laisser deviner devant un compteur RTCM à 0.
