@@ -318,15 +318,22 @@ fun ParametresScreen(
     }
 
     if (choixVoix) {
-        val voixDispo = remember(ttsPret) {
+        // Langue active de l'application (fr/en ; « système » → locale de l'appareil, sinon fr) :
+        // la liste des voix et la voix « par défaut » s'y conforment.
+        val langueApp = when (Langue.code(context)) {
+            "fr" -> "fr"
+            "en" -> "en"
+            else -> Locale.getDefault().language.takeIf { it == "fr" || it == "en" } ?: "fr"
+        }
+        val voixDispo = remember(ttsPret, langueApp) {
             ttsParam.voices
-                ?.filter { it.locale.language == "fr" || it.locale.language == "en" }
+                ?.filter { it.locale.language == langueApp }
                 ?.sortedBy { it.locale.toString() + it.name }
                 ?: emptyList()
         }
         fun choisir(v: Voice?) {
             maj(reglages.copy(voixTts = v?.name))
-            if (v != null) ttsParam.voice = v else ttsParam.language = Locale.FRENCH
+            if (v != null) ttsParam.voice = v else ttsParam.language = Locale(langueApp)
             ttsParam.speak(phraseTestVoix, TextToSpeech.QUEUE_FLUSH, null, "test")
         }
         AlertDialog(
