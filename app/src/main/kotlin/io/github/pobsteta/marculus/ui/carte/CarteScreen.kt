@@ -45,8 +45,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -87,6 +85,7 @@ import io.github.pobsteta.marculus.data.OrthoSource
 import io.github.pobsteta.marculus.data.ParcelleGpkg
 import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
 import io.github.pobsteta.marculus.gnss.SourcePositionInterne
+import io.github.pobsteta.marculus.ui.BandeauCompact
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -406,8 +405,8 @@ fun CarteScreen(
             }
         },
         topBar = {
-            TopAppBar(
-                title = { Text(contexte?.nom ?: "Carte") },
+            BandeauCompact(
+                titre = contexte?.nom ?: "Carte",
                 navigationIcon = {
                     IconButton(onClick = onRetour) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.carte_retour))
@@ -427,12 +426,6 @@ fun CarteScreen(
                         Text(stringResource(R.string.carte_fond_label, fond.libelle), color = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
             )
         },
     ) { padding ->

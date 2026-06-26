@@ -37,7 +37,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -62,6 +61,7 @@ import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.TarifCubage
 import io.github.pobsteta.marculus.R
+import io.github.pobsteta.marculus.ui.BandeauCompact
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.ui.libelle
@@ -139,10 +139,8 @@ fun CreationContexteScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(stringResource(if (edition) R.string.creation_titre_modifier else R.string.creation_titre_nouveau))
-                },
+            BandeauCompact(
+                titre = stringResource(if (edition) R.string.creation_titre_modifier else R.string.creation_titre_nouveau),
                 navigationIcon = {
                     IconButton(onClick = onAnnuler) {
                         Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.creation_action_annuler))

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -37,7 +36,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -103,6 +101,7 @@ import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ParcelleGpkg
 import io.github.pobsteta.marculus.Appareil
 import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
+import io.github.pobsteta.marculus.ui.BandeauCompact
 import io.github.pobsteta.marculus.ui.ToucheVolume
 import io.github.pobsteta.marculus.ui.gnss.BadgeFix
 import io.github.pobsteta.marculus.ui.gnss.DialogueEtatGnss
@@ -300,31 +299,14 @@ fun FeuilleMartelageScreen(
 
     Scaffold(
         topBar = {
-            // Bandeau compact (≈48 dp au lieu des 64 dp du TopAppBar Material3) : libère de la
-            // hauteur pour la grille de saisie. Géré « à la main » car le TopAppBar n'expose pas
-            // de hauteur réglable.
-            Surface(
-                color = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .statusBarsPadding()
-                        .height(48.dp)
-                        .padding(horizontal = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
+            BandeauCompact(
+                titre = contexte?.nom ?: stringResource(R.string.feuille_titre),
+                navigationIcon = {
                     IconButton(onClick = onRetour) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.feuille_retour))
                     }
-                    Text(
-                        contexte?.nom ?: stringResource(R.string.feuille_titre),
-                        style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
-                    )
+                },
+                actions = {
                     if (rtkActif) {
                         BadgeFix(fixRtk, Modifier.padding(end = 8.dp)) { etatGnssOuvert = true }
                     }
@@ -351,8 +333,8 @@ fun FeuilleMartelageScreen(
                             )
                         }
                     }
-                }
-            }
+                },
+            )
         },
     ) { padding ->
         val ctx = contexte

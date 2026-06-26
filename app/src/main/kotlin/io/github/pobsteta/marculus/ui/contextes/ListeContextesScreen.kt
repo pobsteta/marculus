@@ -41,8 +41,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
@@ -69,6 +67,7 @@ import kotlin.math.roundToInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.export.ExportCsv
 import io.github.pobsteta.marculus.R
+import io.github.pobsteta.marculus.ui.BandeauCompact
 import fr.marculus.core.model.EtatKanban
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ResumeContexte
@@ -152,8 +151,8 @@ fun ListeContextesScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.liste_app_title)) },
+            BandeauCompact(
+                titre = stringResource(R.string.liste_app_title),
                 actions = {
                     if (vueKanban) {
                         IconButton(onClick = { modeKanban = !modeKanban }) {
@@ -183,11 +182,6 @@ fun ListeContextesScreen(
                         }
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
             )
         },
         floatingActionButton = {

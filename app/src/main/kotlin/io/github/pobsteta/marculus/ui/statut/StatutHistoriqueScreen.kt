@@ -36,8 +36,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -71,6 +69,7 @@ import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.Tige
 import io.github.pobsteta.marculus.R
+import io.github.pobsteta.marculus.ui.BandeauCompact
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ParcelleGpkg
@@ -117,8 +116,8 @@ fun StatutHistoriqueScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(contexte?.nom ?: stringResource(R.string.statut_titre_fallback)) },
+            BandeauCompact(
+                titre = contexte?.nom ?: stringResource(R.string.statut_titre_fallback),
                 navigationIcon = {
                     IconButton(onClick = onRetour) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.statut_retour_cd))
@@ -129,12 +128,6 @@ fun StatutHistoriqueScreen(
                         Text(stringResource(R.string.statut_export_csv), color = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
             )
         },
     ) { padding ->
