@@ -577,12 +577,13 @@ private fun LegendeClasses(classes: List<Int>, couleur: (Int) -> Color) {
 }
 
 private fun gradientCategorie(cat: CategorieBois, f: Float): Color {
-    // Dégradé clair (petite classe) → foncé (grande classe) par catégorie.
+    // Palette Okabe-Ito (daltonien-safe, évite le couple vert/rouge) ; dégradé clair (petite
+    // classe) → foncé (grande classe) par catégorie. Ordre PB→TGB = bleu→vert→orange→vermillon.
     val (clair, fonce) = when (cat) {
-        CategorieBois.PB -> Color(0xFF90CAF9) to Color(0xFF0D47A1)  // bleu
-        CategorieBois.BM -> Color(0xFFFFE082) to Color(0xFFF57F17)  // ambre
-        CategorieBois.GB -> Color(0xFFFFB74D) to Color(0xFFE65100)  // orange
-        CategorieBois.TGB -> Color(0xFFEF9A9A) to Color(0xFFB71C1C) // rouge
+        CategorieBois.PB -> Color(0xFF56B4E9) to Color(0xFF0072B2)  // bleu ciel → bleu
+        CategorieBois.BM -> Color(0xFF76D7C4) to Color(0xFF009E73)  // turquoise → vert-bleu
+        CategorieBois.GB -> Color(0xFFF0C000) to Color(0xFFE69F00)  // ambre → orange
+        CategorieBois.TGB -> Color(0xFFF08C69) to Color(0xFFD55E00) // saumon → vermillon
     }
     return lerp(clair, fonce, f.coerceIn(0f, 1f))
 }
