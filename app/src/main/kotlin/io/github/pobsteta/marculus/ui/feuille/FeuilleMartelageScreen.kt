@@ -104,7 +104,7 @@ import io.github.pobsteta.marculus.Langue
 import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
 import io.github.pobsteta.marculus.ui.BandeauCompact
 import io.github.pobsteta.marculus.ui.ToucheVolume
-import io.github.pobsteta.marculus.ui.gnss.BadgeFix
+import io.github.pobsteta.marculus.ui.gnss.BadgeGnss
 import io.github.pobsteta.marculus.ui.gnss.DialogueEtatGnss
 import io.github.pobsteta.marculus.ui.tige.SaisieTigeDialog
 import kotlinx.coroutines.Dispatchers
@@ -328,9 +328,14 @@ fun FeuilleMartelageScreen(
                     }
                 },
                 actions = {
-                    if (rtkActif) {
-                        BadgeFix(fixRtk, Modifier.padding(end = 8.dp)) { etatGnssOuvert = true }
-                    }
+                    // Badge tri-état : 📡 externe / 📱 interne / ⚠ sans position (capture coupée).
+                    BadgeGnss(
+                        capture = reglages.capturePosition,
+                        rtkActif = rtkActif,
+                        fix = fixTige,
+                        modifier = Modifier.padding(end = 8.dp),
+                        onClick = { etatGnssOuvert = true },
+                    )
                     Box {
                         IconButton(onClick = { menuReset = true }) {
                             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.feuille_menu))
@@ -550,7 +555,7 @@ fun FeuilleMartelageScreen(
     }
 
     if (etatGnssOuvert) {
-        DialogueEtatGnss(fixRtk) { etatGnssOuvert = false }
+        DialogueEtatGnss(fixTige) { etatGnssOuvert = false }
     }
 }
 
