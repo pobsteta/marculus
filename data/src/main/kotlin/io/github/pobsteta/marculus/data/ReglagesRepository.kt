@@ -33,6 +33,7 @@ class ReglagesRepository(context: Context) {
         val voixTts = stringPreferencesKey("voix_tts")
         val operateur = stringPreferencesKey("operateur")
         val gnssPonctuel = booleanPreferencesKey("gnss_ponctuel")
+        val estimerHauteurMnh = booleanPreferencesKey("estimer_hauteur_mnh")
         val afficherCodeEssence = booleanPreferencesKey("afficher_code_essence")
         val vueKanban = booleanPreferencesKey("vue_kanban")
         val annonceAvisMoins = booleanPreferencesKey("annonce_avis_moins")
@@ -67,6 +68,7 @@ class ReglagesRepository(context: Context) {
             voixTts = p[Cles.voixTts],
             operateur = p[Cles.operateur],
             gnssPonctuel = p[Cles.gnssPonctuel] ?: false,
+            estimerHauteurMnh = p[Cles.estimerHauteurMnh] ?: false,
             afficherCodeEssence = p[Cles.afficherCodeEssence] ?: false,
             vueKanban = p[Cles.vueKanban] ?: false,
             annonceAvisMoins = p[Cles.annonceAvisMoins] ?: false,
@@ -107,6 +109,7 @@ class ReglagesRepository(context: Context) {
             val op = r.operateur
             if (op.isNullOrBlank()) p.remove(Cles.operateur) else p[Cles.operateur] = op
             p[Cles.gnssPonctuel] = r.gnssPonctuel
+            p[Cles.estimerHauteurMnh] = r.estimerHauteurMnh
             p[Cles.afficherCodeEssence] = r.afficherCodeEssence
             p[Cles.vueKanban] = r.vueKanban
             p[Cles.annonceAvisMoins] = r.annonceAvisMoins

@@ -185,6 +185,9 @@ fun ParametresScreen(
             LigneReglage(stringResource(R.string.param_gnss_ponctuel_titre), stringResource(R.string.param_gnss_ponctuel_desc), reglages.gnssPonctuel) {
                 maj(reglages.copy(gnssPonctuel = it))
             }
+            LigneReglage(stringResource(R.string.param_mnh_titre), stringResource(R.string.param_mnh_desc), reglages.estimerHauteurMnh) {
+                maj(reglages.copy(estimerHauteurMnh = it))
+            }
             LigneReglage(stringResource(R.string.param_annonce_nombre_titre), stringResource(R.string.param_annonce_nombre_desc), reglages.annonceNombre) {
                 maj(reglages.copy(annonceNombre = it))
             }

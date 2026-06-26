@@ -214,6 +214,8 @@
     <string name="param_gnss_desc">Associe la position du téléphone à chaque tige (si l\'autorisation est accordée).</string>
     <string name="param_gnss_ponctuel_titre">Acquisition GNSS ponctuelle</string>
     <string name="param_gnss_ponctuel_desc">Capture la position au clic (économise la batterie) au lieu d\'une écoute continue ; le point peut arriver avec un léger délai.</string>
+    <string name="param_mnh_titre">Estimer la hauteur (MNH)</string>
+    <string name="param_mnh_desc">Pré‑remplit la hauteur de la tige depuis la couche « houppier » du GPKG (si présente) : la position GNSS est croisée avec les houppiers et H = hauteur de l\'apex. Valeur modifiable.</string>
     <string name="param_annonce_nombre_titre">Annonce du nombre</string>
     <string name="param_annonce_nombre_desc">Lit le nouveau total à voix haute à chaque comptage.</string>
     <string name="param_annonce_etiquette_titre">Annonce de l\'étiquette</string>

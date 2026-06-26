@@ -49,6 +49,12 @@ data class Reglages(
     val operateur: String? = null,
     /** Acquisition GNSS ponctuelle (au clic) plutôt qu'en écoute continue (économie de batterie). */
     val gnssPonctuel: Boolean = false,
+    /**
+     * Estimer la hauteur de la tige depuis la couche « houppier » du GPKG (MNH) : à la saisie, on
+     * cherche le houppier contenant la position GNSS et on pré‑remplit H = `h_max`. Sans effet tant
+     * que le GPKG importé ne contient pas cette couche. Voir docs/specs/couche-houppier-mnh.md.
+     */
+    val estimerHauteurMnh: Boolean = false,
     /** Afficher le code essence ONF (3 car.) en gros au lieu du nom complet dans les cellules. */
     val afficherCodeEssence: Boolean = false,
     /** Proposer la vue Kanban (À faire / En cours / Terminé) dans la liste des contextes. */
