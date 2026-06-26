@@ -123,6 +123,7 @@
     <string name="feuille_annuler">Cancel</string>
     <string name="feuille_avis">Advisory</string>
     <string name="feuille_avis_menu">Advisory (if + / if −)</string>
+    <string name="feuille_retirer_tige">Remove a stem (−)</string>
     <string name="feuille_hauteur_titre">Height of last tree</string>
     <string name="feuille_hauteur_label">Total height (m)</string>
     <string name="feuille_hauteur_placeholder">e.g. 27%1$s5</string>

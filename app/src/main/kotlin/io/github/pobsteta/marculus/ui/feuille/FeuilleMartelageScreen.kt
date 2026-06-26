@@ -24,13 +24,13 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -601,27 +601,25 @@ private fun CelluleCompteur(
                     }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                         DropdownMenuItem(text = { Text(stringResource(R.string.feuille_avis_menu)) }, onClick = { menu = false; onAvis() })
+                        HorizontalDivider()
+                        // Retirer une tige : action de correction = l'exception, donc reléguée au
+                        // menu (grisée quand inapplicable). Évite les décréments accidentels (gants).
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.feuille_retirer_tige)) },
+                            enabled = hqActif,
+                            onClick = { menu = false; onMoins() },
+                        )
                     }
                 }
             }
-            // Bas : − et + (zones les plus faciles à atteindre).
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Button(
-                    onClick = onMoins,
-                    enabled = hqActif, // n'annule que la saisie en cours (après un +)
-                    modifier = Modifier.weight(1f).height(40.dp),
-                    contentPadding = PaddingValues(0.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                ) {
-                    Text("−", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Button(
-                    onClick = onPlus,
-                    modifier = Modifier.weight(1f).height(40.dp),
-                    contentPadding = PaddingValues(0.dp),
-                ) {
-                    Text("+", style = MaterialTheme.typography.titleLarge)
-                }
+            // Bas : « + » en pleine largeur (action dominante, cible large = sûre avec des gants).
+            // Le « − » (correction, exception) est dans le menu ⋮ au-dessus.
+            Button(
+                onClick = onPlus,
+                modifier = Modifier.fillMaxWidth().height(40.dp),
+                contentPadding = PaddingValues(0.dp),
+            ) {
+                Text("+", style = MaterialTheme.typography.titleLarge)
             }
         }
     }
