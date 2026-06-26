@@ -100,6 +100,7 @@ import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ParcelleGpkg
 import io.github.pobsteta.marculus.Appareil
+import io.github.pobsteta.marculus.Langue
 import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
 import io.github.pobsteta.marculus.ui.BandeauCompact
 import io.github.pobsteta.marculus.ui.ToucheVolume
@@ -123,6 +124,16 @@ private fun fixDepuisLocation(loc: Location): FixGnss {
         precisionHorizontaleM = precision,
         origine = OrigineFix.INTERNE,
     )
+}
+
+/**
+ * Applique la voix TTS choisie ([voixNom]) si elle existe dans le moteur, sinon revient à la langue
+ * [localeDefaut]. Le repli évite de rester bloqué sur une voix précédemment sélectionnée quand le
+ * réglage est repassé sur « voix par défaut ».
+ */
+private fun appliquerVoix(tts: TextToSpeech, voixNom: String?, localeDefaut: Locale) {
+    val voix = voixNom?.let { nom -> tts.voices?.firstOrNull { it.name == nom } }
+    if (voix != null) tts.voice = voix else tts.language = localeDefaut
 }
 
 /** Fix GNSS interne courant du téléphone (null si inactif ou non autorisé). */
@@ -219,11 +230,21 @@ fun FeuilleMartelageScreen(
     val operateurEffectif = reglages.operateur?.takeIf { it.isNotBlank() } ?: Appareil.id(androidContext)
     val toneGen = remember { runCatching { ToneGenerator(AudioManager.STREAM_MUSIC, 90) }.getOrNull() }
     DisposableEffect(Unit) { onDispose { toneGen?.release() } }
-    // Synthèse vocale (annonce du nombre / de l'étiquette), en français.
+    // Langue par défaut des annonces vocales = langue de l'application (fr/en ; « système » →
+    // locale de l'appareil, repli fr). Une voix précise choisie dans les Paramètres prime dessus.
+    val localeAnnonce = remember {
+        val code = when (Langue.code(androidContext)) {
+            "fr" -> "fr"
+            "en" -> "en"
+            else -> Locale.getDefault().language.takeIf { it == "fr" || it == "en" } ?: "fr"
+        }
+        Locale(code)
+    }
+    // Synthèse vocale (annonce du nombre / de l'étiquette), dans la langue de l'app.
     val tts = remember {
         lateinit var moteur: TextToSpeech
         moteur = TextToSpeech(androidContext.applicationContext) { statut ->
-            if (statut == TextToSpeech.SUCCESS) moteur.language = Locale.FRENCH
+            if (statut == TextToSpeech.SUCCESS) moteur.language = localeAnnonce
         }
         moteur
     }
@@ -238,7 +259,7 @@ fun FeuilleMartelageScreen(
             if (reglages.annonceNombre) add(total.toString())
         }
         if (parties.isNotEmpty()) {
-            reglages.voixTts?.let { nom -> tts.voices?.firstOrNull { it.name == nom }?.let { tts.voice = it } }
+            appliquerVoix(tts, reglages.voixTts, localeAnnonce)
             tts.speak(parties.joinToString(", "), TextToSpeech.QUEUE_FLUSH, null, "tige")
         }
     }
@@ -249,7 +270,7 @@ fun FeuilleMartelageScreen(
             if (reglages.annonceAvisMoins && cfg.alerteMoins(total)) add(androidContext.getString(R.string.avis_annonce_moins))
         }
         if (messages.isNotEmpty()) {
-            reglages.voixTts?.let { nom -> tts.voices?.firstOrNull { it.name == nom }?.let { tts.voice = it } }
+            appliquerVoix(tts, reglages.voixTts, localeAnnonce)
             messages.forEach { tts.speak(it, TextToSpeech.QUEUE_ADD, null, "avis") }
         }
     }
