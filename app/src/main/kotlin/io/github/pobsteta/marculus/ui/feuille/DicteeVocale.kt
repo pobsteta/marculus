@@ -42,13 +42,17 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import io.github.pobsteta.marculus.R
 import fr.marculus.core.voice.FrenchNumbers
+import fr.marculus.core.voice.OptionsHauteur
 import fr.marculus.core.voice.ReferentielParle
 import fr.marculus.core.voice.SpokenQualite
 import fr.marculus.core.voice.VoiceCommands
 import fr.marculus.core.voice.VoiceEvent
 import io.github.pobsteta.marculus.voice.ModeleVosk
 import io.github.pobsteta.marculus.voice.PttController
+import io.github.pobsteta.marculus.voice.VocabulaireVosk
 import io.github.pobsteta.marculus.voice.VoskVoiceService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Dictée vocale vue par la feuille de martelage : un état observable et quatre gestes
@@ -84,6 +88,10 @@ class EtatDictee internal constructor(
     var formesQualites: List<Pair<String, String>> by mutableStateOf(emptyList())
         internal set
 
+    /** Lettres de qualité bois dictables dans la découpe : lettre → mot radio. */
+    var formesBois: List<Pair<Char, String>> by mutableStateOf(emptyList())
+        internal set
+
     /**
      * Énoncé d'exemple construit sur le contexte réellement ouvert. Un exemple figé dans les
      * textes finit par mentir : les formes dépendent des essences et du référentiel de qualités.
@@ -115,9 +123,20 @@ class EtatDictee internal constructor(
         service.essenceCourante = null
     }
 
+    /** Exemple d'énoncé de hauteur pour ce contexte (vide si la découpe n'est pas dictable). */
+    var exempleHauteur: String by mutableStateOf("")
+        internal set
+
     /** Dictée simulée : injecte un énoncé sans micro (démo et recette sur émulateur). */
     fun simuler(texte: String) = service.injecterTexte(texte)
 }
+
+/** Hauteur maximale dictable, en mètres : au-delà, ce n'est plus un arbre de nos forêts. */
+private const val HAUTEUR_MAX_M = 50
+
+/** Valeurs de l'énoncé d'exemple affiché dans l'aide. */
+private const val EXEMPLE_HAUTEUR_M = 27
+private const val EXEMPLE_BILLON_M = 6
 
 /** Aiguillage des événements Vosk vers la composition courante (les rappels changent, pas le service). */
 private class AiguillageVocal {
@@ -140,8 +159,10 @@ fun rememberDicteeVocale(
     essences: List<String>,
     classes: List<Int>,
     qualites: List<String>,
+    qualitesBois: List<String>,
     tonalites: ToneGenerator?,
     onTige: (essence: String, classe: Int, qualite: String?) -> Unit,
+    onHauteur: (texte: String) -> Unit,
     onAnnule: () -> Unit,
     onRepete: () -> Unit,
     onRejet: () -> Unit,
@@ -165,6 +186,8 @@ fun rememberDicteeVocale(
                     val nom = codesVersNoms[evenement.codeOnf]
                     if (nom == null) onRejet() else onTige(nom, evenement.classe, evenement.qualite)
                 }
+
+                is VoiceEvent.Hauteur -> onHauteur(evenement.texte)
 
                 is VoiceEvent.Commande -> when (evenement.nom) {
                     VoiceCommands.ANNULE -> onAnnule()
@@ -192,7 +215,7 @@ fun rememberDicteeVocale(
     }
 
     // (Re)construction de la grammaire fermée : essences de la matrice, axe des classes, qualités.
-    LaunchedEffect(actif, micAutorise, essences, classes, qualites) {
+    LaunchedEffect(actif, micAutorise, essences, classes, qualites, qualitesBois) {
         dictee.pret = false
         dictee.microPret = false
         dictee.modeleAbsent = false
@@ -201,11 +224,36 @@ fun rememberDicteeVocale(
             dictee.modeleAbsent = true
             return@LaunchedEffect
         }
-        val parlees = ReferentielParle.essences(essences)
-        val qualitesParlees: List<SpokenQualite> = ReferentielParle.qualites(qualites)
+        // Le modèle ignore silencieusement les mots hors de son lexique : on lui demande ce
+        // qu'il connaît avant de promettre quoi que ce soit à l'opérateur.
+        val connus = withContext(Dispatchers.IO) {
+            VocabulaireVosk.motsConnus(
+                ModeleVosk.dossier(context),
+                ReferentielParle.motsCandidats(essences, qualites),
+            )
+        }
+        val motConnu: (String) -> Boolean = { it in connus }
+        val parlees = ReferentielParle.essences(essences, motConnu)
+        val qualitesParlees: List<SpokenQualite> = ReferentielParle.qualites(qualites, motConnu)
+        val lettresBois = ReferentielParle.lettresBois(qualitesBois)
+        val optionsHauteur = if (lettresBois.isEmpty()) {
+            null
+        } else {
+            OptionsHauteur(
+                maxMetres = HAUTEUR_MAX_M,
+                lettresBois = lettresBois,
+                motRadio = { ReferentielParle.motRadio(it, motConnu) },
+            )
+        }
         codesVersNoms = parlees.associate { it.codeOnf to it.nom }
         dictee.formesEssences = parlees.map { it.nom to it.spoken.joinToString(" ") }
         dictee.formesQualites = qualitesParlees.map { it.code to it.spoken }
+        dictee.formesBois = lettresBois.map { it to ReferentielParle.motRadio(it, motConnu) }
+        dictee.exempleHauteur = optionsHauteur?.let { options ->
+            val lettre = options.motRadio(lettresBois.first())
+            "${VoiceCommands.HAUTEUR} " + FrenchNumbers.toTokens(EXEMPLE_HAUTEUR_M).joinToString(" ") +
+                " " + FrenchNumbers.toTokens(EXEMPLE_BILLON_M).joinToString(" ") + " " + lettre
+        } ?: ""
         dictee.exemple = listOfNotNull(
             parlees.firstOrNull()?.spoken?.joinToString(" "),
             classes.getOrNull(classes.size / 2)?.let { FrenchNumbers.toTokens(it).joinToString(" ") },
@@ -216,6 +264,7 @@ fun rememberDicteeVocale(
                 parlees.map { it.versGrammaire() },
                 classes,
                 qualitesParlees,
+                optionsHauteur,
             ).getOrThrow()
         }
         dictee.pret = configure.isSuccess && service.grammairePrete
@@ -234,6 +283,7 @@ fun rememberDicteeVocale(
  */
 class ActionsVocales {
     var tige: (essence: String, classe: Int, qualite: String?) -> Unit = { _, _, _ -> }
+    var hauteur: (texte: String) -> Unit = {}
     var annule: () -> Unit = {}
     var repete: () -> Unit = {}
     var rejet: () -> Unit = {}
@@ -321,8 +371,16 @@ fun DialogueFormesParlees(
                     dictee.formesQualites.forEach { (code, parle) ->
                         Text("$code → « $parle »", style = MaterialTheme.typography.bodySmall)
                     }
+                }
+                if (dictee.formesBois.isNotEmpty()) {
+                    HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                    Text(stringResource(R.string.voix_formes_hauteur), style = MaterialTheme.typography.titleSmall)
                     Text(
-                        stringResource(R.string.voix_qualite_bois_note),
+                        stringResource(R.string.voix_formes_hauteur_aide, dictee.exempleHauteur),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        dictee.formesBois.joinToString("  ·  ") { (lettre, parle) -> "$lettre → « $parle »" },
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
