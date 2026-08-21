@@ -148,7 +148,8 @@ private class AiguillageVocal {
  * changement d'essences, d'axe de classes ou de qualités.
  *
  * @param actif au moins un déclencheur est activé dans les réglages
- * @param onTige insertion d'une tige dictée par le mécanisme existant (UUID, GNSS, annonce TTS)
+ * @param onTige insertion d'une tige dictée par le mécanisme existant (UUID, GNSS, annonce TTS) ;
+ *   la hauteur est non nulle quand elle a été dictée dans le même énoncé
  * @param onQualite qualité dictée seule → annote la dernière tige, comme le bouton Q
  * @param onAnnule commande « annule » → annulation par événement du journal append-only
  * @param onRepete commande « repete » → ré-annonce de la dernière tige
@@ -162,7 +163,7 @@ fun rememberDicteeVocale(
     qualites: List<String>,
     qualitesBois: List<String>,
     tonalites: ToneGenerator?,
-    onTige: (essence: String, classe: Int, qualite: String?) -> Unit,
+    onTige: (essence: String, classe: Int, qualite: String?, hauteur: String?) -> Unit,
     onHauteur: (texte: String) -> Unit,
     onQualite: (code: String) -> Unit,
     onAnnule: () -> Unit,
@@ -186,7 +187,11 @@ fun rememberDicteeVocale(
             when (evenement) {
                 is VoiceEvent.Tige -> {
                     val nom = codesVersNoms[evenement.codeOnf]
-                    if (nom == null) onRejet() else onTige(nom, evenement.classe, evenement.qualite)
+                    if (nom == null) {
+                        onRejet()
+                    } else {
+                        onTige(nom, evenement.classe, evenement.qualite, evenement.hauteurTexte)
+                    }
                 }
 
                 is VoiceEvent.Hauteur -> onHauteur(evenement.texte)
@@ -286,7 +291,8 @@ fun rememberDicteeVocale(
  * l'écran une fois le contexte chargé : la dictée, elle, existe dès la première composition.
  */
 class ActionsVocales {
-    var tige: (essence: String, classe: Int, qualite: String?) -> Unit = { _, _, _ -> }
+    var tige: (essence: String, classe: Int, qualite: String?, hauteur: String?) -> Unit =
+        { _, _, _, _ -> }
     var hauteur: (texte: String) -> Unit = {}
     var qualite: (code: String) -> Unit = {}
     var annule: () -> Unit = {}

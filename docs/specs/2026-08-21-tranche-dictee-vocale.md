@@ -17,6 +17,7 @@ GNSS point-dans-polygone, annulation par événement), et le téléphone confirm
 | « hêtre quarante cinq chablis » | tige, avec la qualité arbre du référentiel |
 | « quarante cinq » | tige sur l'essence courante (**mode rafale**) |
 | « annule » | annule la dernière tige (événement d'annulation, jamais d'effacement) |
+| « hêtre quarante cinq hauteur vingt sept » | tige **et** sa hauteur, en une seule insertion |
 | « chablis » | qualité arbre sur la dernière tige (équivalent vocal du bouton Q) |
 | « hauteur vingt sept six alpha bravo » | hauteur + découpe sur la dernière tige (`27-6AB`) |
 | « repete » | ré-annonce la dernière tige |
@@ -55,11 +56,29 @@ de sens. Elle se dicte donc **avec** la hauteur, derrière le mot-clé `hauteur`
 | « hauteur vingt sept six alpha bravo » | `27-6AB` |
 | « hauteur vingt sept six alpha bravo quatre charlie delta » | `27-6AB4CD` |
 
-Le mot-clé bascule tout l'énoncé en mètres : sans lui « quarante cinq » est une classe de diamètre,
-avec lui c'est une longueur. Le texte produit est **exactement celui de la saisie manuelle** — il
+Le mot-clé bascule **la suite** de l'énoncé en mètres : sans lui « quarante cinq » est une classe de
+diamètre, avec lui c'est une longueur. Il peut donc ouvrir l'énoncé — la hauteur annote alors la
+dernière tige — ou le **couper en deux** :
+
+> « hêtre quarante cinq chablis hauteur vingt sept six alpha bravo »
+
+Une seule insertion porte alors essence, classe, qualité et hauteur ; pas d'annotation après coup,
+une seule annonce. Devant le mot-clé on exige une **tige complète** : « chablis hauteur vingt sept »
+est rejeté plutôt que d'annoter deux choses à la fois — et surtout, rendre ici l'événement de tête
+reviendrait à jeter la hauteur en silence, ce qu'un test interdit désormais explicitement (le défaut
+existait dans la première version de ce code).
+
+Le compromis reste ouvert à l'opérateur : la forme longue économise un appui, la forme courte limite
+la casse, puisqu'un seul mot mal décodé rejette **tout** l'énoncé. Le texte produit est **exactement celui de la saisie manuelle** — il
 repasse par `annoterHauteur` et se relit avec `HauteurParser`, sans rien de nouveau dans le schéma.
 Les lettres dictables sont celles du **référentiel de qualité bois** (A/B/C/D par défaut), épelées
-en alphabet radio ; les hauteurs vont jusqu'à 50 m. Une longueur de billon sans qualité derrière est
+en alphabet radio ; les hauteurs vont jusqu'à 50 m.
+
+**Priorité sur l'estimation MNH** : une hauteur dictée est une hauteur *mesurée*, elle prime sur
+toute estimation. Le réglage « Estimer la hauteur (MNH) » existe dans les Paramètres mais n'est
+aujourd'hui branché nulle part (seul l'interrupteur est câblé) ; quand il le sera, il ne devra
+compléter que les tiges **sans** hauteur — l'insertion passe déjà `hauteurTexte` explicitement pour
+que la règle soit tenable. Une longueur de billon sans qualité derrière est
 un énoncé incomplet, donc rejeté.
 
 ## Architecture
