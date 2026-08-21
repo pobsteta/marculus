@@ -12,3 +12,5 @@
 !debug.keystore
 # Sidecars de statistiques générés par GDAL/QGIS (dérivés, non versionnés)
 *.aux.xml
+# Répertoire de travail du compilateur Kotlin 2.x (sessions, erreurs) — non versionné.
+.kotlin/

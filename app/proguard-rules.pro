@@ -16,3 +16,10 @@
 -keepclassmembers class mil.nga.** { *; }
 -keep class org.locationtech.proj4j.** { *; }
 -dontwarn com.j256.ormlite.**
+
+# Vosk (reconnaissance vocale) + JNA : accès natif par réflexion, rien ne doit être renommé.
+-keep class org.vosk.** { *; }
+-keep class com.sun.jna.** { *; }
+-keepclassmembers class * extends com.sun.jna.** { *; }
+-dontwarn java.awt.**
+-dontwarn com.sun.jna.**

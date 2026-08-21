@@ -20,6 +20,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
@@ -45,6 +46,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -58,6 +60,9 @@ import android.location.LocationManager
 import android.media.AudioManager
 import android.media.ToneGenerator
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
+import android.os.Handler
+import android.os.Looper
 import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
@@ -83,6 +88,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import java.text.DecimalFormatSymbols
 import java.util.Locale
+import java.util.concurrent.atomic.AtomicInteger
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.Cubage
@@ -199,6 +205,17 @@ private fun vibrer(context: Context) {
     vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
 }
 
+/** Vibration de rejet : deux impulsions, volontairement distinctes du tick de comptage. */
+private fun vibrerDouble(context: Context) {
+    val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+    } else {
+        @Suppress("DEPRECATION")
+        context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+    }
+    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 60, 90, 60), -1))
+}
+
 private val LARGEUR_CELLULE = 140.dp
 private val HAUTEUR_CELLULE = 144.dp
 
@@ -253,15 +270,29 @@ fun FeuilleMartelageScreen(
         if (reglages.vibration) vibrer(androidContext)
         if (reglages.sonClic) toneGen?.startTone(ToneGenerator.TONE_PROP_BEEP, 80)
     }
-    fun annoncer(essence: String, classe: Int, total: Int) {
+    // Nombre d'annonces encore en file : le micro ne se rouvre qu'une fois la dernière terminée.
+    val annoncesEnCours = remember { AtomicInteger(0) }
+    fun dire(texte: String, identifiant: String, remplacer: Boolean) {
+        appliquerVoix(tts, reglages.voixTts, localeAnnonce)
+        annoncesEnCours.incrementAndGet()
+        val mode = if (remplacer) TextToSpeech.QUEUE_FLUSH else TextToSpeech.QUEUE_ADD
+        // Moteur TTS indisponible : sans callback de fin, le micro resterait fermé pour toujours.
+        if (tts.speak(texte, mode, null, identifiant) != TextToSpeech.SUCCESS) {
+            annoncesEnCours.decrementAndGet()
+        }
+    }
+    /**
+     * Annonce du comptage. [forcer] impose l'étiquette même si le réglage est décoché : une tige
+     * dictée doit toujours être confirmée à l'oreille, c'est ce qui ferme la boucle sans écran.
+     */
+    fun annoncer(essence: String, classe: Int, total: Int, forcer: Boolean = false, qualite: String? = null) {
         val parties = buildList {
-            if (reglages.annonceEtiquette) add("$essence $classe")
+            if (reglages.annonceEtiquette || forcer) {
+                add("$essence $classe" + (qualite?.let { " $it" } ?: ""))
+            }
             if (reglages.annonceNombre) add(total.toString())
         }
-        if (parties.isNotEmpty()) {
-            appliquerVoix(tts, reglages.voixTts, localeAnnonce)
-            tts.speak(parties.joinToString(", "), TextToSpeech.QUEUE_FLUSH, null, "tige")
-        }
+        if (parties.isNotEmpty()) dire(parties.joinToString(", "), "tige", remplacer = true)
     }
     // Annonce vocale d'avis : limite inférieure non atteinte / limite supérieure dépassée.
     fun annoncerAvis(cfg: ConfigCompteur, total: Int) {
@@ -269,10 +300,7 @@ fun FeuilleMartelageScreen(
             if (reglages.annonceAvisPlus && cfg.alertePlus(total)) add(androidContext.getString(R.string.avis_annonce_plus))
             if (reglages.annonceAvisMoins && cfg.alerteMoins(total)) add(androidContext.getString(R.string.avis_annonce_moins))
         }
-        if (messages.isNotEmpty()) {
-            appliquerVoix(tts, reglages.voixTts, localeAnnonce)
-            messages.forEach { tts.speak(it, TextToSpeech.QUEUE_ADD, null, "avis") }
-        }
+        messages.forEach { dire(it, "avis", remplacer = false) }
     }
     val contexte by produceState<Contexte?>(initialValue = null, contexteId) {
         value = repository.contexte(contexteId)
@@ -317,6 +345,53 @@ fun FeuilleMartelageScreen(
     var confirmerReset by remember { mutableStateOf(false) }
     var saisieLibre by remember { mutableStateOf(false) }
     var etatGnssOuvert by remember { mutableStateOf(false) }
+    var formesParleesOuvertes by remember { mutableStateOf(false) }
+    // Parcelle rattachée à la dernière tige : son changement remet le mode rafale à zéro.
+    var parcelleCourante by remember { mutableStateOf<String?>(null) }
+    var parcelleConnue by remember { mutableStateOf(false) }
+
+    // Dictée vocale : les actions réelles sont posées plus bas, quand le contexte est chargé.
+    val actionsVocales = remember { ActionsVocales() }
+    val dictee = rememberDicteeVocale(
+        actif = reglages.pttEcran || reglages.pttVolumeLong,
+        essences = contexte?.essencesNoms ?: emptyList(),
+        classes = contexte?.axe?.classes() ?: emptyList(),
+        qualites = qualitesArbre,
+        tonalites = toneGen,
+        onTige = { essence, classe, qualite -> actionsVocales.tige(essence, classe, qualite) },
+        onAnnule = { actionsVocales.annule() },
+        onRepete = { actionsVocales.repete() },
+        onRejet = { actionsVocales.rejet() },
+    )
+    // Anti-larsen : le micro ne se rouvre qu'une fois la DERNIÈRE annonce de la file terminée.
+    DisposableEffect(tts, dictee) {
+        val principal = Handler(Looper.getMainLooper())
+        fun annonceFinie() {
+            if (annoncesEnCours.decrementAndGet() <= 0) {
+                annoncesEnCours.set(0)
+                principal.post { dictee.annonceTerminee() }
+            }
+        }
+        tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+            override fun onStart(utteranceId: String?) = Unit
+            override fun onDone(utteranceId: String?) = annonceFinie()
+            override fun onStop(utteranceId: String?, interrupted: Boolean) = annonceFinie()
+
+            @Deprecated("Signature héritée, remplacée par onError(String, Int)")
+            override fun onError(utteranceId: String?) = annonceFinie()
+        })
+        onDispose { tts.setOnUtteranceProgressListener(null) }
+    }
+    // Appui long sur le volume bas : le relais n'est posé que si la dictée est réellement prête,
+    // sinon le volume bas resterait consommé pour rien.
+    DisposableEffect(reglages.pttVolumeLong, dictee.microPret) {
+        ToucheVolume.onPtt = if (reglages.pttVolumeLong && dictee.microPret) {
+            { tenu -> if (tenu) dictee.demarrer() else dictee.arreter() }
+        } else {
+            null
+        }
+        onDispose { ToucheVolume.onPtt = null }
+    }
 
     Scaffold(
         topBar = {
@@ -346,6 +421,10 @@ fun FeuilleMartelageScreen(
                                 onClick = { menuReset = false; saisieLibre = true },
                             )
                             DropdownMenuItem(
+                                text = { Text(stringResource(R.string.voix_formes_titre)) },
+                                onClick = { menuReset = false; formesParleesOuvertes = true },
+                            )
+                            DropdownMenuItem(
                                 text = { Text(stringResource(R.string.feuille_menu_statut)) },
                                 onClick = { menuReset = false; onStatut() },
                             )
@@ -362,6 +441,16 @@ fun FeuilleMartelageScreen(
                 },
             )
         },
+        floatingActionButton = {
+            if (reglages.pttEcran && contexte != null) {
+                BoutonMicroPtt(
+                    pret = dictee.microPret,
+                    enEcoute = dictee.enEcoute,
+                    onAppui = { dictee.demarrer() },
+                    onRelache = { dictee.arreter() },
+                )
+            }
+        },
     ) { padding ->
         val ctx = contexte
         if (ctx == null) {
@@ -373,19 +462,30 @@ fun FeuilleMartelageScreen(
 
         val classes = ctx.axe.classes()
 
-        // Actions de comptage partagées (cellules + boutons de volume).
-        fun ajouter(essence: String, classe: Int) {
+        // Actions de comptage partagées (cellules, boutons de volume, dictée vocale).
+        // Une tige dictée est une tige normale : mêmes UUID, rattachement GNSS et journal.
+        fun ajouter(
+            essence: String,
+            classe: Int,
+            qualite: String? = null,
+            annonceForcee: Boolean = false,
+        ) {
             retourSensoriel()
             val cle = CompteurCle(essence, classe)
             val nouveauTotal = (totaux[cle] ?: 0) + ctx.increment
-            annoncer(essence, classe, nouveauTotal)
+            annoncer(essence, classe, nouveauTotal, forcer = annonceForcee, qualite = qualite)
             configs[cle]?.let { annoncerAvis(it, nouveauTotal) }
             val fix = fixTige
             val pos = positionEffective
             val parcelleLabel = pos?.let { p -> parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }?.label }
+            // Changement de parcelle rattachée : le mode rafale repart de l'essence dictée.
+            if (parcelleConnue && parcelleLabel != parcelleCourante) dictee.reinitialiserRafale()
+            parcelleCourante = parcelleLabel
+            parcelleConnue = true
             scope.launch {
                 val uuid = repository.ajouterTige(
                     contexteId, essence, classe, quantite = ctx.increment,
+                    qualiteArbre = qualite,
                     position = pos, operateur = operateurEffectif, parcelle = parcelleLabel,
                     qualiteFix = fix?.qualite, precisionM = fix?.precisionHorizontaleM,
                 )
@@ -409,6 +509,43 @@ fun FeuilleMartelageScreen(
                 configs[CompteurCle(essence, classe)]?.let { annoncerAvis(it, total - q) }
                 scope.launch { repository.annulerTige(contexteId, essence, classe, quantite = q) }
                 derniereSaisie = null // un − ferme la saisie en cours
+            }
+        }
+
+        // Actions déclenchées par la dictée : insertion, annulation, répétition, rejet.
+        val messageNonCompris = stringResource(R.string.voix_non_compris)
+        val messageAnnule = stringResource(R.string.voix_annule)
+        val messageRienAAnnuler = stringResource(R.string.voix_rien_a_annuler)
+        SideEffect {
+            actionsVocales.tige = { essence, classe, qualite ->
+                ajouter(essence, classe, qualite = qualite, annonceForcee = true)
+            }
+            actionsVocales.annule = {
+                val cible = derniereSaisie
+                if (cible == null) {
+                    dire(messageRienAAnnuler, "vocal", remplacer = true)
+                } else {
+                    retirer(cible.essence, cible.classe) // annulation par événement, jamais d'effacement
+                    dire(messageAnnule, "vocal", remplacer = false)
+                }
+            }
+            actionsVocales.repete = {
+                val cible = derniereSaisie
+                if (cible == null) {
+                    dire(messageRienAAnnuler, "vocal", remplacer = true)
+                } else {
+                    annoncer(
+                        cible.essence,
+                        cible.classe,
+                        totaux[CompteurCle(cible.essence, cible.classe)] ?: 0,
+                        forcer = true,
+                    )
+                }
+            }
+            actionsVocales.rejet = {
+                // Rejet ≠ silence : motif de vibration distinct du tick, et on ne devine jamais.
+                vibrerDouble(androidContext)
+                dire(messageNonCompris, "vocal", remplacer = true)
             }
         }
 
@@ -556,6 +693,15 @@ fun FeuilleMartelageScreen(
 
     if (etatGnssOuvert) {
         DialogueEtatGnss(fixTige) { etatGnssOuvert = false }
+    }
+
+    if (formesParleesOuvertes) {
+        DialogueFormesParlees(
+            dictee = dictee,
+            pttEcran = reglages.pttEcran,
+            pttVolume = reglages.pttVolumeLong,
+            onFermer = { formesParleesOuvertes = false },
+        )
     }
 }
 
