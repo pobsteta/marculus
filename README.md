@@ -29,8 +29,10 @@ d'événements *append-only* (chaque tige possède un UUID).
 - Affichage du **code essence ONF (3 car.) en gros** (auto-dimensionné) pour la lisibilité.
 
 ### Dictée vocale des tiges (hors ligne)
-- **« hêtre quarante cinq bravo »** → tige HET/45/B, avec confirmation vocale ; la classe seule
-  enchaîne sur l'essence courante (**mode rafale**), « annule » et « repete » sont des commandes.
+- **« hêtre quarante cinq chablis »** → tige Hêtre/45 de qualité Chablis, avec confirmation
+  vocale ; la classe seule enchaîne sur l'essence courante (**mode rafale**), « annule » et
+  « repete » sont des commandes. La qualité se dit avec le **libellé du référentiel** ; un
+  référentiel en codes (A/B/C/D) s'épelle en alphabet radio (« bravo » → B).
 - Reconnaissance **Vosk** hors ligne à **grammaire fermée** : seules les essences du contexte, les
   classes de l'axe et les qualités du référentiel sont dictables — tout le reste est **rejeté**
   (vibration double + « non compris »), jamais deviné.
