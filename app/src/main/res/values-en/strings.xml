@@ -344,6 +344,7 @@
     <string name="voix_micro_description">Hold to dictate</string>
     <string name="voix_formes_titre">Phrases to say</string>
     <string name="voix_formes_aide">Say \"species class\", then the quality if needed — for this context: \"%1$s\". A class on its own keeps the current species.</string>
+    <string name="voix_qualite_seule_note">Said on its own, the quality attaches to the last stem — just like the Q button.</string>
     <string name="voix_formes_hauteur">Height and log breakdown</string>
     <string name="voix_formes_hauteur_aide">Say \"hauteur\" then the metres, followed by one \"length + quality\" pair per log — for example \"%1$s\". The height attaches to the last stem, just like the H button.</string>
     <string name="voix_formes_essences">Context species</string>

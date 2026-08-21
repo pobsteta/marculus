@@ -361,6 +361,7 @@ fun FeuilleMartelageScreen(
         tonalites = toneGen,
         onTige = { essence, classe, qualite -> actionsVocales.tige(essence, classe, qualite) },
         onHauteur = { texte -> actionsVocales.hauteur(texte) },
+        onQualite = { code -> actionsVocales.qualite(code) },
         onAnnule = { actionsVocales.annule() },
         onRepete = { actionsVocales.repete() },
         onRejet = { actionsVocales.rejet() },
@@ -534,6 +535,16 @@ fun FeuilleMartelageScreen(
                         "vocal",
                         remplacer = true,
                     )
+                }
+            }
+            // Qualité dictée seule : elle annote la dernière tige, comme le bouton Q.
+            actionsVocales.qualite = { code ->
+                val cible = derniereSaisie
+                if (cible == null) {
+                    dire(messageRienAAnnuler, "vocal", remplacer = true)
+                } else {
+                    scope.launch { repository.annoterQualite(cible.uuid, code) }
+                    dire(code, "vocal", remplacer = true)
                 }
             }
             actionsVocales.annule = {

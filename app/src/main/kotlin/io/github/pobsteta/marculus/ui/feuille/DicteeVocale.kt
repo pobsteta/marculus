@@ -149,6 +149,7 @@ private class AiguillageVocal {
  *
  * @param actif au moins un déclencheur est activé dans les réglages
  * @param onTige insertion d'une tige dictée par le mécanisme existant (UUID, GNSS, annonce TTS)
+ * @param onQualite qualité dictée seule → annote la dernière tige, comme le bouton Q
  * @param onAnnule commande « annule » → annulation par événement du journal append-only
  * @param onRepete commande « repete » → ré-annonce de la dernière tige
  * @param onRejet énoncé non compris → vibration double + « non compris », jamais d'insertion devinée
@@ -163,6 +164,7 @@ fun rememberDicteeVocale(
     tonalites: ToneGenerator?,
     onTige: (essence: String, classe: Int, qualite: String?) -> Unit,
     onHauteur: (texte: String) -> Unit,
+    onQualite: (code: String) -> Unit,
     onAnnule: () -> Unit,
     onRepete: () -> Unit,
     onRejet: () -> Unit,
@@ -188,6 +190,8 @@ fun rememberDicteeVocale(
                 }
 
                 is VoiceEvent.Hauteur -> onHauteur(evenement.texte)
+
+                is VoiceEvent.Qualite -> onQualite(evenement.code)
 
                 is VoiceEvent.Commande -> when (evenement.nom) {
                     VoiceCommands.ANNULE -> onAnnule()
@@ -284,6 +288,7 @@ fun rememberDicteeVocale(
 class ActionsVocales {
     var tige: (essence: String, classe: Int, qualite: String?) -> Unit = { _, _, _ -> }
     var hauteur: (texte: String) -> Unit = {}
+    var qualite: (code: String) -> Unit = {}
     var annule: () -> Unit = {}
     var repete: () -> Unit = {}
     var rejet: () -> Unit = {}
@@ -371,6 +376,10 @@ fun DialogueFormesParlees(
                     dictee.formesQualites.forEach { (code, parle) ->
                         Text("$code → « $parle »", style = MaterialTheme.typography.bodySmall)
                     }
+                    Text(
+                        stringResource(R.string.voix_qualite_seule_note),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
                 if (dictee.formesBois.isNotEmpty()) {
                     HorizontalDivider(Modifier.padding(vertical = 4.dp))

@@ -3,10 +3,12 @@ package fr.marculus.core.voice
 /**
  * Parseur d'énoncé : transforme la sortie texte de Vosk en événement métier.
  *
- * Formes acceptées (v1) :
+ * Formes acceptées :
  *   "hetre quarante cinq"            -> Tige(HET, 45, qualité nulle)
- *   "hetre quarante cinq bravo"      -> Tige(HET, 45, B)
+ *   "hetre quarante cinq chablis"    -> Tige(HET, 45, Chablis)
  *   "quarante cinq"                  -> Tige(essence courante, 45)   [mode rafale]
+ *   "chablis"                        -> Qualite(Chablis)             [annote la dernière tige]
+ *   "hauteur vingt sept six alpha"   -> Hauteur("27-6A")             [annote la dernière tige]
  *   "annule"                         -> Commande(ANNULE)
  *   "repete"                         -> Commande(REPETE)
  *
@@ -26,6 +28,12 @@ sealed interface VoiceEvent {
      * `HauteurParser` : « 27 », ou « 27-6AB4CD » avec la découpe.
      */
     data class Hauteur(val texte: String) : VoiceEvent
+
+    /**
+     * Qualité arbre dictée seule, pour la dernière tige : l'équivalent vocal du bouton Q.
+     * [code] est le libellé du référentiel, celui qui part dans la tige.
+     */
+    data class Qualite(val code: String) : VoiceEvent
 
     data class Commande(val nom: String) : VoiceEvent
     data class Rejet(val brut: String, val raison: Raison) : VoiceEvent
@@ -63,6 +71,11 @@ class UtteranceParser(private val lexicon: Lexicon) {
             }
             i += match.len
         }
+
+        // Une qualité dictée SEULE annote la dernière tige, comme la hauteur : ni essence ni
+        // classe n'ont été dites, il n'y a donc rien à créer. « hetre chablis » (essence sans
+        // classe) reste un énoncé incomplet : on ne devine pas la classe manquante.
+        if (classe == null && qualite != null && essence == null) return VoiceEvent.Qualite(qualite)
 
         val ess = essence ?: essenceCourante
             ?: return VoiceEvent.Rejet(voskText, VoiceEvent.Raison.INCOMPLET)
