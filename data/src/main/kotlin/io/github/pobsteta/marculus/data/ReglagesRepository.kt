@@ -28,6 +28,8 @@ class ReglagesRepository(context: Context) {
         val annonceNombre = booleanPreferencesKey("annonce_nombre")
         val annonceEtiquette = booleanPreferencesKey("annonce_etiquette")
         val boutonsVolume = booleanPreferencesKey("boutons_volume")
+        val pttEcran = booleanPreferencesKey("ptt_ecran")
+        val pttVolumeLong = booleanPreferencesKey("ptt_volume_long")
         val rouvrirDernier = booleanPreferencesKey("rouvrir_dernier")
         val dernierContexte = stringPreferencesKey("dernier_contexte")
         val voixTts = stringPreferencesKey("voix_tts")
@@ -63,6 +65,8 @@ class ReglagesRepository(context: Context) {
             annonceNombre = p[Cles.annonceNombre] ?: false,
             annonceEtiquette = p[Cles.annonceEtiquette] ?: false,
             boutonsVolume = p[Cles.boutonsVolume] ?: false,
+            pttEcran = p[Cles.pttEcran] ?: false,
+            pttVolumeLong = p[Cles.pttVolumeLong] ?: false,
             rouvrirDernier = p[Cles.rouvrirDernier] ?: false,
             dernierContexteId = p[Cles.dernierContexte],
             voixTts = p[Cles.voixTts],
@@ -101,6 +105,8 @@ class ReglagesRepository(context: Context) {
             p[Cles.annonceNombre] = r.annonceNombre
             p[Cles.annonceEtiquette] = r.annonceEtiquette
             p[Cles.boutonsVolume] = r.boutonsVolume
+            p[Cles.pttEcran] = r.pttEcran
+            p[Cles.pttVolumeLong] = r.pttVolumeLong
             p[Cles.rouvrirDernier] = r.rouvrirDernier
             val id = r.dernierContexteId
             if (id == null) p.remove(Cles.dernierContexte) else p[Cles.dernierContexte] = id

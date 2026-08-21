@@ -328,10 +328,41 @@
     <string name="etat_station">Station de référence</string>
     <string name="etat_skyplot">Satellites (skyplot)</string>
 
+    <!-- Dictée vocale (Vosk) -->
+    <string name="voix_section">Dictée vocale</string>
+    <string name="voix_section_desc">Dicter les tiges à voix haute (« hêtre quarante cinq »), reconnaissance hors ligne avec une grammaire limitée aux essences du contexte.</string>
+    <string name="param_ptt_ecran_titre">Bouton micro à l\'écran</string>
+    <string name="param_ptt_ecran_desc">Un bouton micro apparaît dans la feuille de martelage : maintenez-le appuyé pendant que vous dictez.</string>
+    <string name="param_ptt_volume_titre">Volume bas maintenu (dictée)</string>
+    <string name="param_ptt_volume_desc">Appui long (≈ 0,5 s) sur le volume bas = micro ouvert ; appui court = comptage. Tant que la feuille est ouverte, le volume bas ne règle plus le son.</string>
+    <string name="voix_modele_titre">Modèle vocal français</string>
+    <string name="voix_modele_absent">Non téléchargé — la dictée reste indisponible.</string>
+    <string name="voix_modele_present">Installé — la reconnaissance fonctionne sans réseau.</string>
+    <string name="voix_modele_telecharger">Télécharger (%1$d Mo)</string>
+    <string name="voix_modele_supprimer">Supprimer</string>
+    <string name="voix_modele_conseil">À télécharger en Wi‑Fi avant la sortie : ensuite tout se passe hors ligne.</string>
+    <string name="voix_modele_en_cours">Téléchargement… %1$d %%</string>
+    <string name="voix_modele_erreur">Téléchargement impossible : %1$s</string>
+    <string name="voix_micro_description">Maintenir pour dicter</string>
+    <string name="voix_formes_titre">Formes à dicter</string>
+    <string name="voix_formes_aide">Dites « essence classe » puis, si besoin, la qualité : « hêtre quarante cinq bravo ». La classe seule enchaîne sur la même essence.</string>
+    <string name="voix_formes_essences">Essences du contexte</string>
+    <string name="voix_formes_qualites">Qualités</string>
+    <string name="voix_formes_commandes">Commandes : « annule », « repete ».</string>
+    <string name="voix_aucun_declencheur">Aucun déclencheur activé — voir Paramètres, section « Dictée vocale ».</string>
+    <string name="voix_indisponible">Dictée indisponible (permission micro refusée, ou modèle en cours de chargement).</string>
+    <string name="voix_micro_indisponible">Micro indisponible sur cet appareil : la grammaire est prête, mais aucun déclencheur n\'ouvrira l\'écoute.</string>
+    <string name="voix_non_compris">non compris</string>
+    <string name="voix_annule">annulé</string>
+    <string name="voix_rien_a_annuler">aucune tige</string>
+    <string name="voix_simuler">Énoncé simulé</string>
+    <string name="voix_simuler_action">Injecter</string>
+
     <!-- À propos -->
     <string name="liste_menu_apropos">À propos</string>
     <string name="apropos_titre">À propos de Marculus</string>
     <string name="apropos_version">Version %1$s</string>
     <string name="apropos_desc">Application de martelage forestier — comptage, cubage et géolocalisation RTK.</string>
+    <string name="apropos_licences">Reconnaissance vocale : Vosk (Alpha Cephei) et le modèle vosk-model-small-fr-0.22, distribués sous licence Apache 2.0. Cartographie : osmdroid. GeoPackage : NGA.</string>
     <string name="apropos_github">Ouvrir sur GitHub</string>
 </resources>

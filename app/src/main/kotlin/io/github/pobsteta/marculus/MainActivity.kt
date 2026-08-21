@@ -66,8 +66,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /** Une session push-to-talk est ouverte par l'appui long en cours sur le volume bas. */
+    private var pttEnCours = false
+
     // Comptage par boutons de volume : la feuille enregistre le relais quand le réglage est actif.
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        // Dictée vocale : le volume bas devient court/long, donc l'action attend le relâchement.
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && ToucheVolume.onPtt != null) {
+            if (event != null && event.repeatCount == 0) event.startTracking() // arme onKeyLongPress
+            return true
+        }
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
             val consomme = ToucheVolume.onVolume?.invoke(keyCode == KeyEvent.KEYCODE_VOLUME_UP) ?: false
             if (consomme) return true
@@ -75,8 +83,30 @@ class MainActivity : ComponentActivity() {
         return super.onKeyDown(keyCode, event)
     }
 
+    // Appui long sur le volume bas ≈ 0,5 s : ouverture du micro tant que la touche est tenue.
+    override fun onKeyLongPress(keyCode: Int, event: KeyEvent?): Boolean {
+        val ptt = ToucheVolume.onPtt
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && ptt != null) {
+            pttEnCours = true
+            ptt(true)
+            return true
+        }
+        return super.onKeyLongPress(keyCode, event)
+    }
+
     // Consomme aussi le relâchement pour éviter l'OSD de volume du système.
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        val ptt = ToucheVolume.onPtt
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN && ptt != null) {
+            if (pttEnCours) {
+                pttEnCours = false
+                ptt(false)
+            } else {
+                // Appui court : le comptage se comporte comme avant, au relâchement près.
+                ToucheVolume.onVolume?.invoke(false)
+            }
+            return true
+        }
         if ((keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) &&
             ToucheVolume.onVolume != null
         ) {

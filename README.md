@@ -28,6 +28,18 @@ d'événements *append-only* (chaque tige possède un UUID).
   (« limite inférieure non atteinte » / « limite supérieure dépassée »).
 - Affichage du **code essence ONF (3 car.) en gros** (auto-dimensionné) pour la lisibilité.
 
+### Dictée vocale des tiges (hors ligne)
+- **« hêtre quarante cinq bravo »** → tige HET/45/B, avec confirmation vocale ; la classe seule
+  enchaîne sur l'essence courante (**mode rafale**), « annule » et « repete » sont des commandes.
+- Reconnaissance **Vosk** hors ligne à **grammaire fermée** : seules les essences du contexte, les
+  classes de l'axe et les qualités du référentiel sont dictables — tout le reste est **rejeté**
+  (vibration double + « non compris »), jamais deviné.
+- Deux déclencheurs *push-to-talk* indépendants : **bouton micro à l'écran** ou **volume bas
+  maintenu** (l'appui court reste le comptage).
+- Modèle français **téléchargé à la demande** depuis les Paramètres (~42 Mo, Apache 2.0) : l'APK
+  reste léger et la dictée fonctionne ensuite sans réseau.
+- Voir `docs/specs/2026-08-21-tranche-dictee-vocale.md` (formes à dicter, recette de terrain).
+
 ### Cubage (volumes)
 - **Schaeffer** rapide / lent (une entrée, diamètre ; numéro de tarif).
 - **EMERGE** (deux entrées, projet ANR/IGN, d'après C. Deleuze – RDV Techniques ONF 44) :
@@ -71,12 +83,13 @@ d'événements *append-only* (chaque tige possède un UUID).
 
 | Module    | Rôle |
 |-----------|------|
-| **`:core`** | Domaine Kotlin pur (testé JVM) : modèle, axe des classes, cubage (Schaeffer + EMERGE), géodésie (aires), attribution spatiale, analyse des hauteurs. |
+| **`:core`** | Domaine Kotlin pur (testé JVM) : modèle, axe des classes, cubage (Schaeffer + EMERGE), géodésie (aires), attribution spatiale, analyse des hauteurs, grammaire et parseur de la dictée vocale. |
 | **`:data`** | Persistance **Room** (journal `tige`, `contexte`, configs) + **DataStore** (réglages), `GpkgRepository`, sauvegarde/synchro JSON. |
 | **`:app`**  | UI **Jetpack Compose / Material 3** : liste, création, feuille, carte (osmdroid), statut, paramètres. |
 
 Pile : Gradle 9.4.1 · AGP 9.2.1 (Kotlin intégré) · Kotlin 2.2.10 · Compose BOM 2026.02.01 ·
-Room 2.8.1 · osmdroid 6.1.20 · NGA geopackage-android 6.7.4 · proj4j · minSdk 26 / compileSdk 36.
+Room 2.8.1 · osmdroid 6.1.20 · NGA geopackage-android 6.7.4 · proj4j · Vosk 0.3.47 ·
+minSdk 26 / compileSdk 36.
 
 ---
 

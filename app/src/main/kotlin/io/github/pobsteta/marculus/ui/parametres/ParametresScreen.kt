@@ -23,6 +23,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +55,7 @@ import io.github.pobsteta.marculus.Langue
 import io.github.pobsteta.marculus.R
 import io.github.pobsteta.marculus.data.ReglagesRepository
 import io.github.pobsteta.marculus.data.SauvegardeRepository
+import io.github.pobsteta.marculus.voice.ModeleVosk
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.Locale
@@ -212,6 +214,9 @@ fun ParametresScreen(
             LigneReglage(stringResource(R.string.param_kanban_titre), stringResource(R.string.param_kanban_desc), reglages.vueKanban) {
                 maj(reglages.copy(vueKanban = it))
             }
+
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            SectionDictee(reglages) { maj(it) }
 
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
             // Langue de l'application.
@@ -419,4 +424,85 @@ private fun LigneReglage(titre: String, description: String, valeur: Boolean, on
         }
         Switch(checked = valeur, onCheckedChange = onChange)
     }
+}
+
+/**
+ * Réglages de la dictée vocale : les déclencheurs push-to-talk (indépendants) et le modèle
+ * acoustique. Le modèle est téléchargé à la demande — l'APK reste léger et la reconnaissance,
+ * une fois le modèle installé, ne dépend plus du réseau.
+ */
+@Composable
+private fun SectionDictee(reglages: Reglages, maj: (Reglages) -> Unit) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var installe by remember { mutableStateOf(ModeleVosk.estInstalle(context)) }
+    var progression by remember { mutableStateOf<Float?>(null) }
+    var erreur by remember { mutableStateOf<String?>(null) }
+
+    val permissionMicro = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
+    fun demanderMicro() {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionMicro.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
+
+    Text(stringResource(R.string.voix_section), style = MaterialTheme.typography.titleMedium)
+    Text(stringResource(R.string.voix_section_desc), style = MaterialTheme.typography.bodySmall)
+    LigneReglage(
+        stringResource(R.string.param_ptt_ecran_titre),
+        stringResource(R.string.param_ptt_ecran_desc),
+        reglages.pttEcran,
+    ) { actif ->
+        maj(reglages.copy(pttEcran = actif))
+        if (actif) demanderMicro()
+    }
+    LigneReglage(
+        stringResource(R.string.param_ptt_volume_titre),
+        stringResource(R.string.param_ptt_volume_desc),
+        reglages.pttVolumeLong,
+    ) { actif ->
+        maj(reglages.copy(pttVolumeLong = actif))
+        if (actif) demanderMicro()
+    }
+
+    Text(stringResource(R.string.voix_modele_titre), style = MaterialTheme.typography.titleSmall)
+    Text(
+        stringResource(if (installe) R.string.voix_modele_present else R.string.voix_modele_absent),
+        style = MaterialTheme.typography.bodySmall,
+    )
+    val enCours = progression
+    when {
+        enCours != null -> {
+            val pourcent = if (enCours < 0f) 0 else (enCours * 100).toInt()
+            Text(stringResource(R.string.voix_modele_en_cours, pourcent), style = MaterialTheme.typography.bodySmall)
+            LinearProgressIndicator(
+                progress = { enCours.coerceIn(0f, 1f) },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        installe -> OutlinedButton(
+            onClick = {
+                ModeleVosk.supprimer(context)
+                installe = false
+            },
+        ) { Text(stringResource(R.string.voix_modele_supprimer)) }
+
+        else -> {
+            Text(stringResource(R.string.voix_modele_conseil), style = MaterialTheme.typography.bodySmall)
+            Button(onClick = {
+                erreur = null
+                progression = 0f
+                scope.launch {
+                    val resultat = ModeleVosk.telecharger(context) { progression = it }
+                    progression = null
+                    installe = ModeleVosk.estInstalle(context)
+                    erreur = resultat.exceptionOrNull()?.message
+                }
+            }) { Text(stringResource(R.string.voix_modele_telecharger, ModeleVosk.TAILLE_MO)) }
+        }
+    }
+    erreur?.let { Text(stringResource(R.string.voix_modele_erreur, it), style = MaterialTheme.typography.bodySmall) }
 }

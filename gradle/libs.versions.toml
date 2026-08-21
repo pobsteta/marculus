@@ -11,6 +11,8 @@ activityCompose = "1.8.2"
 lifecycle = "2.9.4"
 coreKtx = "1.16.0"
 coroutines = "1.10.2"
+vosk = "0.3.47"
+jna = "5.13.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -40,3 +42,5 @@ androidx-datastore-preferences = { group = "androidx.datastore", name = "datasto
 osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
 geopackage-android = { group = "mil.nga.geopackage", name = "geopackage-android", version.ref = "geopackage" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+vosk-android = { group = "com.alphacephei", name = "vosk-android", version.ref = "vosk" }
+jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }

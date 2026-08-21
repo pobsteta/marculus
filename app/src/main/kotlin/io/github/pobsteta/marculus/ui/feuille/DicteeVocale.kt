@@ -1,0 +1,333 @@
+package io.github.pobsteta.marculus.ui.feuille
+
+import android.Manifest
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.media.ToneGenerator
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicOff
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import io.github.pobsteta.marculus.R
+import fr.marculus.core.voice.ReferentielParle
+import fr.marculus.core.voice.SpokenQualite
+import fr.marculus.core.voice.VoiceCommands
+import fr.marculus.core.voice.VoiceEvent
+import io.github.pobsteta.marculus.voice.ModeleVosk
+import io.github.pobsteta.marculus.voice.PttController
+import io.github.pobsteta.marculus.voice.VoskVoiceService
+
+/**
+ * Dictée vocale vue par la feuille de martelage : un état observable et quatre gestes
+ * (démarrer, arrêter, annonce terminée, simuler). L'écran ne voit ni Vosk, ni le micro,
+ * ni la grammaire — seul [PttController] ouvre et ferme l'écoute.
+ */
+@Stable
+class EtatDictee internal constructor(
+    private val service: VoskVoiceService,
+    private val ptt: PttController,
+) {
+    /** Modèle chargé et grammaire construite : les énoncés du contexte sont interprétables. */
+    var pret: Boolean by mutableStateOf(false)
+        internal set
+
+    /** Micro utilisable : sans lui, la grammaire existe mais aucun déclencheur n'ouvre l'écoute. */
+    var microPret: Boolean by mutableStateOf(false)
+        internal set
+
+    /** Micro ouvert (déclencheur tenu). */
+    var enEcoute: Boolean by mutableStateOf(false)
+        internal set
+
+    /** Le modèle vocal n'est pas encore téléchargé. */
+    var modeleAbsent: Boolean by mutableStateOf(false)
+        internal set
+
+    /** Formes à dicter pour les essences du contexte : libellé → énoncé attendu. */
+    var formesEssences: List<Pair<String, String>> by mutableStateOf(emptyList())
+        internal set
+
+    /** Formes à dicter pour les qualités du référentiel : code → énoncé attendu. */
+    var formesQualites: List<Pair<String, String>> by mutableStateOf(emptyList())
+        internal set
+
+    /** Appui sur un déclencheur PTT (bouton micro de l'écran, appui long sur le volume bas). */
+    fun demarrer() {
+        if (!microPret) return
+        ptt.demarrer()
+        enEcoute = ptt.actif
+    }
+
+    /** Relâchement du déclencheur : Vosk livre son résultat final à la fermeture du micro. */
+    fun arreter() {
+        ptt.arreter()
+        enEcoute = ptt.actif
+    }
+
+    /** Anti-larsen : coupe le micro avant une annonce, sans clore la session PTT. */
+    internal fun suspendrePourAnnonce() = ptt.suspendrePourAnnonce()
+
+    /** Fin de l'annonce TTS : le micro se rouvre si le déclencheur est toujours tenu. */
+    fun annonceTerminee() = ptt.reprendreApresAnnonce()
+
+    /** Le mode rafale repart de zéro (changement de parcelle rattachée). */
+    fun reinitialiserRafale() {
+        service.essenceCourante = null
+    }
+
+    /** Dictée simulée : injecte un énoncé sans micro (démo et recette sur émulateur). */
+    fun simuler(texte: String) = service.injecterTexte(texte)
+}
+
+/** Aiguillage des événements Vosk vers la composition courante (les rappels changent, pas le service). */
+private class AiguillageVocal {
+    var traiter: (VoiceEvent) -> Unit = {}
+}
+
+/**
+ * Prépare la dictée vocale pour le contexte affiché. Le recognizer est reconstruit à chaque
+ * changement d'essences, d'axe de classes ou de qualités.
+ *
+ * @param actif au moins un déclencheur est activé dans les réglages
+ * @param onTige insertion d'une tige dictée par le mécanisme existant (UUID, GNSS, annonce TTS)
+ * @param onAnnule commande « annule » → annulation par événement du journal append-only
+ * @param onRepete commande « repete » → ré-annonce de la dernière tige
+ * @param onRejet énoncé non compris → vibration double + « non compris », jamais d'insertion devinée
+ */
+@Composable
+fun rememberDicteeVocale(
+    actif: Boolean,
+    essences: List<String>,
+    classes: List<Int>,
+    qualites: List<String>,
+    tonalites: ToneGenerator?,
+    onTige: (essence: String, classe: Int, qualite: String?) -> Unit,
+    onAnnule: () -> Unit,
+    onRepete: () -> Unit,
+    onRejet: () -> Unit,
+): EtatDictee {
+    val context = LocalContext.current
+    val aiguillage = remember { AiguillageVocal() }
+    val service = remember { VoskVoiceService(context) { aiguillage.traiter(it) } }
+    val ptt = remember { PttController(service, tonalites) }
+    val dictee = remember { EtatDictee(service, ptt) }
+
+    // Code métier renvoyé par le parseur → libellé exact de la colonne du contexte.
+    var codesVersNoms by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+
+    // Réarmé à chaque composition : les rappels de l'écran (journal, TTS) sont recréés à chaque fois.
+    SideEffect {
+        aiguillage.traiter = { evenement ->
+            // Anti-larsen : le micro est coupé AVANT toute annonce ; il rouvrira sur `onDone`.
+            dictee.suspendrePourAnnonce()
+            when (evenement) {
+                is VoiceEvent.Tige -> {
+                    val nom = codesVersNoms[evenement.codeOnf]
+                    if (nom == null) onRejet() else onTige(nom, evenement.classe, evenement.qualite)
+                }
+
+                is VoiceEvent.Commande -> when (evenement.nom) {
+                    VoiceCommands.ANNULE -> onAnnule()
+                    VoiceCommands.REPETE -> onRepete()
+                    else -> dictee.annonceTerminee()
+                }
+
+                is VoiceEvent.Rejet -> onRejet()
+            }
+        }
+    }
+
+    // Permission micro : même mécanique que la permission de localisation du GNSS interne.
+    var micAutorise by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED,
+        )
+    }
+    val demandeMicro = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        micAutorise = it
+    }
+    LaunchedEffect(actif, micAutorise) {
+        if (actif && !micAutorise) demandeMicro.launch(Manifest.permission.RECORD_AUDIO)
+    }
+
+    // (Re)construction de la grammaire fermée : essences de la matrice, axe des classes, qualités.
+    LaunchedEffect(actif, micAutorise, essences, classes, qualites) {
+        dictee.pret = false
+        dictee.microPret = false
+        dictee.modeleAbsent = false
+        if (!actif || !micAutorise) return@LaunchedEffect
+        if (!ModeleVosk.estInstalle(context)) {
+            dictee.modeleAbsent = true
+            return@LaunchedEffect
+        }
+        val parlees = ReferentielParle.essences(essences)
+        val qualitesParlees: List<SpokenQualite> = ReferentielParle.qualites(qualites)
+        codesVersNoms = parlees.associate { it.codeOnf to it.nom }
+        dictee.formesEssences = parlees.map { it.nom to it.spoken.joinToString(" ") }
+        dictee.formesQualites = qualitesParlees.map { it.code to it.spoken }
+        val configure = service.chargerModele().mapCatching {
+            service.configurerPourContexte(
+                parlees.map { it.versGrammaire() },
+                classes,
+                qualitesParlees,
+            ).getOrThrow()
+        }
+        dictee.pret = configure.isSuccess && service.grammairePrete
+        dictee.microPret = dictee.pret && service.microDisponible
+    }
+
+    DisposableEffect(service) {
+        onDispose { service.liberer() }
+    }
+    return dictee
+}
+
+/**
+ * Actions de la feuille de martelage offertes aux déclencheurs vocaux. Elles sont posées par
+ * l'écran une fois le contexte chargé : la dictée, elle, existe dès la première composition.
+ */
+class ActionsVocales {
+    var tige: (essence: String, classe: Int, qualite: String?) -> Unit = { _, _, _ -> }
+    var annule: () -> Unit = {}
+    var repete: () -> Unit = {}
+    var rejet: () -> Unit = {}
+}
+
+/**
+ * Bouton micro maintenu appuyé : l'écoute dure exactement le temps de l'appui — relâcher, c'est
+ * demander à Vosk son résultat final.
+ */
+@Composable
+fun BoutonMicroPtt(
+    pret: Boolean,
+    enEcoute: Boolean,
+    onAppui: () -> Unit,
+    onRelache: () -> Unit,
+) {
+    val couleur = when {
+        !pret -> MaterialTheme.colorScheme.surfaceVariant
+        enEcoute -> MaterialTheme.colorScheme.error
+        else -> MaterialTheme.colorScheme.primaryContainer
+    }
+    FloatingActionButton(
+        onClick = {},
+        containerColor = couleur,
+        modifier = Modifier.pointerInput(pret) {
+            detectTapGestures(
+                onPress = {
+                    if (pret) {
+                        onAppui()
+                        tryAwaitRelease()
+                        onRelache()
+                    }
+                },
+            )
+        },
+    ) {
+        Icon(
+            imageVector = if (pret) Icons.Filled.Mic else Icons.Filled.MicOff,
+            contentDescription = stringResource(R.string.voix_micro_description),
+        )
+    }
+}
+
+/** Aide-mémoire : ce qu'il faut dire pour ce contexte, essence par essence. */
+@Composable
+fun DialogueFormesParlees(
+    dictee: EtatDictee,
+    pttEcran: Boolean,
+    pttVolume: Boolean,
+    onFermer: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onFermer,
+        title = { Text(stringResource(R.string.voix_formes_titre)) },
+        text = {
+            Column(
+                Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                when {
+                    !pttEcran && !pttVolume -> Text(stringResource(R.string.voix_aucun_declencheur))
+                    dictee.modeleAbsent -> Text(stringResource(R.string.voix_modele_absent))
+                    !dictee.pret -> Text(stringResource(R.string.voix_indisponible))
+                    !dictee.microPret -> Text(stringResource(R.string.voix_micro_indisponible))
+                    else -> Text(stringResource(R.string.voix_formes_aide))
+                }
+                if (dictee.formesEssences.isNotEmpty()) {
+                    HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                    Text(stringResource(R.string.voix_formes_essences), style = MaterialTheme.typography.titleSmall)
+                    dictee.formesEssences.forEach { (libelle, parle) ->
+                        Text("$libelle → « $parle »", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+                if (dictee.formesQualites.isNotEmpty()) {
+                    HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                    Text(stringResource(R.string.voix_formes_qualites), style = MaterialTheme.typography.titleSmall)
+                    dictee.formesQualites.forEach { (code, parle) ->
+                        Text("$code → « $parle »", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+                HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                Text(stringResource(R.string.voix_formes_commandes), style = MaterialTheme.typography.bodySmall)
+                if (dictee.pret) SimulationDictee(dictee)
+            }
+        },
+        confirmButton = { TextButton(onClick = onFermer) { Text(stringResource(R.string.liste_dialog_fermer)) } },
+    )
+}
+
+/**
+ * Dictée simulée, réservée aux builds de débogage : injecte un énoncé Vosk sans micro. C'est le
+ * chemin de la démo sur émulateur, où la capture audio n'est pas exploitable.
+ */
+@Composable
+private fun SimulationDictee(dictee: EtatDictee) {
+    val context = LocalContext.current
+    val debogage = remember {
+        (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    }
+    if (!debogage) return
+    var texte by remember { mutableStateOf("") }
+    HorizontalDivider(Modifier.padding(vertical = 4.dp))
+    OutlinedTextField(
+        value = texte,
+        onValueChange = { texte = it },
+        label = { Text(stringResource(R.string.voix_simuler)) },
+        singleLine = true,
+        modifier = Modifier.fillMaxWidth(),
+    )
+    TextButton(onClick = { dictee.simuler(texte) }) { Text(stringResource(R.string.voix_simuler_action)) }
+}

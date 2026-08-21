@@ -39,6 +39,13 @@ data class Reglages(
     val annonceEtiquette: Boolean = false,
     /** Compter avec les boutons de volume (volume + = +, volume − = −). */
     val boutonsVolume: Boolean = false,
+    /** Dictée vocale : bouton micro maintenu appuyé dans la feuille de martelage. */
+    val pttEcran: Boolean = false,
+    /**
+     * Dictée vocale : appui **long** (~0,5 s) sur le volume bas. L'appui court reste le comptage ;
+     * en contrepartie le volume bas ne règle plus le son tant que la feuille est ouverte.
+     */
+    val pttVolumeLong: Boolean = false,
     /** Rouvrir le dernier contexte utilisé au lancement de l'application. */
     val rouvrirDernier: Boolean = false,
     /** Identifiant du dernier contexte ouvert (pour « rouvrir le dernier »). */

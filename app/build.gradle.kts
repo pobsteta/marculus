@@ -52,6 +52,15 @@ android {
         compose = true
     }
 
+    packaging {
+        jniLibs {
+            // Les bibliothèques natives de Vosk pèsent ~42 Mo non compressées, toutes ABI confondues.
+            // Compressées dans l'APK, elles retombent à une taille publiable ; le prix est une
+            // extraction à l'installation, invisible à l'usage.
+            useLegacyPackaging = true
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -82,5 +91,8 @@ dependencies {
     implementation(libs.compose.material.icons.core)
     implementation(libs.compose.material.icons.extended)
     implementation(libs.osmdroid.android)
+    // Reconnaissance vocale hors ligne (Vosk) : la JNA doit être tirée en .aar (bibliothèques natives).
+    implementation(libs.vosk.android)
+    implementation(variantOf(libs.jna) { artifactType("aar") })
     debugImplementation(libs.compose.ui.tooling)
 }
