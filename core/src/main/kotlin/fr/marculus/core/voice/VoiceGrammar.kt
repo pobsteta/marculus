@@ -30,7 +30,26 @@ object VoiceCommands {
     const val ANNULE = "annule"       // retire la dernière tige (le journal append-only s'en charge)
     const val REPETE = "repete"       // re-annonce la dernière tige par TTS
     val ALL = listOf(ANNULE, REPETE)
+
+    /**
+     * Mot-clé ouvrant un énoncé de hauteur : « hauteur vingt sept six alpha bravo ». Il bascule
+     * le parseur dans un mode où les nombres sont des mètres, pas des classes — un même
+     * « quarante cinq » ne veut pas dire la même chose des deux côtés.
+     */
+    const val HAUTEUR = "hauteur"
 }
+
+/**
+ * Dictée de la hauteur et de la découpe. [maxMetres] borne les nombres admis (hauteur totale et
+ * longueurs de billon) ; [lettresBois] sont les lettres du référentiel de qualité bois, épelées
+ * en alphabet radio.
+ */
+data class OptionsHauteur(
+    val maxMetres: Int = 60,
+    val lettresBois: List<Char> = emptyList(),
+    /** Mot radio de chaque lettre, résolu contre le vocabulaire du modèle. */
+    val motRadio: (Char) -> String = { ReferentielParle.motRadio(it) },
+)
 
 object GrammarBuilder {
 
@@ -46,12 +65,18 @@ object GrammarBuilder {
         essences: List<SpokenEssence>,
         classes: List<Int>,
         qualites: List<SpokenQualite>,
+        hauteur: OptionsHauteur? = null,
     ): String {
         val phrases = buildSet {
             essences.forEach { add(it.spoken.joinToString(" ")) }
             classes.forEach { add(FrenchNumbers.toTokens(it).joinToString(" ")) }
             qualites.forEach { add(it.spoken) }
             addAll(VoiceCommands.ALL)
+            if (hauteur != null) {
+                add(VoiceCommands.HAUTEUR)
+                (1..hauteur.maxMetres).forEach { add(FrenchNumbers.toTokens(it).joinToString(" ")) }
+                hauteur.lettresBois.forEach { add(hauteur.motRadio(it)) }
+            }
             add("[unk]")
         }
         return phrases.joinToString(prefix = "[", postfix = "]") { "\"${it.replace("\"", "")}\"" }
@@ -62,11 +87,18 @@ object GrammarBuilder {
         essences: List<SpokenEssence>,
         classes: List<Int>,
         qualites: List<SpokenQualite>,
+        hauteur: OptionsHauteur? = null,
     ): Lexicon = Lexicon(
         essences = essences.associateBy { it.spoken },
         classes = classes.associateBy { FrenchNumbers.toTokens(it) },
         // Les qualités sont multi-mots dès qu'elles sont épelées en radio ("alpha bravo").
         qualites = qualites.associateBy { it.spoken.split(" ").filter(String::isNotEmpty) },
+        nombres = hauteur?.let { h ->
+            (1..h.maxMetres).associateBy { FrenchNumbers.toTokens(it) }
+        } ?: emptyMap(),
+        lettresBois = hauteur?.let { h ->
+            h.lettresBois.associateBy { listOf(h.motRadio(it)) }
+        } ?: emptyMap(),
     )
 }
 
@@ -75,9 +107,17 @@ data class Lexicon(
     val essences: Map<List<String>, SpokenEssence>,
     val classes: Map<List<String>, Int>,
     val qualites: Map<List<String>, SpokenQualite>,
+    /** Nombres en mètres (hauteur totale et longueurs de découpe), vide si la hauteur est hors grammaire. */
+    val nombres: Map<List<String>, Int> = emptyMap(),
+    /** Lettres de qualité bois épelées en radio. */
+    val lettresBois: Map<List<String>, Char> = emptyMap(),
 ) {
     val maxKeyLen: Int =
-        (essences.keys + classes.keys + qualites.keys).maxOfOrNull { it.size } ?: 1
+        (essences.keys + classes.keys + qualites.keys + nombres.keys + lettresBois.keys)
+            .maxOfOrNull { it.size } ?: 1
+
+    /** La hauteur est dictable dans ce contexte. */
+    val hauteurDictable: Boolean get() = nombres.isNotEmpty()
 }
 
 /**

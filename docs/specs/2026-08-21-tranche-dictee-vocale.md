@@ -17,6 +17,7 @@ GNSS point-dans-polygone, annulation par événement), et le téléphone confirm
 | « hêtre quarante cinq chablis » | tige, avec la qualité arbre du référentiel |
 | « quarante cinq » | tige sur l'essence courante (**mode rafale**) |
 | « annule » | annule la dernière tige (événement d'annulation, jamais d'effacement) |
+| « hauteur vingt sept six alpha bravo » | hauteur + découpe sur la dernière tige (`27-6AB`) |
 | « repete » | ré-annonce la dernière tige |
 | tout le reste | **rejet** : vibration double + « non compris », aucune insertion devinée |
 
@@ -33,13 +34,27 @@ voulu, mais l'exemple « hêtre quarante cinq bravo » du brief supposait un ré
 L'aide « Formes à dicter » de l'application construit désormais son exemple sur le contexte
 réellement ouvert, pour qu'aucun exemple figé ne puisse mentir.
 
-Deux limites assumées de ce lot :
+Limite assumée : une **qualité dite seule** n'annote pas la dernière tige — le parseur exige une
+classe, donc l'annotation après coup reste au bouton Q. Couvert par un test explicite.
 
-- la **qualité bois de découpe** (A/B/C/D dans `hauteurTexte`, ex. `27-6AB4CD`) **n'est pas
-  dictable** : elle n'a pas d'existence propre dans le schéma, elle vit dans le texte de hauteur —
-  elle est donc reportée avec la dictée de la hauteur (étape 2) ;
-- une **qualité dite seule** n'annote pas la dernière tige : le parseur exige une classe, donc
-  l'annotation après coup reste au bouton Q. Couvert par un test explicite.
+### Hauteur et qualité bois de découpe
+
+La qualité bois n'a pas de champ propre dans le schéma : elle vit dans le texte de hauteur
+(`27-6AB4CD` = 27 m dont 6 m de AB et 4 m de CD), et une qualité de découpe sans longueur n'a pas
+de sens. Elle se dicte donc **avec** la hauteur, derrière le mot-clé `hauteur` :
+
+| Dit | Texte produit |
+|---|---|
+| « hauteur vingt sept » | `27` |
+| « hauteur vingt sept six alpha bravo » | `27-6AB` |
+| « hauteur vingt sept six alpha bravo quatre charlie delta » | `27-6AB4CD` |
+
+Le mot-clé bascule tout l'énoncé en mètres : sans lui « quarante cinq » est une classe de diamètre,
+avec lui c'est une longueur. Le texte produit est **exactement celui de la saisie manuelle** — il
+repasse par `annoterHauteur` et se relit avec `HauteurParser`, sans rien de nouveau dans le schéma.
+Les lettres dictables sont celles du **référentiel de qualité bois** (A/B/C/D par défaut), épelées
+en alphabet radio ; les hauteurs vont jusqu'à 50 m. Une longueur de billon sans qualité derrière est
+un énoncé incomplet, donc rejeté.
 
 ## Architecture
 
@@ -74,12 +89,26 @@ Les formes à dicter sont **générées** depuis les libellés réels du context
 Le menu ⋮ de la feuille de martelage affiche « Formes à dicter » : la liste exacte pour le contexte
 ouvert. C'est l'aide de terrain à montrer à un nouvel opérateur.
 
-**Limite du modèle** : `vosk-model-small-fr-0.22` a un vocabulaire fini. Un mot qui n'y figure pas
-est ignoré à la construction de la grammaire (Vosk le signale dans le journal :
-`Ignoring word missing in vocabulary: 'volis'`) — la forme concernée devient simplement
-indictable, sans erreur ni plantage. Constaté sur la recette : la qualité « Volis ». Parade quand
-le cas se présente : renommer l'entrée du référentiel avec un mot courant, ou passer à un code en
-lettres, que l'alphabet radio rend toujours dictable.
+### Rien n'est promis que le modèle ne sache décoder
+
+`vosk-model-small-fr-0.22` a un vocabulaire fini (135 774 mots) et **ignore silencieusement** les
+mots d'une grammaire qui n'y figurent pas : un simple `Ignoring word missing in vocabulary: 'volis'`
+dans le journal, et la forme devient indictable sans que rien ne le signale à l'opérateur.
+
+L'application lit donc ce vocabulaire avant de construire les formes parlées. Il est embarqué dans
+la table de symboles OpenFst de `graph/Gr.fst` ; `VocabulaireVosk.motsConnus` parcourt cette table
+en flux et ne teste que les mots candidats — le lexique complet n'est jamais chargé en mémoire.
+Deux conséquences :
+
+- un **libellé inconnu du modèle** (« Volis ») bascule sur l'épellation radio de ses initiales,
+  allongée juste assez pour rester unique : **Volis → « victor »** ;
+- les **mots de l'alphabet radio** ont eux-mêmes des replis, car `foxtrot`, `juliett`, `uniform` et
+  `xray` **ne sont pas dans le modèle** — ils deviennent `fox`, `juliette`, `uniforme`, `xavier`.
+  Sans ce garde-fou, la désambiguïsation « frêne » (FRC) aurait produit « frene foxtrot », que le
+  décodeur n'aurait jamais reconnu.
+
+La liste affichée dans « Formes à dicter » est donc, par construction, celle que le modèle sait
+décoder.
 
 ### Déclencheurs
 
@@ -168,8 +197,5 @@ Paramètres, contexte « Demo » à 3 essences (Chêne / Hêtre / Sapin, axe 20�
 ## Étape suivante (hors lot)
 
 - Bouton Flic 2 (cf. ci-dessus).
-- Hauteur dictée (« hauteur vingt sept ») alimentant l'analyse `27-6AB4CD` existante, avec la
-  **qualité bois de découpe** en alphabet radio (« six alpha bravo ») — le seul endroit où elle a
-  un sens dans le schéma actuel.
 - Qualité dite seule annotant la dernière tige (équivalent vocal du bouton Q).
 - Note libre dictée (whisper.cpp) — hors grammaire fermée par construction.

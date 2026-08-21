@@ -20,6 +20,13 @@ package fr.marculus.core.voice
  */
 sealed interface VoiceEvent {
     data class Tige(val codeOnf: String, val classe: Int, val qualite: String?) : VoiceEvent
+
+    /**
+     * Hauteur dictée pour la dernière tige. [texte] est déjà au format saisi à la main et lu par
+     * `HauteurParser` : « 27 », ou « 27-6AB4CD » avec la découpe.
+     */
+    data class Hauteur(val texte: String) : VoiceEvent
+
     data class Commande(val nom: String) : VoiceEvent
     data class Rejet(val brut: String, val raison: Raison) : VoiceEvent
     enum class Raison { UNK, INCOMPLET, AMBIGU }
@@ -35,6 +42,9 @@ class UtteranceParser(private val lexicon: Lexicon) {
         if (tokens.size == 1 && tokens[0] in VoiceCommands.ALL) {
             return VoiceEvent.Commande(tokens[0])
         }
+        // Le mot-clé « hauteur » bascule tout l'énoncé en mètres : sans lui, « quarante cinq »
+        // est une classe de diamètre, avec lui c'est une longueur.
+        if (tokens[0] == VoiceCommands.HAUTEUR) return parseHauteur(tokens.drop(1), voskText)
 
         var i = 0
         var essence: String? = null
@@ -58,6 +68,49 @@ class UtteranceParser(private val lexicon: Lexicon) {
             ?: return VoiceEvent.Rejet(voskText, VoiceEvent.Raison.INCOMPLET)
         val cls = classe ?: return VoiceEvent.Rejet(voskText, VoiceEvent.Raison.INCOMPLET)
         return VoiceEvent.Tige(ess, cls, qualite)
+    }
+
+    /**
+     * « hauteur vingt sept » → « 27 » ; « hauteur vingt sept six alpha bravo quatre charlie delta »
+     * → « 27-6AB4CD ». La hauteur totale d'abord, puis autant de couples (longueur, lettres) que
+     * l'opérateur en dicte. Le texte produit est celui de la saisie manuelle : rien de nouveau
+     * n'entre dans le schéma.
+     */
+    private fun parseHauteur(tokens: List<String>, brut: String): VoiceEvent {
+        if (!lexicon.hauteurDictable) return VoiceEvent.Rejet(brut, VoiceEvent.Raison.AMBIGU)
+        var i = 0
+        val nombre = { pos: Int -> plusLongNombre(tokens, pos) }
+
+        val totale = nombre(i) ?: return VoiceEvent.Rejet(brut, VoiceEvent.Raison.INCOMPLET)
+        i += totale.len
+
+        val segments = StringBuilder()
+        while (i < tokens.size) {
+            val longueur = nombre(i) ?: return VoiceEvent.Rejet(brut, VoiceEvent.Raison.AMBIGU)
+            i += longueur.len
+            val lettres = StringBuilder()
+            while (i < tokens.size) {
+                val lettre = lexicon.lettresBois[listOf(tokens[i])] ?: break
+                lettres.append(lettre)
+                i++
+            }
+            // Une longueur sans qualité n'est pas une découpe : c'est un énoncé incomplet.
+            if (lettres.isEmpty()) return VoiceEvent.Rejet(brut, VoiceEvent.Raison.INCOMPLET)
+            segments.append(longueur.valeur).append(lettres)
+        }
+
+        val texte = if (segments.isEmpty()) "${totale.valeur}" else "${totale.valeur}-$segments"
+        return VoiceEvent.Hauteur(texte)
+    }
+
+    private data class Nombre(val valeur: Int, val len: Int)
+
+    private fun plusLongNombre(tokens: List<String>, from: Int): Nombre? {
+        val maxLen = minOf(lexicon.maxKeyLen, tokens.size - from)
+        for (len in maxLen downTo 1) {
+            lexicon.nombres[tokens.subList(from, from + len)]?.let { return Nombre(it, len) }
+        }
+        return null
     }
 
     // ---- appariement au plus long sur le lexique fermé ----

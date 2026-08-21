@@ -357,8 +357,10 @@ fun FeuilleMartelageScreen(
         essences = contexte?.essencesNoms ?: emptyList(),
         classes = contexte?.axe?.classes() ?: emptyList(),
         qualites = qualitesArbre,
+        qualitesBois = qualitesBois,
         tonalites = toneGen,
         onTige = { essence, classe, qualite -> actionsVocales.tige(essence, classe, qualite) },
+        onHauteur = { texte -> actionsVocales.hauteur(texte) },
         onAnnule = { actionsVocales.annule() },
         onRepete = { actionsVocales.repete() },
         onRejet = { actionsVocales.rejet() },
@@ -519,6 +521,20 @@ fun FeuilleMartelageScreen(
         SideEffect {
             actionsVocales.tige = { essence, classe, qualite ->
                 ajouter(essence, classe, qualite = qualite, annonceForcee = true)
+            }
+            // Hauteur dictée : elle annote la dernière tige, exactement comme le bouton H.
+            actionsVocales.hauteur = { texte ->
+                val cible = derniereSaisie
+                if (cible == null) {
+                    dire(messageRienAAnnuler, "vocal", remplacer = true)
+                } else {
+                    scope.launch { repository.annoterHauteur(cible.uuid, texte) }
+                    dire(
+                        androidContext.getString(R.string.voix_hauteur_annonce, texte.substringBefore('-')),
+                        "vocal",
+                        remplacer = true,
+                    )
+                }
             }
             actionsVocales.annule = {
                 val cible = derniereSaisie

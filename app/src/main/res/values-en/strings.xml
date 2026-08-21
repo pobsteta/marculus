@@ -344,13 +344,15 @@
     <string name="voix_micro_description">Hold to dictate</string>
     <string name="voix_formes_titre">Phrases to say</string>
     <string name="voix_formes_aide">Say \"species class\", then the quality if needed — for this context: \"%1$s\". A class on its own keeps the current species.</string>
-    <string name="voix_qualite_bois_note">Log quality (A/B/C/D) cannot be dictated: it is entered with the height, from the cell\'s H button.</string>
+    <string name="voix_formes_hauteur">Height and log breakdown</string>
+    <string name="voix_formes_hauteur_aide">Say \"hauteur\" then the metres, followed by one \"length + quality\" pair per log — for example \"%1$s\". The height attaches to the last stem, just like the H button.</string>
     <string name="voix_formes_essences">Context species</string>
     <string name="voix_formes_qualites">Qualities</string>
     <string name="voix_formes_commandes">Commands: \"annule\", \"repete\".</string>
     <string name="voix_aucun_declencheur">No trigger enabled — see Settings, \"Voice dictation\".</string>
     <string name="voix_indisponible">Dictation unavailable (mic permission denied, or model still loading).</string>
     <string name="voix_micro_indisponible">No usable microphone on this device: the grammar is ready but no trigger will open the mic.</string>
+    <string name="voix_hauteur_annonce">height %1$s</string>
     <string name="voix_non_compris">not understood</string>
     <string name="voix_annule">cancelled</string>
     <string name="voix_rien_a_annuler">no stem</string>

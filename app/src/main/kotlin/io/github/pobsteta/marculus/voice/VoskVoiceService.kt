@@ -3,6 +3,7 @@ package io.github.pobsteta.marculus.voice
 import android.content.Context
 import android.util.Log
 import fr.marculus.core.voice.GrammarBuilder
+import fr.marculus.core.voice.OptionsHauteur
 import fr.marculus.core.voice.SpokenEssence
 import fr.marculus.core.voice.SpokenQualite
 import fr.marculus.core.voice.UtteranceParser
@@ -70,12 +71,13 @@ class VoskVoiceService(
         essences: List<SpokenEssence>,
         classes: List<Int>,
         qualites: List<SpokenQualite>,
+        hauteur: OptionsHauteur? = null,
     ): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val m = model ?: error("Modèle Vosk non chargé")
             libererRecognizer()
-            val grammaire = GrammarBuilder.buildJson(essences, classes, qualites)
-            parser = UtteranceParser(GrammarBuilder.buildLexicon(essences, classes, qualites))
+            val grammaire = GrammarBuilder.buildJson(essences, classes, qualites, hauteur)
+            parser = UtteranceParser(GrammarBuilder.buildLexicon(essences, classes, qualites, hauteur))
             essenceCourante = null
             val r = Recognizer(m, FREQUENCE_HZ, grammaire)
             recognizer = r
