@@ -41,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import io.github.pobsteta.marculus.R
+import fr.marculus.core.voice.FrenchNumbers
 import fr.marculus.core.voice.ReferentielParle
 import fr.marculus.core.voice.SpokenQualite
 import fr.marculus.core.voice.VoiceCommands
@@ -81,6 +82,13 @@ class EtatDictee internal constructor(
 
     /** Formes à dicter pour les qualités du référentiel : code → énoncé attendu. */
     var formesQualites: List<Pair<String, String>> by mutableStateOf(emptyList())
+        internal set
+
+    /**
+     * Énoncé d'exemple construit sur le contexte réellement ouvert. Un exemple figé dans les
+     * textes finit par mentir : les formes dépendent des essences et du référentiel de qualités.
+     */
+    var exemple: String by mutableStateOf("")
         internal set
 
     /** Appui sur un déclencheur PTT (bouton micro de l'écran, appui long sur le volume bas). */
@@ -198,6 +206,11 @@ fun rememberDicteeVocale(
         codesVersNoms = parlees.associate { it.codeOnf to it.nom }
         dictee.formesEssences = parlees.map { it.nom to it.spoken.joinToString(" ") }
         dictee.formesQualites = qualitesParlees.map { it.code to it.spoken }
+        dictee.exemple = listOfNotNull(
+            parlees.firstOrNull()?.spoken?.joinToString(" "),
+            classes.getOrNull(classes.size / 2)?.let { FrenchNumbers.toTokens(it).joinToString(" ") },
+            qualitesParlees.firstOrNull()?.spoken,
+        ).joinToString(" ")
         val configure = service.chargerModele().mapCatching {
             service.configurerPourContexte(
                 parlees.map { it.versGrammaire() },
@@ -293,7 +306,7 @@ fun DialogueFormesParlees(
                     dictee.modeleAbsent -> Text(stringResource(R.string.voix_modele_absent))
                     !dictee.pret -> Text(stringResource(R.string.voix_indisponible))
                     !dictee.microPret -> Text(stringResource(R.string.voix_micro_indisponible))
-                    else -> Text(stringResource(R.string.voix_formes_aide))
+                    else -> Text(stringResource(R.string.voix_formes_aide, dictee.exemple))
                 }
                 if (dictee.formesEssences.isNotEmpty()) {
                     HorizontalDivider(Modifier.padding(vertical = 4.dp))
@@ -308,6 +321,10 @@ fun DialogueFormesParlees(
                     dictee.formesQualites.forEach { (code, parle) ->
                         Text("$code → « $parle »", style = MaterialTheme.typography.bodySmall)
                     }
+                    Text(
+                        stringResource(R.string.voix_qualite_bois_note),
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
                 HorizontalDivider(Modifier.padding(vertical = 4.dp))
                 Text(stringResource(R.string.voix_formes_commandes), style = MaterialTheme.typography.bodySmall)

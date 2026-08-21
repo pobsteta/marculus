@@ -5,22 +5,41 @@ fourni avec les sources, désormais résorbé dans ce document).
 
 ## Ce que ça fait
 
-L'opérateur maintient un déclencheur, dit « hêtre quarante cinq bravo », relâche : une tige HET/45
-de qualité B entre au journal exactement comme une tige tapée (UUID, rattachement GNSS
-point-dans-polygone, annulation par événement), et le téléphone confirme à voix haute.
+L'opérateur maintient un déclencheur, dit « hêtre quarante cinq chablis », relâche : une tige
+Hêtre/45 de qualité Chablis entre au journal exactement comme une tige tapée (UUID, rattachement
+GNSS point-dans-polygone, annulation par événement), et le téléphone confirme à voix haute.
 
 Énoncés reconnus :
 
 | Dit | Effet |
 |---|---|
 | « hêtre quarante cinq » | tige, essence + classe |
-| « hêtre quarante cinq bravo » | tige, avec la qualité B |
+| « hêtre quarante cinq chablis » | tige, avec la qualité arbre du référentiel |
 | « quarante cinq » | tige sur l'essence courante (**mode rafale**) |
 | « annule » | annule la dernière tige (événement d'annulation, jamais d'effacement) |
 | « repete » | ré-annonce la dernière tige |
 | tout le reste | **rejet** : vibration double + « non compris », aucune insertion devinée |
 
 Le mode rafale repart de zéro quand la parcelle rattachée change.
+
+### Ce qui se dit pour la qualité — et ce qui ne se dit pas
+
+La qualité dictée est la **qualité arbre**, celle du bouton Q de la cellule, et elle se dit avec le
+**libellé du référentiel normalisé** : avec le référentiel par défaut, « sec », « chablis »,
+« malade ». L'**alphabet radio** ne s'applique qu'aux entrées qui sont des **codes en lettres** :
+un référentiel A/B/C/D se dicte « alpha », « bravo »… Dire « bravo » sur un référentiel en toutes
+lettres est donc un mot hors grammaire, et l'énoncé entier est rejeté — c'est le comportement
+voulu, mais l'exemple « hêtre quarante cinq bravo » du brief supposait un référentiel en codes.
+L'aide « Formes à dicter » de l'application construit désormais son exemple sur le contexte
+réellement ouvert, pour qu'aucun exemple figé ne puisse mentir.
+
+Deux limites assumées de ce lot :
+
+- la **qualité bois de découpe** (A/B/C/D dans `hauteurTexte`, ex. `27-6AB4CD`) **n'est pas
+  dictable** : elle n'a pas d'existence propre dans le schéma, elle vit dans le texte de hauteur —
+  elle est donc reportée avec la dictée de la hauteur (étape 2) ;
+- une **qualité dite seule** n'annote pas la dernière tige : le parseur exige une classe, donc
+  l'annotation après coup reste au bouton Q. Couvert par un test explicite.
 
 ## Architecture
 
@@ -149,5 +168,8 @@ Paramètres, contexte « Demo » à 3 essences (Chêne / Hêtre / Sapin, axe 20�
 ## Étape suivante (hors lot)
 
 - Bouton Flic 2 (cf. ci-dessus).
-- Hauteur dictée (« hauteur vingt sept ») alimentant l'analyse `27-6AB4CD` existante.
+- Hauteur dictée (« hauteur vingt sept ») alimentant l'analyse `27-6AB4CD` existante, avec la
+  **qualité bois de découpe** en alphabet radio (« six alpha bravo ») — le seul endroit où elle a
+  un sens dans le schéma actuel.
+- Qualité dite seule annotant la dernière tige (équivalent vocal du bouton Q).
 - Note libre dictée (whisper.cpp) — hors grammaire fermée par construction.

@@ -343,7 +343,8 @@
     <string name="voix_modele_erreur">Download failed: %1$s</string>
     <string name="voix_micro_description">Hold to dictate</string>
     <string name="voix_formes_titre">Phrases to say</string>
-    <string name="voix_formes_aide">Say \"species class\", then the quality if needed. A class on its own keeps the current species.</string>
+    <string name="voix_formes_aide">Say \"species class\", then the quality if needed — for this context: \"%1$s\". A class on its own keeps the current species.</string>
+    <string name="voix_qualite_bois_note">Log quality (A/B/C/D) cannot be dictated: it is entered with the height, from the cell\'s H button.</string>
     <string name="voix_formes_essences">Context species</string>
     <string name="voix_formes_qualites">Qualities</string>
     <string name="voix_formes_commandes">Commands: \"annule\", \"repete\".</string>
