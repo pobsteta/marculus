@@ -9,6 +9,8 @@ package fr.marculus.core.voice
  *   "quarante cinq"                  -> Tige(essence courante, 45)   [mode rafale]
  *   "chablis"                        -> Qualite(Chablis)             [annote la dernière tige]
  *   "hauteur vingt sept six alpha"   -> Hauteur("27-6A")             [annote la dernière tige]
+ *   "hetre quarante cinq hauteur vingt sept"
+ *                                    -> Tige(HET, 45, null, "27")    [tout d'un seul tenant]
  *   "annule"                         -> Commande(ANNULE)
  *   "repete"                         -> Commande(REPETE)
  *
@@ -21,7 +23,17 @@ package fr.marculus.core.voice
  * existante de Marculus ferme la boucle.
  */
 sealed interface VoiceEvent {
-    data class Tige(val codeOnf: String, val classe: Int, val qualite: String?) : VoiceEvent
+    /**
+     * Tige à créer. [hauteurTexte] n'est renseigné que si la hauteur a été dictée dans le même
+     * énoncé (« hetre quarante cinq hauteur vingt sept ») : une seule insertion porte alors les
+     * trois attributs, sans annotation après coup.
+     */
+    data class Tige(
+        val codeOnf: String,
+        val classe: Int,
+        val qualite: String?,
+        val hauteurTexte: String? = null,
+    ) : VoiceEvent
 
     /**
      * Hauteur dictée pour la dernière tige. [texte] est déjà au format saisi à la main et lu par
@@ -50,9 +62,30 @@ class UtteranceParser(private val lexicon: Lexicon) {
         if (tokens.size == 1 && tokens[0] in VoiceCommands.ALL) {
             return VoiceEvent.Commande(tokens[0])
         }
-        // Le mot-clé « hauteur » bascule tout l'énoncé en mètres : sans lui, « quarante cinq »
-        // est une classe de diamètre, avec lui c'est une longueur.
-        if (tokens[0] == VoiceCommands.HAUTEUR) return parseHauteur(tokens.drop(1), voskText)
+
+        // Le mot-clé « hauteur » bascule la SUITE de l'énoncé en mètres : sans lui, « quarante
+        // cinq » est une classe de diamètre, avec lui c'est une longueur. Il peut ouvrir l'énoncé
+        // (annotation de la dernière tige) ou le couper en deux (tige + sa hauteur d'un seul tenant).
+        val coupure = tokens.indexOf(VoiceCommands.HAUTEUR)
+        if (coupure == 0) return parseHauteur(tokens.drop(1), voskText)
+        if (coupure > 0) {
+            val hauteur = parseHauteur(tokens.drop(coupure + 1), voskText)
+            if (hauteur !is VoiceEvent.Hauteur) return hauteur
+            // Devant le mot-clé, on exige une tige COMPLÈTE : « chablis hauteur vingt sept »
+            // annoterait deux choses à la fois. Surtout, renvoyer ici l'événement de tête
+            // reviendrait à jeter la hauteur en silence — jamais.
+            return when (val tige = parseTige(tokens.take(coupure), voskText, essenceCourante)) {
+                is VoiceEvent.Tige -> tige.copy(hauteurTexte = hauteur.texte)
+                is VoiceEvent.Rejet -> tige
+                else -> VoiceEvent.Rejet(voskText, VoiceEvent.Raison.INCOMPLET)
+            }
+        }
+        return parseTige(tokens, voskText, essenceCourante)
+    }
+
+    /** Énoncé de création : essence (ou essence courante) + classe, qualité optionnelle. */
+    private fun parseTige(tokens: List<String>, voskText: String, essenceCourante: String?): VoiceEvent {
+        if (tokens.isEmpty()) return VoiceEvent.Rejet(voskText, VoiceEvent.Raison.INCOMPLET)
 
         var i = 0
         var essence: String? = null

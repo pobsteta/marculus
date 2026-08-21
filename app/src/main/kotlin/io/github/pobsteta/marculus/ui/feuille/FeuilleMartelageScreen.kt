@@ -285,10 +285,21 @@ fun FeuilleMartelageScreen(
      * Annonce du comptage. [forcer] impose l'étiquette même si le réglage est décoché : une tige
      * dictée doit toujours être confirmée à l'oreille, c'est ce qui ferme la boucle sans écran.
      */
-    fun annoncer(essence: String, classe: Int, total: Int, forcer: Boolean = false, qualite: String? = null) {
+    fun annoncer(
+        essence: String,
+        classe: Int,
+        total: Int,
+        forcer: Boolean = false,
+        qualite: String? = null,
+        hauteur: String? = null,
+    ) {
         val parties = buildList {
             if (reglages.annonceEtiquette || forcer) {
-                add("$essence $classe" + (qualite?.let { " $it" } ?: ""))
+                add(
+                    "$essence $classe" + (qualite?.let { " $it" } ?: "") +
+                        // On relit la hauteur totale : la découpe serait illisible à l'oreille.
+                        (hauteur?.let { " " + androidContext.getString(R.string.voix_hauteur_annonce, it.substringBefore('-')) } ?: ""),
+                )
             }
             if (reglages.annonceNombre) add(total.toString())
         }
@@ -359,7 +370,9 @@ fun FeuilleMartelageScreen(
         qualites = qualitesArbre,
         qualitesBois = qualitesBois,
         tonalites = toneGen,
-        onTige = { essence, classe, qualite -> actionsVocales.tige(essence, classe, qualite) },
+        onTige = { essence, classe, qualite, hauteur ->
+            actionsVocales.tige(essence, classe, qualite, hauteur)
+        },
         onHauteur = { texte -> actionsVocales.hauteur(texte) },
         onQualite = { code -> actionsVocales.qualite(code) },
         onAnnule = { actionsVocales.annule() },
@@ -471,12 +484,20 @@ fun FeuilleMartelageScreen(
             essence: String,
             classe: Int,
             qualite: String? = null,
+            hauteurTexte: String? = null,
             annonceForcee: Boolean = false,
         ) {
             retourSensoriel()
             val cle = CompteurCle(essence, classe)
             val nouveauTotal = (totaux[cle] ?: 0) + ctx.increment
-            annoncer(essence, classe, nouveauTotal, forcer = annonceForcee, qualite = qualite)
+            annoncer(
+                essence,
+                classe,
+                nouveauTotal,
+                forcer = annonceForcee,
+                qualite = qualite,
+                hauteur = hauteurTexte,
+            )
             configs[cle]?.let { annoncerAvis(it, nouveauTotal) }
             val fix = fixTige
             val pos = positionEffective
@@ -488,6 +509,9 @@ fun FeuilleMartelageScreen(
             scope.launch {
                 val uuid = repository.ajouterTige(
                     contexteId, essence, classe, quantite = ctx.increment,
+                    // Hauteur dictée : elle prime sur toute estimation (MNH), qui ne doit
+                    // compléter que les tiges sans hauteur mesurée.
+                    hauteurTexte = hauteurTexte,
                     qualiteArbre = qualite,
                     position = pos, operateur = operateurEffectif, parcelle = parcelleLabel,
                     qualiteFix = fix?.qualite, precisionM = fix?.precisionHorizontaleM,
@@ -520,8 +544,14 @@ fun FeuilleMartelageScreen(
         val messageAnnule = stringResource(R.string.voix_annule)
         val messageRienAAnnuler = stringResource(R.string.voix_rien_a_annuler)
         SideEffect {
-            actionsVocales.tige = { essence, classe, qualite ->
-                ajouter(essence, classe, qualite = qualite, annonceForcee = true)
+            actionsVocales.tige = { essence, classe, qualite, hauteur ->
+                ajouter(
+                    essence,
+                    classe,
+                    qualite = qualite,
+                    hauteurTexte = hauteur,
+                    annonceForcee = true,
+                )
             }
             // Hauteur dictée : elle annote la dernière tige, exactement comme le bouton H.
             actionsVocales.hauteur = { texte ->

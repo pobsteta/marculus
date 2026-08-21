@@ -182,3 +182,87 @@ class VocabulaireModeleTest {
         assertTrue(ref.getValue("Volis").spoken.size >= 2, "le code doit être épelé")
     }
 }
+
+/** La hauteur dictée dans le même souffle que la tige : une seule insertion, trois attributs. */
+class TigeAvecHauteurTest {
+
+    private val parseur = UtteranceParser(
+        GrammarBuilder.buildLexicon(
+            essences = listOf(SpokenEssence("HET", listOf("hetre"))),
+            classes = listOf(40, 45, 50),
+            qualites = ReferentielParle.qualites(Referentiels.QUALITE_ARBRE_DEFAUT),
+            hauteur = OptionsHauteur(
+                maxMetres = 60,
+                lettresBois = ReferentielParle.lettresBois(Referentiels.QUALITE_BOIS_DEFAUT),
+            ),
+        ),
+    )
+
+    @Test
+    fun `tige puis hauteur dans le meme enonce`() {
+        assertEquals(
+            VoiceEvent.Tige("HET", 45, null, "27"),
+            parseur.parse("hetre quarante cinq hauteur vingt sept"),
+        )
+    }
+
+    @Test
+    fun `tige, qualite et hauteur avec decoupe`() {
+        assertEquals(
+            VoiceEvent.Tige("HET", 45, "Chablis", "27-6AB"),
+            parseur.parse("hetre quarante cinq chablis hauteur vingt sept six alpha bravo"),
+        )
+    }
+
+    @Test
+    fun `en rafale, la classe seule accepte aussi la hauteur`() {
+        assertEquals(
+            VoiceEvent.Tige("HET", 50, null, "30"),
+            parseur.parse("cinquante hauteur trente", essenceCourante = "HET"),
+        )
+    }
+
+    @Test
+    fun `les deux formes courtes restent valides`() {
+        assertEquals(VoiceEvent.Tige("HET", 45, null), parseur.parse("hetre quarante cinq"))
+        assertEquals(VoiceEvent.Hauteur("27"), parseur.parse("hauteur vingt sept"))
+    }
+
+    @Test
+    fun `devant le mot-cle, il faut une tige complete`() {
+        // « chablis hauteur vingt sept » annoterait deux choses à la fois : on fait redire.
+        assertEquals(
+            VoiceEvent.Rejet("chablis hauteur vingt sept", VoiceEvent.Raison.INCOMPLET),
+            parseur.parse("chablis hauteur vingt sept"),
+        )
+        assertEquals(
+            VoiceEvent.Rejet("hetre hauteur vingt sept", VoiceEvent.Raison.INCOMPLET),
+            parseur.parse("hetre hauteur vingt sept"),
+        )
+    }
+
+    @Test
+    fun `une hauteur invalide rejette tout l enonce, sans creer la tige`() {
+        // Tout ou rien : la tige de tête est valide, mais la découpe ne l'est pas → rien n'est
+        // enregistré, pas même la tige.
+        assertEquals(
+            VoiceEvent.Rejet(
+                "hetre quarante cinq hauteur six alpha bravo quatre",
+                VoiceEvent.Raison.AMBIGU,
+            ),
+            parseur.parse("hetre quarante cinq hauteur six alpha bravo quatre"),
+        )
+        assertEquals(
+            VoiceEvent.Rejet("hetre quarante cinq hauteur", VoiceEvent.Raison.INCOMPLET),
+            parseur.parse("hetre quarante cinq hauteur"),
+        )
+    }
+
+    @Test
+    fun `la hauteur n est jamais jetee en silence`() {
+        // Le défaut que ce test a attrapé : la tête « chablis » renvoyait Qualite et la hauteur
+        // partait à la poubelle sans que l'opérateur en sache rien.
+        val evenement = parseur.parse("chablis hauteur vingt sept")
+        assertEquals(VoiceEvent.Rejet("chablis hauteur vingt sept", VoiceEvent.Raison.INCOMPLET), evenement)
+    }
+}

@@ -38,9 +38,11 @@ d'événements *append-only* (chaque tige possède un UUID).
   (vibration double + « non compris »), jamais deviné.
 - Deux déclencheurs *push-to-talk* indépendants : **bouton micro à l'écran** ou **volume bas
   maintenu** (l'appui court reste le comptage).
-- **Annotation à la voix de la dernière tige** : « hauteur vingt sept six alpha bravo » écrit
-  `27-6AB` au format exact de la saisie manuelle, et une qualité dite seule (« chablis ») fait le
-  travail du bouton Q — de quoi qualifier sans regarder l'écran une tige comptée au doigt.
+- **Hauteur et découpe** : « hauteur vingt sept six alpha bravo » écrit `27-6AB` au format exact de
+  la saisie manuelle — seule elle annote la dernière tige, **enchaînée derrière une tige**
+  (« hêtre quarante cinq hauteur vingt sept ») elle est enregistrée avec elle, en une insertion.
+  Une qualité dite seule (« chablis ») fait le travail du bouton Q — de quoi qualifier sans
+  regarder l'écran une tige comptée au doigt.
 - Modèle français **téléchargé à la demande** depuis les Paramètres (~42 Mo, Apache 2.0) : l'APK
   reste léger et la dictée fonctionne ensuite sans réseau. L'application **lit le vocabulaire du
   modèle** et n'affiche que des formes qu'il sait décoder (« Volis », inconnu de lui, devient
