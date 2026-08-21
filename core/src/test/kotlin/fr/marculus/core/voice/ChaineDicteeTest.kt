@@ -51,13 +51,29 @@ class ChaineDicteeTest {
     }
 
     @Test
-    fun `une qualite dictee seule ne suffit pas a annoter la derniere tige`() {
-        // Limite actuelle : le parseur exige une classe ; annoter par la voix la dernière tige
-        // n'est pas implémenté (le bouton Q de la cellule reste le chemin).
+    fun `une qualite dictee seule annote la derniere tige`() {
+        val parseur = parseurAvec(Referentiels.QUALITE_ARBRE_DEFAUT)
+        assertEquals(VoiceEvent.Qualite("Chablis"), parseur.parse("chablis"))
+        // Même en rafale : l'essence courante ne suffit pas à faire une tige sans classe.
+        assertEquals(VoiceEvent.Qualite("Sec"), parseur.parse("sec", essenceCourante = "HET"))
+    }
+
+    @Test
+    fun `une essence sans classe reste incomplete, meme suivie d une qualite`() {
+        // On n'invente pas la classe manquante : « hetre chablis » n'est pas une tige.
         val parseur = parseurAvec(Referentiels.QUALITE_ARBRE_DEFAUT)
         assertEquals(
-            VoiceEvent.Rejet("chablis", VoiceEvent.Raison.INCOMPLET),
-            parseur.parse("chablis", essenceCourante = "HET"),
+            VoiceEvent.Rejet("hetre chablis", VoiceEvent.Raison.INCOMPLET),
+            parseur.parse("hetre chablis"),
+        )
+    }
+
+    @Test
+    fun `la qualite reste attachee a la tige quand la classe est dictee`() {
+        val parseur = parseurAvec(Referentiels.QUALITE_ARBRE_DEFAUT)
+        assertEquals(
+            VoiceEvent.Tige("HET", 45, "Chablis"),
+            parseur.parse("hetre quarante cinq chablis"),
         )
     }
 }

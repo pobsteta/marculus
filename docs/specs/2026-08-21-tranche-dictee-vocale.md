@@ -17,6 +17,7 @@ GNSS point-dans-polygone, annulation par événement), et le téléphone confirm
 | « hêtre quarante cinq chablis » | tige, avec la qualité arbre du référentiel |
 | « quarante cinq » | tige sur l'essence courante (**mode rafale**) |
 | « annule » | annule la dernière tige (événement d'annulation, jamais d'effacement) |
+| « chablis » | qualité arbre sur la dernière tige (équivalent vocal du bouton Q) |
 | « hauteur vingt sept six alpha bravo » | hauteur + découpe sur la dernière tige (`27-6AB`) |
 | « repete » | ré-annonce la dernière tige |
 | tout le reste | **rejet** : vibration double + « non compris », aucune insertion devinée |
@@ -34,8 +35,13 @@ voulu, mais l'exemple « hêtre quarante cinq bravo » du brief supposait un ré
 L'aide « Formes à dicter » de l'application construit désormais son exemple sur le contexte
 réellement ouvert, pour qu'aucun exemple figé ne puisse mentir.
 
-Limite assumée : une **qualité dite seule** n'annote pas la dernière tige — le parseur exige une
-classe, donc l'annotation après coup reste au bouton Q. Couvert par un test explicite.
+Une **qualité dite seule** annote la dernière tige, exactement comme la hauteur : ni essence ni
+classe n'ayant été dites, il n'y a rien à créer. C'est ce qui permet de qualifier sans regarder
+l'écran une tige comptée au doigt sur la grille. S'il n'y a pas de tige dans la session,
+l'application répond « aucune tige » et n'écrit rien — même règle que la hauteur.
+
+En revanche « hêtre chablis » (essence sans classe) reste un **rejet incomplet** : on ne devine
+jamais la classe manquante. Les trois cas sont verrouillés par des tests.
 
 ### Hauteur et qualité bois de découpe
 
@@ -197,5 +203,4 @@ Paramètres, contexte « Demo » à 3 essences (Chêne / Hêtre / Sapin, axe 20�
 ## Étape suivante (hors lot)
 
 - Bouton Flic 2 (cf. ci-dessus).
-- Qualité dite seule annotant la dernière tige (équivalent vocal du bouton Q).
 - Note libre dictée (whisper.cpp) — hors grammaire fermée par construction.
