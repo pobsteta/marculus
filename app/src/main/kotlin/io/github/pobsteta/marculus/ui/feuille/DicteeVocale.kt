@@ -6,7 +6,8 @@ import android.content.pm.PackageManager
 import android.media.ToneGenerator
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,9 +33,9 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -228,6 +229,12 @@ class ActionsVocales {
 /**
  * Bouton micro maintenu appuyé : l'écoute dure exactement le temps de l'appui — relâcher, c'est
  * demander à Vosk son résultat final.
+ *
+ * Le push-to-talk est piloté par les **interactions du bouton** et non par un détecteur de gestes
+ * posé par-dessus : `FloatingActionButton` installe son propre `clickable` à l'intérieur du
+ * modifier qu'on lui passe, consomme l'appui, et un `detectTapGestures` extérieur ne verrait
+ * jamais l'événement. `PressInteraction` donne en prime le cas « doigt glissé hors du bouton »
+ * (Cancel), qui doit refermer le micro comme un relâchement.
  */
 @Composable
 fun BoutonMicroPtt(
@@ -241,20 +248,22 @@ fun BoutonMicroPtt(
         enEcoute -> MaterialTheme.colorScheme.error
         else -> MaterialTheme.colorScheme.primaryContainer
     }
+    val interactions = remember { MutableInteractionSource() }
+    val appui by rememberUpdatedState(onAppui)
+    val relache by rememberUpdatedState(onRelache)
+    LaunchedEffect(interactions) {
+        interactions.interactions.collect { interaction ->
+            when (interaction) {
+                is PressInteraction.Press -> appui()
+                is PressInteraction.Release, is PressInteraction.Cancel -> relache()
+                else -> Unit
+            }
+        }
+    }
     FloatingActionButton(
-        onClick = {},
+        onClick = {}, // l'action utile est l'appui maintenu, pas le clic
         containerColor = couleur,
-        modifier = Modifier.pointerInput(pret) {
-            detectTapGestures(
-                onPress = {
-                    if (pret) {
-                        onAppui()
-                        tryAwaitRelease()
-                        onRelache()
-                    }
-                },
-            )
-        },
+        interactionSource = interactions,
     ) {
         Icon(
             imageVector = if (pret) Icons.Filled.Mic else Icons.Filled.MicOff,
