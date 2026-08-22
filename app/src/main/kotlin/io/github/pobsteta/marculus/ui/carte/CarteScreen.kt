@@ -82,6 +82,7 @@ import fr.marculus.core.model.Position
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.OrthoSource
+import io.github.pobsteta.marculus.data.DesserteGpkg
 import io.github.pobsteta.marculus.data.ParcelleGpkg
 import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
 import io.github.pobsteta.marculus.gnss.SourcePositionInterne
@@ -105,6 +106,7 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
+import org.osmdroid.views.overlay.Polyline
 import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.floor
@@ -115,6 +117,9 @@ private const val ZOOM_MAX = 19.0
 
 /** Au-delà de cette vitesse (m/s ≈ 2,9 km/h), on oriente le cône par le cap GNSS plutôt que la boussole. */
 private const val SEUIL_VITESSE_MS = 0.8
+
+/** Ocre de la desserte : lisible sur l'ortho comme sur le fond OSM, distinct des essences. */
+private const val COULEUR_DESSERTE = 0xFFB35C00.toInt()
 
 /** Palette de couleurs distinctes pour colorer les parcelles par propriétaire. */
 private val PALETTE_FONCIER = listOf(
@@ -161,6 +166,11 @@ fun CarteScreen(
     var parcelleCentre by remember { mutableStateOf<String?>(null) }
     val parcelles by produceState(initialValue = emptyList<ParcelleGpkg>(), cheminGpkg) {
         value = cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcellesDetail(it) } } ?: emptyList()
+    }
+    // Desserte : routes, pistes et chemins. Purement informative — elle sert à trouver l'accès
+    // au chantier et le point de dépôt, elle n'entre dans aucun calcul.
+    val dessertes by produceState(initialValue = emptyList<DesserteGpkg>(), cheminGpkg) {
+        value = cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.dessertes(it) } } ?: emptyList()
     }
     val orthoSource by produceState<OrthoSource?>(initialValue = null, cheminGpkg) {
         value = null
@@ -291,8 +301,8 @@ fun CarteScreen(
     }
 
     val ctx = contexte
-    // Surcouches reconstruites quand contexte, journal ou parcelles changent.
-    LaunchedEffect(ctx, journal, parcelles) {
+    // Surcouches reconstruites quand contexte, journal, parcelles ou desserte changent.
+    LaunchedEffect(ctx, journal, parcelles, dessertes) {
         if (ctx == null) return@LaunchedEffect
         val couleurs = ctx.essences.associate { it.nom to it.couleurFondArgb }
         mapView.overlays.clear()
@@ -327,6 +337,23 @@ fun CarteScreen(
                         setOnMarkerClickListener { _, _ -> false }
                     },
                 )
+            }
+        }
+        // Desserte (au-dessus des parcelles, sous les tiges) : un tracé continu par tronçon.
+        dessertes.forEach { d ->
+            d.lignes.forEach { ligne ->
+                if (ligne.size >= 2) {
+                    mapView.overlays.add(
+                        Polyline(mapView).apply {
+                            setPoints(ligne.map { GeoPoint(it.latitude, it.longitude) })
+                            outlinePaint.color = COULEUR_DESSERTE
+                            outlinePaint.strokeWidth = 6f
+                            d.label?.let { title = it }
+                            d.type?.let { snippet = it }
+                            setOnClickListener { _, _, _ -> false }
+                        },
+                    )
+                }
             }
         }
         // Tiges (dessus) : titre = essence/classe, sous-titre = parcelle (rattachement spatial).

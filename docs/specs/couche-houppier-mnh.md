@@ -18,7 +18,11 @@ rattachement aux parcelles.
 
 `h_max` est l'attribut canonique. Pour la robustesse, l'app accepte aussi ces alias
 (insensible à la casse) : `hmax`, `hauteur_max`, `hauteur`, `height`. Toute autre table que
-`houppier` reste traitée comme une couche de parcelles (inchangé).
+`houppier` reste traitée comme une couche de parcelles (inchangé) — la liste complète des
+couches attendues dans le GPKG est dans `couches-gpkg.md`.
+
+**Livré le 2026-08-22** : lecture de la couche, estimation à la saisie, et exclusion des
+houppiers du rattachement spatial des tiges.
 
 ## Production en amont (exemple lidR)
 
@@ -37,10 +41,19 @@ du même GPKG.
 
 ## Comportement de l'app
 
+- Réglage **« Estimer la hauteur (MNH) »** (Paramètres), décoché par défaut. Décoché, la couche
+  n'est même pas lue.
 - À la saisie d'une tige, si la couche `houppier` est présente **et** qu'une position est captée :
-  point‑dans‑polygone → on **pré‑remplit H = `h_max`** (arrondi), **modifiable** par l'opérateur.
-- Repli quand la position n'est dans aucun houppier (trouée, bord) : laisser vide (ou houppier le
-  plus proche, selon réglage).
+  point‑dans‑polygone → **H = `h_max` arrondi au mètre**, **modifiable** au bouton H de la cellule.
+- L'estimation ne complète que les tiges **sans hauteur mesurée** : une hauteur **dictée** ou
+  **saisie** prime toujours, elle n'est jamais écrasée.
+- **Houppiers superposés** (segmentation par enveloppe convexe) : on retient le **plus haut**,
+  celui dont l'apex domine physiquement l'opérateur.
+- Position dans aucun houppier (trouée, bord, tige dominée) : **rien n'est écrit**. Pas de repli
+  sur le houppier le plus proche — ce serait deviner l'arbre d'à côté.
+- Hauteur hors de **1–70 m** : ignorée (`h_max` à 0, ou en centimètres).
+- En **GNSS ponctuel**, la position n'arrive qu'après l'insertion : l'estimation est alors faite
+  au même moment que le rattachement à la parcelle, et annotée sur la tige.
 - L'estimation est une **aide**, jamais une valeur d'autorité.
 
 ## Limites à connaître
@@ -50,3 +63,6 @@ du même GPKG.
 - **Canopée visible seulement** : les tiges **dominées** (sous couvert) n'apparaissent pas dans le
   MNH → pas de houppier → pas d'estimation (cas normal au martelage).
 - Sur/sous‑segmentation possible en peuplement dense : l'opérateur garde la main.
+- **Traçabilité** : le schéma n'a pas de champ distinguant une hauteur estimée d'une hauteur
+  mesurée. À l'export, les deux se ressemblent. Si la distinction devient nécessaire (cubage,
+  contrôle), il faudra une colonne dédiée et une migration Room.

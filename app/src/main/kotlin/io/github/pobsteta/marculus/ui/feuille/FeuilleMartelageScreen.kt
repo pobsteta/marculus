@@ -93,7 +93,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.Cubage
+import fr.marculus.core.EstimationHauteur
 import fr.marculus.core.HauteurParser
+import fr.marculus.core.Houppier
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.FixGnss
@@ -216,6 +218,14 @@ private fun vibrerDouble(context: Context) {
     }
     vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 60, 90, 60), -1))
 }
+
+/**
+ * Hauteur estimée depuis les houppiers du MNH, ou `null` : réglage décoché, position absente,
+ * couche `houppier` absente, ou position dans aucun houppier (trouée, bord, tige dominée).
+ * Elle ne complète **que** les tiges sans hauteur mesurée — dictée ou saisie priment toujours.
+ */
+private fun hauteurEstimee(actif: Boolean, houppiers: List<Houppier>, p: Position?): String? =
+    if (actif && p != null) EstimationHauteur.texte(houppiers, p) else null
 
 private val LARGEUR_CELLULE = 140.dp
 private val HAUTEUR_CELLULE = 144.dp
@@ -353,6 +363,16 @@ fun FeuilleMartelageScreen(
     // Parcelles du contexte : pour figer le rattachement spatial dans la tige au moment du martelage.
     val parcelles by produceState(initialValue = emptyList<ParcelleGpkg>(), contexte) {
         value = contexte?.cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.parcellesDetail(it) } } ?: emptyList()
+    }
+    // Houppiers (MNH) : lus seulement si le réglage est actif — un GPKG sans couche `houppier`
+    // rend une liste vide, et l'estimation ne se déclenche jamais.
+    val estimerMnh = reglages.estimerHauteurMnh
+    val houppiers by produceState(initialValue = emptyList<Houppier>(), contexte, estimerMnh) {
+        value = if (!estimerMnh) {
+            emptyList()
+        } else {
+            contexte?.cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.houppiers(it) } } ?: emptyList()
+        }
     }
     var saisie by remember { mutableStateOf<Saisie?>(null) }
     var derniereSaisie by remember { mutableStateOf<DerniereSaisie?>(null) }
@@ -515,7 +535,7 @@ fun FeuilleMartelageScreen(
                     contexteId, essence, classe, quantite = ctx.increment,
                     // Hauteur dictée : elle prime sur toute estimation (MNH), qui ne doit
                     // compléter que les tiges sans hauteur mesurée.
-                    hauteurTexte = hauteurTexte,
+                    hauteurTexte = hauteurTexte ?: hauteurEstimee(estimerMnh, houppiers, pos),
                     qualiteArbre = qualite,
                     position = pos, operateur = operateurEffectif, parcelle = parcelleLabel,
                     qualiteFix = fix?.qualite, precisionM = fix?.precisionHorizontaleM,
@@ -525,7 +545,15 @@ fun FeuilleMartelageScreen(
                     capturerPositionPonctuelle(androidContext) { fixP ->
                         if (fixP != null) {
                             val pcl = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, fixP.position) }?.label
-                            scope.launch { repository.annoterPosition(uuid, fixP.position, pcl, fixP.qualite, fixP.precisionHorizontaleM) }
+                            scope.launch {
+                                repository.annoterPosition(uuid, fixP.position, pcl, fixP.qualite, fixP.precisionHorizontaleM)
+                                // En GNSS ponctuel la position n'existe qu'ici : c'est le seul
+                                // moment où l'estimation MNH est possible pour cette tige.
+                                if (hauteurTexte == null) {
+                                    hauteurEstimee(estimerMnh, houppiers, fixP.position)
+                                        ?.let { repository.annoterHauteur(uuid, it) }
+                                }
+                            }
                         }
                     }
                 }
@@ -734,7 +762,8 @@ fun FeuilleMartelageScreen(
                     if (action == ActionTige.PLUS) {
                         val uuid = repository.ajouterTige(
                             contexteId, essence, classe, quantite = quantite,
-                            hauteurTexte = hauteur, qualiteArbre = qualite, position = pos,
+                            hauteurTexte = hauteur ?: hauteurEstimee(estimerMnh, houppiers, pos),
+                            qualiteArbre = qualite, position = pos,
                             operateur = operateurEffectif, parcelle = parcelleLabel,
                             qualiteFix = fix?.qualite, precisionM = fix?.precisionHorizontaleM,
                         )
@@ -742,7 +771,13 @@ fun FeuilleMartelageScreen(
                             capturerPositionPonctuelle(androidContext) { fixP ->
                                 if (fixP != null) {
                                     val pcl = parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, fixP.position) }?.label
-                                    scope.launch { repository.annoterPosition(uuid, fixP.position, pcl, fixP.qualite, fixP.precisionHorizontaleM) }
+                                    scope.launch {
+                                        repository.annoterPosition(uuid, fixP.position, pcl, fixP.qualite, fixP.precisionHorizontaleM)
+                                        if (hauteur == null) {
+                                            hauteurEstimee(estimerMnh, houppiers, fixP.position)
+                                                ?.let { repository.annoterHauteur(uuid, it) }
+                                        }
+                                    }
                                 }
                             }
                         }
