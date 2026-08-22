@@ -140,7 +140,10 @@ décoder.
 Deux sources, activables indépendamment dans Paramètres → « Dictée vocale », toutes deux passant par
 `PttController` — seul habilité à ouvrir et fermer le micro :
 
-1. **Bouton micro à l'écran** : maintenu appuyé dans la feuille de martelage.
+1. **Bouton micro à l'écran** : maintenu appuyé dans la feuille de martelage. Il fait **112 dp de
+   côté** (quatre fois la surface d'un FAB Material standard) : c'est une cible qu'on trouve **en
+   gant**, sans regarder, dans le coin bas-droit. La grille se termine par une marge de la hauteur
+   du bouton, pour que sa dernière ligne puisse défiler au-dessus.
 2. **Volume bas maintenu** : appui court = comptage (inchangé), appui long ≈ 0,5 s = micro
    (`startTracking` / `onKeyLongPress`). Ne fonctionne qu'écran allumé, application au premier plan.
 

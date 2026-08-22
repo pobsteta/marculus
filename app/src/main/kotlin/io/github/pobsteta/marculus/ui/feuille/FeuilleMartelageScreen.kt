@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -218,6 +219,9 @@ private fun vibrerDouble(context: Context) {
 
 private val LARGEUR_CELLULE = 140.dp
 private val HAUTEUR_CELLULE = 144.dp
+
+/** Marge de fin de grille laissant défiler la dernière ligne au-dessus du bouton micro. */
+private val MARGE_BOUTON_MICRO = TAILLE_MICRO + 16.dp
 
 private sealed interface Saisie {
     data class Hauteur(val uuid: String) : Saisie
@@ -661,6 +665,9 @@ fun FeuilleMartelageScreen(
                     }
                 }
             }
+            // Le bouton micro flotte au-dessus du coin bas-droit : sans cette marge, la dernière
+            // ligne de la grille resterait dessous, hors d'atteinte en fin de défilement.
+            if (reglages.pttEcran) Spacer(Modifier.height(MARGE_BOUTON_MICRO))
         }
     }
 
