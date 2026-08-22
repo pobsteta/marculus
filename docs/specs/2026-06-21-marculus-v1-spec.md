@@ -27,6 +27,8 @@
     NTRIP, service de premier plan, qualité de fix et précision tracées sur la tige —
     **validé sur récepteur u-blox F9P**.
   - ✅ **Dictée vocale hors ligne** des tiges (Vosk, grammaire fermée, push-to-talk).
+  - ✅ **Couches typées du GPKG** (`couches-gpkg.md`) : parcelles, `houppier` (estimation de la
+    hauteur par MNH), `desserte` (routes/pistes/chemins sur la carte), ortho.
   - 🔜 Synchro **temps réel / réseau** entre appareils.
 - Contraintes : **hors-ligne total**, **sans publicité**. Le partage reste **par fichier**
   (pas de serveur).
@@ -155,10 +157,9 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 
 ## 10. Reste à faire
 
-- 🟡 **Estimation de la hauteur par MNH** : l'interrupteur « Estimer la hauteur (MNH) » existe
-  dans les Paramètres et la convention de couche est arrêtée (`couche-houppier-mnh.md`), mais
-  **rien ne lit encore la couche `houppier`** — `GpkgRepository` traite pour l'instant *toutes*
-  les tables vecteur comme des parcelles. **Principal reste à faire** côté code.
+- 🔜 **Traçabilité des hauteurs estimées** : rien ne distingue au schéma une hauteur estimée
+  (MNH) d'une hauteur mesurée. Une colonne dédiée + migration Room si la distinction devient
+  nécessaire au cubage ou au contrôle.
 - 🔜 Synchro **temps réel / réseau** multi-opérateurs (au-delà du fichier `.marsync`).
 - 🔜 Foncier structuré complet (`Propriétaire → Forêt → Parcelle` géré en propre) au-delà
   de l'attribution déduite du GPKG.

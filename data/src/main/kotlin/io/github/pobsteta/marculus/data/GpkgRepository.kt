@@ -3,7 +3,10 @@ package io.github.pobsteta.marculus.data
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import fr.marculus.core.CouchesGpkg
 import fr.marculus.core.Geodesie
+import fr.marculus.core.Houppier
+import fr.marculus.core.TypeCouche
 import fr.marculus.core.model.Position
 import mil.nga.geopackage.GeoPackage
 import mil.nga.geopackage.GeoPackageFactory
@@ -15,6 +18,8 @@ import mil.nga.proj.ProjectionFactory
 import mil.nga.proj.ProjectionTransform
 import mil.nga.sf.Geometry
 import mil.nga.sf.GeometryCollection
+import mil.nga.sf.LineString
+import mil.nga.sf.MultiLineString
 import mil.nga.sf.MultiPolygon
 import mil.nga.sf.Polygon
 import org.locationtech.proj4j.ProjCoordinate
@@ -60,6 +65,17 @@ data class ParcelleGpkg(
     val anneaux: List<List<Position>>,
 )
 
+/** Un tronçon de desserte lu du GPKG : routes, pistes et chemins, en lignes (WGS84). */
+data class DesserteGpkg(
+    val id: Long,
+    /** Libellé à afficher (nom, à défaut nature, à défaut rien). */
+    val label: String?,
+    /** Nature du tronçon (route empierrée, piste, cloisonnement…), si l'attribut existe. */
+    val type: String?,
+    /** Une polyligne par tronçon ; un MULTILINESTRING en donne plusieurs. */
+    val lignes: List<List<Position>>,
+)
+
 /** Lecture d'un GeoPackage (parcelles vectorielles, reprojetées en WGS84 pour la carte). */
 class GpkgRepository(private val context: Context) {
 
@@ -91,6 +107,7 @@ class GpkgRepository(private val context: Context) {
                 Log.d("Marculus.Gpkg", "tables features=${gpkg.featureTables}, tiles=${gpkg.tileTables}")
                 val wgs84 = ProjectionFactory.getProjection(ProjectionConstants.EPSG_WORLD_GEODETIC_SYSTEM.toLong())
                 for (table in gpkg.featureTables) {
+                    if (CouchesGpkg.type(table) != TypeCouche.PARCELLE) continue
                     val dao = gpkg.getFeatureDao(table)
                     val transform = dao.projection.getTransformation(wgs84)
                     val rs = dao.queryForAll()
@@ -124,6 +141,9 @@ class GpkgRepository(private val context: Context) {
             try {
                 val wgs84 = ProjectionFactory.getProjection(ProjectionConstants.EPSG_WORLD_GEODETIC_SYSTEM.toLong())
                 for (table in gpkg.featureTables) {
+                    // Houppiers et dessertes ne sont pas des parcelles : sans ce filtre, un
+                    // houppier deviendrait candidat au rattachement spatial de la tige.
+                    if (CouchesGpkg.type(table) != TypeCouche.PARCELLE) continue
                     val dao = gpkg.getFeatureDao(table)
                     val transform = dao.projection.getTransformation(wgs84)
                     val geomCol = dao.geometryColumnName
@@ -170,6 +190,82 @@ class GpkgRepository(private val context: Context) {
         return out
     }
 
+    /**
+     * Houppiers du GPKG (couche `houppier`) : contour en WGS84 + hauteur d'apex en mètres.
+     * Une entité sans attribut de hauteur exploitable est ignorée — elle ne pourrait rien estimer.
+     */
+    fun houppiers(chemin: String): List<Houppier> =
+        entites(chemin, TypeCouche.HOUPPIER) { _, attrs, geom, transform ->
+            val h = CouchesGpkg.attribut(attrs, CouchesGpkg.ALIAS_HAUTEUR)
+                ?.replace(',', '.')?.toDoubleOrNull() ?: return@entites null
+            val anneaux = mutableListOf<List<Position>>()
+            collecter(geom, transform, anneaux)
+            if (anneaux.isEmpty()) null else Houppier(hauteurM = h, anneaux = anneaux)
+        }
+
+    /** Dessertes du GPKG (couche `desserte`) : routes, pistes et chemins, en lignes WGS84. */
+    fun dessertes(chemin: String): List<DesserteGpkg> =
+        entites(chemin, TypeCouche.DESSERTE) { id, attrs, geom, transform ->
+            val lignes = mutableListOf<List<Position>>()
+            collecterLignes(geom, transform, lignes)
+            if (lignes.isEmpty()) {
+                null
+            } else {
+                val nom = CouchesGpkg.attribut(attrs, CouchesGpkg.ALIAS_NOM)
+                val type = CouchesGpkg.attribut(attrs, CouchesGpkg.ALIAS_TYPE)
+                DesserteGpkg(id = id, label = nom ?: type, type = type, lignes = lignes)
+            }
+        }
+
+    /**
+     * Parcourt les entités des tables jouant le rôle `type` et applique `extraire` à chacune.
+     * Le GPKG est ouvert, lu et refermé ici : les erreurs de lecture (fichier absent, table
+     * illisible) rendent une liste vide plutôt qu'une exception — la carte doit survivre à un
+     * GPKG imparfait.
+     */
+    private fun <T> entites(
+        chemin: String,
+        type: TypeCouche,
+        extraire: (Long, Map<String, String>, Geometry, ProjectionTransform) -> T?,
+    ): List<T> {
+        val fichier = File(chemin)
+        if (!fichier.exists()) return emptyList()
+        val out = mutableListOf<T>()
+        try {
+            val manager = GeoPackageFactory.getManager(context)
+            val gpkg = manager.openExternal(fichier) ?: return emptyList()
+            try {
+                val wgs84 = ProjectionFactory.getProjection(ProjectionConstants.EPSG_WORLD_GEODETIC_SYSTEM.toLong())
+                for (table in gpkg.featureTables) {
+                    if (CouchesGpkg.type(table) != type) continue
+                    val dao = gpkg.getFeatureDao(table)
+                    val transform = dao.projection.getTransformation(wgs84)
+                    val colonnes = dao.columnNames.filter { it != dao.geometryColumnName }
+                    val rs = dao.queryForAll()
+                    try {
+                        while (rs.moveToNext()) {
+                            val row = rs.row
+                            val geom = row.geometry?.geometry ?: continue
+                            val attrs = colonnes.mapNotNull { c ->
+                                val v = runCatching { row.getValue(c) }.getOrNull()
+                                if (v != null) c to v.toString() else null
+                            }.toMap()
+                            extraire(row.id, attrs, geom, transform)?.let { out.add(it) }
+                        }
+                    } finally {
+                        rs.close()
+                    }
+                }
+            } finally {
+                gpkg.close()
+            }
+        } catch (e: Exception) {
+            Log.e("Marculus.Gpkg", "entites($type)", e)
+        }
+        Log.d("Marculus.Gpkg", "entites($type) = ${out.size}")
+        return out
+    }
+
     /** Première valeur non vide parmi les colonnes dont le nom correspond (insensible à la casse). */
     private fun trouver(attrs: Map<String, String>, vararg cles: String): String? =
         attrs.entries.firstOrNull { e ->
@@ -201,6 +297,23 @@ class GpkgRepository(private val context: Context) {
         } catch (e: Exception) {
             Log.e("Marculus.Gpkg", "ouvrirOrtho", e)
             null
+        }
+    }
+
+    /** Polylignes d'une géométrie linéaire (une desserte peut être un MULTILINESTRING). */
+    private fun collecterLignes(g: Geometry, transform: ProjectionTransform, sortie: MutableList<List<Position>>) {
+        when (g) {
+            is MultiLineString -> g.lineStrings.forEach { collecterLignes(it, transform, sortie) }
+            is LineString -> sortie.add(
+                g.points.map { p ->
+                    val w = transform.transform(ProjCoordinate(p.x, p.y))
+                    Position(latitude = w.y, longitude = w.x)
+                },
+            )
+            // Une desserte cartographiée en surface (route large) : on en garde les contours.
+            is MultiPolygon, is Polygon -> collecter(g, transform, sortie)
+            is GeometryCollection<*> -> g.geometries.forEach { collecterLignes(it as Geometry, transform, sortie) }
+            else -> Unit
         }
     }
 
