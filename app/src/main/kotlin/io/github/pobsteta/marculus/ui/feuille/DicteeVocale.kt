@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -309,6 +310,11 @@ class ActionsVocales {
  * modifier qu'on lui passe, consomme l'appui, et un `detectTapGestures` extérieur ne verrait
  * jamais l'événement. `PressInteraction` donne en prime le cas « doigt glissé hors du bouton »
  * (Cancel), qui doit refermer le micro comme un relâchement.
+ *
+ * **Taille** : le FAB Material par défaut (56 dp) est une cible de doigt nu. Le déclencheur de
+ * dictée se cherche **en gant**, sans regarder l'écran, dans le coin de l'écran : il fait donc
+ * [TAILLE_MICRO] de côté, soit **quatre fois la surface** d'un FAB standard, avec une icône
+ * agrandie dans la même proportion.
  */
 @Composable
 fun BoutonMicroPtt(
@@ -338,13 +344,21 @@ fun BoutonMicroPtt(
         onClick = {}, // l'action utile est l'appui maintenu, pas le clic
         containerColor = couleur,
         interactionSource = interactions,
+        modifier = Modifier.size(TAILLE_MICRO),
     ) {
         Icon(
             imageVector = if (pret) Icons.Filled.Mic else Icons.Filled.MicOff,
             contentDescription = stringResource(R.string.voix_micro_description),
+            modifier = Modifier.size(ICONE_MICRO),
         )
     }
 }
+
+/** Côté du bouton micro : 4 × la surface du FAB Material (56 dp), pour une cible gantée. */
+internal val TAILLE_MICRO = 112.dp
+
+/** Icône du micro, agrandie dans la même proportion que le bouton (24 dp × 2). */
+private val ICONE_MICRO = 48.dp
 
 /** Aide-mémoire : ce qu'il faut dire pour ce contexte, essence par essence. */
 @Composable
