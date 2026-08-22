@@ -7,7 +7,11 @@
 > Spec figée le 2026-06-21 après cadrage. On **repart de zéro** (aucun code hérité).
 > **Mise à jour 2026-06-24** : l'avancée a largement dépassé le périmètre v1 « comptage seul ».
 > La v1 est livrée et l'essentiel de la v2 (cubage EMERGE, géo/GPKG, GNSS, synchro par fichier)
-> l'est aussi. Légende d'état : ✅ fait · 🟡 partiel · 🔜 à faire.
+> l'est aussi.
+> **Mise à jour 2026-08-22** : le **GNSS externe RTK/NTRIP** est livré **et validé sur récepteur
+> u-blox F9P** (la tranche complète est détaillée dans `2026-06-24-tranche-rtk-ntrip.md`) ; la
+> tranche **dictée vocale hors ligne** (Vosk, grammaire fermée) est livrée
+> (`2026-08-21-tranche-dictee-vocale.md`). Légende d'état : ✅ fait · 🟡 partiel · 🔜 à faire.
 
 ## 1. Périmètre
 
@@ -19,8 +23,11 @@
   - ✅ GNSS ponctuel (acquisition à la demande, permission, terminologie « GNSS »).
   - ✅ Fonds de carte **OSM + satellite ESRI** en ligne + **ortho GPKG** hors-ligne (bascule).
   - ✅ Synchro multi-opérateurs **par fichier** (`.marsync`, fusion « dernière écriture gagne »).
-  - 🔜 GNSS externe **RTK/NTRIP** (type projet Centipede) ; synchro **temps réel / réseau**
-    entre appareils.
+  - ✅ GNSS externe **RTK/NTRIP** (type projet Centipede) : transport BT SPP / TCP, client
+    NTRIP, service de premier plan, qualité de fix et précision tracées sur la tige —
+    **validé sur récepteur u-blox F9P**.
+  - ✅ **Dictée vocale hors ligne** des tiges (Vosk, grammaire fermée, push-to-talk).
+  - 🔜 Synchro **temps réel / réseau** entre appareils.
 - Contraintes : **hors-ligne total**, **sans publicité**. Le partage reste **par fichier**
   (pas de serveur).
 
@@ -108,6 +115,9 @@ Tige (journal)  : uuid, contexteId, essence, classe,
    (nombre, étiquette, avis limite inf./sup.), boutons de volume, thème sombre, langue,
    GNSS ponctuel, opérateur, **Export/Import ZIP**, **Export CSV**, **fusion `.marsync`**.
 7. ✅ **Référentiels** — édition des listes Essences / Qualité arbre / Qualité bois.
+8. ✅ **Dictée vocale** *(sur la feuille de martelage)* — push-to-talk (volume bas maintenu ou
+   bouton micro), grammaire fermée générée depuis le contexte, annonce TTS de confirmation,
+   aide « Formes à dicter » au menu ⋮. Modèle Vosk téléchargé depuis les Paramètres.
 
 ## 7. Comportement d'une cellule (feuille de martelage)
 
@@ -145,8 +155,14 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 
 ## 10. Reste à faire
 
-- 🔜 **GNSS externe RTK/NTRIP** (type projet Centipede, récepteur Bluetooth) pour la
-  précision centimétrique — **principal reste à faire**.
+- 🟡 **Estimation de la hauteur par MNH** : l'interrupteur « Estimer la hauteur (MNH) » existe
+  dans les Paramètres et la convention de couche est arrêtée (`couche-houppier-mnh.md`), mais
+  **rien ne lit encore la couche `houppier`** — `GpkgRepository` traite pour l'instant *toutes*
+  les tables vecteur comme des parcelles. **Principal reste à faire** côté code.
 - 🔜 Synchro **temps réel / réseau** multi-opérateurs (au-delà du fichier `.marsync`).
 - 🔜 Foncier structuré complet (`Propriétaire → Forêt → Parcelle` géré en propre) au-delà
   de l'attribution déduite du GPKG.
+- 🔜 **Bouton Flic 2** (BLE) comme troisième déclencheur de la dictée — reporté (dépendance
+  JitPack écartée) ; `PttController` est prêt à le recevoir.
+- 🔜 **Recette terrain de la dictée** (7 cas, bruit réel, gants) — cf.
+  `2026-08-21-tranche-dictee-vocale.md`.

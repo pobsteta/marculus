@@ -3,6 +3,7 @@
 > Objectif : ajouter à Marculus la **précision centimétrique** via un récepteur GNSS
 > **externe** (type réseau **Centipede**), en plus du GNSS interne du téléphone (qui reste
 > le mode par défaut, précision métrique). Préparé le 2026-06-24.
+> **Tranche livrée et validée sur matériel u-blox F9P le 2026-08-22.**
 > Légende : ✅ fait · 🟡 partiel · 🔜 à faire.
 
 ## 1. Contexte technique actuel
@@ -213,7 +214,9 @@ par défaut) pour obtenir un fix RTK FIXE. Sautable si le récepteur corrige dé
    **câblage feuille de martelage** : quand le RTK est actif, le service est auto-démarré, la
    **position figée au `+`** (cellules, boutons volume, saisie libre) provient du fix RTK avec sa
    **qualité/précision**, et le **badge** est affiché en permanence dans la barre.
-   **Tranche RTK complète** — validation bout-en-bout = rejeu TCP (§9) puis **matériel**.
+   **Tranche RTK complète** — validation bout-en-bout faite : rejeu TCP (§9) puis **matériel réel
+   sur u-blox F9P (2026-08-22) : la chaîne fonctionne** (fix RTK, badge, position et précision
+   tracées sur la tige).
 
 G0 (mock location) abandonné. Chaque étape est démontrable seule ; le parser NMEA est livrable
 et testable immédiatement, indépendamment du matériel.
