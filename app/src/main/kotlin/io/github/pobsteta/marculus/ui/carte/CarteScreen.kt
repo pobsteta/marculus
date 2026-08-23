@@ -311,8 +311,31 @@ fun CarteScreen(
         fun couleurFonciere(p: String?): Int =
             if (p == null) 0xFF374742.toInt()
             else PALETTE_FONCIER[(proprios.indexOf(p).coerceAtLeast(0)) % PALETTE_FONCIER.size]
+        // Tiges par parcelle, en une passe : le rattachement figé dans la tige fait foi, sinon
+        // on retombe sur le point-dans-polygone (tiges d'avant l'import du GeoPackage).
+        val tigesParParcelle = mutableMapOf<Long, Int>()
+        journal.filter { it.action == ActionTige.PLUS && it.position != null }.forEach { t ->
+            val p = t.position ?: return@forEach
+            val pcl = parcelles.firstOrNull { it.label == t.parcelle }
+                ?: parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }
+            if (pcl != null) tigesParParcelle[pcl.id] = (tigesParParcelle[pcl.id] ?: 0) + t.quantite
+        }
         parcelles.forEach { pcl ->
             val c = couleurFonciere(pcl.proprietaire)
+            // Sans titre ni description, osmdroid ouvre quand même sa bulle — vide. Ce qu'on sait
+            // de la parcelle vient du GeoPackage : autant le montrer là où on la touche.
+            val titre = pcl.parcelleNom?.let { context.getString(R.string.carte_parcelle_titre, it) } ?: pcl.label
+            val foncier = listOfNotNull(
+                pcl.proprietaires.takeIf { it.isNotEmpty() }?.joinToString(" & ") ?: pcl.proprietaire,
+                pcl.foret,
+                pcl.commune,
+            ).joinToString(" · ")
+            val chiffres = context.getString(
+                R.string.carte_parcelle_chiffres,
+                String.format(Locale.getDefault(), "%.2f", pcl.surfaceHa),
+                tigesParParcelle[pcl.id] ?: 0,
+            )
+            val details = listOf(foncier, chiffres).filter { it.isNotBlank() }.joinToString("\n")
             pcl.anneaux.forEach { anneau ->
                 if (anneau.size >= 2) {
                     mapView.overlays.add(
@@ -321,6 +344,8 @@ fun CarteScreen(
                             fillPaint.color = (0x33 shl 24) or (c and 0xFFFFFF)
                             outlinePaint.color = c
                             outlinePaint.strokeWidth = 4f
+                            title = titre
+                            snippet = details
                         },
                     )
                 }
@@ -334,7 +359,9 @@ fun CarteScreen(
                         position = GeoPoint(lat, lon)
                         setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                         setTextIcon(pcl.parcelleNom ?: pcl.id.toString())
-                        setOnMarkerClickListener { _, _ -> false }
+                        title = titre
+                        snippet = details
+                        setOnMarkerClickListener { m, _ -> m.showInfoWindow(); true }
                     },
                 )
             }

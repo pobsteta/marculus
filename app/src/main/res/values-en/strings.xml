@@ -175,6 +175,8 @@
     <string name="carte_retour">Back</string>
     <string name="carte_charge_gpkg">Load: gpkg</string>
     <string name="carte_fond_label">Base map: %1$s</string>
+    <string name="carte_parcelle_titre">Parcel %1$s</string>
+    <string name="carte_parcelle_chiffres">%1$s ha · %2$d stem(s)</string>
     <string name="carte_hors_parcelle">Outside parcels</string>
     <string name="carte_hauteur_prefix">H: %1$s</string>
     <string name="carte_qualite_prefix">Q: %1$s</string>
