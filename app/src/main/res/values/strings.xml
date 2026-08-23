@@ -348,6 +348,7 @@
     <string name="voix_formes_aide">Dites « essence classe », puis la qualité si besoin — pour ce contexte : « %1$s ». Une classe dite seule enchaîne sur l\'essence courante.</string>
     <string name="voix_qualite_seule_note">Dite seule, la qualité s\'attache à la dernière tige — comme le bouton Q.</string>
     <string name="voix_formes_hauteur">Hauteur et découpe</string>
+    <string name="voix_formes_decoupe_aide">Pour poser une découpe sur une hauteur déjà connue (estimée, dictée ou saisie) sans la redire : « %1$s ».</string>
     <string name="voix_formes_hauteur_aide">Dites « hauteur » puis les mètres, et autant de couples « longueur + qualité » que de billons — par exemple « %1$s ». Seule, elle s\'attache à la dernière tige ; à la suite d\'une tige (« hetre quarante cinq hauteur vingt sept »), elle est enregistrée avec elle.</string>
     <string name="voix_formes_essences">Essences du contexte</string>
     <string name="voix_formes_qualites">Qualités</string>
@@ -356,6 +357,8 @@
     <string name="voix_indisponible">Dictée indisponible (permission micro refusée, ou modèle en cours de chargement).</string>
     <string name="voix_micro_indisponible">Micro indisponible sur cet appareil : la grammaire est prête, mais aucun déclencheur n\'ouvrira l\'écoute.</string>
     <string name="voix_hauteur_annonce">hauteur %1$s</string>
+    <string name="voix_decoupe_annonce">découpe %1$s</string>
+    <string name="voix_sans_hauteur">aucune hauteur</string>
     <string name="voix_non_compris">non compris</string>
     <string name="voix_annule">annulé</string>
     <string name="voix_rien_a_annuler">aucune tige</string>

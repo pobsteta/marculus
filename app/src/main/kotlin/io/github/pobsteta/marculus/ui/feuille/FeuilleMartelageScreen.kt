@@ -399,6 +399,7 @@ fun FeuilleMartelageScreen(
             actionsVocales.tige(essence, classe, qualite, hauteur)
         },
         onHauteur = { texte -> actionsVocales.hauteur(texte) },
+        onDecoupe = { segments -> actionsVocales.decoupe(segments) },
         onQualite = { code -> actionsVocales.qualite(code) },
         onAnnule = { actionsVocales.annule() },
         onRepete = { actionsVocales.repete() },
@@ -598,6 +599,30 @@ fun FeuilleMartelageScreen(
                         "vocal",
                         remplacer = true,
                     )
+                }
+            }
+            // Découpe dictée seule : elle se greffe sur la hauteur que la tige porte déjà —
+            // estimée par le MNH, dictée ou saisie. Sans hauteur, une longueur de billon ne veut
+            // rien dire : on refuse plutôt que d'inventer une hauteur totale.
+            actionsVocales.decoupe = { segments ->
+                val cible = derniereSaisie
+                if (cible == null) {
+                    dire(messageRienAAnnuler, "vocal", remplacer = true)
+                } else {
+                    scope.launch {
+                        val actuelle = repository.tige(cible.uuid)?.hauteurTexte?.substringBefore('-')?.trim()
+                        if (actuelle.isNullOrEmpty()) {
+                            dire(androidContext.getString(R.string.voix_sans_hauteur), "vocal", remplacer = true)
+                        } else {
+                            // La découpe dite remplace la précédente : redire, c'est corriger.
+                            repository.annoterHauteur(cible.uuid, "$actuelle-$segments")
+                            dire(
+                                androidContext.getString(R.string.voix_decoupe_annonce, segments),
+                                "vocal",
+                                remplacer = true,
+                            )
+                        }
+                    }
                 }
             }
             // Qualité dictée seule : elle annote la dernière tige, comme le bouton Q.

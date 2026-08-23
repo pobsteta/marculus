@@ -57,6 +57,8 @@ du même GPKG.
 - **Ajouter une découpe à une hauteur estimée** : le bouton H rouvre la saisie **sur la valeur
   courante** (hauteur d'un côté, découpe de l'autre). Sur une tige estimée à 27 m, il suffit donc
   de taper `6AB` dans le champ découpe pour obtenir `27-6AB` — la hauteur n'est pas à retaper.
+  À la voix, le mot-clé **`decoupe`** fait la même chose sans redire la hauteur :
+  « decoupe six alpha bravo » sur une tige estimée à 27 m donne `27-6AB`.
   La qualité bois ne vient **jamais** du GPKG : elle sort du référentiel de qualité bois du
   contexte et vit dans le texte de hauteur (`HauteurParser`), comme pour une hauteur mesurée.
 - L'estimation est une **aide**, jamais une valeur d'autorité.
