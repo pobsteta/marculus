@@ -157,6 +157,7 @@ fun AppRoot(
         Route.Liste -> ListeContextesScreen(
             repository = repository,
             sauvegardeRepository = sauvegardeRepository,
+            lotRepository = lotRepository,
             operateur = reglages.operateur?.takeIf { it.isNotBlank() } ?: Appareil.id(context),
             vueKanban = reglages.vueKanban,
             onCreer = { route = Route.Creation },

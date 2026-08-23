@@ -5,8 +5,13 @@ v0.136.1). Aucun changement de modèle, aucune migration Room.
 
 ## Ce que ça fait
 
-Paramètres → *Synchro multi-opérateurs* → **« Importer un lot (.zip) »**. En un geste, ce que
-l'opérateur faisait treize fois : les contextes du lot sont fusionnés, et **chaque GeoPackage est
+**Liste des contextes → menu ⋮ → « Importer un lot (.zip) »** — c'est là qu'on reçoit un lot, sur
+l'écran où les chantiers apparaissent. Le même geste existe dans **Paramètres → Synchro**, à côté
+de la fusion : un opérateur qui vient de recevoir un `.marsync` y cherchera naturellement l'import
+du lot. Un seul composant sert les deux écrans (`ui/lot/ImportLot.kt`), pour que le geste soit
+identique et qu'aucun des deux ne puisse dériver vers la restauration destructive.
+
+En un geste, ce que l'opérateur faisait treize fois : les contextes du lot sont fusionnés, et **chaque GeoPackage est
 rattaché à son contexte** sans passer par un sélecteur de fichiers.
 
 ```
@@ -72,7 +77,8 @@ copie de 12 Mo. Le répertoire temporaire est effacé dans un `finally`, y compr
 | `LotMartelage.kt` | `:core` | Ce qu'on refuse (zip-slip), extensions, nom local déterministe, appariement |
 | `LotRepository.kt` | `:data` | Lecture de l'archive, copies, fusion, rattachement |
 | `SauvegardeRepository.contextesDuLot` | `:data` | Lecture seule du `gpkgNom` (n'écrit rien) |
-| `ParametresScreen.kt` | `:app` | Bouton, sélecteur, message de résultat |
+| `ui/lot/ImportLot.kt` | `:app` | Sélecteur, appel au dépôt, compte rendu — partagé par les deux écrans |
+| `ListeContextesScreen.kt` · `ParametresScreen.kt` | `:app` | Les deux entrées vers ce composant |
 
 `:core` reste pur : 8 tests JVM couvrent les refus et l'appariement, sans archive ni Android.
 

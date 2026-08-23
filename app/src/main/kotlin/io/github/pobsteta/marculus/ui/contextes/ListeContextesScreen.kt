@@ -70,7 +70,10 @@ import kotlin.math.roundToInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.export.ExportCsv
 import io.github.pobsteta.marculus.R
+import io.github.pobsteta.marculus.data.LotRepository
 import io.github.pobsteta.marculus.ui.BandeauCompact
+import io.github.pobsteta.marculus.ui.lot.DialogueResultatLot
+import io.github.pobsteta.marculus.ui.lot.rememberImportLot
 import fr.marculus.core.model.EtatKanban
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ResumeContexte
@@ -89,6 +92,7 @@ private const val URL_GITHUB = "https://pobsteta.github.io/marculus/"
 fun ListeContextesScreen(
     repository: MartelageRepository,
     sauvegardeRepository: SauvegardeRepository,
+    lotRepository: LotRepository,
     operateur: String,
     vueKanban: Boolean = false,
     onCreer: () -> Unit,
@@ -111,6 +115,9 @@ fun ListeContextesScreen(
     var dragResume by remember { mutableStateOf<ResumeContexte?>(null) }
     var dragPointer by remember { mutableStateOf(Offset.Zero) }
     val colonneRects = remember { mutableStateMapOf<Int, Rect>() }
+    // Réception d'un lot de chantiers : c'est ici qu'elle a lieu, sur l'écran où les contextes
+    // apparaissent. Le même geste existe dans les Paramètres, à côté de la synchro.
+    val importLot = rememberImportLot(lotRepository)
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("text/csv"),
@@ -170,6 +177,13 @@ fun ListeContextesScreen(
                             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.liste_menu_content_desc))
                         }
                         DropdownMenu(expanded = menuAppli, onDismissRequest = { menuAppli = false }) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text(stringResource(if (importLot.enCours) R.string.lot_en_cours else R.string.lot_importer))
+                                },
+                                enabled = !importLot.enCours,
+                                onClick = { menuAppli = false; importLot.lancer() },
+                            )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.liste_menu_referentiels)) },
                                 onClick = { menuAppli = false; onReferentiels() },
@@ -316,6 +330,8 @@ fun ListeContextesScreen(
             dismissButton = { TextButton(onClick = { aSupprimer = null }) { Text(stringResource(R.string.liste_dialog_annuler)) } },
         )
     }
+
+    DialogueResultatLot(importLot)
 
     if (aProposOuvert) {
         val versionNom = remember {

@@ -55,6 +55,8 @@ import io.github.pobsteta.marculus.Langue
 import io.github.pobsteta.marculus.R
 import io.github.pobsteta.marculus.data.LotRepository
 import io.github.pobsteta.marculus.data.ReglagesRepository
+import io.github.pobsteta.marculus.ui.lot.DialogueResultatLot
+import io.github.pobsteta.marculus.ui.lot.rememberImportLot
 import io.github.pobsteta.marculus.data.SauvegardeRepository
 import io.github.pobsteta.marculus.voice.ModeleVosk
 import kotlinx.coroutines.launch
@@ -98,10 +100,8 @@ fun ParametresScreen(
     val msgRestauration = stringResource(R.string.param_msg_restauration)
     val msgIllisible = stringResource(R.string.param_msg_illisible)
     val msgFusion = stringResource(R.string.sync_msg_fusion)
-    val msgLotSansMarsync = stringResource(R.string.lot_msg_sans_marsync)
-    val msgLotMarsyncMultiple = stringResource(R.string.lot_msg_marsync_multiple)
-    val msgLotEntreeRefusee = stringResource(R.string.lot_msg_entree_refusee)
-    var lotEnCours by remember { mutableStateOf(false) }
+    // Import d'un lot de chantiers : même composant que la liste des contextes.
+    val importLot = rememberImportLot(lotRepository)
 
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/zip"),
@@ -145,25 +145,6 @@ fun ParametresScreen(
         }
     }
 
-
-    // Import d'un lot de chantiers (Nemeton) : fusion + rattachement automatique des GeoPackages.
-    // Rien ici ne touche à `importerJson()` : un lot ne doit jamais pouvoir effacer le journal.
-    val lotLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) {
-            lotEnCours = true
-            scope.launch {
-                message = when (val r = lotRepository.importer(uri)) {
-                    is LotRepository.Resultat.Ok -> resumeLot(context, r)
-                    LotRepository.Resultat.SansMarsync -> msgLotSansMarsync
-                    LotRepository.Resultat.MarsyncMultiple -> msgLotMarsyncMultiple
-                    is LotRepository.Resultat.EntreeRefusee ->
-                        String.format(msgLotEntreeRefusee, r.nom)
-                    LotRepository.Resultat.Illisible -> msgIllisible
-                }
-                lotEnCours = false
-            }
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -320,11 +301,11 @@ fun ParametresScreen(
 
             Text(stringResource(R.string.lot_desc), style = MaterialTheme.typography.bodySmall)
             OutlinedButton(
-                onClick = { lotLauncher.launch(arrayOf("application/zip", "application/octet-stream", "*/*")) },
-                enabled = !lotEnCours,
+                onClick = { importLot.lancer() },
+                enabled = !importLot.enCours,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(stringResource(if (lotEnCours) R.string.lot_en_cours else R.string.lot_importer))
+                Text(stringResource(if (importLot.enCours) R.string.lot_en_cours else R.string.lot_importer))
             }
 
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
@@ -424,6 +405,8 @@ fun ParametresScreen(
         )
     }
 
+    DialogueResultatLot(importLot)
+
     message?.let { texte ->
         AlertDialog(
             onDismissRequest = { message = null },
@@ -431,20 +414,6 @@ fun ParametresScreen(
             text = { Text(texte) },
         )
     }
-}
-
-/**
- * Résumé d'un import de lot. Les contextes restés sans carte sont **nommés** : un contexte muet
- * dont on ignore pourquoi il n'a pas de carte est pire qu'un message.
- */
-private fun resumeLot(context: android.content.Context, r: LotRepository.Resultat.Ok): String {
-    val base = context.getString(R.string.lot_msg_ok, r.contextes, r.rattaches)
-    if (r.sansGpkg.isEmpty()) return base
-    return base + "\n\n" + context.getString(
-        R.string.lot_msg_sans_gpkg,
-        r.sansGpkg.size,
-        r.sansGpkg.joinToString(", "),
-    )
 }
 
 private fun lireJsonDepuisZip(context: android.content.Context, uri: Uri): String? =
