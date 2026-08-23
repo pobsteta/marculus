@@ -97,6 +97,7 @@ Nemeton, elle arrivera dans le même GeoPackage sans changer le format du lot.
 | Contrôle | Attendu |
 |---|---|
 | Lot de 13 chantiers (12 Mo) | 13 contextes, 13 cartes rattachées, aucun geste manuel |
+| ✅ Lot de 3 chantiers, 2 GeoPackages (2026-08-23, SM-S918B) | contextes créés et cartes rattachées — cas nominal vérifié sur matériel |
 | Ré-import du même lot | aucun doublon, aucun `fichier(1).gpkg` |
 | Lot amputé d'un GeoPackage | 12 rattachés, le 13ᵉ créé sans carte, **et nommé** dans le message |
 | ZIP sans `.marsync` | refus explicite, rien créé |
