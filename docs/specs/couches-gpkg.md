@@ -44,7 +44,9 @@ Voir `couche-houppier-mnh.md` pour la production en amont (lidR/QGIS) et les lim
 | Géométrie | un polygone par houppier |
 | Hauteur | **`h_max`**, réel, en **mètres** (alias : `hmax`, `hauteur_max`, `hauteur`, `height`) |
 
-Une entité sans hauteur lisible est ignorée. Les hauteurs hors de **1–70 m** sont rejetées : un
+Rien d'autre n'est attendu dans cette couche : la **qualité bois de découpe** ne s'y met pas,
+elle vient du référentiel du contexte et s'ajoute sur le téléphone, dans le texte de hauteur
+(`27-6AB`). Une entité sans hauteur lisible est ignorée. Les hauteurs hors de **1–70 m** sont rejetées : un
 `h_max` à 0 (houppier vide) ou en centimètres n'écrira rien plutôt qu'une absurdité au journal.
 
 ## `desserte` — routes, pistes et chemins

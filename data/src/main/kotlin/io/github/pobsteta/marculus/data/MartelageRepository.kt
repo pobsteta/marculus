@@ -293,6 +293,9 @@ class MartelageRepository(
     )
 
     /** Annote une tige précise (par uuid) : la hauteur. */
+    /** Une tige par son UUID : sert à rouvrir une saisie sur sa valeur courante. */
+    suspend fun tige(uuid: String): Tige? = tigeDao.parUuid(uuid)?.versDomaine()
+
     suspend fun annoterHauteur(uuid: String, hauteurTexte: String?) = tigeDao.majHauteur(uuid, hauteurTexte)
 
     /** Annote une tige précise (par uuid) : la qualité arbre. */

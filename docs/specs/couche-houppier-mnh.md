@@ -54,6 +54,11 @@ du même GPKG.
 - Hauteur hors de **1–70 m** : ignorée (`h_max` à 0, ou en centimètres).
 - En **GNSS ponctuel**, la position n'arrive qu'après l'insertion : l'estimation est alors faite
   au même moment que le rattachement à la parcelle, et annotée sur la tige.
+- **Ajouter une découpe à une hauteur estimée** : le bouton H rouvre la saisie **sur la valeur
+  courante** (hauteur d'un côté, découpe de l'autre). Sur une tige estimée à 27 m, il suffit donc
+  de taper `6AB` dans le champ découpe pour obtenir `27-6AB` — la hauteur n'est pas à retaper.
+  La qualité bois ne vient **jamais** du GPKG : elle sort du référentiel de qualité bois du
+  contexte et vit dans le texte de hauteur (`HauteurParser`), comme pour une hauteur mesurée.
 - L'estimation est une **aide**, jamais une valeur d'autorité.
 
 ## Limites à connaître

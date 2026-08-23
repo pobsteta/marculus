@@ -68,6 +68,9 @@ interface TigeDao {
         modifie: Long,
     )
 
+    @Query("SELECT * FROM tige WHERE uuid = :uuid")
+    suspend fun parUuid(uuid: String): TigeEntity?
+
     @Query("UPDATE tige SET hauteurTexte = :hauteur WHERE uuid = :uuid")
     suspend fun majHauteur(uuid: String, hauteur: String?)
 

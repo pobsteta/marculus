@@ -234,7 +234,8 @@ private val HAUTEUR_CELLULE = 144.dp
 private val MARGE_BOUTON_MICRO = TAILLE_MICRO + 16.dp
 
 private sealed interface Saisie {
-    data class Hauteur(val uuid: String) : Saisie
+    /** `initial` = texte de hauteur déjà porté par la tige (estimé MNH, dicté ou saisi). */
+    data class Hauteur(val uuid: String, val initial: String = "") : Saisie
     data class Qualite(val uuid: String) : Saisie
     data class Avis(val essence: String, val classe: Int) : Saisie
 }
@@ -686,7 +687,15 @@ fun FeuilleMartelageScreen(
                             hqActif = estDerniere,
                             onPlus = { ajouter(e.nom, classe) },
                             onMoins = { retirer(e.nom, classe) },
-                            onHauteur = { derniereSaisie?.let { saisie = Saisie.Hauteur(it.uuid) } },
+                            onHauteur = {
+                                // On rouvre sur la valeur courante : sinon, ajouter une découpe à
+                                // une hauteur estimée (MNH) ou déjà dictée obligerait à la retaper.
+                                derniereSaisie?.let { d ->
+                                    scope.launch {
+                                        saisie = Saisie.Hauteur(d.uuid, repository.tige(d.uuid)?.hauteurTexte.orEmpty())
+                                    }
+                                }
+                            },
                             onQualite = { derniereSaisie?.let { saisie = Saisie.Qualite(it.uuid) } },
                             onAvis = { saisie = Saisie.Avis(e.nom, classe) },
                         )
@@ -716,6 +725,7 @@ fun FeuilleMartelageScreen(
 
     when (val s = saisie) {
         is Saisie.Hauteur -> SaisieHauteurDialog(
+            initial = s.initial,
             qualitesBois = qualitesBois,
             onAnnuler = { saisie = null },
             onValider = { texte ->
@@ -914,14 +924,21 @@ private fun TriangleAlerte(signe: String) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SaisieHauteurDialog(
+    initial: String = "",
     qualitesBois: List<String>,
     onAnnuler: () -> Unit,
     onValider: (String) -> Unit,
 ) {
-    var hauteur by remember { mutableStateOf("") }
-    var decoupe by remember { mutableStateOf(TextFieldValue("")) }
     // Séparateur décimal de la langue de l'application (fr → « , », en → « . »).
     val separateur = DecimalFormatSymbols.getInstance(LocalConfiguration.current.locales[0]).decimalSeparator
+    // « 27-6AB4CD » se rouvre en deux champs : la hauteur d'un côté, la découpe de l'autre.
+    val sep = initial.indexOf('-')
+    var hauteur by remember(initial) {
+        mutableStateOf((if (sep >= 0) initial.substring(0, sep) else initial).trim().replace('.', separateur))
+    }
+    var decoupe by remember(initial) {
+        mutableStateOf(TextFieldValue(if (sep >= 0) initial.substring(sep + 1).trim() else ""))
+    }
     // Validation non bloquante : codes qualité saisis absents du référentiel.
     val connues = remember(qualitesBois) { qualitesBois.map { it.uppercase() }.toSet() }
     val inconnues = remember(decoupe.text, connues) {
