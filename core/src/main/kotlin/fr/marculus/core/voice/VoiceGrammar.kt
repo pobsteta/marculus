@@ -37,6 +37,18 @@ object VoiceCommands {
      * « quarante cinq » ne veut pas dire la même chose des deux côtés.
      */
     const val HAUTEUR = "hauteur"
+
+    /**
+     * Mot-clé de **découpe seule** : « decoupe six alpha bravo » pose la découpe sur la hauteur
+     * **déjà portée** par la dernière tige — estimée depuis le MNH, dictée ou saisie — sans avoir
+     * à la redire. Sans lui, ajouter une qualité bois obligeait à répéter la hauteur entière, et
+     * une hauteur redite écrase une hauteur mesurée.
+     *
+     * Plusieurs variantes sont mises dans la grammaire : le modèle ignore silencieusement celles
+     * qu'il ne connaît pas (accentuation, mot absent du lexique), les autres restent dictables.
+     * L'aide « Formes à dicter » affiche la première que le modèle sait décoder.
+     */
+    val DECOUPE = listOf("decoupe", "découpe", "billon")
 }
 
 /**
@@ -74,6 +86,7 @@ object GrammarBuilder {
             addAll(VoiceCommands.ALL)
             if (hauteur != null) {
                 add(VoiceCommands.HAUTEUR)
+                addAll(VoiceCommands.DECOUPE)
                 (1..hauteur.maxMetres).forEach { add(FrenchNumbers.toTokens(it).joinToString(" ")) }
                 hauteur.lettresBois.forEach { add(hauteur.motRadio(it)) }
             }

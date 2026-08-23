@@ -265,4 +265,47 @@ class TigeAvecHauteurTest {
         val evenement = parseur.parse("chablis hauteur vingt sept")
         assertEquals(VoiceEvent.Rejet("chablis hauteur vingt sept", VoiceEvent.Raison.INCOMPLET), evenement)
     }
+    // ---- « decoupe » : la découpe seule, sur la hauteur que la tige porte déjà ----
+
+    @Test
+    fun `decoupe seule, sans redire la hauteur`() {
+        assertEquals(VoiceEvent.Decoupe("6AB"), parseur.parse("decoupe six alpha bravo"))
+        assertEquals(
+            VoiceEvent.Decoupe("6AB4CD"),
+            parseur.parse("decoupe six alpha bravo quatre charlie delta"),
+        )
+    }
+
+    @Test
+    fun `les variantes du mot-cle decoupe sont equivalentes`() {
+        // Le modèle ignore celles qu'il ne connaît pas ; le parseur les accepte toutes.
+        VoiceCommands.DECOUPE.forEach { mot ->
+            assertEquals(VoiceEvent.Decoupe("6AB"), parseur.parse("$mot six alpha bravo"), mot)
+        }
+    }
+
+    @Test
+    fun `decoupe sans qualite derriere est incomplete`() {
+        // « six » seul n'est pas une découpe : on ne devine pas la qualité bois.
+        assertTrue(parseur.parse("decoupe six") is VoiceEvent.Rejet)
+        assertTrue(parseur.parse("decoupe") is VoiceEvent.Rejet)
+    }
+
+    @Test
+    fun `le mot-cle decoupe doit ouvrir l enonce`() {
+        // Une découpe derrière une tige porterait sur une hauteur qui n'existe pas encore :
+        // l'accepter reviendrait à jeter la découpe en silence.
+        assertTrue(parseur.parse("hetre quarante cinq decoupe six alpha bravo") is VoiceEvent.Rejet)
+        assertTrue(parseur.parse("hauteur vingt sept decoupe six alpha bravo") is VoiceEvent.Rejet)
+    }
+
+    @Test
+    fun `la decoupe dictee se greffe au format de la saisie manuelle`() {
+        val evenement = parseur.parse("decoupe six alpha bravo") as VoiceEvent.Decoupe
+        // Greffée sur une hauteur estimée à 27 m, elle donne le texte de la saisie manuelle.
+        val relu = HauteurParser.parse("27-${evenement.segments}")
+        assertEquals(27.0, relu.hauteurTotale)
+        assertEquals(listOf(SegmentDecoupe(6.0, "AB")), relu.segments)
+    }
+
 }

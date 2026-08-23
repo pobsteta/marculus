@@ -128,6 +128,13 @@ class EtatDictee internal constructor(
     var exempleHauteur: String by mutableStateOf("")
         internal set
 
+    /**
+     * Énoncé d'exemple pour la découpe seule, avec la variante du mot-clé que le modèle sait
+     * décoder — promettre « découpe » à un modèle qui ne connaît que « decoupe » serait mentir.
+     */
+    var exempleDecoupe: String by mutableStateOf("")
+        internal set
+
     /** Dictée simulée : injecte un énoncé sans micro (démo et recette sur émulateur). */
     fun simuler(texte: String) = service.injecterTexte(texte)
 }
@@ -151,6 +158,7 @@ private class AiguillageVocal {
  * @param actif au moins un déclencheur est activé dans les réglages
  * @param onTige insertion d'une tige dictée par le mécanisme existant (UUID, GNSS, annonce TTS) ;
  *   la hauteur est non nulle quand elle a été dictée dans le même énoncé
+ * @param onDecoupe découpe dictée seule → se greffe sur la hauteur déjà portée par la dernière tige
  * @param onQualite qualité dictée seule → annote la dernière tige, comme le bouton Q
  * @param onAnnule commande « annule » → annulation par événement du journal append-only
  * @param onRepete commande « repete » → ré-annonce de la dernière tige
@@ -166,6 +174,7 @@ fun rememberDicteeVocale(
     tonalites: ToneGenerator?,
     onTige: (essence: String, classe: Int, qualite: String?, hauteur: String?) -> Unit,
     onHauteur: (texte: String) -> Unit,
+    onDecoupe: (segments: String) -> Unit,
     onQualite: (code: String) -> Unit,
     onAnnule: () -> Unit,
     onRepete: () -> Unit,
@@ -196,6 +205,8 @@ fun rememberDicteeVocale(
                 }
 
                 is VoiceEvent.Hauteur -> onHauteur(evenement.texte)
+
+                is VoiceEvent.Decoupe -> onDecoupe(evenement.segments)
 
                 is VoiceEvent.Qualite -> onQualite(evenement.code)
 
@@ -239,7 +250,7 @@ fun rememberDicteeVocale(
         val connus = withContext(Dispatchers.IO) {
             VocabulaireVosk.motsConnus(
                 ModeleVosk.dossier(context),
-                ReferentielParle.motsCandidats(essences, qualites),
+                ReferentielParle.motsCandidats(essences, qualites) + VoiceCommands.DECOUPE,
             )
         }
         val motConnu: (String) -> Boolean = { it in connus }
@@ -263,6 +274,11 @@ fun rememberDicteeVocale(
             val lettre = options.motRadio(lettresBois.first())
             "${VoiceCommands.HAUTEUR} " + FrenchNumbers.toTokens(EXEMPLE_HAUTEUR_M).joinToString(" ") +
                 " " + FrenchNumbers.toTokens(EXEMPLE_BILLON_M).joinToString(" ") + " " + lettre
+        } ?: ""
+        dictee.exempleDecoupe = optionsHauteur?.let { options ->
+            val lettre = options.motRadio(lettresBois.first())
+            val motCle = VoiceCommands.DECOUPE.firstOrNull(motConnu) ?: VoiceCommands.DECOUPE.first()
+            "$motCle " + FrenchNumbers.toTokens(EXEMPLE_BILLON_M).joinToString(" ") + " " + lettre
         } ?: ""
         dictee.exemple = listOfNotNull(
             parlees.firstOrNull()?.spoken?.joinToString(" "),
@@ -295,6 +311,7 @@ class ActionsVocales {
     var tige: (essence: String, classe: Int, qualite: String?, hauteur: String?) -> Unit =
         { _, _, _, _ -> }
     var hauteur: (texte: String) -> Unit = {}
+    var decoupe: (segments: String) -> Unit = {}
     var qualite: (code: String) -> Unit = {}
     var annule: () -> Unit = {}
     var repete: () -> Unit = {}
@@ -410,6 +427,10 @@ fun DialogueFormesParlees(
                     )
                     Text(
                         dictee.formesBois.joinToString("  ·  ") { (lettre, parle) -> "$lettre → « $parle »" },
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        stringResource(R.string.voix_formes_decoupe_aide, dictee.exempleDecoupe),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }

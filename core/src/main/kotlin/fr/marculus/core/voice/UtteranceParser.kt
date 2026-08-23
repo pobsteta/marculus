@@ -9,6 +9,7 @@ package fr.marculus.core.voice
  *   "quarante cinq"                  -> Tige(essence courante, 45)   [mode rafale]
  *   "chablis"                        -> Qualite(Chablis)             [annote la dernière tige]
  *   "hauteur vingt sept six alpha"   -> Hauteur("27-6A")             [annote la dernière tige]
+ *   "decoupe six alpha bravo"        -> Decoupe("6AB")                [sur la hauteur existante]
  *   "hetre quarante cinq hauteur vingt sept"
  *                                    -> Tige(HET, 45, null, "27")    [tout d'un seul tenant]
  *   "annule"                         -> Commande(ANNULE)
@@ -42,6 +43,13 @@ sealed interface VoiceEvent {
     data class Hauteur(val texte: String) : VoiceEvent
 
     /**
+     * Découpe dictée seule pour la dernière tige, sans redire la hauteur : [segments] est la
+     * partie qui suit le tiret (« 6AB4CD »), à greffer sur la hauteur que la tige porte déjà.
+     * Sans hauteur, une longueur de billon ne veut rien dire : l'appelant refuse alors l'énoncé.
+     */
+    data class Decoupe(val segments: String) : VoiceEvent
+
+    /**
      * Qualité arbre dictée seule, pour la dernière tige : l'équivalent vocal du bouton Q.
      * [code] est le libellé du référentiel, celui qui part dans la tige.
      */
@@ -66,6 +74,14 @@ class UtteranceParser(private val lexicon: Lexicon) {
         // Le mot-clé « hauteur » bascule la SUITE de l'énoncé en mètres : sans lui, « quarante
         // cinq » est une classe de diamètre, avec lui c'est une longueur. Il peut ouvrir l'énoncé
         // (annotation de la dernière tige) ou le couper en deux (tige + sa hauteur d'un seul tenant).
+        // « decoupe six alpha bravo » : la découpe seule, sur la hauteur déjà portée par la tige.
+        // Le mot-clé doit ouvrir l'énoncé — « hetre quarante cinq decoupe six alpha bravo » serait
+        // une découpe sur une hauteur qui n'existe pas encore, donc jetée en silence : on rejette.
+        if (tokens[0] in VoiceCommands.DECOUPE) return parseDecoupe(tokens.drop(1), voskText)
+        if (tokens.any { it in VoiceCommands.DECOUPE }) {
+            return VoiceEvent.Rejet(voskText, VoiceEvent.Raison.AMBIGU)
+        }
+
         val coupure = tokens.indexOf(VoiceCommands.HAUTEUR)
         if (coupure == 0) return parseHauteur(tokens.drop(1), voskText)
         if (coupure > 0) {
@@ -125,14 +141,48 @@ class UtteranceParser(private val lexicon: Lexicon) {
     private fun parseHauteur(tokens: List<String>, brut: String): VoiceEvent {
         if (!lexicon.hauteurDictable) return VoiceEvent.Rejet(brut, VoiceEvent.Raison.AMBIGU)
         var i = 0
-        val nombre = { pos: Int -> plusLongNombre(tokens, pos) }
-
-        val totale = nombre(i) ?: return VoiceEvent.Rejet(brut, VoiceEvent.Raison.INCOMPLET)
+        val totale = plusLongNombre(tokens, i) ?: return VoiceEvent.Rejet(brut, VoiceEvent.Raison.INCOMPLET)
         i += totale.len
 
-        val segments = StringBuilder()
+        val segments = when (val r = segments(tokens, i)) {
+            is Segments.Err -> return VoiceEvent.Rejet(brut, r.raison)
+            is Segments.Ok -> r.texte
+        }
+
+        val texte = if (segments.isEmpty()) "${totale.valeur}" else "${totale.valeur}-$segments"
+        return VoiceEvent.Hauteur(texte)
+    }
+
+    /**
+     * « decoupe six alpha bravo » → « 6AB ». Aucune hauteur totale n'est dite : elle vient de la
+     * tige. Une découpe vide n'annoterait rien, c'est un énoncé incomplet.
+     */
+    private fun parseDecoupe(tokens: List<String>, brut: String): VoiceEvent {
+        if (!lexicon.hauteurDictable) return VoiceEvent.Rejet(brut, VoiceEvent.Raison.AMBIGU)
+        return when (val r = segments(tokens, 0)) {
+            is Segments.Err -> VoiceEvent.Rejet(brut, r.raison)
+            // « decoupe » tout court n'annoterait rien : énoncé incomplet.
+            is Segments.Ok ->
+                if (r.texte.isEmpty()) VoiceEvent.Rejet(brut, VoiceEvent.Raison.INCOMPLET)
+                else VoiceEvent.Decoupe(r.texte)
+        }
+    }
+
+    private sealed interface Segments {
+        data class Ok(val texte: String) : Segments
+        data class Err(val raison: VoiceEvent.Raison) : Segments
+    }
+
+    /**
+     * Suite de couples (longueur, lettres de qualité bois) → « 6AB4CD ». Deux façons d'échouer,
+     * qu'on distingue car elles ne disent pas la même chose du bruit ambiant : un mot là où on
+     * attendait une longueur est **ambigu**, une longueur sans qualité derrière est **incomplète**.
+     */
+    private fun segments(tokens: List<String>, from: Int): Segments {
+        var i = from
+        val sortie = StringBuilder()
         while (i < tokens.size) {
-            val longueur = nombre(i) ?: return VoiceEvent.Rejet(brut, VoiceEvent.Raison.AMBIGU)
+            val longueur = plusLongNombre(tokens, i) ?: return Segments.Err(VoiceEvent.Raison.AMBIGU)
             i += longueur.len
             val lettres = StringBuilder()
             while (i < tokens.size) {
@@ -140,13 +190,10 @@ class UtteranceParser(private val lexicon: Lexicon) {
                 lettres.append(lettre)
                 i++
             }
-            // Une longueur sans qualité n'est pas une découpe : c'est un énoncé incomplet.
-            if (lettres.isEmpty()) return VoiceEvent.Rejet(brut, VoiceEvent.Raison.INCOMPLET)
-            segments.append(longueur.valeur).append(lettres)
+            if (lettres.isEmpty()) return Segments.Err(VoiceEvent.Raison.INCOMPLET)
+            sortie.append(longueur.valeur).append(lettres)
         }
-
-        val texte = if (segments.isEmpty()) "${totale.valeur}" else "${totale.valeur}-$segments"
-        return VoiceEvent.Hauteur(texte)
+        return Segments.Ok(sortie.toString())
     }
 
     private data class Nombre(val valeur: Int, val len: Int)

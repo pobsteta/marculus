@@ -20,6 +20,7 @@ GNSS point-dans-polygone, annulation par événement), et le téléphone confirm
 | « hêtre quarante cinq hauteur vingt sept » | tige **et** sa hauteur, en une seule insertion |
 | « chablis » | qualité arbre sur la dernière tige (équivalent vocal du bouton Q) |
 | « hauteur vingt sept six alpha bravo » | hauteur + découpe sur la dernière tige (`27-6AB`) |
+| « decoupe six alpha bravo » | découpe seule, **sur la hauteur déjà portée** par la dernière tige |
 | « repete » | ré-annonce la dernière tige |
 | tout le reste | **rejet** : vibration double + « non compris », aucune insertion devinée |
 
@@ -68,6 +69,26 @@ est rejeté plutôt que d'annoter deux choses à la fois — et surtout, rendre 
 reviendrait à jeter la hauteur en silence, ce qu'un test interdit désormais explicitement (le défaut
 existait dans la première version de ce code).
 
+### Découpe seule : « decoupe six alpha bravo »
+
+Depuis que la hauteur peut arriver **sans être dictée** — estimée depuis la couche `houppier` du
+GPKG (MNH) —, il fallait pouvoir poser une qualité bois sur une hauteur qu'on n'a pas prononcée.
+Redire la hauteur entière marcherait, mais écraserait une valeur mesurée par une valeur dite, et
+coûterait un énoncé long là où un mot mal décodé rejette tout.
+
+Le mot-clé `decoupe` ouvre donc un énoncé qui ne porte **que** la découpe : elle se greffe sur la
+hauteur totale que la tige porte déjà (estimée, dictée ou saisie), et **remplace** la découpe
+précédente — redire, c'est corriger. Sans hauteur sur la tige, l'application répond « aucune
+hauteur » et n'écrit rien ; sans tige, « aucune tige » — mêmes règles que la hauteur seule.
+
+Le mot-clé doit **ouvrir** l'énoncé : « hêtre quarante cinq decoupe six alpha bravo » est rejeté,
+parce que la tige n'a pas encore de hauteur au moment où on parle et que la découpe serait jetée en
+silence — le même défaut que celui corrigé pour la hauteur enchaînée.
+
+Trois variantes sont mises dans la grammaire (`decoupe`, `découpe`, `billon`) : le modèle ignore
+silencieusement celles qu'il ne connaît pas, et l'aide « Formes à dicter » n'affiche que celle
+qu'il sait décoder — même garde-fou que pour les mots de l'alphabet radio.
+
 Le compromis reste ouvert à l'opérateur : la forme longue économise un appui, la forme courte limite
 la casse, puisqu'un seul mot mal décodé rejette **tout** l'énoncé. Le texte produit est **exactement celui de la saisie manuelle** — il
 repasse par `annoterHauteur` et se relit avec `HauteurParser`, sans rien de nouveau dans le schéma.
@@ -94,7 +115,7 @@ un énoncé incomplet, donc rejeté.
 | `voice/ModeleVosk.kt` | `:app` | Téléchargement / installation / suppression du modèle |
 | `ui/feuille/DicteeVocale.kt` | `:app` | Colle Compose : grammaire du contexte, permission micro, bouton micro, aide-mémoire |
 
-`:core` reste 100 % JVM : ni Vosk, ni Android n'y entrent. 44 tests JVM couvrent la grammaire, le
+`:core` reste 100 % JVM : ni Vosk, ni Android n'y entrent. 49 tests JVM couvrent la grammaire, le
 parseur, le référentiel parlé et le noyau PTT (93 % d'instructions couvertes sur le paquet `voice`).
 
 ### Référentiel parlé
