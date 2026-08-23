@@ -179,6 +179,12 @@
     <string name="carte_fond_label">Fond : %1$s</string>
     <string name="carte_parcelle_titre">Parcelle %1$s</string>
     <string name="carte_parcelle_chiffres">%1$s ha · %2$d tige(s)</string>
+    <string name="carte_couches">Couches affichées</string>
+    <string name="carte_couche_parcelles">Parcelles (%1$d)</string>
+    <string name="carte_couche_houppiers">Houppiers (%1$d)</string>
+    <string name="carte_couche_desserte">Desserte (%1$d)</string>
+    <string name="carte_houppier_titre">Houppier</string>
+    <string name="carte_houppier_hauteur">Apex à %1$s m</string>
     <string name="carte_hors_parcelle">Hors parcelle</string>
     <string name="carte_hauteur_prefix">H : %1$s</string>
     <string name="carte_qualite_prefix">Q : %1$s</string>

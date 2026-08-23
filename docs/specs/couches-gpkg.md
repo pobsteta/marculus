@@ -62,6 +62,22 @@ La desserte est **purement informative** : tracée en ocre sur la carte, au-dess
 et sous les tiges, libellé et nature au toucher. Elle sert à trouver l'accès au chantier et le
 point de dépôt ; elle n'entre dans aucun calcul, et aucune tige ne lui est rattachée.
 
+## Affichage : les couches se cochent
+
+Sur la carte, le bouton **⧉ Couches** (bandeau) ouvre la liste des couches du GeoPackage ouvert,
+avec le **nombre d'objets** de chacune. Une couche absente du fichier reste **grisée** : mieux
+vaut voir qu'il n'y a rien à afficher que de cocher une case sans effet.
+
+| Couche | Rendu | Par défaut |
+|---|---|---|
+| Parcelles | remplissage coloré par propriétaire + étiquette au centre | **affichée** |
+| Houppiers | contour vert seul (on lit ce qu'il y a dessous), bulle = hauteur d'apex | **masquée** |
+| Desserte | tracé ocre, bulle = nom et nature | **affichée** |
+
+Les houppiers sont masqués au départ parce qu'ils se comptent par milliers là où les parcelles se
+comptent sur les doigts : affichés d'office, ils masqueraient tout le reste. Le choix est conservé
+tant que l'écran vit (rotation comprise).
+
 ## Ortho
 
 La **première table de tuiles** du GPKG sert de fond de carte hors-ligne ; elle est reprojetée en

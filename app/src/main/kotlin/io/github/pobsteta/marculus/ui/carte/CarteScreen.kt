@@ -36,7 +36,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallFloatingActionButton
@@ -49,6 +52,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Remove
@@ -61,6 +65,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -75,6 +80,7 @@ import androidx.core.content.ContextCompat
 import io.github.pobsteta.marculus.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.AttributionSpatiale
+import fr.marculus.core.Houppier
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
@@ -117,6 +123,22 @@ private const val ZOOM_MAX = 19.0
 
 /** Au-delà de cette vitesse (m/s ≈ 2,9 km/h), on oriente le cône par le cap GNSS plutôt que la boussole. */
 private const val SEUIL_VITESSE_MS = 0.8
+
+/** Une couche du GeoPackage dans le menu : sa case, son libellé, son nombre d'objets. */
+@Composable
+private fun LigneCouche(libelle: String, coche: Boolean, disponible: Boolean, onChange: (Boolean) -> Unit) {
+    DropdownMenuItem(
+        enabled = disponible,
+        text = { Text(libelle) },
+        leadingIcon = {
+            Checkbox(checked = coche && disponible, enabled = disponible, onCheckedChange = { onChange(it) })
+        },
+        onClick = { if (disponible) onChange(!coche) },
+    )
+}
+
+/** Vert des houppiers : contour seul, assez soutenu pour se voir sur une ortho de forêt. */
+private const val COULEUR_HOUPPIER = 0xFF2E7D32.toInt()
 
 /** Ocre de la desserte : lisible sur l'ortho comme sur le fond OSM, distinct des essences. */
 private const val COULEUR_DESSERTE = 0xFFB35C00.toInt()
@@ -172,6 +194,17 @@ fun CarteScreen(
     val dessertes by produceState(initialValue = emptyList<DesserteGpkg>(), cheminGpkg) {
         value = cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.dessertes(it) } } ?: emptyList()
     }
+    // Houppiers : la même couche que celle qui estime la hauteur des tiges, ici seulement
+    // regardée. Lue quel que soit le réglage MNH — voir une couronne n'engage rien.
+    val houppiers by produceState(initialValue = emptyList<Houppier>(), cheminGpkg) {
+        value = cheminGpkg?.let { withContext(Dispatchers.IO) { gpkgRepository.houppiers(it) } } ?: emptyList()
+    }
+    // Couches affichées. Les houppiers sont décochés au départ : ils se comptent par milliers là
+    // où les parcelles se comptent sur les doigts, et masqueraient le reste sous un tapis vert.
+    var voirParcelles by rememberSaveable { mutableStateOf(true) }
+    var voirDesserte by rememberSaveable { mutableStateOf(true) }
+    var voirHouppiers by rememberSaveable { mutableStateOf(false) }
+    var menuCouches by remember { mutableStateOf(false) }
     val orthoSource by produceState<OrthoSource?>(initialValue = null, cheminGpkg) {
         value = null
         val chemin = cheminGpkg
@@ -302,7 +335,7 @@ fun CarteScreen(
 
     val ctx = contexte
     // Surcouches reconstruites quand contexte, journal, parcelles ou desserte changent.
-    LaunchedEffect(ctx, journal, parcelles, dessertes) {
+    LaunchedEffect(ctx, journal, parcelles, dessertes, houppiers, voirParcelles, voirDesserte, voirHouppiers) {
         if (ctx == null) return@LaunchedEffect
         val couleurs = ctx.essences.associate { it.nom to it.couleurFondArgb }
         mapView.overlays.clear()
@@ -320,7 +353,7 @@ fun CarteScreen(
                 ?: parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, p) }
             if (pcl != null) tigesParParcelle[pcl.id] = (tigesParParcelle[pcl.id] ?: 0) + t.quantite
         }
-        parcelles.forEach { pcl ->
+        (if (voirParcelles) parcelles else emptyList()).forEach { pcl ->
             val c = couleurFonciere(pcl.proprietaire)
             // Sans titre ni description, osmdroid ouvre quand même sa bulle — vide. Ce qu'on sait
             // de la parcelle vient du GeoPackage : autant le montrer là où on la touche.
@@ -366,8 +399,33 @@ fun CarteScreen(
                 )
             }
         }
+        // Houppiers (juste au-dessus des parcelles) : contour seul, pour qu'on lise ce qu'il y a
+        // dessous. La bulle donne la hauteur d'apex, celle qui pré-remplit H à la saisie.
+        if (voirHouppiers) {
+            val titreHouppier = context.getString(R.string.carte_houppier_titre)
+            houppiers.forEach { h ->
+                val hauteur = context.getString(
+                    R.string.carte_houppier_hauteur,
+                    String.format(Locale.getDefault(), "%.1f", h.hauteurM),
+                )
+                h.anneaux.forEach { anneau ->
+                    if (anneau.size >= 2) {
+                        mapView.overlays.add(
+                            Polygon(mapView).apply {
+                                points = anneau.map { GeoPoint(it.latitude, it.longitude) }
+                                fillPaint.color = 0x00000000
+                                outlinePaint.color = COULEUR_HOUPPIER
+                                outlinePaint.strokeWidth = 2f
+                                title = titreHouppier
+                                snippet = hauteur
+                            },
+                        )
+                    }
+                }
+            }
+        }
         // Desserte (au-dessus des parcelles, sous les tiges) : un tracé continu par tronçon.
-        dessertes.forEach { d ->
+        (if (voirDesserte) dessertes else emptyList()).forEach { d ->
             d.lignes.forEach { ligne ->
                 if (ligne.size >= 2) {
                     mapView.overlays.add(
@@ -467,6 +525,35 @@ fun CarteScreen(
                     }
                 },
                 actions = {
+                    // Couches du GeoPackage : chacune se coche, et celles que le fichier ne
+                    // contient pas restent grisées — mieux vaut voir qu'il n'y a rien à afficher
+                    // que de cocher une case sans effet.
+                    Box {
+                        IconButton(onClick = { menuCouches = true }) {
+                            Icon(
+                                Icons.Filled.Layers,
+                                contentDescription = stringResource(R.string.carte_couches),
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                            )
+                        }
+                        DropdownMenu(expanded = menuCouches, onDismissRequest = { menuCouches = false }) {
+                            LigneCouche(
+                                libelle = stringResource(R.string.carte_couche_parcelles, parcelles.size),
+                                coche = voirParcelles,
+                                disponible = parcelles.isNotEmpty(),
+                            ) { voirParcelles = it }
+                            LigneCouche(
+                                libelle = stringResource(R.string.carte_couche_houppiers, houppiers.size),
+                                coche = voirHouppiers,
+                                disponible = houppiers.isNotEmpty(),
+                            ) { voirHouppiers = it }
+                            LigneCouche(
+                                libelle = stringResource(R.string.carte_couche_desserte, dessertes.size),
+                                coche = voirDesserte,
+                                disponible = dessertes.isNotEmpty(),
+                            ) { voirDesserte = it }
+                        }
+                    }
                     TextButton(onClick = { importGpkgLauncher.launch(arrayOf("*/*")) }) {
                         Text(stringResource(R.string.carte_charge_gpkg), color = MaterialTheme.colorScheme.onPrimary)
                     }
