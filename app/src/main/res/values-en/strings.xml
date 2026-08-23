@@ -177,6 +177,12 @@
     <string name="carte_fond_label">Base map: %1$s</string>
     <string name="carte_parcelle_titre">Parcel %1$s</string>
     <string name="carte_parcelle_chiffres">%1$s ha · %2$d stem(s)</string>
+    <string name="carte_couches">Displayed layers</string>
+    <string name="carte_couche_parcelles">Parcels (%1$d)</string>
+    <string name="carte_couche_houppiers">Crowns (%1$d)</string>
+    <string name="carte_couche_desserte">Roads (%1$d)</string>
+    <string name="carte_houppier_titre">Crown</string>
+    <string name="carte_houppier_hauteur">Apex at %1$s m</string>
     <string name="carte_hors_parcelle">Outside parcels</string>
     <string name="carte_hauteur_prefix">H: %1$s</string>
     <string name="carte_qualite_prefix">Q: %1$s</string>

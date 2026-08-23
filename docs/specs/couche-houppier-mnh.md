@@ -61,6 +61,8 @@ du même GPKG.
   « decoupe six alpha bravo » sur une tige estimée à 27 m donne `27-6AB`.
   La qualité bois ne vient **jamais** du GPKG : elle sort du référentiel de qualité bois du
   contexte et vit dans le texte de hauteur (`HauteurParser`), comme pour une hauteur mesurée.
+- La couche est aussi **affichable sur la carte** (bouton Couches), indépendamment du réglage :
+  contour seul, bulle donnant la hauteur d'apex. Voir une couronne n'engage rien.
 - L'estimation est une **aide**, jamais une valeur d'autorité.
 
 ## Limites à connaître
