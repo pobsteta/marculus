@@ -11,17 +11,22 @@ object MarculusData {
         val referentiels: ReferentielsRepository,
         val sauvegarde: SauvegardeRepository,
         val gpkg: GpkgRepository,
+        val lot: LotRepository,
     )
 
     fun creer(context: Context): Conteneur {
         val db = MarculusDatabase.creer(context)
         val referentiels = ReferentielsRepository(context)
+        val martelage = MartelageRepository(db.contexteDao(), db.tigeDao(), db.compteurConfigDao())
+        val sauvegarde =
+            SauvegardeRepository(db.contexteDao(), db.tigeDao(), db.compteurConfigDao(), db.mergeDao(), referentiels)
         return Conteneur(
-            repository = MartelageRepository(db.contexteDao(), db.tigeDao(), db.compteurConfigDao()),
+            repository = martelage,
             reglages = ReglagesRepository(context),
             referentiels = referentiels,
-            sauvegarde = SauvegardeRepository(db.contexteDao(), db.tigeDao(), db.compteurConfigDao(), db.mergeDao(), referentiels),
+            sauvegarde = sauvegarde,
             gpkg = GpkgRepository(context),
+            lot = LotRepository(context, sauvegarde, martelage),
         )
     }
 }

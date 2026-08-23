@@ -68,6 +68,13 @@ La **première table de tuiles** du GPKG sert de fond de carte hors-ligne ; elle
 Web Mercator au premier affichage (le résultat est écrit dans le GPKG, `<table>_wm`). N'en mettre
 **qu'une** : avec plusieurs tables de tuiles, celle qui est retenue n'est pas prévisible.
 
+## Lot de chantiers
+
+Un GPKG peut arriver **par lot** : une archive ZIP produite par Nemeton, contenant un `.marsync`
+et un GeoPackage par contexte, appariés par le champ `gpkgNom` — voir
+`2026-08-23-import-lot-zip.md`. Ces GeoPackages portent `parcelle` et `desserte`, et pas de table
+de tuiles.
+
 ## Pièges
 
 - Ne pas livrer une couche de houppiers sous un autre nom que `houppier` : elle deviendrait une

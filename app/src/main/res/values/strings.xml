@@ -271,6 +271,14 @@
     <string name="sync_operateur_desc">Identité par défaut (appareil) : %1$s… — saisissez un nom pour la remplacer.</string>
     <string name="sync_partager">Partager (.marsync)</string>
     <string name="sync_fusionner">Fusionner</string>
+    <string name="lot_desc">Un lot de chantiers produit par Nemeton : les contextes sont fusionnés et chaque carte est rattachée à son contexte, sans rattachement manuel.</string>
+    <string name="lot_importer">Importer un lot (.zip)</string>
+    <string name="lot_en_cours">Import en cours…</string>
+    <string name="lot_msg_ok">%1$d chantier(s) importé(s), %2$d carte(s) rattachée(s).</string>
+    <string name="lot_msg_sans_gpkg">%1$d chantier(s) sans carte : %2$s. Le GeoPackage annoncé manque au lot — rattachez-le à la main depuis la carte.</string>
+    <string name="lot_msg_sans_marsync">Ce ZIP ne contient aucun fichier .marsync : ce n\'est pas un lot de chantiers. Rien n\'a été importé.</string>
+    <string name="lot_msg_marsync_multiple">Ce ZIP contient plusieurs fichiers .marsync : impossible de savoir lequel fait foi. Rien n\'a été importé.</string>
+    <string name="lot_msg_entree_refusee">Archive refusée : l\'entrée « %1$s » n\'est pas un simple nom de fichier. Rien n\'a été importé.</string>
     <string name="sync_msg_fusion">Synchronisation fusionnée.</string>
     <string name="sync_partage_titre">Partager la synchronisation</string>
 

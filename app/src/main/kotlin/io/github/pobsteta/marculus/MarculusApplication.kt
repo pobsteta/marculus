@@ -26,4 +26,5 @@ class MarculusApplication : Application() {
     val referentiels get() = data.referentiels
     val sauvegarde get() = data.sauvegarde
     val gpkg get() = data.gpkg
+    val lot get() = data.lot
 }

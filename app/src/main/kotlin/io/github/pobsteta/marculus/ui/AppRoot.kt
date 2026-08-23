@@ -31,6 +31,7 @@ import fr.marculus.core.model.Reglages
 import fr.marculus.core.model.SeuilsCategories
 import io.github.pobsteta.marculus.Appareil
 import io.github.pobsteta.marculus.data.GpkgRepository
+import io.github.pobsteta.marculus.data.LotRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ReferentielsRepository
 import io.github.pobsteta.marculus.data.ReglagesRepository
@@ -96,6 +97,7 @@ fun AppRoot(
     referentielsRepository: ReferentielsRepository,
     sauvegardeRepository: SauvegardeRepository,
     gpkgRepository: GpkgRepository,
+    lotRepository: LotRepository,
 ) {
     // rememberSaveable : la navigation survit aux rotations / recréations d'activité.
     var route: Route by rememberSaveable(stateSaver = RouteSaver) { mutableStateOf<Route>(Route.Liste) }
@@ -176,6 +178,7 @@ fun AppRoot(
         Route.Parametres -> ParametresScreen(
             reglagesRepository = reglagesRepository,
             sauvegardeRepository = sauvegardeRepository,
+            lotRepository = lotRepository,
             onRetour = { route = Route.Liste },
         )
 

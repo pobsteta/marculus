@@ -29,6 +29,8 @@
   - ✅ **Dictée vocale hors ligne** des tiges (Vosk, grammaire fermée, push-to-talk).
   - ✅ **Couches typées du GPKG** (`couches-gpkg.md`) : parcelles, `houppier` (estimation de la
     hauteur par MNH), `desserte` (routes/pistes/chemins sur la carte), ortho.
+  - ✅ **Import d'un lot de chantiers** (.zip Nemeton) : fusion des contextes et rattachement
+    automatique des GeoPackages (`2026-08-23-import-lot-zip.md`).
   - 🔜 Synchro **temps réel / réseau** entre appareils.
 - Contraintes : **hors-ligne total**, **sans publicité**. Le partage reste **par fichier**
   (pas de serveur).

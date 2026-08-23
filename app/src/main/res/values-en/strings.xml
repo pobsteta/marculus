@@ -269,6 +269,14 @@
     <string name="sync_operateur_desc">Default identity (device): %1$s… — enter a name to override it.</string>
     <string name="sync_partager">Share (.marsync)</string>
     <string name="sync_fusionner">Merge</string>
+    <string name="lot_desc">A batch of marking sites produced by Nemeton: contexts are merged and each map is attached to its context, with no manual pairing.</string>
+    <string name="lot_importer">Import a batch (.zip)</string>
+    <string name="lot_en_cours">Importing…</string>
+    <string name="lot_msg_ok">%1$d site(s) imported, %2$d map(s) attached.</string>
+    <string name="lot_msg_sans_gpkg">%1$d site(s) without a map: %2$s. The announced GeoPackage is missing from the batch — attach it by hand from the map.</string>
+    <string name="lot_msg_sans_marsync">This ZIP holds no .marsync file: it is not a batch of sites. Nothing was imported.</string>
+    <string name="lot_msg_marsync_multiple">This ZIP holds several .marsync files: there is no telling which one is authoritative. Nothing was imported.</string>
+    <string name="lot_msg_entree_refusee">Archive refused: entry \"%1$s\" is not a plain file name. Nothing was imported.</string>
     <string name="sync_msg_fusion">Sync merged.</string>
     <string name="sync_partage_titre">Share the sync</string>
 

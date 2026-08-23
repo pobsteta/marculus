@@ -35,6 +35,7 @@ class MainActivity : ComponentActivity() {
         val referentielsRepo = (application as MarculusApplication).referentiels
         val sauvegardeRepo = (application as MarculusApplication).sauvegarde
         val gpkgRepo = (application as MarculusApplication).gpkg
+        val lotRepo = (application as MarculusApplication).lot
         setContent {
             val reglages by reglagesRepo.reglages.collectAsStateWithLifecycle(Reglages())
 
@@ -60,7 +61,7 @@ class MainActivity : ComponentActivity() {
 
             MarculusTheme(darkTheme = reglages.themeSombre || isSystemInDarkTheme()) {
                 Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    AppRoot(repository, reglagesRepo, reglages, referentielsRepo, sauvegardeRepo, gpkgRepo)
+                    AppRoot(repository, reglagesRepo, reglages, referentielsRepo, sauvegardeRepo, gpkgRepo, lotRepo)
                 }
             }
         }

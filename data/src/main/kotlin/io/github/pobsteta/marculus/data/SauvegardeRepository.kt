@@ -7,6 +7,7 @@ import io.github.pobsteta.marculus.data.db.ContexteEntity
 import io.github.pobsteta.marculus.data.db.MergeDao
 import io.github.pobsteta.marculus.data.db.TigeDao
 import io.github.pobsteta.marculus.data.db.TigeEntity
+import fr.marculus.core.LotMartelage
 import kotlinx.coroutines.flow.first
 import org.json.JSONArray
 import org.json.JSONObject
@@ -74,6 +75,21 @@ class SauvegardeRepository(
         val configs = root.optJSONArray("configs").objetsOuVide().map { it.versConfig() }
         mergeDao.fusionner(contextes, tiges, configs)
     }
+
+    /**
+     * Contextes annoncés par un lot, avec le **`gpkgNom`** qui les apparie à leur GeoPackage.
+     * Ce champ n'existe que dans les lots : `versContexte()` l'ignore, et `cheminGpkg` reste à
+     * renseigner après copie — la machine émettrice ne peut pas connaître nos chemins privés.
+     * Lecture seule : cette fonction n'écrit rien, la fusion reste l'affaire de [fusionnerJson].
+     */
+    fun contextesDuLot(json: String): List<LotMartelage.ContexteDuLot> =
+        JSONObject(json).optJSONArray("contextes").objetsOuVide().map {
+            LotMartelage.ContexteDuLot(
+                id = it.getString("id"),
+                nom = it.optString("nom", it.getString("id")),
+                gpkgNom = it.texteOuNull("gpkgNom"),
+            )
+        }
 
     private fun JSONArray?.objetsOuVide(): List<JSONObject> =
         if (this == null) emptyList() else (0 until length()).map { getJSONObject(it) }
