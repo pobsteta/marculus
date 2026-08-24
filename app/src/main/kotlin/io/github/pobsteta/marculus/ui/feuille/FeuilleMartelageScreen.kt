@@ -91,6 +91,7 @@ import java.text.DecimalFormatSymbols
 import java.util.Locale
 import java.util.concurrent.atomic.AtomicInteger
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.AnnonceHauteur
 import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.Cubage
 import fr.marculus.core.EstimationHauteur
@@ -220,6 +221,16 @@ private fun vibrerDouble(context: Context) {
 }
 
 /**
+ * Hauteur telle qu'elle s'annonce : « hauteur 12, découpe 6 A, 3 A B ». La découpe est dite
+ * **dans tous les cas** — dictée dans le même énoncé que la tige, ajoutée après coup, ou saisie.
+ */
+private fun annonceHauteur(context: android.content.Context, texte: String): String {
+    val totale = context.getString(R.string.voix_hauteur_annonce, AnnonceHauteur.totale(texte))
+    val decoupe = AnnonceHauteur.decoupe(texte) ?: return totale
+    return totale + ", " + context.getString(R.string.voix_decoupe_annonce, decoupe)
+}
+
+/**
  * Hauteur estimée depuis les houppiers du MNH, ou `null` : réglage décoché, position absente,
  * couche `houppier` absente, ou position dans aucun houppier (trouée, bord, tige dominée).
  * Elle ne complète **que** les tiges sans hauteur mesurée — dictée ou saisie priment toujours.
@@ -312,8 +323,9 @@ fun FeuilleMartelageScreen(
             if (reglages.annonceEtiquette || forcer) {
                 add(
                     "$essence $classe" + (qualite?.let { " $it" } ?: "") +
-                        // On relit la hauteur totale : la découpe serait illisible à l'oreille.
-                        (hauteur?.let { " " + androidContext.getString(R.string.voix_hauteur_annonce, it.substringBefore('-')) } ?: ""),
+                        // La découpe fait partie de ce qui a été dit : elle se relit aussi, sans
+                        // quoi rien ne permet de vérifier à l'oreille ce que le décodeur a compris.
+                        (hauteur?.let { " " + annonceHauteur(androidContext, it) } ?: ""),
                 )
             }
             if (reglages.annonceNombre) add(total.toString())
@@ -594,11 +606,7 @@ fun FeuilleMartelageScreen(
                     dire(messageRienAAnnuler, "vocal", remplacer = true)
                 } else {
                     scope.launch { repository.annoterHauteur(cible.uuid, texte) }
-                    dire(
-                        androidContext.getString(R.string.voix_hauteur_annonce, texte.substringBefore('-')),
-                        "vocal",
-                        remplacer = true,
-                    )
+                    dire(annonceHauteur(androidContext, texte), "vocal", remplacer = true)
                 }
             }
             // Découpe dictée seule : elle se greffe sur la hauteur que la tige porte déjà —
@@ -617,7 +625,10 @@ fun FeuilleMartelageScreen(
                             // La découpe dite remplace la précédente : redire, c'est corriger.
                             repository.annoterHauteur(cible.uuid, "$actuelle-$segments")
                             dire(
-                                androidContext.getString(R.string.voix_decoupe_annonce, segments),
+                                androidContext.getString(
+                                    R.string.voix_decoupe_annonce,
+                                    AnnonceHauteur.decoupe("0-$segments") ?: segments,
+                                ),
                                 "vocal",
                                 remplacer = true,
                             )
