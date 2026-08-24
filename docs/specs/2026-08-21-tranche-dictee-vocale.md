@@ -115,7 +115,7 @@ un énoncé incomplet, donc rejeté.
 | `voice/ModeleVosk.kt` | `:app` | Téléchargement / installation / suppression du modèle |
 | `ui/feuille/DicteeVocale.kt` | `:app` | Colle Compose : grammaire du contexte, permission micro, bouton micro, aide-mémoire |
 
-`:core` reste 100 % JVM : ni Vosk, ni Android n'y entrent. 49 tests JVM couvrent la grammaire, le
+`:core` reste 100 % JVM : ni Vosk, ni Android n'y entrent. 55 tests JVM couvrent la grammaire, le
 parseur, le référentiel parlé et le noyau PTT (93 % d'instructions couvertes sur le paquet `voice`).
 
 ### Référentiel parlé
@@ -186,6 +186,17 @@ Coexistence Bluetooth vérifiée sur le papier : le récepteur GNSS (SPP ou BLE)
 deux liens indépendants, multiplexés par la puce dual-mode ; aucun n'est un périphérique audio, donc
 la capture reste sur le micro interne. À éviter : les télécommandes selfie type AB Shutter, qui
 émulent volume+ et percuteraient le comptage.
+
+### Ce qui est réannoncé
+
+L'annonce TTS relit **tout ce qui a été saisi**, découpe comprise : « chêne 50 hauteur 12, découpe
+6 A, 3 A B ». La hauteur enchaînée à une tige taisait sa découpe — c'était le seul cas où
+l'opérateur ne pouvait pas vérifier à l'oreille ce que le décodeur avait compris, alors même que
+la découpe est la partie la plus fragile de l'énoncé.
+
+Les lettres de qualité bois sont **détachées** (« A B », pas « AB ») : un synthétiseur français lit
+`AB` comme un mot, ce qui rend la relecture inutile pour contrôler. La mise en mots vit dans
+`AnnonceHauteur` (`:core`, testée), pas dans l'écran.
 
 ### Anti-larsen
 
