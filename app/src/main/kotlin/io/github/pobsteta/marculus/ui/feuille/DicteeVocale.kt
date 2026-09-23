@@ -24,6 +24,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -332,6 +333,8 @@ class ActionsVocales {
  * dictée se cherche **en gant**, sans regarder l'écran, dans le coin de l'écran : il fait donc
  * [TAILLE_MICRO] de côté, soit **quatre fois la surface** d'un FAB standard, avec une icône
  * agrandie dans la même proportion.
+ *
+ * [compact] le ramène à la taille d'un petit FAB, pour se ranger parmi les boutons +/− de la carte.
  */
 @Composable
 fun BoutonMicroPtt(
@@ -339,6 +342,7 @@ fun BoutonMicroPtt(
     enEcoute: Boolean,
     onAppui: () -> Unit,
     onRelache: () -> Unit,
+    compact: Boolean = false,
 ) {
     val couleur = when {
         !pret -> MaterialTheme.colorScheme.surfaceVariant
@@ -357,17 +361,25 @@ fun BoutonMicroPtt(
             }
         }
     }
-    FloatingActionButton(
-        onClick = {}, // l'action utile est l'appui maintenu, pas le clic
-        containerColor = couleur,
-        interactionSource = interactions,
-        modifier = Modifier.size(TAILLE_MICRO),
-    ) {
-        Icon(
-            imageVector = if (pret) Icons.Filled.Mic else Icons.Filled.MicOff,
-            contentDescription = stringResource(R.string.voix_micro_description),
-            modifier = Modifier.size(ICONE_MICRO),
-        )
+    val icone = if (pret) Icons.Filled.Mic else Icons.Filled.MicOff
+    val description = stringResource(R.string.voix_micro_description)
+    if (compact) {
+        SmallFloatingActionButton(
+            onClick = {}, // l'action utile est l'appui maintenu, pas le clic
+            containerColor = couleur,
+            interactionSource = interactions,
+        ) {
+            Icon(imageVector = icone, contentDescription = description)
+        }
+    } else {
+        FloatingActionButton(
+            onClick = {}, // l'action utile est l'appui maintenu, pas le clic
+            containerColor = couleur,
+            interactionSource = interactions,
+            modifier = Modifier.size(TAILLE_MICRO),
+        ) {
+            Icon(imageVector = icone, contentDescription = description, modifier = Modifier.size(ICONE_MICRO))
+        }
     }
 }
 

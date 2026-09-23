@@ -233,6 +233,9 @@ fun AppRoot(
         is Route.Carte -> CarteScreen(
             repository = repository,
             contexteId = r.contexteId,
+            reglages = reglages,
+            qualitesArbre = qualitesArbre,
+            qualitesBois = qualitesBois,
             gpkgRepository = gpkgRepository,
             onRetour = { route = Route.Feuille(r.contexteId) },
         )

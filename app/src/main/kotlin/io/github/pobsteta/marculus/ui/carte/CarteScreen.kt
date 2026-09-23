@@ -85,6 +85,7 @@ import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.Position
+import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.OrthoSource
@@ -93,6 +94,8 @@ import io.github.pobsteta.marculus.data.ParcelleGpkg
 import io.github.pobsteta.marculus.gnss.ServiceGnssRtk
 import io.github.pobsteta.marculus.gnss.SourcePositionInterne
 import io.github.pobsteta.marculus.ui.BandeauCompact
+import io.github.pobsteta.marculus.ui.feuille.BoutonMicroPtt
+import io.github.pobsteta.marculus.ui.feuille.sessionMartelage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -165,6 +168,9 @@ private val SOURCE_SATELLITE: OnlineTileSourceBase = object : OnlineTileSourceBa
 fun CarteScreen(
     repository: MartelageRepository,
     contexteId: String,
+    reglages: Reglages,
+    qualitesArbre: List<String>,
+    qualitesBois: List<String>,
     gpkgRepository: GpkgRepository,
     onRetour: () -> Unit,
 ) {
@@ -218,6 +224,19 @@ fun CarteScreen(
             awaitDispose { }
         }
     }
+    // Saisie vocale depuis la carte : la même session que la feuille — une tige dictée ici est
+    // figée au même endroit, annoncée de la même voix, et apparaît aussitôt sur la carte.
+    val session = sessionMartelage(
+        repository = repository,
+        contexteId = contexteId,
+        contexte = contexte,
+        reglages = reglages,
+        qualitesArbre = qualitesArbre,
+        qualitesBois = qualitesBois,
+        parcelles = parcelles,
+        houppiers = houppiers,
+    )
+    val dictee = session.dictee
     val importGpkgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             scope.launch {
@@ -513,6 +532,17 @@ fun CarteScreen(
                 }
                 SmallFloatingActionButton(onClick = { recadrer() }) {
                     Icon(Icons.Filled.MyLocation, contentDescription = stringResource(R.string.carte_recentrer))
+                }
+                // Le micro sous les boutons de navigation, à leur taille : sur la carte, il ne doit
+                // pas masquer le terrain autour de sa position.
+                if (reglages.pttEcran && contexte != null) {
+                    BoutonMicroPtt(
+                        pret = dictee.microPret,
+                        enEcoute = dictee.enEcoute,
+                        onAppui = { dictee.demarrer() },
+                        onRelache = { dictee.arreter() },
+                        compact = true,
+                    )
                 }
             }
         },
