@@ -353,9 +353,9 @@
     <string name="etat_tel_desactive">Localisation désactivée sur le téléphone : activez-la dans les réglages rapides.</string>
     <string name="etat_tel_fix">Position obtenue.</string>
     <string name="etat_tel_fix_ttff">Position obtenue (premier fix en %1$d s).</string>
-    <string name="etat_tel_recherche_aucun">Recherche depuis %1$d s : aucun satellite capté pour l'instant.</string>
+    <string name="etat_tel_recherche_aucun">Recherche depuis %1$d s : aucun satellite capté pour l\'instant.</string>
     <string name="etat_tel_recherche">Recherche depuis %1$d s : %2$d satellites en vue, %3$d utilisés.</string>
-    <string name="etat_tel_ponctuel_note">En mode ponctuel, le GNSS ne s'allume qu'au moment de chaque tige ; il est allumé ici le temps de ce panneau.</string>
+    <string name="etat_tel_ponctuel_note">En mode ponctuel, le GNSS ne s\'allume qu\'au moment de chaque tige ; il est allumé ici le temps de ce panneau.</string>
     <string name="gnss_badge_recherche">Recherche…</string>
     <string name="gnss_badge_ponctuel">Ponctuel</string>
     <string name="gnss_badge_sans_position">Sans position</string>
