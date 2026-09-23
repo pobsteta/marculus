@@ -33,6 +33,15 @@ class ChaineDicteeTest {
     }
 
     @Test
+    fun `qualite biodiversite dictee sans accent`() {
+        val parseur = parseurAvec(Referentiels.QUALITE_ARBRE_DEFAUT)
+        assertEquals(
+            VoiceEvent.Tige("HET", 45, "Biodiversité"),
+            parseur.parse("hetre quarante cinq biodiversite"),
+        )
+    }
+
+    @Test
     fun `l alphabet radio n est PAS accepte avec un referentiel en toutes lettres`() {
         // Piège documenté : « bravo » n'existe dans la grammaire que si le référentiel de
         // qualités contient des codes en lettres. Sinon c'est un mot hors lexique → rejet.
