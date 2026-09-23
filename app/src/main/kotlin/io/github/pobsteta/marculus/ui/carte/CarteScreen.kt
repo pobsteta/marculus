@@ -70,6 +70,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -224,19 +225,6 @@ fun CarteScreen(
             awaitDispose { }
         }
     }
-    // Saisie vocale depuis la carte : la même session que la feuille — une tige dictée ici est
-    // figée au même endroit, annoncée de la même voix, et apparaît aussitôt sur la carte.
-    val session = sessionMartelage(
-        repository = repository,
-        contexteId = contexteId,
-        contexte = contexte,
-        reglages = reglages,
-        qualitesArbre = qualitesArbre,
-        qualitesBois = qualitesBois,
-        parcelles = parcelles,
-        houppiers = houppiers,
-    )
-    val dictee = session.dictee
     val importGpkgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             scope.launch {
@@ -262,6 +250,22 @@ fun CarteScreen(
             controller.setCenter(GeoPoint(46.6, 2.5)) // France
         }
     }
+
+    // Saisie vocale depuis la carte : la même session que la feuille — une tige dictée ici est
+    // figée au même endroit, annoncée de la même voix, et apparaît aussitôt sur la carte.
+    val session = sessionMartelage(
+        repository = repository,
+        contexteId = contexteId,
+        contexte = contexte,
+        reglages = reglages,
+        qualitesArbre = qualitesArbre,
+        qualitesBois = qualitesBois,
+        parcelles = parcelles,
+        houppiers = houppiers,
+        // GNSS coupé ou pas encore de fix : la tige se place sous la croix du centre de la carte.
+        positionPointee = { mapView.mapCenter.let { Position(it.latitude, it.longitude) } },
+    )
+    val dictee = session.dictee
 
     DisposableEffect(Unit) {
         mapView.onResume()
@@ -608,6 +612,7 @@ fun CarteScreen(
         }
         Box(Modifier.fillMaxSize().padding(padding)) {
             AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
+            if (session.pointage) CroixCentre(Modifier.align(Alignment.Center))
             parcelleCentre?.let { libelle ->
                 Card(
                     modifier = Modifier.align(Alignment.TopCenter).padding(8.dp),
@@ -728,6 +733,23 @@ private fun LegendeEssences(
                 }
             }
         }
+    }
+}
+
+/**
+ * Réticule du centre de la carte : là où se placera la tige tant qu'aucun fix GNSS n'est
+ * disponible. Trait sombre liseré de blanc, lisible sur l'ortho comme sur le fond OSM.
+ */
+@Composable
+private fun CroixCentre(modifier: Modifier = Modifier) {
+    androidx.compose.foundation.Canvas(modifier.size(28.dp)) {
+        val c = size.width / 2f
+        val traits = listOf(
+            Offset(0f, c) to Offset(size.width, c),
+            Offset(c, 0f) to Offset(c, size.height),
+        )
+        traits.forEach { (a, b) -> drawLine(Color.White, a, b, strokeWidth = 5.dp.toPx()) }
+        traits.forEach { (a, b) -> drawLine(Color(0xFFB71C1C), a, b, strokeWidth = 2.dp.toPx()) }
     }
 }
 

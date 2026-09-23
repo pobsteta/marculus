@@ -220,6 +220,8 @@ class SessionMartelage internal constructor(
     val rtkActif: Boolean,
     /** Capture sur le GNSS du téléphone alors que sa localisation est coupée : aucune position. */
     val gnssCoupe: Boolean,
+    /** Sans fix, les tiges prennent la position pointée (centre de la carte), en « Manuel ». */
+    val pointage: Boolean,
     val derniereSaisie: DerniereSaisie?,
     /** Compte une tige : retour sensoriel, annonce, journal, GNSS. Sans effet tant que le contexte charge. */
     val ajouter: (essence: String, classe: Int) -> Unit,
@@ -242,6 +244,9 @@ class SessionMartelage internal constructor(
  *
  * @param parcelles parcelles du GeoPackage, pour figer le rattachement spatial dans la tige
  * @param houppiers houppiers du MNH, lus seulement si l'estimation de hauteur est réglée
+ * @param positionPointee position de repli quand la capture est réglée mais qu'aucun fix n'est
+ *   disponible (GNSS coupé, en recherche, récepteur absent) : le centre de la carte. La tige est
+ *   alors marquée [QualiteFix.MANUEL], jamais confondue avec une mesure GNSS.
  */
 @Composable
 fun sessionMartelage(
@@ -253,6 +258,7 @@ fun sessionMartelage(
     qualitesBois: List<String>,
     parcelles: List<ParcelleGpkg>,
     houppiers: List<Houppier>,
+    positionPointee: (() -> Position?)? = null,
 ): SessionMartelage {
     val scope = rememberCoroutineScope()
     val androidContext = LocalContext.current
@@ -358,6 +364,22 @@ fun sessionMartelage(
         rtkActif -> fixRtk
         else -> position
     }
+    // Sans fix, la position pointée (centre de la carte) tient lieu de position, en « Manuel ».
+    // Sauf en ponctuel sur le GNSS du téléphone allumé : le fix n'y existe qu'à la tige, et c'est
+    // lui qui la placera.
+    val ponctuelInterne = !rtkActif && reglages.gnssPonctuel && !gnssCoupe
+    val pointage = reglages.capturePosition && fixTige == null && positionPointee != null && !ponctuelInterne
+    fun fixEffectif(): FixGnss? = fixTige ?: positionPointee?.takeIf { pointage }?.invoke()?.let {
+        FixGnss(
+            position = it,
+            qualite = QualiteFix.MANUEL,
+            nbSatellites = 0,
+            hdop = null,
+            altitudeM = null,
+            ageCorrectionsS = null,
+            precisionHorizontaleM = null,
+        )
+    }
     val estimerMnh = reglages.estimerHauteurMnh
     fun parcelleDe(p: Position?): String? =
         p?.let { pos -> parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, pos) }?.label }
@@ -425,7 +447,7 @@ fun sessionMartelage(
         qualite: String?,
         onInseree: (uuid: String) -> Unit = {},
     ) {
-        val fix = fixTige
+        val fix = fixEffectif()
         val pos = fix?.position
         scope.launch {
             val uuid = repository.ajouterTige(
@@ -480,7 +502,7 @@ fun sessionMartelage(
             hauteur = hauteurTexte,
         )
         configs[cle]?.let { annoncerAvis(it, nouveauTotal) }
-        val parcelleLabel = parcelleDe(fixTige?.position)
+        val parcelleLabel = parcelleDe(fixEffectif()?.position)
         // Changement de parcelle rattachée : le mode rafale repart de l'essence dictée.
         if (parcelleConnue && parcelleLabel != parcelleCourante) dictee.reinitialiserRafale()
         parcelleCourante = parcelleLabel
@@ -598,6 +620,7 @@ fun sessionMartelage(
         configs = configs,
         fixTige = fixTige,
         gnssCoupe = gnssCoupe,
+        pointage = pointage,
         rtkActif = rtkActif,
         derniereSaisie = derniereSaisie,
         ajouter = { essence, classe -> ajouter(essence, classe) },
