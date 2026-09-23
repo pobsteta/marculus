@@ -19,11 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fr.marculus.core.model.FixGnss
 import fr.marculus.core.model.QualiteFix
+import io.github.pobsteta.marculus.R
 
 /**
  * Pastille de **qualité du fix GNSS** : couleur selon RTK fixe / flottant / DGPS / autonome,
@@ -45,6 +47,7 @@ fun BadgeFix(fix: FixGnss?, modifier: Modifier = Modifier, onClick: (() -> Unit)
  *
  * @param capture maître-interrupteur « enregistrer la position GNSS ».
  * @param rtkActif vrai si la source est le récepteur externe (sinon GNSS interne).
+ * @param ponctuel GNSS interne en acquisition ponctuelle : pas de fix entre deux tiges, et c'est normal.
  * @param fix fix retenu pour la tige (null = pas encore de position).
  */
 @Composable
@@ -52,17 +55,20 @@ fun BadgeGnss(
     capture: Boolean,
     rtkActif: Boolean,
     fix: FixGnss?,
+    ponctuel: Boolean = false,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
     if (!capture) {
-        Pastille("Sans position", Color(0xFFB71C1C), Icons.Filled.LocationOff, modifier, onClick)
+        Pastille(stringResource(R.string.gnss_badge_sans_position), Color(0xFFB71C1C), Icons.Filled.LocationOff, modifier, onClick)
         return
     }
     val icone = if (rtkActif) Icons.Filled.SatelliteAlt else Icons.Filled.Smartphone
     if (fix == null) {
         // Capture active mais pas encore de fix (récepteur en connexion / GNSS en recherche).
-        Pastille("Recherche…", Color(0xFF616161), icone, modifier, onClick)
+        // En ponctuel, la puce ne tourne qu'à la tige : « Recherche… » laisserait croire à une panne.
+        val texte = if (!rtkActif && ponctuel) R.string.gnss_badge_ponctuel else R.string.gnss_badge_recherche
+        Pastille(stringResource(texte), Color(0xFF616161), icone, modifier, onClick)
         return
     }
     val precision = fix.precisionHorizontaleM?.let { " · ${formaterPrecision(it)}" }.orEmpty()
