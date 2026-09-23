@@ -48,6 +48,7 @@ fun BadgeFix(fix: FixGnss?, modifier: Modifier = Modifier, onClick: (() -> Unit)
  * @param capture maître-interrupteur « enregistrer la position GNSS ».
  * @param rtkActif vrai si la source est le récepteur externe (sinon GNSS interne).
  * @param ponctuel GNSS interne en acquisition ponctuelle : pas de fix entre deux tiges, et c'est normal.
+ * @param gnssCoupe GNSS du téléphone retenu mais localisation désactivée : rouge, comme sans position.
  * @param fix fix retenu pour la tige (null = pas encore de position).
  */
 @Composable
@@ -56,11 +57,16 @@ fun BadgeGnss(
     rtkActif: Boolean,
     fix: FixGnss?,
     ponctuel: Boolean = false,
+    gnssCoupe: Boolean = false,
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
 ) {
     if (!capture) {
         Pastille(stringResource(R.string.gnss_badge_sans_position), Color(0xFFB71C1C), Icons.Filled.LocationOff, modifier, onClick)
+        return
+    }
+    if (gnssCoupe) {
+        Pastille(stringResource(R.string.gnss_badge_coupe), Color(0xFFB71C1C), Icons.Filled.LocationOff, modifier, onClick)
         return
     }
     val icone = if (rtkActif) Icons.Filled.SatelliteAlt else Icons.Filled.Smartphone
