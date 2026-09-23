@@ -345,6 +345,7 @@
     <string name="gnss_badge_ponctuel">On demand</string>
     <string name="gnss_badge_sans_position">No position</string>
     <string name="gnss_badge_coupe">GNSS off</string>
+    <string name="carte_position_manuelle">Manual position</string>
     <string name="etat_fix">Fix type</string>
     <string name="etat_precision">Horizontal accuracy</string>
     <string name="etat_latitude">Latitude</string>
