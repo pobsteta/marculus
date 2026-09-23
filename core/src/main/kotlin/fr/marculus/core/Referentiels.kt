@@ -6,8 +6,11 @@ object Referentiels {
         "Chêne", "Hêtre", "Autres feuillus", "Sapin", "Épicéa", "Autres résineux",
     )
 
+    /** Arbre conservé pour la biodiversité (arbre-habitat, à cavités, bois mort sur pied…). */
+    const val QUALITE_BIODIVERSITE = "Biodiversité"
+
     val QUALITE_ARBRE_DEFAUT: List<String> = listOf(
-        "Sec", "Chablis", "Volis", "Malade",
+        "Sec", "Chablis", "Volis", "Malade", QUALITE_BIODIVERSITE,
     )
 
     /** Qualités bois : lettres simples et combinaisons (employées dans le texte de hauteur). */
