@@ -78,6 +78,7 @@ import io.github.pobsteta.marculus.ui.BandeauCompact
 import io.github.pobsteta.marculus.ui.ToucheVolume
 import io.github.pobsteta.marculus.ui.gnss.BadgeGnss
 import io.github.pobsteta.marculus.ui.gnss.DialogueEtatGnss
+import io.github.pobsteta.marculus.ui.gnss.DialogueEtatGnssTelephone
 import io.github.pobsteta.marculus.ui.tige.SaisieTigeDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -164,6 +165,7 @@ fun FeuilleMartelageScreen(
                         capture = reglages.capturePosition,
                         rtkActif = session.rtkActif,
                         fix = fixTige,
+                        ponctuel = reglages.gnssPonctuel,
                         modifier = Modifier.padding(end = 8.dp),
                         onClick = { etatGnssOuvert = true },
                     )
@@ -353,7 +355,12 @@ fun FeuilleMartelageScreen(
 
 
     if (etatGnssOuvert) {
-        DialogueEtatGnss(fixTige) { etatGnssOuvert = false }
+        // GNSS du téléphone : un panneau qui dit pourquoi il n'y a pas (encore) de position.
+        if (session.rtkActif || !reglages.capturePosition) {
+            DialogueEtatGnss(fixTige) { etatGnssOuvert = false }
+        } else {
+            DialogueEtatGnssTelephone(reglages.gnssPonctuel) { etatGnssOuvert = false }
+        }
     }
 
     if (formesParleesOuvertes) {

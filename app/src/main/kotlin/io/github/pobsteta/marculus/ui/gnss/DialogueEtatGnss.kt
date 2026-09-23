@@ -36,11 +36,7 @@ fun DialogueEtatGnss(fix: FixGnss?, onFermer: () -> Unit) {
                 Text(stringResource(R.string.etat_gnss_aucun))
             } else {
                 Column(Modifier.verticalScroll(rememberScrollState())) {
-                    Ligne(stringResource(R.string.etat_fix), fix.qualite.libelle)
-                    Ligne(stringResource(R.string.etat_precision), fix.precisionHorizontaleM?.let(::precision))
-                    Ligne(stringResource(R.string.etat_latitude), fmt(fix.position.latitude, 7))
-                    Ligne(stringResource(R.string.etat_longitude), fmt(fix.position.longitude, 7))
-                    Ligne(stringResource(R.string.etat_altitude), fix.altitudeM?.let { "${fmt(it, 1)} m" })
+                    DetailsFix(fix)
                     Ligne(stringResource(R.string.etat_satellites_utilises), fix.nbSatellites.takeIf { it > 0 }?.toString())
                     Ligne(stringResource(R.string.etat_satellites_vus), fix.satellites.size.takeIf { it > 0 }?.toString())
                     Ligne(stringResource(R.string.etat_hdop), fix.hdop?.let { fmt(it, 2) })
@@ -65,8 +61,18 @@ fun DialogueEtatGnss(fix: FixGnss?, onFermer: () -> Unit) {
     )
 }
 
+/** Lignes de position communes aux deux sources : type de fix, précision, coordonnées, altitude. */
 @Composable
-private fun Ligne(libelle: String, valeur: String?) {
+internal fun DetailsFix(fix: FixGnss) {
+    Ligne(stringResource(R.string.etat_fix), fix.qualite.libelle)
+    Ligne(stringResource(R.string.etat_precision), fix.precisionHorizontaleM?.let(::precision))
+    Ligne(stringResource(R.string.etat_latitude), fmt(fix.position.latitude, 7))
+    Ligne(stringResource(R.string.etat_longitude), fmt(fix.position.longitude, 7))
+    Ligne(stringResource(R.string.etat_altitude), fix.altitudeM?.let { "${fmt(it, 1)} m" })
+}
+
+@Composable
+internal fun Ligne(libelle: String, valeur: String?) {
     Row(Modifier.fillMaxWidth().padding(vertical = 3.dp)) {
         Text(libelle, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
         Text(

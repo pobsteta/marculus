@@ -328,6 +328,22 @@
     <!-- GNSS status panel -->
     <string name="etat_gnss_titre">GNSS status</string>
     <string name="etat_gnss_aucun">No GNSS data (receiver not connected).</string>
+    <string name="etat_source">Source</string>
+    <string name="etat_source_telephone">Phone GNSS</string>
+    <string name="etat_mode">Acquisition</string>
+    <string name="etat_mode_continu">Continuous</string>
+    <string name="etat_mode_ponctuel">On demand (each stem)</string>
+    <string name="etat_age_position">Position age</string>
+    <string name="etat_tel_non_autorise">Location permission denied: no position can be recorded.</string>
+    <string name="etat_tel_desactive">Location is turned off on the phone: enable it in quick settings.</string>
+    <string name="etat_tel_fix">Position acquired.</string>
+    <string name="etat_tel_fix_ttff">Position acquired (first fix in %1$d s).</string>
+    <string name="etat_tel_recherche_aucun">Searching for %1$d s: no satellite received yet.</string>
+    <string name="etat_tel_recherche">Searching for %1$d s: %2$d satellites in view, %3$d used.</string>
+    <string name="etat_tel_ponctuel_note">In on-demand mode, GNSS only turns on for each stem; it is kept on here while this panel is open.</string>
+    <string name="gnss_badge_recherche">Searching…</string>
+    <string name="gnss_badge_ponctuel">On demand</string>
+    <string name="gnss_badge_sans_position">No position</string>
     <string name="etat_fix">Fix type</string>
     <string name="etat_precision">Horizontal accuracy</string>
     <string name="etat_latitude">Latitude</string>
