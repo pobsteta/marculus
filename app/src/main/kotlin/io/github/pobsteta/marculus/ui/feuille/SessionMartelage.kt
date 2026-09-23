@@ -1,7 +1,10 @@
 package io.github.pobsteta.marculus.ui.feuille
 
 import android.Manifest
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
@@ -97,7 +100,9 @@ private fun positionActuelle(active: Boolean): FixGnss? {
                 }
                 override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
                 override fun onProviderEnabled(provider: String) {}
-                override fun onProviderDisabled(provider: String) {}
+                // Localisation coupée : la dernière position deviendrait celle de toutes les
+                // tiges suivantes. Mieux vaut une tige sans position qu'une position périmée.
+                override fun onProviderDisabled(provider: String) { etat.value = null }
             }
             listener = l
             runCatching {
@@ -110,6 +115,32 @@ private fun positionActuelle(active: Boolean): FixGnss? {
         onDispose { listener?.let { l -> runCatching { lm?.removeUpdates(l) } } }
     }
     return etat.value
+}
+
+/**
+ * Localisation du téléphone activée ? Suivi en direct (réglages rapides), y compris en mode
+ * ponctuel où aucune écoute GNSS ne tourne entre deux tiges.
+ */
+@Composable
+private fun localisationActivee(): Boolean {
+    val context = LocalContext.current
+    val lm = remember { context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager }
+    fun lire() = lm?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true
+    var activee by remember { mutableStateOf(lire()) }
+    DisposableEffect(lm) {
+        val recepteur = object : BroadcastReceiver() {
+            override fun onReceive(c: Context?, intent: Intent?) { activee = lire() }
+        }
+        ContextCompat.registerReceiver(
+            context,
+            recepteur,
+            IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+        activee = lire()
+        onDispose { runCatching { context.unregisterReceiver(recepteur) } }
+    }
+    return activee
 }
 
 /** Capture un fix GNSS interne unique (one-shot) — acquisition ponctuelle au clic. */
@@ -187,6 +218,8 @@ class SessionMartelage internal constructor(
     /** Fix retenu pour figer la tige : null si la capture est coupée. */
     val fixTige: FixGnss?,
     val rtkActif: Boolean,
+    /** Capture sur le GNSS du téléphone alors que sa localisation est coupée : aucune position. */
+    val gnssCoupe: Boolean,
     val derniereSaisie: DerniereSaisie?,
     /** Compte une tige : retour sensoriel, annonce, journal, GNSS. Sans effet tant que le contexte charge. */
     val ajouter: (essence: String, classe: Int) -> Unit,
@@ -318,8 +351,10 @@ fun sessionMartelage(
     // Fix retenu pour figer la tige (position + qualité + précision). « Enregistrer la position
     // GNSS » est le maître-interrupteur : décoché → AUCUN fix, même avec un RTK connecté.
     // Coché → RTK si actif, sinon GNSS interne. La qualité est enregistrée dans les deux cas.
+    val gnssCoupe = reglages.capturePosition && !rtkActif && !localisationActivee()
     val fixTige = when {
         !reglages.capturePosition -> null
+        gnssCoupe -> null
         rtkActif -> fixRtk
         else -> position
     }
@@ -562,6 +597,7 @@ fun sessionMartelage(
         totaux = totaux,
         configs = configs,
         fixTige = fixTige,
+        gnssCoupe = gnssCoupe,
         rtkActif = rtkActif,
         derniereSaisie = derniereSaisie,
         ajouter = { essence, classe -> ajouter(essence, classe) },

@@ -359,6 +359,7 @@
     <string name="gnss_badge_recherche">Recherche…</string>
     <string name="gnss_badge_ponctuel">Ponctuel</string>
     <string name="gnss_badge_sans_position">Sans position</string>
+    <string name="gnss_badge_coupe">GNSS coupé</string>
 
     <!-- Dictée vocale (Vosk) -->
     <string name="voix_section">Dictée vocale</string>

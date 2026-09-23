@@ -166,6 +166,7 @@ fun FeuilleMartelageScreen(
                         rtkActif = session.rtkActif,
                         fix = fixTige,
                         ponctuel = reglages.gnssPonctuel,
+                        gnssCoupe = session.gnssCoupe,
                         modifier = Modifier.padding(end = 8.dp),
                         onClick = { etatGnssOuvert = true },
                     )
