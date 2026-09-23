@@ -26,6 +26,9 @@ jobs:
 
       - name: Configurer le SDK Android
         uses: android-actions/setup-android@v3
+        with:
+          # Le paquet « tools » (installé par défaut) n'existe plus avec les cmdline-tools 16.
+          packages: platform-tools
 
       - name: Configurer Gradle
         uses: gradle/actions/setup-gradle@v4
