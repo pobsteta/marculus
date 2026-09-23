@@ -86,6 +86,7 @@ import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.Position
+import fr.marculus.core.model.QualiteFix
 import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
@@ -482,6 +483,8 @@ fun CarteScreen(
                     val hq = buildList {
                         t.hauteurTexte?.takeIf { it.isNotBlank() }?.let { add(context.getString(R.string.carte_hauteur_prefix, it)) }
                         t.qualiteArbre?.takeIf { it.isNotBlank() }?.let { add(context.getString(R.string.carte_qualite_prefix, it)) }
+                        // Placée au centre de la carte faute de fix : à ne pas prendre pour une mesure.
+                        if (t.qualiteFix == QualiteFix.MANUEL) add(context.getString(R.string.carte_position_manuelle))
                     }
                     if (hq.isNotEmpty()) subDescription = hq.joinToString(" · ")
                 },
