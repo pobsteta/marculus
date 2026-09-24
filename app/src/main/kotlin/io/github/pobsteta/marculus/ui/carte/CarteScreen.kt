@@ -127,7 +127,7 @@ import kotlin.math.pow
 private const val ZOOM_MAX = 19.0
 
 /**
- * Niveaux de surzoom au-delà des tuiles natives (Satellite, ortho) : les dernières tuiles sont
+ * Niveaux de surzoom au-delà des tuiles natives (ortho IGN, ortho du chantier) : les dernières tuiles sont
  * agrandies. +5 niveaux amènent l'échelle au mètre, pour viser un arbre précis.
  */
 private const val SURZOOM = 5
@@ -160,15 +160,31 @@ private val PALETTE_FONCIER = listOf(
     0xFFFDD835.toInt(), 0xFF00ACC1.toInt(), 0xFF6D4C41.toInt(), 0xFFEC407A.toInt(),
 )
 
-private enum class Fond(val libelle: String) { OSM("OSM"), SATELLITE("Satellite"), ORTHO("Ortho") }
+/**
+ * Fonds de carte. [attribution] est la mention exigée par la licence de la source, affichée sous
+ * l'échelle ; l'ortho du chantier vient du GeoPackage, déjà attribué par celui qui l'a produit.
+ */
+private enum class Fond(val libelle: String, val attribution: String?) {
+    OSM("OSM", "© OpenStreetMap"),
+    IGN("Ortho IGN", "© IGN"),
+    ORTHO("Ortho chantier", null),
+}
 
-private val SOURCE_SATELLITE: OnlineTileSourceBase = object : OnlineTileSourceBase(
-    "ESRI World Imagery", 0, 19, 256, "",
-    arrayOf("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/"),
+/**
+ * Orthophotos IGN (BD ORTHO®, 20 cm) servies par la Géoplateforme en WMTS : gratuites, sans clé,
+ * sous Licence Ouverte Etalab 2.0. Le jeu de matrices `PM_0_19` est la grille Web Mercator
+ * d'osmdroid (0 à 19) : TILEROW/TILECOL sont directement Y/X.
+ */
+private val SOURCE_ORTHO_IGN: OnlineTileSourceBase = object : OnlineTileSourceBase(
+    "OrthoIGN", 0, 19, 256, ".jpg",
+    arrayOf("https://data.geopf.fr/wmts"),
 ) {
     override fun getTileURLString(pMapTileIndex: Long): String =
-        getBaseUrl() + MapTileIndex.getZoom(pMapTileIndex) + "/" +
-            MapTileIndex.getY(pMapTileIndex) + "/" + MapTileIndex.getX(pMapTileIndex)
+        getBaseUrl() + "?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0" +
+            "&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM_0_19" +
+            "&TILEMATRIX=" + MapTileIndex.getZoom(pMapTileIndex) +
+            "&TILEROW=" + MapTileIndex.getY(pMapTileIndex) +
+            "&TILECOL=" + MapTileIndex.getX(pMapTileIndex)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -345,7 +361,7 @@ fun CarteScreen(
     LaunchedEffect(fond, orthoSource) {
         val provider = when (fond) {
             Fond.OSM -> MapTileProviderBasic(context.applicationContext, TileSourceFactory.MAPNIK)
-            Fond.SATELLITE -> MapTileProviderBasic(context.applicationContext, SOURCE_SATELLITE)
+            Fond.IGN -> MapTileProviderBasic(context.applicationContext, SOURCE_ORTHO_IGN)
             Fond.ORTHO -> orthoSource?.let { src ->
                 // Tuiles natives jusqu'à src.zoomMax ; au-delà, l'approximateur les agrandit (overzoom).
                 val gpkgModule = GpkgTileModule(context, src)
@@ -358,14 +374,14 @@ fun CarteScreen(
             } ?: MapTileProviderBasic(context.applicationContext, TileSourceFactory.MAPNIK)
         }
         mapView.tileProvider = provider
-        // Satellite et ortho : surzoom au-delà de la résolution native (≈20 cm), jusqu'à l'échelle
+        // Orthos IGN et chantier : surzoom au-delà de la résolution native (≈20 cm), jusqu'à l'échelle
         // du mètre. OSM n'en a pas besoin : ses tuiles sont un dessin, pas une image du terrain.
         mapView.maxZoomLevel = when (fond) {
             Fond.OSM -> ZOOM_MAX
-            Fond.SATELLITE -> ZOOM_MAX + SURZOOM
+            Fond.IGN -> ZOOM_MAX + SURZOOM
             Fond.ORTHO -> ((orthoSource?.zoomMax ?: 19) + SURZOOM).toDouble()
         }
-        // Retour vers un fond moins profond (Satellite → OSM) : on redescend, sinon fond blanc.
+        // Retour vers un fond moins profond (ortho IGN → OSM) : on redescend, sinon fond blanc.
         if (mapView.zoomLevelDouble > mapView.maxZoomLevel) mapView.controller.setZoom(mapView.maxZoomLevel)
         mapView.invalidate()
     }
@@ -609,8 +625,8 @@ fun CarteScreen(
                     }
                     TextButton(onClick = {
                         fond = when (fond) {
-                            Fond.OSM -> Fond.SATELLITE
-                            Fond.SATELLITE -> if (orthoSource != null) Fond.ORTHO else Fond.OSM
+                            Fond.OSM -> Fond.IGN
+                            Fond.IGN -> if (orthoSource != null) Fond.ORTHO else Fond.OSM
                             Fond.ORTHO -> Fond.OSM
                         }
                     }) {
@@ -649,11 +665,13 @@ fun CarteScreen(
                 onToggle = { legendeOuverte = !legendeOuverte },
                 modifier = Modifier.align(Alignment.BottomStart).padding(8.dp),
             )
-            EchelleCarte(
-                metresParPixel = metresParPixel,
-                densite = densite,
-                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp),
-            )
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                EchelleCarte(metresParPixel = metresParPixel, densite = densite)
+                fond.attribution?.let { Text(it, style = MaterialTheme.typography.labelSmall) }
+            }
             if (chargement) {
                 IndicateurImport(Modifier.align(Alignment.Center))
             }
