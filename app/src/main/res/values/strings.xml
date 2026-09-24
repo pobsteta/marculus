@@ -110,6 +110,8 @@
     <string name="creation_date_aucune">Non renseignée</string>
     <string name="creation_date_choisir">Choisir</string>
     <string name="creation_date_ok">OK</string>
+    <string name="liste_carte_menu_date">Date du martelage</string>
+    <string name="liste_date_retirer">Retirer</string>
     <string name="creation_tarif_numero">Numéro de tarif (1–20)</string>
 
     <!-- Feuille de martelage -->

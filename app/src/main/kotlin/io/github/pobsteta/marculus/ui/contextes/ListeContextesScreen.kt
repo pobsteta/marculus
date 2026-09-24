@@ -34,6 +34,9 @@ import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -106,6 +109,7 @@ fun ListeContextesScreen(
     val resumes by repository.resumes().collectAsStateWithLifecycle(emptyList())
     var aSupprimer by remember { mutableStateOf<ResumeContexte?>(null) }
     var aLire by remember { mutableStateOf<ResumeContexte?>(null) }
+    var aDater by remember { mutableStateOf<ResumeContexte?>(null) }
     var menuAppli by remember { mutableStateOf(false) }
     var aProposOuvert by remember { mutableStateOf(false) }
     var pendingExport by remember { mutableStateOf<String?>(null) }
@@ -224,6 +228,7 @@ fun ListeContextesScreen(
                 onModifier = { onModifier(resume.contexte.id) },
                 onSupprimer = { aSupprimer = resume },
                 onLire = { aLire = resume },
+                onDater = { aDater = resume },
                 onDupliquer = { scope.launch { repository.dupliquerContexte(resume.contexte.id) } },
                 onExporter = {
                     pendingExport = resume.contexte.id
@@ -386,6 +391,31 @@ fun ListeContextesScreen(
             confirmButton = { TextButton(onClick = { aLire = null }) { Text(stringResource(R.string.liste_dialog_fermer)) } },
         )
     }
+
+    // Date de martelage seule : toujours modifiable, y compris sur un contexte verrouillé.
+    aDater?.let { cible ->
+        val etat = rememberDatePickerState(initialSelectedDateMillis = cible.contexte.dateMartelage)
+        fun enregistrer(date: Long?) {
+            scope.launch { repository.modifierDateMartelage(cible.contexte.id, date) }
+            aDater = null
+        }
+        DatePickerDialog(
+            onDismissRequest = { aDater = null },
+            confirmButton = {
+                TextButton(onClick = { enregistrer(etat.selectedDateMillis) }) {
+                    Text(stringResource(R.string.creation_date_ok))
+                }
+            },
+            dismissButton = {
+                Row {
+                    if (cible.contexte.dateMartelage != null) {
+                        TextButton(onClick = { enregistrer(null) }) { Text(stringResource(R.string.liste_date_retirer)) }
+                    }
+                    TextButton(onClick = { aDater = null }) { Text(stringResource(R.string.creation_action_annuler)) }
+                }
+            },
+        ) { DatePicker(state = etat) }
+    }
 }
 
 private fun normRecherche(s: String): String =
@@ -481,6 +511,7 @@ private fun CarteContexte(
     onModifier: () -> Unit,
     onSupprimer: () -> Unit,
     onLire: () -> Unit,
+    onDater: () -> Unit,
     onDupliquer: () -> Unit,
     onExporter: () -> Unit,
     onPartager: () -> Unit,
@@ -528,6 +559,8 @@ private fun CarteContexte(
                 }
                 DropdownMenu(expanded = menuOuvert, onDismissRequest = { menuOuvert = false }) {
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_lire)) }, onClick = { menuOuvert = false; onLire() })
+                    // Hors verrou : la date ne touche pas aux tiges déjà comptées.
+                    DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_date)) }, onClick = { menuOuvert = false; onDater() })
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_dupliquer)) }, onClick = { menuOuvert = false; onDupliquer() })
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_exporter_csv)) }, onClick = { menuOuvert = false; onExporter() })
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_partager)) }, onClick = { menuOuvert = false; onPartager() })
