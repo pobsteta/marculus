@@ -168,6 +168,15 @@ class MartelageRepository(
         )
     }
 
+    /**
+     * Met à jour uniquement la date de martelage — permis même sur un contexte verrouillé :
+     * la date ne change ni les tiges, ni leurs totaux, ni leur sens.
+     */
+    suspend fun modifierDateMartelage(contexteId: String, date: Long?) {
+        val existant = contexteDao.parId(contexteId) ?: return
+        contexteDao.inserer(existant.copy(dateMartelage = date, modifie = horloge()))
+    }
+
     /** Met à jour uniquement le GeoPackage rattaché à un contexte (import depuis la carte). */
     suspend fun enregistrerCheminGpkg(contexteId: String, chemin: String?) {
         val existant = contexteDao.parId(contexteId) ?: return
