@@ -126,6 +126,12 @@ import kotlin.math.pow
 
 private const val ZOOM_MAX = 19.0
 
+/**
+ * Niveaux de surzoom au-delà des tuiles natives (Satellite, ortho) : les dernières tuiles sont
+ * agrandies. +5 niveaux amènent l'échelle au mètre, pour viser un arbre précis.
+ */
+private const val SURZOOM = 5
+
 /** Au-delà de cette vitesse (m/s ≈ 2,9 km/h), on oriente le cône par le cap GNSS plutôt que la boussole. */
 private const val SEUIL_VITESSE_MS = 0.8
 
@@ -352,8 +358,15 @@ fun CarteScreen(
             } ?: MapTileProviderBasic(context.applicationContext, TileSourceFactory.MAPNIK)
         }
         mapView.tileProvider = provider
-        // En ortho : overzoom autorisé au-delà de la résolution native (≈20 cm) jusqu'à +5 niveaux.
-        mapView.maxZoomLevel = if (fond == Fond.ORTHO) ((orthoSource?.zoomMax ?: 19) + 5).toDouble() else ZOOM_MAX
+        // Satellite et ortho : surzoom au-delà de la résolution native (≈20 cm), jusqu'à l'échelle
+        // du mètre. OSM n'en a pas besoin : ses tuiles sont un dessin, pas une image du terrain.
+        mapView.maxZoomLevel = when (fond) {
+            Fond.OSM -> ZOOM_MAX
+            Fond.SATELLITE -> ZOOM_MAX + SURZOOM
+            Fond.ORTHO -> ((orthoSource?.zoomMax ?: 19) + SURZOOM).toDouble()
+        }
+        // Retour vers un fond moins profond (Satellite → OSM) : on redescend, sinon fond blanc.
+        if (mapView.zoomLevelDouble > mapView.maxZoomLevel) mapView.controller.setZoom(mapView.maxZoomLevel)
         mapView.invalidate()
     }
 
