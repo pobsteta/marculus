@@ -5,6 +5,8 @@ import android.net.Uri
 import android.util.Log
 import fr.marculus.core.CouchesGpkg
 import fr.marculus.core.Geodesie
+import fr.marculus.core.GrilleWebMercator
+import fr.marculus.core.MatriceTuiles
 import fr.marculus.core.Houppier
 import fr.marculus.core.TypeCouche
 import fr.marculus.core.model.Position
@@ -13,6 +15,7 @@ import mil.nga.geopackage.GeoPackageFactory
 import mil.nga.geopackage.tiles.reproject.TileReprojection
 import mil.nga.geopackage.tiles.reproject.TileReprojectionOptimize
 import mil.nga.geopackage.tiles.retriever.GeoPackageTileRetriever
+import mil.nga.geopackage.tiles.user.TileDao
 import mil.nga.proj.ProjectionConstants
 import mil.nga.proj.ProjectionFactory
 import mil.nga.proj.ProjectionTransform
@@ -25,17 +28,25 @@ import mil.nga.sf.Polygon
 import org.locationtech.proj4j.ProjCoordinate
 import java.io.File
 
-/** Fournisseur de tuiles ortho (reprojetées en Web Mercator), servi à osmdroid. À fermer après usage. */
+/** Suffixe de la table ortho reprojetée en Web Mercator, créée à la première ouverture. */
+private const val SUFFIXE_WM = "_wm"
+
+/**
+ * Fournisseur de tuiles ortho en grille Web Mercator (XYZ), servi à osmdroid. À fermer après usage.
+ *
+ * @param lire tuile (zoom, x, y) : lue telle quelle quand le GPKG est déjà sur la grille, sinon
+ *   extraite de la table reprojetée.
+ */
 class OrthoSource(
     private val gpkg: GeoPackage,
-    private val retriever: GeoPackageTileRetriever,
+    private val lire: (zoom: Int, x: Int, y: Int) -> ByteArray?,
     val zoomMin: Int,
     val zoomMax: Int,
 ) {
     @Synchronized
     fun tuile(zoom: Int, x: Int, y: Int): ByteArray? =
         try {
-            retriever.getTile(x, y, zoom)?.data
+            lire(zoom, x, y)
         } catch (e: Exception) {
             null
         }
@@ -272,7 +283,18 @@ class GpkgRepository(private val context: Context) {
             cles.any { it.equals(e.key, ignoreCase = true) } && e.value.isNotBlank()
         }?.value
 
-    /** Ouvre l'ortho du GPKG, la reprojette en Web Mercator si besoin, et renvoie un fournisseur de tuiles. */
+    /** Zooms de la table qui portent au moins une tuile (GDAL déclare aussi les zooms vides). */
+    private fun zoomsPresents(dao: TileDao): List<Long> =
+        dao.zoomLevels.filter { dao.count(it) > 0 }.sorted()
+
+    /**
+     * Ouvre l'ortho du GPKG et renvoie un fournisseur de tuiles XYZ.
+     *
+     * - Déjà sur la grille Web Mercator standard (export Nemeton, GDAL GoogleMapsCompatible) :
+     *   servie **telle quelle**, sans reprojection.
+     * - Sinon : reprojetée une fois dans `<table>_wm`, **zoom par zoom présent** — une matrice
+     *   déclarée mais vide faisait planter la reprojection de toute la pyramide.
+     */
     fun ouvrirOrtho(chemin: String): OrthoSource? {
         val fichier = File(chemin)
         if (!fichier.exists()) return null
@@ -280,24 +302,58 @@ class GpkgRepository(private val context: Context) {
             val manager = GeoPackageFactory.getManager(context)
             val gpkg = manager.openExternal(fichier) ?: return null
             val tables = gpkg.tileTables
-            if (tables.isEmpty()) {
+            // La table reprojetée d'une ouverture précédente n'est pas une source.
+            val source = tables.firstOrNull { !it.endsWith(SUFFIXE_WM) } ?: tables.firstOrNull()
+            if (source == null) {
                 gpkg.close()
                 return null
             }
-            val source = tables.first()
-            val cible = source + "_wm"
-            if (!gpkg.tileTables.contains(cible)) {
-                Log.d("Marculus.Gpkg", "Reprojection ortho $source -> $cible (grille Web Mercator standard)…")
-                TileReprojection.reproject(gpkg, source, cible, TileReprojectionOptimize.webMercator())
+            val daoSource = gpkg.getTileDao(source)
+            val zoomsSource = zoomsPresents(daoSource)
+            if (estGrilleWebMercator(daoSource, zoomsSource)) {
+                Log.d("Marculus.Gpkg", "Ortho $source déjà en grille Web Mercator : servie telle quelle, zoom $zoomsSource")
+                return OrthoSource(
+                    gpkg,
+                    { z, x, y -> daoSource.queryForTile(x.toLong(), y.toLong(), z.toLong())?.tileData },
+                    zoomsSource.first().toInt(),
+                    zoomsSource.last().toInt(),
+                )
+            }
+            val cible = source + SUFFIXE_WM
+            if (!source.endsWith(SUFFIXE_WM) && !gpkg.tileTables.contains(cible) && zoomsSource.isNotEmpty()) {
+                Log.d("Marculus.Gpkg", "Reprojection ortho $source -> $cible, zooms $zoomsSource…")
+                TileReprojection.create(gpkg, source, cible, TileReprojectionOptimize.webMercator())
+                    .reproject(zoomsSource)
             }
             val tableFinale = if (gpkg.tileTables.contains(cible)) cible else source
             val dao = gpkg.getTileDao(tableFinale)
-            Log.d("Marculus.Gpkg", "Ortho prête: $tableFinale zoom ${dao.minZoom}..${dao.maxZoom}")
-            OrthoSource(gpkg, GeoPackageTileRetriever(dao), dao.minZoom.toInt(), dao.maxZoom.toInt())
+            val zooms = zoomsPresents(dao)
+            if (zooms.isEmpty()) {
+                gpkg.close()
+                return null
+            }
+            Log.d("Marculus.Gpkg", "Ortho prête: $tableFinale zoom $zooms")
+            val retriever = GeoPackageTileRetriever(dao)
+            OrthoSource(gpkg, { z, x, y -> retriever.getTile(x, y, z)?.data }, zooms.first().toInt(), zooms.last().toInt())
         } catch (e: Exception) {
             Log.e("Marculus.Gpkg", "ouvrirOrtho", e)
             null
         }
+    }
+
+    /** Table déjà tuilée sur la grille XYZ d'osmdroid : EPSG:3857, monde entier, 256 px, 2^z. */
+    private fun estGrilleWebMercator(dao: TileDao, zooms: List<Long>): Boolean {
+        val jeu = dao.tileMatrixSet
+        val srs = jeu.srs
+        val matrices = zooms.mapNotNull { z ->
+            dao.getTileMatrix(z)?.let {
+                MatriceTuiles(z.toInt(), it.matrixWidth, it.matrixHeight, it.tileWidth, it.tileHeight)
+            }
+        }
+        return matrices.size == zooms.size && GrilleWebMercator.estStandard(
+            srs?.organization, srs?.organizationCoordsysId ?: -1,
+            jeu.minX, jeu.minY, jeu.maxX, jeu.maxY, matrices,
+        )
     }
 
     /** Polylignes d'une géométrie linéaire (une desserte peut être un MULTILINESTRING). */
