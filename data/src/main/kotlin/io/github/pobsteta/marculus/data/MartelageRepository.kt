@@ -30,8 +30,6 @@ data class ResumeContexte(val contexte: Contexte, val nbEvenements: Int) {
     val verrouille: Boolean get() = nbEvenements > 0 && !contexte.exporte
 }
 
-private const val RS = "" // séparateur d'enregistrements (essences)
-private const val US = "" // séparateur de champs (nom / fond / texte)
 
 /** Accès aux données du martelage : mappe les entités Room vers le domaine pur `fr.marculus.core`. */
 class MartelageRepository(
@@ -409,56 +407,4 @@ class MartelageRepository(
     ) {
         configDao.upsert(CompteurConfigEntity(contexteId, essence, classe, avisSiPlus, avisSiMoins))
     }
-
-    // --- Encodage / mapping ---
-
-    private fun encodeEssences(list: List<EssenceColonne>): String =
-        list.joinToString(RS) { "${it.nom}$US${it.couleurFondArgb}$US${it.couleurTexteArgb}" }
-
-    private fun decodeEssences(s: String): List<EssenceColonne> =
-        if (s.isEmpty()) {
-            emptyList()
-        } else {
-            s.split(RS).mapNotNull { rec ->
-                val p = rec.split(US)
-                if (p.size == 3) EssenceColonne(p[0], p[1].toInt(), p[2].toInt()) else null
-            }
-        }
-
-    private fun ContexteEntity.versDomaine() = Contexte(
-        id = id,
-        nom = nom,
-        mode = ModeMesure.valueOf(mode),
-        axe = AxeClasses(min = classeMin, max = classeMax, pas = classePas),
-        essences = decodeEssences(essences),
-        commentaire = commentaire,
-        increment = increment,
-        exporte = exporte,
-        cheminGpkg = cheminGpkg,
-        tarif = runCatching { TarifCubage.valueOf(tarif) }.getOrDefault(TarifCubage.AUCUN),
-        tarifNumero = tarifNumero,
-        coefficientForme = coefficientForme,
-        dateMartelage = dateMartelage,
-        statut = runCatching { EtatKanban.valueOf(statut) }.getOrDefault(EtatKanban.PROPOSEE),
-        modifie = modifie,
-        dejaExporte = dejaExporte,
-    )
-
-    private fun TigeEntity.versDomaine() = Tige(
-        uuid = uuid,
-        contexteId = contexteId,
-        essence = essence,
-        classe = classe,
-        action = ActionTige.valueOf(action),
-        horodatage = horodatage,
-        quantite = quantite,
-        hauteurTexte = hauteurTexte,
-        qualiteArbre = qualiteArbre,
-        position = if (latitude != null && longitude != null) Position(latitude, longitude) else null,
-        operateur = operateur,
-        parcelle = parcelle,
-        qualiteFix = qualiteFix?.let { runCatching { QualiteFix.valueOf(it) }.getOrNull() },
-        precisionM = precisionM,
-        modifie = modifie,
-    )
 }

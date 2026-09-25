@@ -62,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.Cubage
+import fr.marculus.core.VolumesMartelage
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CategorieBois
 import fr.marculus.core.model.TarifCubage
@@ -198,17 +199,13 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
     val maxEssence = parEssence.maxOfOrNull { it.second } ?: 0
     val locale = LocalConfiguration.current.locales[0]
     val emerge = contexte.tarif == TarifCubage.EMERGE
-    var volTige = 0.0
-    var volHoup = 0.0
-    var volTot = 0.0
-    if (contexte.tarif != TarifCubage.AUCUN) {
-        journal.forEach {
-            val v = Cubage.volumesUnitaire(contexte, it.essence, it.classe, it.hauteurTexte)
-            val signe = if (it.action == ActionTige.PLUS) it.quantite else -it.quantite
-            volTige += v.tige * signe; volHoup += v.houppier * signe; volTot += v.total * signe
-        }
-    }
-    val surfaceTotale = totaux.entries.sumOf { (cle, n) -> Cubage.surfaceTerriereUnitaire(contexte, cle.classe) * n }
+    // Même calcul que les exports (.marsync, CSV) : une annulation retire la dernière tige de sa
+    // case, avec son volume — elle est saisie sans hauteur et ne retirerait rien en EMERGE.
+    val volumes = VolumesMartelage.totaux(contexte, journal)
+    val volTige = volumes.volumeTigeM3
+    val volHoup = volumes.volumeHouppierM3
+    val volTot = volumes.volumeTotalM3
+    val surfaceTotale = volumes.surfaceTerriereM2
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
