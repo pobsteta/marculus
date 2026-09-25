@@ -1,8 +1,6 @@
 package io.github.pobsteta.marculus.ui.statut
 
-import io.github.pobsteta.marculus.FichierEcrit
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import io.github.pobsteta.marculus.ExportFichier
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -105,15 +103,15 @@ fun StatutHistoriqueScreen(
     val scopeStatut = rememberCoroutineScope()
     val context = LocalContext.current
     val locale = LocalConfiguration.current.locales[0]
-    val exportLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
-        val ctx = contexte
-        if (uri != null && ctx != null) {
-            val csv = csvFoncier(ctx, journal, parcelles, locale)
-            context.contentResolver.openOutputStream(uri)?.use {
+    fun exporterFoncier() {
+        val ctx = contexte ?: return
+        val csv = csvFoncier(ctx, journal, parcelles, locale)
+        scopeStatut.launch {
+            val emplacement = ExportFichier.enregistrer(context, "${ctx.nom} - foncier.csv", "text/csv") {
                 it.write("﻿".toByteArray(Charsets.UTF_8))
                 it.write(csv.toByteArray(Charsets.UTF_8))
             }
-            FichierEcrit.signaler(context, uri)
+            ExportFichier.annoncer(context, emplacement)
         }
     }
 
@@ -127,7 +125,7 @@ fun StatutHistoriqueScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = { exportLauncher.launch("martelage-foncier.csv") }) {
+                    TextButton(onClick = { exporterFoncier() }) {
                         Text(stringResource(R.string.statut_export_csv), color = MaterialTheme.colorScheme.onPrimary)
                     }
                 },

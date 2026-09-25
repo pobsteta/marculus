@@ -1,6 +1,6 @@
 package io.github.pobsteta.marculus.ui.parametres
 
-import io.github.pobsteta.marculus.FichierEcrit
+import io.github.pobsteta.marculus.ExportFichier
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
@@ -104,22 +104,20 @@ fun ParametresScreen(
     // Import d'un lot de chantiers : même composant que la liste des contextes.
     val importLot = rememberImportLot(lotRepository)
 
-    val exportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("application/zip"),
-    ) { uri ->
-        if (uri != null) {
-            scope.launch {
-                val json = sauvegardeRepository.exporterJson()
-                context.contentResolver.openOutputStream(uri)?.use { os ->
-                    ZipOutputStream(os).use { zos ->
-                        zos.putNextEntry(ZipEntry(ENTREE_ZIP))
-                        zos.write(json.toByteArray(Charsets.UTF_8))
-                        zos.closeEntry()
-                    }
+    // Sauvegarde directe dans Téléchargements/Marculus/ (visible en USB avec sa vraie taille).
+    fun sauvegarder() {
+        scope.launch {
+            val json = sauvegardeRepository.exporterJson()
+            val nom = "marculus-sauvegarde-${LocalDateTime.now().format(FORMAT_HORODATAGE)}.zip"
+            val emplacement = ExportFichier.enregistrer(context, nom, "application/zip") { os ->
+                ZipOutputStream(os).use { zos ->
+                    zos.putNextEntry(ZipEntry(ENTREE_ZIP))
+                    zos.write(json.toByteArray(Charsets.UTF_8))
+                    zos.closeEntry()
                 }
-                FichierEcrit.signaler(context, uri)
-                message = msgSauvegarde
             }
+            ExportFichier.annoncer(context, emplacement)
+            if (emplacement != null) message = msgSauvegarde
         }
     }
 
@@ -260,7 +258,7 @@ fun ParametresScreen(
             Text(stringResource(R.string.param_sauvegarde_desc), style = MaterialTheme.typography.bodySmall)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Button(
-                    onClick = { exportLauncher.launch("marculus-sauvegarde-${LocalDateTime.now().format(FORMAT_HORODATAGE)}.zip") },
+                    onClick = { sauvegarder() },
                     modifier = Modifier.weight(1f),
                 ) {
                     Text(stringResource(R.string.param_sauvegarder))

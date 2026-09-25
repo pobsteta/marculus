@@ -120,6 +120,8 @@
     <string name="creation_date_ok">OK</string>
     <string name="liste_carte_menu_date">Date du martelage</string>
     <string name="liste_date_retirer">Retirer</string>
+    <string name="export_ok">Exporté : %1$s</string>
+    <string name="export_echec">Échec de l\'export.</string>
     <string name="liste_carte_menu_mode">Mode de mesure</string>
     <string name="liste_mode_titre">Mode de mesure</string>
     <string name="liste_mode_aide">Les %1$d tiges gardent leur classe : seule son unité change. Catégories, surfaces terrières et volumes sont recalculés.</string>

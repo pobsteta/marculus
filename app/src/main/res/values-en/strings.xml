@@ -118,6 +118,8 @@
     <string name="creation_date_ok">OK</string>
     <string name="liste_carte_menu_date">Marking date</string>
     <string name="liste_date_retirer">Remove</string>
+    <string name="export_ok">Exported: %1$s</string>
+    <string name="export_echec">Export failed.</string>
     <string name="liste_carte_menu_mode">Measurement mode</string>
     <string name="liste_mode_titre">Measurement mode</string>
     <string name="liste_mode_aide">The %1$d stems keep their class; only its unit changes. Categories, basal areas and volumes are recomputed.</string>

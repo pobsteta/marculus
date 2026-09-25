@@ -1,6 +1,6 @@
 package io.github.pobsteta.marculus.ui.contextes
 
-import io.github.pobsteta.marculus.FichierEcrit
+import io.github.pobsteta.marculus.ExportFichier
 import fr.marculus.core.model.ModeMesure
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.RadioButton
@@ -10,8 +10,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.FilterChip
 import android.content.Intent
 import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -121,7 +119,6 @@ fun ListeContextesScreen(
     var aChangerMode by remember { mutableStateOf<ResumeContexte?>(null) }
     var menuAppli by remember { mutableStateOf(false) }
     var aProposOuvert by remember { mutableStateOf(false) }
-    var pendingExport by remember { mutableStateOf<String?>(null) }
     var recherche by remember { mutableStateOf("") }
     // Contextes déjà martelés (exportés au moins une fois) : masqués à chaque ouverture de l'app,
     // pour que la liste montre d'abord ce qui reste à faire.
@@ -135,23 +132,18 @@ fun ListeContextesScreen(
     // apparaissent. Le même geste existe dans les Paramètres, à côté de la synchro.
     val importLot = rememberImportLot(lotRepository)
 
-    val exportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("text/csv"),
-    ) { uri ->
-        val id = pendingExport
-        pendingExport = null
-        if (uri != null && id != null) {
-            scope.launch {
-                val ctx = repository.contexte(id) ?: return@launch
-                val journal = repository.journalInstantane(id)
-                val csv = ExportCsv.contexteCsv(ctx, journal)
-                context.contentResolver.openOutputStream(uri)?.use {
-                    // BOM UTF-8 pour qu'Excel détecte l'encodage et affiche correctement les accents.
-                    it.write("﻿$csv".toByteArray(Charsets.UTF_8))
-                }
-                FichierEcrit.signaler(context, uri)
-                repository.marquerExporte(id)
+    // Export CSV direct dans Téléchargements/Marculus/ (voir ExportFichier : visible en USB
+    // avec sa vraie taille, sans débrancher le câble).
+    fun exporterCsv(id: String) {
+        scope.launch {
+            val ctx = repository.contexte(id) ?: return@launch
+            val csv = ExportCsv.contexteCsv(ctx, repository.journalInstantane(id))
+            val emplacement = ExportFichier.enregistrer(context, "${ctx.nom}.csv", "text/csv") {
+                // BOM UTF-8 pour qu'Excel détecte l'encodage et affiche correctement les accents.
+                it.write("﻿$csv".toByteArray(Charsets.UTF_8))
             }
+            ExportFichier.annoncer(context, emplacement)
+            if (emplacement != null) repository.marquerExporte(id)
         }
     }
 
@@ -288,10 +280,7 @@ fun ListeContextesScreen(
                 onDater = { aDater = resume },
                 onChangerMode = { aChangerMode = resume },
                 onDupliquer = { scope.launch { repository.dupliquerContexte(resume.contexte.id) } },
-                onExporter = {
-                    pendingExport = resume.contexte.id
-                    exportLauncher.launch("${resume.contexte.nom}.csv")
-                },
+                onExporter = { exporterCsv(resume.contexte.id) },
                 onPartager = { partagerContexte(resume.contexte.id, resume.contexte.nom) },
             )
             when {
