@@ -47,7 +47,9 @@
     <string name="liste_carte_resume_verrouille"> · 🔒</string>
     <string name="liste_carte_resume_martele"> · ✓ martelé</string>
     <string name="liste_filtre_marteles">Martelés (%1$d)</string>
-    <string name="liste_section_marteles">Déjà martelés</string>
+    <string name="liste_afficher_a_marteler">Afficher les contextes à marteler (%1$d)</string>
+    <string name="liste_aucun_martele">Aucun contexte martelé.</string>
+    <string name="liste_recherche_aucun_martele">Aucun contexte martelé ne correspond.</string>
     <string name="liste_afficher_marteles">Afficher les martelés (%1$d)</string>
     <string name="liste_tous_marteles">Tous les contextes sont martelés.</string>
     <string name="liste_recherche_marteles_seuls">Aucun contexte à marteler ne correspond.</string>
