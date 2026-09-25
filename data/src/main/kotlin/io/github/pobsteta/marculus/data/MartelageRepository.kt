@@ -185,6 +185,17 @@ class MartelageRepository(
         contexteDao.inserer(existant.copy(dateMartelage = date, modifie = horloge()))
     }
 
+    /**
+     * Corrige uniquement le mode de mesure — permis même verrouillé : les tiges gardent leur classe,
+     * seule son unité de lecture change (un lot exporté en circonférence alors qu'on mesure des
+     * diamètres fausse catégories, surfaces terrières et volumes).
+     */
+    suspend fun modifierModeMesure(contexteId: String, mode: ModeMesure) {
+        val existant = contexteDao.parId(contexteId) ?: return
+        if (existant.mode == mode.name) return
+        contexteDao.inserer(existant.copy(mode = mode.name, modifie = horloge()))
+    }
+
     /** Met à jour uniquement le GeoPackage rattaché à un contexte (import depuis la carte). */
     suspend fun enregistrerCheminGpkg(contexteId: String, chemin: String?) {
         val existant = contexteDao.parId(contexteId) ?: return
