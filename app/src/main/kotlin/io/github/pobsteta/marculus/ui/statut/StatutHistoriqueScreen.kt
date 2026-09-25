@@ -185,7 +185,8 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
     }
     val total = parEssence.sumOf { it.second }
     val classes = contexte.axe.classes()
-    // Couleur d'une classe : teinte par catégorie (PB/BM/GB/TGB), dégradé clair→foncé dans la catégorie.
+    // Couleur d'une classe : celle de sa catégorie (PB/BM/GB/TGB, seuils du référentiel), à peine
+    // nuancée d'une classe à l'autre — la catégorie se lit d'abord, la classe ensuite.
     val couleurClasse: (Int) -> Color = { classe ->
         val cat = seuils.categorie(classe, contexte.mode)
         val membres = classes.filter { seuils.categorie(it, contexte.mode) == cat }
@@ -274,7 +275,13 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
         if (total > 0) {
             item { HorizontalDivider() }
             item { Text(stringResource(R.string.statut_detail_par_classe), style = MaterialTheme.typography.titleSmall) }
-            item { LegendeClasses(classes, couleurClasse) }
+            item {
+                LegendeCategories(
+                    categories = classes.map { seuils.categorie(it, contexte.mode) }.distinct(),
+                    seuils = seuils,
+                    locale = locale,
+                )
+            }
             items(contexte.essencesNoms) { essence ->
                 BarreEmpilee(
                     essence = essence,
@@ -560,33 +567,52 @@ private fun LigneEssenceParc(stat: StatEssence, couleurs: Map<String, Int>, nive
     }
 }
 
+/**
+ * Légende par catégorie, avec ses limites de **diamètre** telles que réglées dans les Référentiels
+ * (en circonférence, la classe est ramenée au diamètre avant d'être rangée).
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun LegendeClasses(classes: List<Int>, couleur: (Int) -> Color) {
+private fun LegendeCategories(categories: List<CategorieBois>, seuils: SeuilsCategories, locale: java.util.Locale) {
+    fun cm(v: Double) = String.format(locale, "%.1f", v).removeSuffix(",0").removeSuffix(".0")
     FlowRow(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        classes.forEach { c ->
+        categories.sortedBy { it.ordinal }.forEach { cat ->
+            val limites = when (cat) {
+                CategorieBois.PB -> "< ${cm(seuils.pbBm)}"
+                CategorieBois.BM -> "${cm(seuils.pbBm)}–${cm(seuils.bmGb)}"
+                CategorieBois.GB -> "${cm(seuils.bmGb)}–${cm(seuils.gbTgb)}"
+                CategorieBois.TGB -> "≥ ${cm(seuils.gbTgb)}"
+            }
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Box(Modifier.size(12.dp).background(couleur(c)))
-                Text("$c", style = MaterialTheme.typography.labelSmall)
+                Box(Modifier.size(12.dp).background(couleurCategorie(cat)))
+                Text("${cat.name} Ø $limites cm", style = MaterialTheme.typography.labelSmall)
             }
         }
     }
 }
 
-private fun gradientCategorie(cat: CategorieBois, f: Float): Color {
-    // Palette Okabe-Ito (daltonien-safe, évite le couple vert/rouge) ; dégradé clair (petite
-    // classe) → foncé (grande classe) par catégorie. Ordre PB→TGB = bleu→vert→orange→vermillon.
-    val (clair, fonce) = when (cat) {
-        CategorieBois.PB -> Color(0xFF56B4E9) to Color(0xFF0072B2)  // bleu ciel → bleu
-        CategorieBois.BM -> Color(0xFF76D7C4) to Color(0xFF009E73)  // turquoise → vert-bleu
-        CategorieBois.GB -> Color(0xFFF0C000) to Color(0xFFE69F00)  // ambre → orange
-        CategorieBois.TGB -> Color(0xFFF08C69) to Color(0xFFD55E00) // saumon → vermillon
-    }
-    return lerp(clair, fonce, f.coerceIn(0f, 1f))
+/** Palette Okabe-Ito (lisible par les daltoniens) : PB→TGB = bleu → vert → orange → vermillon. */
+private fun couleurCategorie(cat: CategorieBois): Color = when (cat) {
+    CategorieBois.PB -> Color(0xFF0072B2)
+    CategorieBois.BM -> Color(0xFF009E73)
+    CategorieBois.GB -> Color(0xFFE69F00)
+    CategorieBois.TGB -> Color(0xFFD55E00)
 }
+
+/**
+ * Couleur de catégorie, nuancée de [f] (0 = plus petite classe de la catégorie, 1 = plus grande) :
+ * un léger éclaircissement seulement, pour que la catégorie reste la lecture dominante.
+ */
+private fun gradientCategorie(cat: CategorieBois, f: Float): Color {
+    val base = couleurCategorie(cat)
+    return lerp(lerp(base, Color.White, NUANCE_CLASSE), base, f.coerceIn(0f, 1f))
+}
+
+/** Éclaircissement de la plus petite classe d'une catégorie : de quoi distinguer, sans dominer. */
+private const val NUANCE_CLASSE = 0.22f
 
 @Composable
 private fun BarreEmpilee(
@@ -604,10 +630,14 @@ private fun BarreEmpilee(
         Text(essence, modifier = Modifier.width(96.dp), style = MaterialTheme.typography.bodySmall)
         Box(Modifier.weight(1f).height(24.dp).background(MaterialTheme.colorScheme.surfaceVariant)) {
             Row(Modifier.fillMaxSize()) {
-                classesAvecTotal.forEach { (classe, t) ->
-                    if (t > 0) {
-                        Box(Modifier.weight(t.toFloat()).fillMaxHeight().background(couleurParClasse(classe)))
-                    }
+                // Fin liseré blanc entre classes : chaque classe reste lisible dans le bloc de sa catégorie.
+                val presentes = classesAvecTotal.filter { it.second > 0 }
+                presentes.forEachIndexed { i, (classe, t) ->
+                    Box(
+                        Modifier.weight(t.toFloat()).fillMaxHeight().background(Color.White)
+                            .padding(end = if (i < presentes.lastIndex) 1.dp else 0.dp)
+                            .background(couleurParClasse(classe)),
+                    )
                 }
                 val reste = maxEssence - essenceTotal
                 if (reste > 0) Spacer(Modifier.weight(reste.toFloat()))
