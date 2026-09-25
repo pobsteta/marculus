@@ -77,6 +77,8 @@ data class Contexte(
     val dateMartelage: Long? = null,
     /** Colonne Kanban (workflow) du contexte. */
     val statut: EtatKanban = EtatKanban.PROPOSEE,
+    /** Dernière modification (ms epoch), comme dans le `.marsync` : la plus récente gagne. */
+    val modifie: Long = 0,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 }
@@ -104,4 +106,6 @@ data class Tige(
     val qualiteFix: QualiteFix? = null,
     /** Précision horizontale (m) au moment du martelage, ou null. */
     val precisionM: Double? = null,
+    /** Dernière modification (ms epoch), comme dans le `.marsync`. */
+    val modifie: Long = 0,
 )
