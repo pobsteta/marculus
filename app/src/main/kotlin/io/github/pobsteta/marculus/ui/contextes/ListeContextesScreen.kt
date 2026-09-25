@@ -1,5 +1,6 @@
 package io.github.pobsteta.marculus.ui.contextes
 
+import io.github.pobsteta.marculus.FichierEcrit
 import fr.marculus.core.model.ModeMesure
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.RadioButton
@@ -148,6 +149,7 @@ fun ListeContextesScreen(
                     // BOM UTF-8 pour qu'Excel détecte l'encodage et affiche correctement les accents.
                     it.write("﻿$csv".toByteArray(Charsets.UTF_8))
                 }
+                FichierEcrit.signaler(context, uri)
                 repository.marquerExporte(id)
             }
         }

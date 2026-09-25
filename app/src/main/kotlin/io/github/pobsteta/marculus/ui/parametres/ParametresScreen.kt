@@ -1,5 +1,6 @@
 package io.github.pobsteta.marculus.ui.parametres
 
+import io.github.pobsteta.marculus.FichierEcrit
 import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
@@ -116,6 +117,7 @@ fun ParametresScreen(
                         zos.closeEntry()
                     }
                 }
+                FichierEcrit.signaler(context, uri)
                 message = msgSauvegarde
             }
         }
