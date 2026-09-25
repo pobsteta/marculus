@@ -1,5 +1,6 @@
 package io.github.pobsteta.marculus.ui.statut
 
+import io.github.pobsteta.marculus.FichierEcrit
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Canvas
@@ -111,6 +112,7 @@ fun StatutHistoriqueScreen(
                 it.write("﻿".toByteArray(Charsets.UTF_8))
                 it.write(csv.toByteArray(Charsets.UTF_8))
             }
+            FichierEcrit.signaler(context, uri)
         }
     }
 
