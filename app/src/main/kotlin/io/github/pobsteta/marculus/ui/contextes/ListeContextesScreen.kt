@@ -1,5 +1,8 @@
 package io.github.pobsteta.marculus.ui.contextes
 
+import fr.marculus.core.model.ModeMesure
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.RadioButton
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.material.icons.filled.Check
@@ -114,6 +117,7 @@ fun ListeContextesScreen(
     var aSupprimer by remember { mutableStateOf<ResumeContexte?>(null) }
     var aLire by remember { mutableStateOf<ResumeContexte?>(null) }
     var aDater by remember { mutableStateOf<ResumeContexte?>(null) }
+    var aChangerMode by remember { mutableStateOf<ResumeContexte?>(null) }
     var menuAppli by remember { mutableStateOf(false) }
     var aProposOuvert by remember { mutableStateOf(false) }
     var pendingExport by remember { mutableStateOf<String?>(null) }
@@ -280,6 +284,7 @@ fun ListeContextesScreen(
                 onSupprimer = { aSupprimer = resume },
                 onLire = { aLire = resume },
                 onDater = { aDater = resume },
+                onChangerMode = { aChangerMode = resume },
                 onDupliquer = { scope.launch { repository.dupliquerContexte(resume.contexte.id) } },
                 onExporter = {
                     pendingExport = resume.contexte.id
@@ -494,6 +499,44 @@ fun ListeContextesScreen(
             },
         ) { DatePicker(state = etat) }
     }
+
+    // Mode de mesure seul : corrige l'unité des classes, y compris sur un contexte verrouillé.
+    aChangerMode?.let { cible ->
+        var choix by remember(cible) { mutableStateOf(cible.contexte.mode) }
+        AlertDialog(
+            onDismissRequest = { aChangerMode = null },
+            title = { Text(stringResource(R.string.liste_mode_titre)) },
+            text = {
+                Column {
+                    ModeMesure.entries.forEach { m ->
+                        Row(
+                            Modifier.fillMaxWidth().selectable(selected = choix == m, onClick = { choix = m }),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = choix == m, onClick = { choix = m })
+                            Text(m.libelle())
+                        }
+                    }
+                    if (cible.nbEvenements > 0) {
+                        Text(
+                            stringResource(R.string.liste_mode_aide, cible.nbEvenements),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 8.dp),
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    scope.launch { repository.modifierModeMesure(cible.contexte.id, choix) }
+                    aChangerMode = null
+                }) { Text(stringResource(R.string.creation_date_ok)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { aChangerMode = null }) { Text(stringResource(R.string.creation_action_annuler)) }
+            },
+        )
+    }
 }
 
 private fun normRecherche(s: String): String =
@@ -590,6 +633,7 @@ private fun CarteContexte(
     onSupprimer: () -> Unit,
     onLire: () -> Unit,
     onDater: () -> Unit,
+    onChangerMode: () -> Unit,
     onDupliquer: () -> Unit,
     onExporter: () -> Unit,
     onPartager: () -> Unit,
@@ -640,6 +684,8 @@ private fun CarteContexte(
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_lire)) }, onClick = { menuOuvert = false; onLire() })
                     // Hors verrou : la date ne touche pas aux tiges déjà comptées.
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_date)) }, onClick = { menuOuvert = false; onDater() })
+                    // Hors verrou aussi : corriger l'unité ne touche pas aux tiges.
+                    DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_mode)) }, onClick = { menuOuvert = false; onChangerMode() })
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_dupliquer)) }, onClick = { menuOuvert = false; onDupliquer() })
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_exporter_csv)) }, onClick = { menuOuvert = false; onExporter() })
                     DropdownMenuItem(text = { Text(stringResource(R.string.liste_carte_menu_partager)) }, onClick = { menuOuvert = false; onPartager() })
