@@ -421,6 +421,7 @@ class MartelageRepository(
         coefficientForme = coefficientForme,
         dateMartelage = dateMartelage,
         statut = runCatching { EtatKanban.valueOf(statut) }.getOrDefault(EtatKanban.PROPOSEE),
+        modifie = modifie,
     )
 
     private fun TigeEntity.versDomaine() = Tige(
@@ -438,5 +439,6 @@ class MartelageRepository(
         parcelle = parcelle,
         qualiteFix = qualiteFix?.let { runCatching { QualiteFix.valueOf(it) }.getOrNull() },
         precisionM = precisionM,
+        modifie = modifie,
     )
 }
