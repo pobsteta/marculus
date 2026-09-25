@@ -45,7 +45,9 @@
     <string name="liste_carte_resume_verrouille"> · 🔒</string>
     <string name="liste_carte_resume_martele"> · ✓ marked</string>
     <string name="liste_filtre_marteles">Marked (%1$d)</string>
-    <string name="liste_section_marteles">Already marked</string>
+    <string name="liste_afficher_a_marteler">Show contexts to mark (%1$d)</string>
+    <string name="liste_aucun_martele">No marked context.</string>
+    <string name="liste_recherche_aucun_martele">No marked context matches.</string>
     <string name="liste_afficher_marteles">Show marked contexts (%1$d)</string>
     <string name="liste_tous_marteles">All contexts are marked.</string>
     <string name="liste_recherche_marteles_seuls">No context left to mark matches.</string>

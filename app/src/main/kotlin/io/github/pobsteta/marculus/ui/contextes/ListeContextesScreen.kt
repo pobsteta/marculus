@@ -219,31 +219,58 @@ fun ListeContextesScreen(
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            OutlinedTextField(
-                value = recherche,
-                onValueChange = { recherche = it },
-                label = { Text(stringResource(R.string.liste_recherche)) },
-                singleLine = true,
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-            )
+            val kanban = vueKanban && modeKanban
             val trouves = if (recherche.isBlank()) resumes else resumes.filter { correspond(it, recherche) }
             val (marteles, aMarteler) = trouves.partition { it.contexte.dejaExporte }
             val nbMarteles = resumes.count { it.contexte.dejaExporte }
-            // Kanban : le tableau montre tout le flux, colonne « Réalisée » comprise.
-            val filtres = if (vueKanban && modeKanban) trouves else aMarteler
-            if (nbMarteles > 0 && !(vueKanban && modeKanban)) {
-                FilterChip(
-                    selected = voirMarteles,
-                    onClick = { voirMarteles = !voirMarteles },
-                    label = { Text(stringResource(R.string.liste_filtre_marteles, nbMarteles)) },
-                    leadingIcon = if (voirMarteles) {
-                        { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
-                    } else {
-                        null
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp),
+            // Deux listes exclusives : à marteler (par défaut) ou martelés (puce cochée). Le Kanban,
+            // lui, montre tout le flux, colonne « Réalisée » comprise.
+            val filtres = when {
+                kanban -> trouves
+                voirMarteles -> marteles
+                else -> aMarteler
+            }
+            // Ce que la recherche trouve dans l'autre liste, pour le signaler au lieu de le taire.
+            val autres = when {
+                kanban -> emptyList()
+                voirMarteles -> aMarteler
+                else -> marteles
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                OutlinedTextField(
+                    value = recherche,
+                    onValueChange = { recherche = it },
+                    label = { Text(stringResource(R.string.liste_recherche)) },
+                    singleLine = true,
+                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                    modifier = Modifier.weight(1f),
                 )
+                if ((nbMarteles > 0 || voirMarteles) && !kanban) {
+                    FilterChip(
+                        selected = voirMarteles,
+                        onClick = { voirMarteles = !voirMarteles },
+                        label = { Text(stringResource(R.string.liste_filtre_marteles, nbMarteles)) },
+                        leadingIcon = if (voirMarteles) {
+                            { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                        } else {
+                            null
+                        },
+                    )
+                }
+            }
+            val basculer = @Composable {
+                TextButton(onClick = { voirMarteles = !voirMarteles }) {
+                    Text(
+                        stringResource(
+                            if (voirMarteles) R.string.liste_afficher_a_marteler else R.string.liste_afficher_marteles,
+                            autres.size,
+                        ),
+                    )
+                }
             }
             @Composable
             fun carte(resume: ResumeContexte) = CarteContexte(
@@ -261,8 +288,8 @@ fun ListeContextesScreen(
                 onPartager = { partagerContexte(resume.contexte.id, resume.contexte.nom) },
             )
             when {
-                // Rien d'autre que des martelés masqués : le dire, plutôt qu'une liste « vide ».
-                filtres.isEmpty() && marteles.isNotEmpty() && !voirMarteles && !(vueKanban && modeKanban) -> {
+                // Liste vide mais l'autre ne l'est pas : le dire, et proposer d'y passer.
+                filtres.isEmpty() && autres.isNotEmpty() -> {
                     Column(
                         Modifier.fillMaxSize().padding(32.dp),
                         verticalArrangement = Arrangement.Center,
@@ -270,18 +297,23 @@ fun ListeContextesScreen(
                     ) {
                         Text(
                             stringResource(
-                                if (recherche.isBlank()) R.string.liste_tous_marteles else R.string.liste_recherche_marteles_seuls,
+                                when {
+                                    voirMarteles -> R.string.liste_recherche_aucun_martele
+                                    recherche.isBlank() -> R.string.liste_tous_marteles
+                                    else -> R.string.liste_recherche_marteles_seuls
+                                },
                             ),
                             textAlign = TextAlign.Center,
                         )
-                        TextButton(onClick = { voirMarteles = true }) {
-                            Text(stringResource(R.string.liste_afficher_marteles, marteles.size))
-                        }
+                        basculer()
                     }
                 }
-                filtres.isEmpty() && (marteles.isEmpty() || vueKanban && modeKanban) -> {
+                filtres.isEmpty() -> {
                     Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
-                        Text(stringResource(R.string.liste_vide_message), textAlign = TextAlign.Center)
+                        Text(
+                            stringResource(if (voirMarteles && !kanban) R.string.liste_aucun_martele else R.string.liste_vide_message),
+                            textAlign = TextAlign.Center,
+                        )
                     }
                 }
                 vueKanban && modeKanban -> {
@@ -357,25 +389,9 @@ fun ListeContextesScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(filtres, key = { it.contexte.id }) { resume -> carte(resume) }
-                        if (marteles.isNotEmpty()) {
-                            if (voirMarteles) {
-                                item(key = "entete-marteles") {
-                                    Text(
-                                        stringResource(R.string.liste_section_marteles),
-                                        style = MaterialTheme.typography.titleSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(top = 12.dp, start = 4.dp),
-                                    )
-                                }
-                                items(marteles, key = { it.contexte.id }) { resume -> carte(resume) }
-                            } else if (recherche.isNotBlank()) {
-                                // La recherche trouve aussi dans les martelés masqués : le signaler.
-                                item(key = "marteles-masques") {
-                                    TextButton(onClick = { voirMarteles = true }) {
-                                        Text(stringResource(R.string.liste_afficher_marteles, marteles.size))
-                                    }
-                                }
-                            }
+                        // La recherche trouve aussi dans l'autre liste : le signaler.
+                        if (recherche.isNotBlank() && autres.isNotEmpty()) {
+                            item(key = "autre-liste") { basculer() }
                         }
                     }
                 }
