@@ -43,6 +43,12 @@
     <string name="liste_detail_verrouille">Locked: read-only until the context is exported.</string>
     <string name="liste_carte_resume">%1$s · classes %2$d–%3$d (step %4$d) · %5$d species · %6$d stems</string>
     <string name="liste_carte_resume_verrouille"> · 🔒</string>
+    <string name="liste_carte_resume_martele"> · ✓ marked</string>
+    <string name="liste_filtre_marteles">Marked (%1$d)</string>
+    <string name="liste_section_marteles">Already marked</string>
+    <string name="liste_afficher_marteles">Show marked contexts (%1$d)</string>
+    <string name="liste_tous_marteles">All contexts are marked.</string>
+    <string name="liste_recherche_marteles_seuls">No context left to mark matches.</string>
     <string name="liste_carte_options_content_desc">Context options</string>
     <string name="liste_carte_menu_lire">View</string>
     <string name="liste_carte_menu_dupliquer">Duplicate</string>

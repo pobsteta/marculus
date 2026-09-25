@@ -1,5 +1,9 @@
 package io.github.pobsteta.marculus.ui.contextes
 
+import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.FilterChip
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -114,6 +118,9 @@ fun ListeContextesScreen(
     var aProposOuvert by remember { mutableStateOf(false) }
     var pendingExport by remember { mutableStateOf<String?>(null) }
     var recherche by remember { mutableStateOf("") }
+    // Contextes déjà martelés (exportés au moins une fois) : masqués à chaque ouverture de l'app,
+    // pour que la liste montre d'abord ce qui reste à faire.
+    var voirMarteles by rememberSaveable { mutableStateOf(false) }
     var modeKanban by remember { mutableStateOf(false) }
     // Glisser-déposer Kanban : carte tirée + position du doigt (coord. racine) + rectangles des colonnes.
     var dragResume by remember { mutableStateOf<ResumeContexte?>(null) }
@@ -220,7 +227,24 @@ fun ListeContextesScreen(
                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
             )
-            val filtres = if (recherche.isBlank()) resumes else resumes.filter { correspond(it, recherche) }
+            val trouves = if (recherche.isBlank()) resumes else resumes.filter { correspond(it, recherche) }
+            val (marteles, aMarteler) = trouves.partition { it.contexte.dejaExporte }
+            val nbMarteles = resumes.count { it.contexte.dejaExporte }
+            // Kanban : le tableau montre tout le flux, colonne « Réalisée » comprise.
+            val filtres = if (vueKanban && modeKanban) trouves else aMarteler
+            if (nbMarteles > 0 && !(vueKanban && modeKanban)) {
+                FilterChip(
+                    selected = voirMarteles,
+                    onClick = { voirMarteles = !voirMarteles },
+                    label = { Text(stringResource(R.string.liste_filtre_marteles, nbMarteles)) },
+                    leadingIcon = if (voirMarteles) {
+                        { Icon(Icons.Filled.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
+                    } else {
+                        null
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                )
+            }
             @Composable
             fun carte(resume: ResumeContexte) = CarteContexte(
                 resume = resume,
@@ -237,7 +261,25 @@ fun ListeContextesScreen(
                 onPartager = { partagerContexte(resume.contexte.id, resume.contexte.nom) },
             )
             when {
-                filtres.isEmpty() -> {
+                // Rien d'autre que des martelés masqués : le dire, plutôt qu'une liste « vide ».
+                filtres.isEmpty() && marteles.isNotEmpty() && !voirMarteles && !(vueKanban && modeKanban) -> {
+                    Column(
+                        Modifier.fillMaxSize().padding(32.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(
+                            stringResource(
+                                if (recherche.isBlank()) R.string.liste_tous_marteles else R.string.liste_recherche_marteles_seuls,
+                            ),
+                            textAlign = TextAlign.Center,
+                        )
+                        TextButton(onClick = { voirMarteles = true }) {
+                            Text(stringResource(R.string.liste_afficher_marteles, marteles.size))
+                        }
+                    }
+                }
+                filtres.isEmpty() && (marteles.isEmpty() || vueKanban && modeKanban) -> {
                     Box(Modifier.fillMaxSize().padding(32.dp), contentAlignment = Alignment.Center) {
                         Text(stringResource(R.string.liste_vide_message), textAlign = TextAlign.Center)
                     }
@@ -315,6 +357,26 @@ fun ListeContextesScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(filtres, key = { it.contexte.id }) { resume -> carte(resume) }
+                        if (marteles.isNotEmpty()) {
+                            if (voirMarteles) {
+                                item(key = "entete-marteles") {
+                                    Text(
+                                        stringResource(R.string.liste_section_marteles),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(top = 12.dp, start = 4.dp),
+                                    )
+                                }
+                                items(marteles, key = { it.contexte.id }) { resume -> carte(resume) }
+                            } else if (recherche.isNotBlank()) {
+                                // La recherche trouve aussi dans les martelés masqués : le signaler.
+                                item(key = "marteles-masques") {
+                                    TextButton(onClick = { voirMarteles = true }) {
+                                        Text(stringResource(R.string.liste_afficher_marteles, marteles.size))
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -542,7 +604,8 @@ private fun CarteContexte(
                         contexte.axe.pas,
                         contexte.essences.size,
                         resume.nbEvenements,
-                    ) + if (resume.verrouille) stringResource(R.string.liste_carte_resume_verrouille) else "",
+                    ) + (if (resume.verrouille) stringResource(R.string.liste_carte_resume_verrouille) else "") +
+                        if (contexte.dejaExporte) stringResource(R.string.liste_carte_resume_martele) else "",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 contexte.dateMartelage?.let { d ->

@@ -1,5 +1,6 @@
 package io.github.pobsteta.marculus.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -26,6 +27,12 @@ data class ContexteEntity(
     val statut: String = "PROPOSEE",   // EtatKanban.name
     /** Horodatage de dernière modification (synchro « dernière écriture gagne »). */
     val modifie: Long = 0,
+    /**
+     * Exporté au moins une fois : le martelage est considéré comme fait. Contrairement à
+     * [exporte], il ne retombe jamais — une tige ajoutée ensuite ne rend pas le chantier « à faire ».
+     */
+    @ColumnInfo(defaultValue = "0")
+    val dejaExporte: Boolean = false,
 )
 
 @Entity(

@@ -28,6 +28,9 @@ interface MergeDao {
     @Query("SELECT id AS cle, modifie FROM contexte")
     suspend fun contextesModifie(): List<CleModifie>
 
+    @Query("SELECT id FROM contexte WHERE dejaExporte = 1")
+    suspend fun contextesDejaExportes(): List<String>
+
     @Query("SELECT uuid AS cle, modifie FROM tige")
     suspend fun tigesModifie(): List<CleModifie>
 
@@ -38,7 +41,13 @@ interface MergeDao {
         configs: List<CompteurConfigEntity>,
     ) {
         val cMod = contextesModifie().associate { it.cle to it.modifie }
-        remplacerContextes(contextes.filter { (cMod[it.id] ?: Long.MIN_VALUE) < it.modifie })
+        // « Déjà exporté » ne retombe jamais : une version plus récente venue d'un appareil qui
+        // ne l'a pas encore exporté ne l'efface pas ici.
+        val dejaExportes = contextesDejaExportes().toSet()
+        remplacerContextes(
+            contextes.filter { (cMod[it.id] ?: Long.MIN_VALUE) < it.modifie }
+                .map { if (it.id in dejaExportes) it.copy(dejaExporte = true) else it },
+        )
         val tMod = tigesModifie().associate { it.cle to it.modifie }
         remplacerTiges(tiges.filter { (tMod[it.uuid] ?: Long.MIN_VALUE) < it.modifie })
         insererConfigs(configs)
