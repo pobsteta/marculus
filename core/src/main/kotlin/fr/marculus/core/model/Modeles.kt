@@ -79,6 +79,8 @@ data class Contexte(
     val statut: EtatKanban = EtatKanban.PROPOSEE,
     /** Dernière modification (ms epoch), comme dans le `.marsync` : la plus récente gagne. */
     val modifie: Long = 0,
+    /** Exporté au moins une fois : martelage fait. Ne retombe jamais, contrairement à [exporte]. */
+    val dejaExporte: Boolean = false,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 }

@@ -63,6 +63,7 @@ class MartelageRepository(
                 id = nouvelId,
                 nom = "${source.nom} (copie)",
                 exporte = false,
+                dejaExporte = false,
                 dateCreation = horloge(),
                 modifie = horloge(),
             ),
@@ -71,10 +72,17 @@ class MartelageRepository(
         return nouvelId
     }
 
-    /** Marque un contexte comme exporté (débloque modification/suppression). */
+    /** Marque un contexte comme exporté (débloque modification/suppression) et martelé. */
     suspend fun marquerExporte(id: String) {
         val existant = contexteDao.parId(id) ?: return
-        contexteDao.inserer(existant.copy(exporte = true))
+        contexteDao.inserer(
+            existant.copy(
+                exporte = true,
+                dejaExporte = true,
+                // Premier export : horodaté pour que la synchro propage « martelé » aux autres appareils.
+                modifie = if (existant.dejaExporte) existant.modifie else horloge(),
+            ),
+        )
         promouvoirStatutMin(id, EtatKanban.REALISEE) // export → au moins « Réalisée »
     }
 
@@ -422,6 +430,7 @@ class MartelageRepository(
         dateMartelage = dateMartelage,
         statut = runCatching { EtatKanban.valueOf(statut) }.getOrDefault(EtatKanban.PROPOSEE),
         modifie = modifie,
+        dejaExporte = dejaExporte,
     )
 
     private fun TigeEntity.versDomaine() = Tige(

@@ -103,7 +103,7 @@ class SauvegardeRepository(
         put("exporte", exporte); put("dateCreation", dateCreation); putOpt("operateur", operateur)
         putOpt("cheminGpkg", cheminGpkg); put("tarif", tarif); put("tarifNumero", tarifNumero)
         put("coefficientForme", coefficientForme); putOpt("dateMartelage", dateMartelage)
-        put("statut", statut); put("modifie", modifie)
+        put("statut", statut); put("modifie", modifie); put("dejaExporte", dejaExporte)
     }
 
     private fun JSONObject.versContexte() = ContexteEntity(
@@ -119,6 +119,8 @@ class SauvegardeRepository(
         dateMartelage = if (has("dateMartelage") && !isNull("dateMartelage")) getLong("dateMartelage") else null,
         statut = if (has("statut") && !isNull("statut")) getString("statut") else "PROPOSEE",
         modifie = if (has("modifie") && !isNull("modifie")) getLong("modifie") else 0,
+        // Absent des fichiers d'avant la v13 : un contexte exporté l'a forcément été une fois.
+        dejaExporte = optBoolean("dejaExporte", getBoolean("exporte")),
     )
 
     private fun TigeEntity.toJson() = JSONObject().apply {
