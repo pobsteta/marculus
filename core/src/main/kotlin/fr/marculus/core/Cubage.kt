@@ -49,6 +49,9 @@ object Cubage {
         return null
     }
 
+    /** L'essence a des coefficients EMERGE (sinon, repli par coefficient de forme). */
+    fun estCouverteEmerge(essence: String): Boolean = coefEmerge(essence) != null
+
     /** Code ONF (3 caractères) de l'essence si reconnue (nom français ou latin), sinon null. */
     fun codeEssence(essence: String): String? {
         val n = normaliser(essence)

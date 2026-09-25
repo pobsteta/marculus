@@ -1,5 +1,6 @@
 package fr.marculus.core.export
 
+import fr.marculus.core.VolumesMartelage
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.AxeClasses
 import fr.marculus.core.model.Contexte
@@ -8,7 +9,9 @@ import fr.marculus.core.model.EtatKanban
 import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.Position
 import fr.marculus.core.model.QualiteFix
+import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.Tige
+import java.util.Locale
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -95,7 +98,7 @@ class ExportCsvTest {
     }
 
     @Test
-    fun `les cinq lignes d en-tete du format 2 suivent la ligne Contexte, dans l ordre`() {
+    fun `l en-tete du format 3 suit la ligne Contexte, dans l ordre`() {
         val ctx = contexte.copy(
             id = "act_20260923155141_xyz123",
             statut = EtatKanban.REALISEE,
@@ -106,15 +109,22 @@ class ExportCsvTest {
         assertEquals(
             listOf(
                 "Contexte;Parcelle 12",
-                "FormatCsv;2",
+                "FormatCsv;3",
                 "ContexteId;act_20260923155141_xyz123",
                 "Statut;REALISEE",
                 "DateMartelage;2027-10-15",
                 "Modifie;1790000000000",
+                "Tarif;AUCUN",
+                "TarifNumero;0",
+                "CoefficientForme;0.5",
+                "VolumeTigeTotalM3;0.0000",
+                "VolumeTotalM3;0.0000",
+                "SurfaceTerriereTotaleM2;0.0000",
+                "NbTigesNonCubees;0",
                 "Mode;DIAMETRE",
                 "Increment;1",
             ),
-            lignes.take(8),
+            lignes.take(15),
         )
     }
 
@@ -126,7 +136,7 @@ class ExportCsvTest {
     }
 
     @Test
-    fun `le journal compte 15 colonnes dont les 12 premieres inchangees`() {
+    fun `le journal compte 20 colonnes dont les 15 du format 2 inchangees`() {
         val tige = Tige(
             uuid = "6f1c-uuid", contexteId = "c1", essence = "Chêne", classe = 20,
             action = ActionTige.PLUS, horodatage = 1000L, hauteurTexte = "27-6AB", qualiteArbre = "B",
@@ -136,18 +146,22 @@ class ExportCsvTest {
         val csv = ExportCsv.contexteCsv(contexte, listOf(tige))
         val lignes = csv.split("\n")
         val entete = cellules(lignes[lignes.indexOf("JOURNAL") + 1])
-        assertEquals(15, entete.size)
+        assertEquals(20, entete.size)
         assertEquals(colonnesFormat1, entete.take(12))
-        assertEquals(listOf("Uuid", "Parcelle", "Modifie"), entete.drop(12))
+        assertEquals(listOf("Uuid", "Parcelle", "Modifie"), entete.subList(12, 15))
+        assertEquals(
+            listOf("VolumeTigeM3", "VolumeHouppierM3", "VolumeTotalM3", "SurfaceTerriereM2", "Cubage"),
+            entete.drop(15),
+        )
         val ligne = lignesJournal(csv).single()
-        assertEquals(15, ligne.size)
+        assertEquals(20, ligne.size)
         assertEquals(
             listOf(
                 "1970-01-01T00:00:01Z", "Chêne", "20", "PLUS", "1", "27-6AB", "B",
                 "47.912345", "1.905432", "PO", "RTK fixe", "0.02",
                 "6f1c-uuid", "B 7", "1790000000000",
             ),
-            ligne,
+            ligne.take(15),
         )
     }
 
@@ -173,5 +187,49 @@ class ExportCsvTest {
         val ctx = contexte.copy(nom = "Bois; du \"Roi\"")
         val premiere = ExportCsv.contexteCsv(ctx, emptyList()).split("\n").first()
         assertEquals(listOf("Contexte", "Bois; du \"Roi\""), cellules(premiere))
+    }
+
+    // --- Format 3 : volumes (brief nemetonshiny 2026-09-25) ---
+
+    @Test
+    fun `volumes du csv identiques au calcul partage avec le marsync et l ecran Statut`() {
+        val ctx = contexte.copy(tarif = TarifCubage.EMERGE)
+        val journal = listOf(
+            Tige("u-a", "c1", "Hêtre", 25, ActionTige.PLUS, horodatage = 1000L, hauteurTexte = "22"),
+            Tige("u-b", "c1", "Hêtre", 25, ActionTige.PLUS, horodatage = 2000L, hauteurTexte = "26"),
+            Tige("u-c", "c1", "Chêne", 30, ActionTige.PLUS, horodatage = 3000L), // sans hauteur
+            Tige("u-x", "c1", "Hêtre", 25, ActionTige.ANNULATION, horodatage = 4000L),
+        )
+        val csv = ExportCsv.contexteCsv(ctx, journal)
+        val lignes = csv.split("\n")
+        val attendu = VolumesMartelage.totaux(ctx, journal)
+        assertTrue("VolumeTigeTotalM3;${"%.4f".format(Locale.ROOT, attendu.volumeTigeM3)}" in lignes)
+        assertTrue("VolumeTotalM3;${"%.4f".format(Locale.ROOT, attendu.volumeTotalM3)}" in lignes)
+        assertTrue("NbTigesNonCubees;1" in lignes)
+        lignesJournal(csv).forEach { c ->
+            val t = journal.single { it.uuid == c[12] }
+            val v = VolumesMartelage.cubage(ctx, t)
+            assertEquals(v.volumeTigeM3, c[15].toDouble(), 1e-6)
+            assertEquals(v.volumeHouppierM3, c[16].toDouble(), 1e-6)
+            assertEquals(v.volumeTotalM3, c[17].toDouble(), 1e-6)
+            assertEquals(v.surfaceTerriereM2, c[18].toDouble(), 1e-6)
+            assertEquals(v.cubage, c[19])
+        }
+        assertEquals("NON_CUBABLE", lignesJournal(csv).single { it[12] == "u-c" }[19])
+    }
+
+    @Test
+    fun `les decimaux des volumes restent a point meme en francais`() {
+        val defaut = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.FRANCE)
+            val ctx = contexte.copy(tarif = TarifCubage.SCHAEFFER_RAPIDE, tarifNumero = 8)
+            val csv = ExportCsv.contexteCsv(ctx, listOf(Tige("u", "c1", "Chêne", 30, ActionTige.PLUS, horodatage = 1L)))
+            val ligne = lignesJournal(csv).single()
+            assertTrue(ligne[15].contains('.') && !ligne[15].contains(','))
+            assertEquals("SCHAEFFER_RAPIDE:8", ligne[19])
+        } finally {
+            Locale.setDefault(defaut)
+        }
     }
 }

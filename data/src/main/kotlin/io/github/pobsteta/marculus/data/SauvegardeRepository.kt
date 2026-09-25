@@ -9,6 +9,7 @@ import io.github.pobsteta.marculus.data.db.TigeDao
 import io.github.pobsteta.marculus.data.db.TigeEntity
 import fr.marculus.core.LotMartelage
 import kotlinx.coroutines.flow.first
+import fr.marculus.core.VolumesMartelage
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -23,8 +24,11 @@ class SauvegardeRepository(
     suspend fun exporterJson(): String {
         val root = JSONObject()
         root.put("version", 1)
-        root.put("contextes", JSONArray().apply { contexteDao.toutes().forEach { put(it.toJson()) } })
-        root.put("tiges", JSONArray().apply { tigeDao.toutes().forEach { put(it.toJson()) } })
+        val contextes = contexteDao.toutes()
+        val tiges = tigeDao.toutes()
+        val v = volumes(contextes, tiges)
+        root.put("contextes", JSONArray().apply { contextes.forEach { put(it.toJson(v.totaux[it.id])) } })
+        root.put("tiges", JSONArray().apply { tiges.forEach { put(it.toJson(v.parTige[it.uuid])) } })
         root.put("configs", JSONArray().apply { configDao.toutes().forEach { put(it.toJson()) } })
         root.put(
             "referentiels",
@@ -57,8 +61,11 @@ class SauvegardeRepository(
     suspend fun exporterContexteJson(contexteId: String): String {
         val root = JSONObject()
         root.put("version", 1)
-        root.put("contextes", JSONArray().apply { contexteDao.parId(contexteId)?.let { put(it.toJson()) } })
-        root.put("tiges", JSONArray().apply { tigeDao.listeParContexte(contexteId).forEach { put(it.toJson()) } })
+        val contextes = listOfNotNull(contexteDao.parId(contexteId))
+        val tiges = tigeDao.listeParContexte(contexteId)
+        val v = volumes(contextes, tiges)
+        root.put("contextes", JSONArray().apply { contextes.forEach { put(it.toJson(v.totaux[it.id])) } })
+        root.put("tiges", JSONArray().apply { tiges.forEach { put(it.toJson(v.parTige[it.uuid])) } })
         root.put("configs", JSONArray().apply { configDao.listeParContexte(contexteId).forEach { put(it.toJson()) } })
         return root.toString(2)
     }
@@ -94,9 +101,32 @@ class SauvegardeRepository(
     private fun JSONArray?.objetsOuVide(): List<JSONObject> =
         if (this == null) emptyList() else (0 until length()).map { getJSONObject(it) }
 
+    /** Volumes calculés à l'export, avec le tarif courant de chaque contexte. */
+    private class Volumes(
+        val totaux: Map<String, VolumesMartelage.Totaux>,
+        val parTige: Map<String, VolumesMartelage.CubageTige>,
+    )
+
+    private fun volumes(contextes: List<ContexteEntity>, tiges: List<TigeEntity>): Volumes {
+        val parContexte = tiges.groupBy { it.contexteId }
+        val totaux = mutableMapOf<String, VolumesMartelage.Totaux>()
+        val parTige = mutableMapOf<String, VolumesMartelage.CubageTige>()
+        contextes.forEach { entite ->
+            val contexte = runCatching { entite.versDomaine() }.getOrNull() ?: return@forEach
+            val journal = parContexte[entite.id].orEmpty().mapNotNull { runCatching { it.versDomaine() }.getOrNull() }
+            totaux[entite.id] = VolumesMartelage.totaux(contexte, journal)
+            journal.forEach { parTige[it.uuid] = VolumesMartelage.cubage(contexte, it) }
+        }
+        return Volumes(totaux, parTige)
+    }
+
     // --- Sérialisation des entités ---
 
-    private fun ContexteEntity.toJson() = JSONObject().apply {
+    /**
+     * [volumes] : totaux nets calculés sur le téléphone (lecture seule, ignorés à la relecture).
+     * Marculus est la seule source des volumes de martelage.
+     */
+    private fun ContexteEntity.toJson(volumes: VolumesMartelage.Totaux? = null) = JSONObject().apply {
         put("id", id); put("nom", nom); put("mode", mode)
         put("classeMin", classeMin); put("classeMax", classeMax); put("classePas", classePas)
         put("essences", essences); putOpt("commentaire", commentaire); put("increment", increment)
@@ -104,6 +134,10 @@ class SauvegardeRepository(
         putOpt("cheminGpkg", cheminGpkg); put("tarif", tarif); put("tarifNumero", tarifNumero)
         put("coefficientForme", coefficientForme); putOpt("dateMartelage", dateMartelage)
         put("statut", statut); put("modifie", modifie); put("dejaExporte", dejaExporte)
+        volumes?.let {
+            put("volumeTigeTotalM3", it.volumeTigeM3); put("volumeTotalM3", it.volumeTotalM3)
+            put("surfaceTerriereTotaleM2", it.surfaceTerriereM2); put("nbTigesNonCubees", it.nbTigesNonCubees)
+        }
     }
 
     private fun JSONObject.versContexte() = ContexteEntity(
@@ -123,13 +157,19 @@ class SauvegardeRepository(
         dejaExporte = optBoolean("dejaExporte", getBoolean("exporte")),
     )
 
-    private fun TigeEntity.toJson() = JSONObject().apply {
+    /** [cubage] : valeurs unitaires (une tige) calculées à l'export ; ignorées à la relecture. */
+    private fun TigeEntity.toJson(cubage: VolumesMartelage.CubageTige? = null) = JSONObject().apply {
         put("uuid", uuid); put("contexteId", contexteId); put("essence", essence); put("classe", classe)
         put("action", action); put("horodatage", horodatage); put("quantite", quantite)
         putOpt("hauteurTexte", hauteurTexte); putOpt("qualiteArbre", qualiteArbre)
         putOpt("latitude", latitude); putOpt("longitude", longitude); putOpt("operateur", operateur)
         putOpt("parcelle", parcelle); putOpt("qualiteFix", qualiteFix); putOpt("precisionM", precisionM)
         put("modifie", modifie)
+        cubage?.let {
+            put("volumeTigeM3", it.volumeTigeM3); put("volumeHouppierM3", it.volumeHouppierM3)
+            put("volumeTotalM3", it.volumeTotalM3); put("surfaceTerriereM2", it.surfaceTerriereM2)
+            put("cubage", it.cubage)
+        }
     }
 
     private fun JSONObject.versTige() = TigeEntity(
