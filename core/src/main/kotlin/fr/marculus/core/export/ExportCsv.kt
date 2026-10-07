@@ -19,12 +19,16 @@ import java.util.Locale
  *
  * **Format 3** (`FormatCsv;3`) : ajoute les volumes calculés sur le téléphone ([VolumesMartelage]) —
  * tarif et totaux nets en en-tête, cinq colonnes unitaires en fin de journal.
+ *
+ * **Format 4** (`FormatCsv;4`) : affouage — `Affouage` et `VolumeMaxLotM3` en en-tête (après
+ * `Increment`, les quinze premières lignes ne bougent pas) et colonne `Lot` en fin de journal
+ * (vide hors affouage).
  */
 object ExportCsv {
     private const val SEP = ";"
 
     /** Version du format, lue par Nemeton : son absence désigne le format 1, non réimportable. */
-    const val FORMAT = 3
+    const val FORMAT = 4
 
     fun contexteCsv(contexte: Contexte, journal: List<Tige>): String {
         val sb = StringBuilder()
@@ -46,6 +50,9 @@ object ExportCsv {
         sb.appendLine("NbTigesNonCubees${SEP}${totauxVolumes.nbTigesNonCubees}")
         sb.appendLine("Mode${SEP}${contexte.mode}")
         sb.appendLine("Increment${SEP}${contexte.increment}")
+        // Format 4 : affouage, après les quinze premières lignes.
+        sb.appendLine("Affouage${SEP}${contexte.affouage}")
+        sb.appendLine("VolumeMaxLotM3${SEP}${contexte.volumeMaxLotM3}")
         contexte.commentaire?.let { sb.appendLine("Commentaire${SEP}${champ(it)}") }
         sb.appendLine()
 
@@ -70,6 +77,8 @@ object ExportCsv {
                 "Uuid", "Parcelle", "Modifie",
                 // Format 3 : valeurs unitaires (une tige), après les quinze colonnes du format 2.
                 "VolumeTigeM3", "VolumeHouppierM3", "VolumeTotalM3", "SurfaceTerriereM2", "Cubage",
+                // Format 4 : lot d'affouage figé au martelage.
+                "Lot",
             ).joinToString(SEP),
         )
         journal.sortedBy { it.horodatage }.forEach { t ->
@@ -96,6 +105,7 @@ object ExportCsv {
                     decimal(c.volumeTotalM3, DECIMALES_UNITAIRE),
                     decimal(c.surfaceTerriereM2, DECIMALES_UNITAIRE),
                     c.cubage,
+                    t.lot?.toString() ?: "",
                 ).joinToString(SEP) { champ(it) },
             )
         }

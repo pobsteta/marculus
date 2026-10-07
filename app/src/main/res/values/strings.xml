@@ -421,4 +421,10 @@
     <string name="apropos_desc">Application de martelage forestier — comptage, cubage et géolocalisation RTK.</string>
     <string name="apropos_licences">Reconnaissance vocale : Vosk (Alpha Cephei) et le modèle vosk-model-small-fr-0.22, distribués sous licence Apache 2.0. Cartographie : osmdroid. GeoPackage : NGA.</string>
     <string name="apropos_github">Ouvrir sur GitHub</string>
+    <string name="voix_lot_annonce">lot numéro %1$d</string>
+    <string name="creation_affouage">Affouage</string>
+    <string name="creation_affouage_volume_max">Volume maximal d\'un lot (m³)</string>
+    <string name="creation_affouage_aide">Les lots démarrent à 1. Le volume bois fort de chaque tige est cumulé ; dès que le lot atteint le volume maximal, la tige suivante ouvre le lot suivant. Le numéro de lot est annoncé à chaque tige. En EMERGE, une tige sans hauteur ne compte pas dans le volume.</string>
+    <string name="creation_erreur_affouage_tarif">L\'affouage nécessite un tarif de cubage.</string>
+    <string name="creation_erreur_affouage_volume">Volume maximal d\'un lot invalide (nombre &gt; 0).</string>
 </resources>

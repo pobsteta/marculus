@@ -96,6 +96,10 @@ fun CreationContexteScreen(
     }
     var coefForme by remember { mutableStateOf((contexteExistant?.coefficientForme ?: 0.5).toString()) }
     var dateMartelage by remember { mutableStateOf(contexteExistant?.dateMartelage) }
+    var affouage by remember { mutableStateOf(contexteExistant?.affouage ?: false) }
+    var volumeMaxLot by remember {
+        mutableStateOf(contexteExistant?.volumeMaxLotM3?.takeIf { it > 0.0 }?.toString() ?: "")
+    }
     var datePickerOuvert by remember { mutableStateOf(false) }
 
     val essencesDisponibles = remember {
@@ -136,6 +140,8 @@ fun CreationContexteScreen(
     val errMinMax = stringResource(R.string.creation_erreur_min_max)
     val errInc = stringResource(R.string.creation_erreur_increment)
     val errEssence = stringResource(R.string.creation_erreur_essence_requise)
+    val errAffouageTarif = stringResource(R.string.creation_erreur_affouage_tarif)
+    val errAffouageVolume = stringResource(R.string.creation_erreur_affouage_volume)
 
     Scaffold(
         topBar = {
@@ -286,6 +292,23 @@ fun CreationContexteScreen(
                 Text(stringResource(R.string.creation_coef_forme_aide), style = MaterialTheme.typography.bodySmall)
             }
 
+            HorizontalDivider()
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(checked = affouage, onCheckedChange = { affouage = it })
+                Text(stringResource(R.string.creation_affouage), style = MaterialTheme.typography.titleSmall)
+            }
+            if (affouage) {
+                OutlinedTextField(
+                    value = volumeMaxLot,
+                    onValueChange = { saisie -> volumeMaxLot = saisie.filter { it.isDigit() || it == '.' || it == ',' } },
+                    label = { Text(stringResource(R.string.creation_affouage_volume_max)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Text(stringResource(R.string.creation_affouage_aide), style = MaterialTheme.typography.bodySmall)
+            }
+
             erreur?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -299,6 +322,7 @@ fun CreationContexteScreen(
                         val ma = max.toIntOrNull()
                         val pa = pas.toIntOrNull()
                         val inc = increment.toIntOrNull()
+                        val vMaxLot = volumeMaxLot.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 }
                         erreur = when {
                             nom.isBlank() -> errNom
                             mi == null || ma == null || pa == null -> errNombres
@@ -306,6 +330,8 @@ fun CreationContexteScreen(
                             mi > ma -> errMinMax
                             inc == null || inc <= 0 -> errInc
                             selection.isEmpty() -> errEssence
+                            affouage && tarif == TarifCubage.AUCUN -> errAffouageTarif
+                            affouage && vMaxLot == null -> errAffouageVolume
                             else -> {
                                 val essences = essencesDisponibles
                                     .filter { it in selection }
@@ -313,11 +339,14 @@ fun CreationContexteScreen(
                                 val commentaireFinal = commentaire.trim().ifBlank { null }
                                 val numero = tarifNumero.toIntOrNull() ?: 0
                                 val coef = coefForme.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 } ?: 0.5
+                                // Décoché, le volume saisi est conservé : recocher retrouve la borne.
+                                val volumeLot = vMaxLot ?: contexteExistant?.volumeMaxLotM3 ?: 0.0
                                 scope.launch {
                                     if (edition) {
                                         repository.modifierContexte(
                                             contexteExistant!!.id, nom.trim(), mode,
                                             AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg, tarif, numero, coef, dateMartelage,
+                                            affouage, volumeLot,
                                         )
                                         onEnregistre(contexteExistant.id)
                                     } else {
@@ -326,6 +355,7 @@ fun CreationContexteScreen(
                                             essences, commentaireFinal, inc,
                                             cheminGpkg = cheminGpkg, tarif = tarif, tarifNumero = numero,
                                             coefficientForme = coef, dateMartelage = dateMartelage,
+                                            affouage = affouage, volumeMaxLotM3 = volumeLot,
                                         )
                                         onEnregistre(id)
                                     }

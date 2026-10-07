@@ -1,0 +1,90 @@
+# Tranche « contexte Affouage » (lots de volume)
+
+Demande de Pascal du 2026-10-07. Statut : **livré** (2026-10-07).
+
+## Besoin
+
+Pour un martelage d'affouage, les tiges sont réparties en **lots** de volume à peu près égal.
+On ne fait pas les lots après coup sur un tableur : l'opérateur marque le numéro de lot sur
+l'arbre au moment du martelage. L'application doit donc **dire** à chaque tige le lot où elle va.
+
+## Ce que ça fait
+
+**Création / modification d'un contexte** : une case **« Affouage »** dans la section du tarif
+de cubage. Cochée, elle ouvre un champ **« Volume maximal d'un lot (m³) »** (décimal, > 0).
+
+- Affouage exige un **tarif de cubage** (≠ Aucun) : sans volume par tige, aucun lot ne se ferme.
+  Refus à l'enregistrement avec un message.
+- En **EMERGE**, une tige sans hauteur vaut 0 m³ : le lot ne se remplit que par les tiges
+  mesurées (MNH, dictée, bouton H). Le texte d'aide le dit — Schaeffer est le choix naturel.
+
+**Au comptage** (feuille, carte, dictée vocale — tout passe par `sessionMartelage.ajouter`) :
+
+1. Les lots démarrent à **1**.
+2. Le volume de chaque tige (`VolumesMartelage.cubage(...).volumeTigeM3 × quantité`, bois fort
+   tige) est cumulé dans le lot courant.
+3. Dès que le cumul est **≥ volume maximal**, le lot est clos : la tige **suivante** ouvre le lot
+   suivant (la tige qui fait déborder appartient au lot qu'elle ferme), et le cumul repart de 0.
+4. L'annonce vocale reste celle des Paramètres (« Annonce de l'étiquette » → « Chêne 35 »,
+   « Annonce du nombre » → total), et **dans tous les cas** on ajoute **« lot numéro N »** —
+   même si les deux annonces sont décochées. Ex. : « Chêne 35, lot numéro 3, 12 ».
+
+## Décisions
+
+### Le lot est figé sur la tige
+
+Nouveau champ `Tige.lot: Int?` (null hors affouage), comme la parcelle : c'est un **instantané**.
+Le numéro a été dit à voix haute et peint sur l'arbre ; il ne doit jamais changer après coup —
+ni si une hauteur est complétée plus tard, ni si le tarif ou le volume maximal change, ni après
+une fusion `.marsync` qui intercalerait les tiges d'un autre appareil.
+
+### L'état courant est dérivé du journal
+
+Pas de compteur stocké dans le contexte. `AffouageLots.prochainLot(contexte, journal)` (`:core`,
+pur, testé) rejoue le journal :
+
+- les annulations retirent, comme dans `VolumesMartelage`, les dernières tiges de leur case ;
+- lot courant = plus grand lot porté par une tige PLUS (1 si aucune) ;
+- cumul = volume des tiges **vivantes** de ce lot (volumes recalculés avec les hauteurs actuelles) ;
+- prochain lot = lot courant + 1 si cumul ≥ max, sinon lot courant.
+
+Conséquence voulue : un **−** juste après la tige qui a fermé un lot rouvre ce lot — la tige
+suivante y retourne. Un lot vidé par annulation garde son numéro (on ne saute pas, on ne recule
+pas au-delà du plus grand lot déjà annoncé).
+
+Les tiges sans lot (affouage coché en cours de martelage) sont ignorées : on démarre au lot 1.
+
+### Annonce avant l'écriture
+
+Le lot est calculé sur le journal observé par la session, avant l'insertion, pour que l'annonce
+parte sans latence (comme le total aujourd'hui). Deux tiges tapées plus vite que la remontée du
+flux Room peuvent tomber dans un lot déjà plein : le lot déborde d'une tige, mais **ce qui est dit
+est ce qui est enregistré** — c'est l'invariant qui compte sur le terrain.
+
+## Modèle et persistance
+
+| Où | Changement |
+|---|---|
+| `Contexte` | `affouage: Boolean = false`, `volumeMaxLotM3: Double = 0.0` |
+| `Tige` | `lot: Int? = null` |
+| Room | **v14**, `MIGRATION_13_14` : 2 colonnes `contexte`, 1 colonne `tige` (défauts 0 / NULL) |
+| `.marsync` | `affouage`, `volumeMaxLotM3` (contexte), `lot` (tige) ; absents → défauts |
+| CSV | **format 4** : `Affouage` / `VolumeMaxLotM3` en en-tête après `Increment` (15 premières lignes inchangées), colonne `Lot` en fin de journal (vide hors affouage) — à signaler à Nemeton |
+
+## Hors périmètre (à proposer ensuite)
+
+
+- Annonce « lot N complet » à la fermeture d'un lot.
+- Récapitulatif par lot (nombre de tiges, volume) dans l'écran Statut.
+- Lot affiché sur la carte / dans la feuille.
+
+## Saisie libre et « répète »
+
+- Saisie libre (dialogue hors grille) : la tige reçoit le lot ouvert, sans annonce.
+- Commande vocale « répète » : ré-annonce aussi le lot de la dernière tige.
+
+## Tests
+
+- `AffouageLotsTest` : départ à 1, cumul et bascule à l'égalité, débordement, annulation qui
+  rouvre un lot, tiges sans lot ignorées, quantité > 1, tarif AUCUN.
+- `ExportCsvTest` : format 4, en-tête affouage, colonne `Lot`.

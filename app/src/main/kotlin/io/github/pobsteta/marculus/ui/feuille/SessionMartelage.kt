@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.AffouageLots
 import fr.marculus.core.AnnonceHauteur
 import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.EstimationHauteur
@@ -204,7 +205,7 @@ private fun hauteurEstimee(actif: Boolean, houppiers: List<Houppier>, p: Positio
     if (actif && p != null) EstimationHauteur.texte(houppiers, p) else null
 
 /** Dernière tige saisie (la seule annotable par H/Q, par la voix ou les boutons de volume). */
-data class DerniereSaisie(val uuid: String, val essence: String, val classe: Int)
+data class DerniereSaisie(val uuid: String, val essence: String, val classe: Int, val lot: Int? = null)
 
 /**
  * Ce qu'un écran de martelage (feuille, carte) offre pour compter des tiges : les totaux, le fix
@@ -311,6 +312,7 @@ fun sessionMartelage(
         forcer: Boolean = false,
         qualite: String? = null,
         hauteur: String? = null,
+        lot: Int? = null,
     ) {
         val parties = buildList {
             if (reglages.annonceEtiquette || forcer) {
@@ -321,6 +323,9 @@ fun sessionMartelage(
                         (hauteur?.let { " " + annonceHauteur(androidContext, it) } ?: ""),
                 )
             }
+            // Affouage : le lot se dit toujours, réglages d'annonce cochés ou non — c'est lui
+            // qu'on marque sur l'arbre.
+            lot?.let { add(androidContext.getString(R.string.voix_lot_annonce, it)) }
             if (reglages.annonceNombre) add(total.toString())
         }
         if (parties.isNotEmpty()) dire(parties.joinToString(", "), "tige", remplacer = true)
@@ -335,6 +340,10 @@ fun sessionMartelage(
     }
     val totaux by repository.totaux(contexteId).collectAsStateWithLifecycle(emptyMap())
     val configs by repository.configs(contexteId).collectAsStateWithLifecycle(emptyMap())
+    // Journal observé : l'affouage en dérive le lot ouvert et son cumul de volume.
+    val journal by repository.journal(contexteId).collectAsStateWithLifecycle(emptyList())
+    /** Lot de la prochaine tige, ou null hors affouage. */
+    fun prochainLot(ctx: Contexte): Int? = if (ctx.affouage) AffouageLots.prochainLot(ctx, journal) else null
     // Demande la permission de localisation à l'exécution dès que la capture GNSS est activée.
     val permLocalisation = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     // Permission de localisation : seulement pour le GNSS INTERNE. Le récepteur RTK externe
@@ -445,6 +454,7 @@ fun sessionMartelage(
         quantite: Int,
         hauteurTexte: String?,
         qualite: String?,
+        lot: Int?,
         onInseree: (uuid: String) -> Unit = {},
     ) {
         val fix = fixEffectif()
@@ -458,6 +468,7 @@ fun sessionMartelage(
                 qualiteArbre = qualite,
                 position = pos, operateur = operateurEffectif, parcelle = parcelleDe(pos),
                 qualiteFix = fix?.qualite, precisionM = fix?.precisionHorizontaleM,
+                lot = lot,
             )
             onInseree(uuid)
             if (!rtkActif && reglages.capturePosition && reglages.gnssPonctuel) {
@@ -493,6 +504,9 @@ fun sessionMartelage(
         retourSensoriel()
         val cle = CompteurCle(essence, classe)
         val nouveauTotal = (totaux[cle] ?: 0) + ctx.increment
+        // Le lot est calculé avant l'écriture pour être dit sans attendre ; ce qui est dit est
+        // ce qui est figé sur la tige.
+        val lot = prochainLot(ctx)
         annoncer(
             essence,
             classe,
@@ -500,6 +514,7 @@ fun sessionMartelage(
             forcer = annonceForcee,
             qualite = qualite,
             hauteur = hauteurTexte,
+            lot = lot,
         )
         configs[cle]?.let { annoncerAvis(it, nouveauTotal) }
         val parcelleLabel = parcelleDe(fixEffectif()?.position)
@@ -507,8 +522,8 @@ fun sessionMartelage(
         if (parcelleConnue && parcelleLabel != parcelleCourante) dictee.reinitialiserRafale()
         parcelleCourante = parcelleLabel
         parcelleConnue = true
-        inserer(essence, classe, ctx.increment, hauteurTexte, qualite) { uuid ->
-            derniereSaisie = DerniereSaisie(uuid, essence, classe)
+        inserer(essence, classe, ctx.increment, hauteurTexte, qualite, lot) { uuid ->
+            derniereSaisie = DerniereSaisie(uuid, essence, classe, lot)
         }
     }
     fun retirer(essence: String, classe: Int) {
@@ -604,6 +619,7 @@ fun sessionMartelage(
                     cible.classe,
                     totaux[CompteurCle(cible.essence, cible.classe)] ?: 0,
                     forcer = true,
+                    lot = cible.lot,
                 )
             }
         }
@@ -627,7 +643,8 @@ fun sessionMartelage(
         retirer = { essence, classe -> retirer(essence, classe) },
         saisirLibre = { action, essence, classe, quantite, hauteur, qualite ->
             if (action == ActionTige.PLUS) {
-                inserer(essence, classe, quantite, hauteur, qualite)
+                // Saisie libre : sans annonce, mais la tige compte dans le lot ouvert.
+                inserer(essence, classe, quantite, hauteur, qualite, contexte?.let { prochainLot(it) })
             } else {
                 scope.launch {
                     repository.annulerTige(contexteId, essence, classe, quantite = quantite, operateur = operateurEffectif)

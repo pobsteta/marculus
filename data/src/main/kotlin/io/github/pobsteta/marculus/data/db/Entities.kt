@@ -33,6 +33,12 @@ data class ContexteEntity(
      */
     @ColumnInfo(defaultValue = "0")
     val dejaExporte: Boolean = false,
+    /** Martelage d'affouage : tiges rangées en lots de volume borné. */
+    @ColumnInfo(defaultValue = "0")
+    val affouage: Boolean = false,
+    /** Volume maximal (m³) d'un lot d'affouage. */
+    @ColumnInfo(defaultValue = "0")
+    val volumeMaxLotM3: Double = 0.0,
 )
 
 @Entity(
@@ -59,6 +65,8 @@ data class TigeEntity(
     val precisionM: Double? = null,
     /** Horodatage de dernière modification (synchro « dernière écriture gagne »). */
     val modifie: Long = 0,
+    /** Lot d'affouage annoncé au martelage (figé), ou null. */
+    val lot: Int? = null,
 )
 
 /** Réglages par compteur (cellule) d'un contexte : avis si plus / si moins. */
