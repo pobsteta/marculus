@@ -114,4 +114,19 @@ class AffouageLotsTest {
     fun `hors affouage aucune fermeture`() {
         assertEquals(false, AffouageLots.fermeLot(contexte(2.0), listOf(plus("a", 1, 1)), plus("b", 2, null)))
     }
+
+    @Test
+    fun `bilan par lot - tiges et volume nets, lot complet signale`() {
+        val ctx = contexte(2.0)
+        val j = listOf(
+            plus("a", 1, 1), plus("b", 2, 1), plus("c", 3, 2), plus("d", 4, 2), moins("x", 5),
+            plus("e", 6, null),
+        )
+        val b = AffouageLots.bilan(ctx, j)
+        assertEquals(listOf(1, 2, null), b.map { it.lot })
+        assertEquals(listOf(2, 1, 1), b.map { it.nbTiges })
+        assertEquals(2 * v40, b[0].volumeM3, eps)
+        assertEquals(v40, b[1].volumeM3, eps)
+        assertEquals(listOf(true, false, false), b.map { it.complet })
+    }
 }

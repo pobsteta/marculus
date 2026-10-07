@@ -16,6 +16,32 @@ import fr.marculus.core.model.Tige
  */
 object AffouageLots {
 
+    /**
+     * Bilan d'un lot : tiges et volume (m³, bois fort tige) **nets**, annulations déduites.
+     * [lot] null regroupe les tiges comptées sans lot (avant que l'affouage soit coché).
+     */
+    data class BilanLot(val lot: Int?, val nbTiges: Int, val volumeM3: Double, val complet: Boolean)
+
+    /**
+     * Bilan par lot, dans l'ordre des numéros (les tiges sans lot en dernier). Calculé sur le
+     * journal net ([JournalNet]) : une tige annulée ne compte dans aucun lot. Un lot vidé par
+     * annulation n'apparaît plus.
+     */
+    fun bilan(contexte: Contexte, journal: List<Tige>): List<BilanLot> =
+        JournalNet.tiges(journal)
+            .filter { it.action == ActionTige.PLUS }
+            .groupBy { it.lot }
+            .map { (lot, tiges) ->
+                val v = tiges.sumOf { VolumesMartelage.cubage(contexte, it).volumeTigeM3 * it.quantite }
+                BilanLot(
+                    lot = lot,
+                    nbTiges = tiges.sumOf { it.quantite },
+                    volumeM3 = v,
+                    complet = lot != null && contexte.volumeMaxLotM3 > 0.0 && v >= contexte.volumeMaxLotM3,
+                )
+            }
+            .sortedWith(compareBy(nullsLast()) { it.lot })
+
     /** Lot ouvert et volume (m³) déjà cumulé dedans. */
     data class Etat(val lot: Int, val cumulM3: Double)
 

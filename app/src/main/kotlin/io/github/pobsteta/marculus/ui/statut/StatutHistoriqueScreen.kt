@@ -58,6 +58,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.AffouageLots
 import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.Cubage
 import fr.marculus.core.VolumesMartelage
@@ -140,14 +141,23 @@ fun StatutHistoriqueScreen(
             return@Scaffold
         }
         Column(Modifier.padding(padding).fillMaxSize()) {
-            TabRow(selectedTabIndex = onglet) {
-                Tab(selected = onglet == 0, onClick = { onglet = 0 }, text = { Text(stringResource(R.string.statut_onglet_statut)) })
-                Tab(selected = onglet == 1, onClick = { onglet = 1 }, text = { Text(stringResource(R.string.statut_onglet_par_parcelle)) })
-                Tab(selected = onglet == 2, onClick = { onglet = 2 }, text = { Text(stringResource(R.string.statut_onglet_historique)) })
+            // Identifiants d'onglet stables ; « Lots » n'existe que pour un contexte d'affouage.
+            val onglets = listOfNotNull(
+                ONGLET_STATUT to R.string.statut_onglet_statut,
+                (ONGLET_LOTS to R.string.statut_onglet_lots).takeIf { ctx.affouage },
+                ONGLET_PARCELLES to R.string.statut_onglet_par_parcelle,
+                ONGLET_HISTORIQUE to R.string.statut_onglet_historique,
+            )
+            val ongletActif = onglet.takeIf { id -> onglets.any { it.first == id } } ?: ONGLET_STATUT
+            TabRow(selectedTabIndex = onglets.indexOfFirst { it.first == ongletActif }) {
+                onglets.forEach { (id, libelle) ->
+                    Tab(selected = ongletActif == id, onClick = { onglet = id }, text = { Text(stringResource(libelle)) })
+                }
             }
-            when (onglet) {
-                0 -> OngletStatut(ctx, totaux, journal, seuils)
-                1 -> OngletParcelles(ctx, journal, parcelles)
+            when (ongletActif) {
+                ONGLET_STATUT -> OngletStatut(ctx, totaux, journal, seuils)
+                ONGLET_LOTS -> OngletLots(ctx, journal)
+                ONGLET_PARCELLES -> OngletParcelles(ctx, journal, parcelles)
                 else -> OngletHistorique(ctx, journal, onEdit = { tigeEnEdition = it })
             }
         }
@@ -292,6 +302,70 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
 }
 
 @OptIn(ExperimentalLayoutApi::class)
+private const val ONGLET_STATUT = 0
+private const val ONGLET_PARCELLES = 1
+private const val ONGLET_HISTORIQUE = 2
+private const val ONGLET_LOTS = 3
+
+/** Affouage : tiges et volume (bois fort tige) nets de chaque lot, annulations déduites. */
+@Composable
+private fun OngletLots(contexte: Contexte, journal: List<Tige>) {
+    val locale = LocalConfiguration.current.locales[0]
+    val bilan = AffouageLots.bilan(contexte, journal)
+    fun m3(v: Double) = String.format(locale, "%.2f", v)
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item {
+            Text(
+                stringResource(R.string.statut_lots_volume_max, m3(contexte.volumeMaxLotM3)),
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
+        if (bilan.isEmpty()) {
+            item { Text(stringResource(R.string.statut_lots_aucun), style = MaterialTheme.typography.bodyMedium) }
+            return@LazyColumn
+        }
+        item {
+            Row(Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.statut_lots_col_lot), Modifier.weight(1.4f), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.statut_lots_col_tiges), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.statut_lots_col_volume), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+            }
+            HorizontalDivider()
+        }
+        items(bilan) { b ->
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1.4f)) {
+                    Text(
+                        b.lot?.let { stringResource(R.string.statut_lots_lot, it) } ?: stringResource(R.string.statut_lots_sans_lot),
+                        style = MaterialTheme.typography.titleSmall,
+                    )
+                    if (b.lot != null) {
+                        Text(
+                            stringResource(if (b.complet) R.string.statut_lots_complet else R.string.statut_lots_en_cours),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (b.complet) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                Text(b.nbTiges.toString(), Modifier.weight(1f))
+                Text(m3(b.volumeM3), Modifier.weight(1f))
+            }
+        }
+        item {
+            HorizontalDivider()
+            Row(Modifier.fillMaxWidth().padding(top = 4.dp)) {
+                Text(stringResource(R.string.statut_lots_total), Modifier.weight(1.4f), fontWeight = FontWeight.Bold)
+                Text(bilan.sumOf { it.nbTiges }.toString(), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                Text(m3(bilan.sumOf { it.volumeM3 }), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
 @Composable
 private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: List<ParcelleGpkg>) {
     val strHorsParcelle = stringResource(R.string.statut_hors_parcelle)

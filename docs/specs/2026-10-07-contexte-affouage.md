@@ -75,7 +75,6 @@ est ce qui est enregistré** — c'est l'invariant qui compte sur le terrain.
 ## Hors périmètre (à proposer ensuite)
 
 
-- Récapitulatif par lot (nombre de tiges, volume) dans l'écran Statut.
 - Lot affiché sur la carte / dans la feuille.
 
 ## Saisie libre et « répète »
@@ -91,10 +90,17 @@ retire (dernière tige de sa case, même règle que les volumes) ; un paquet (qu
 partie reste avec sa quantité restante ; une annulation sans tige à retirer est gardée. L'en-tête
 porte `Journal;NET` ou `Journal;COMPLET` ; totaux et volumes d'en-tête sont identiques.
 
+## Onglet « Lots » (Statut / historique)
+
+Visible seulement pour un contexte d'affouage, entre « Statut » et « Par parcelle ». Pour chaque
+lot : nombre de tiges et volume bois fort tige (m³), **nets** (`AffouageLots.bilan`, sur
+`JournalNet` : une tige annulée ne compte dans aucun lot), avec « complet » / « en cours », puis
+une ligne Total. Les tiges comptées sans lot sont regroupées en dernier (« Sans lot »).
+
 ## Tests
 
 - `AffouageLotsTest` : départ à 1, cumul et bascule à l'égalité, débordement, annulation qui
   rouvre un lot, tiges sans lot ignorées, quantité > 1, tarif AUCUN.
-- `AffouageLotsTest` : `fermeLot` (fermeture, égalité, hors affouage).
+- `AffouageLotsTest` : `fermeLot` (fermeture, égalité, hors affouage), `bilan` par lot.
 - `JournalNetTest` : retrait de la paire, case, ordre, paquet partiel, annulation orpheline, totaux égaux.
 - `ExportCsvTest` : format 4, en-tête affouage, colonne `Lot`, export net.

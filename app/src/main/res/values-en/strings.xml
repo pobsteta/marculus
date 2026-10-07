@@ -431,4 +431,15 @@
     <string name="liste_export_net">Only the stems to count</string>
     <string name="liste_export_aide">Stems to count: each cancellation is removed together with the stem it cancels. Totals and volumes are the same either way.</string>
     <string name="liste_export_confirmer">Export</string>
+    <string name="statut_onglet_lots">Lots</string>
+    <string name="statut_lots_volume_max">Maximum lot volume: %1$s m³</string>
+    <string name="statut_lots_aucun">No stem in a lot yet.</string>
+    <string name="statut_lots_col_lot">Lot</string>
+    <string name="statut_lots_col_tiges">Stems</string>
+    <string name="statut_lots_col_volume">Volume (m³)</string>
+    <string name="statut_lots_lot">Lot %1$d</string>
+    <string name="statut_lots_sans_lot">No lot</string>
+    <string name="statut_lots_complet">complete</string>
+    <string name="statut_lots_en_cours">in progress</string>
+    <string name="statut_lots_total">Total</string>
 </resources>

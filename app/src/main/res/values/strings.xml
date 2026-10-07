@@ -433,4 +433,15 @@
     <string name="liste_export_net">Uniquement les tiges à comptabiliser</string>
     <string name="liste_export_aide">Tiges à comptabiliser : chaque annulation disparaît avec la tige qu\'elle annule. Les totaux et les volumes sont les mêmes dans les deux cas.</string>
     <string name="liste_export_confirmer">Exporter</string>
+    <string name="statut_onglet_lots">Lots</string>
+    <string name="statut_lots_volume_max">Volume maximal d\'un lot : %1$s m³</string>
+    <string name="statut_lots_aucun">Aucune tige dans un lot pour l\'instant.</string>
+    <string name="statut_lots_col_lot">Lot</string>
+    <string name="statut_lots_col_tiges">Tiges</string>
+    <string name="statut_lots_col_volume">Volume (m³)</string>
+    <string name="statut_lots_lot">Lot %1$d</string>
+    <string name="statut_lots_sans_lot">Sans lot</string>
+    <string name="statut_lots_complet">complet</string>
+    <string name="statut_lots_en_cours">en cours</string>
+    <string name="statut_lots_total">Total</string>
 </resources>
