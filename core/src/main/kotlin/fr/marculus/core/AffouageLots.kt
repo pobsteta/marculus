@@ -50,6 +50,17 @@ object AffouageLots {
         return Etat(lot, cumul)
     }
 
+    /**
+     * La tige [nouvelle] (pas encore au journal, son lot déjà fixé) ferme-t-elle son lot ?
+     * C'est elle qui fait atteindre ou dépasser la borne : on annonce alors « lot N complet ».
+     */
+    fun fermeLot(contexte: Contexte, journal: List<Tige>, nouvelle: Tige): Boolean {
+        val lot = nouvelle.lot ?: return false
+        if (contexte.volumeMaxLotM3 <= 0.0) return false
+        val e = etat(contexte, journal + nouvelle)
+        return e.lot == lot && e.cumulM3 >= contexte.volumeMaxLotM3
+    }
+
     /** Lot où ira la prochaine tige : le lot courant, ou le suivant s'il a atteint la borne. */
     fun prochainLot(contexte: Contexte, journal: List<Tige>): Int {
         val e = etat(contexte, journal)

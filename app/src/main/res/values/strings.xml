@@ -427,4 +427,10 @@
     <string name="creation_affouage_aide">Les lots démarrent à 1. Le volume bois fort de chaque tige est cumulé ; dès que le lot atteint le volume maximal, la tige suivante ouvre le lot suivant. Le numéro de lot est annoncé à chaque tige. En EMERGE, une tige sans hauteur ne compte pas dans le volume.</string>
     <string name="creation_erreur_affouage_tarif">L\'affouage nécessite un tarif de cubage.</string>
     <string name="creation_erreur_affouage_volume">Volume maximal d\'un lot invalide (nombre &gt; 0).</string>
+    <string name="voix_lot_complet">lot %1$d complet</string>
+    <string name="liste_export_titre">Exporter en CSV</string>
+    <string name="liste_export_complet">Journal complet (avec les annulations)</string>
+    <string name="liste_export_net">Uniquement les tiges à comptabiliser</string>
+    <string name="liste_export_aide">Tiges à comptabiliser : chaque annulation disparaît avec la tige qu\'elle annule. Les totaux et les volumes sont les mêmes dans les deux cas.</string>
+    <string name="liste_export_confirmer">Exporter</string>
 </resources>

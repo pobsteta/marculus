@@ -28,6 +28,7 @@ de cubage. Cochée, elle ouvre un champ **« Volume maximal d'un lot (m³) »** 
 4. L'annonce vocale reste celle des Paramètres (« Annonce de l'étiquette » → « Chêne 35 »,
    « Annonce du nombre » → total), et **dans tous les cas** on ajoute **« lot numéro N »** —
    même si les deux annonces sont décochées. Ex. : « Chêne 35, lot numéro 3, 12 ».
+5. La tige qui ferme son lot ajoute **« lot N complet »** : « Chêne 35, lot numéro 3, lot 3 complet ».
 
 ## Décisions
 
@@ -74,7 +75,6 @@ est ce qui est enregistré** — c'est l'invariant qui compte sur le terrain.
 ## Hors périmètre (à proposer ensuite)
 
 
-- Annonce « lot N complet » à la fermeture d'un lot.
 - Récapitulatif par lot (nombre de tiges, volume) dans l'écran Statut.
 - Lot affiché sur la carte / dans la feuille.
 
@@ -83,8 +83,18 @@ est ce qui est enregistré** — c'est l'invariant qui compte sur le terrain.
 - Saisie libre (dialogue hors grille) : la tige reçoit le lot ouvert, sans annonce.
 - Commande vocale « répète » : ré-annonce aussi le lot de la dernière tige.
 
+## Export CSV « tiges à comptabiliser »
+
+À l'export CSV (liste des contextes), une question : **journal complet** ou **uniquement les
+tiges à comptabiliser**. En net (`JournalNet`), chaque annulation disparaît avec la tige qu'elle
+retire (dernière tige de sa case, même règle que les volumes) ; un paquet (quantité > 1) annulé en
+partie reste avec sa quantité restante ; une annulation sans tige à retirer est gardée. L'en-tête
+porte `Journal;NET` ou `Journal;COMPLET` ; totaux et volumes d'en-tête sont identiques.
+
 ## Tests
 
 - `AffouageLotsTest` : départ à 1, cumul et bascule à l'égalité, débordement, annulation qui
   rouvre un lot, tiges sans lot ignorées, quantité > 1, tarif AUCUN.
-- `ExportCsvTest` : format 4, en-tête affouage, colonne `Lot`.
+- `AffouageLotsTest` : `fermeLot` (fermeture, égalité, hors affouage).
+- `JournalNetTest` : retrait de la paire, case, ordre, paquet partiel, annulation orpheline, totaux égaux.
+- `ExportCsvTest` : format 4, en-tête affouage, colonne `Lot`, export net.

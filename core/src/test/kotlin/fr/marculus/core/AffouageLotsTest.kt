@@ -94,4 +94,24 @@ class AffouageLotsTest {
         val ctx = contexte(1.0, TarifCubage.AUCUN)
         assertEquals(1, AffouageLots.prochainLot(ctx, listOf(plus("a", 1, 1), plus("b", 2, 1))))
     }
+
+    @Test
+    fun `la tige qui atteint la borne ferme son lot`() {
+        val ctx = contexte(2.0)
+        assertEquals(false, AffouageLots.fermeLot(ctx, emptyList(), plus("a", 1, 1)))
+        assertEquals(true, AffouageLots.fermeLot(ctx, listOf(plus("a", 1, 1)), plus("b", 2, 1)))
+    }
+
+    @Test
+    fun `a l egalite la tige ferme son lot, pas la suivante`() {
+        val ctx = contexte(2 * v40)
+        assertEquals(true, AffouageLots.fermeLot(ctx, listOf(plus("a", 1, 1)), plus("b", 2, 1)))
+        val j = listOf(plus("a", 1, 1), plus("b", 2, 1))
+        assertEquals(false, AffouageLots.fermeLot(ctx, j, plus("c", 3, 2)))
+    }
+
+    @Test
+    fun `hors affouage aucune fermeture`() {
+        assertEquals(false, AffouageLots.fermeLot(contexte(2.0), listOf(plus("a", 1, 1)), plus("b", 2, null)))
+    }
 }

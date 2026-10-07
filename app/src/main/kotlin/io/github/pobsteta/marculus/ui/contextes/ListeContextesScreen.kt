@@ -117,6 +117,7 @@ fun ListeContextesScreen(
     var aLire by remember { mutableStateOf<ResumeContexte?>(null) }
     var aDater by remember { mutableStateOf<ResumeContexte?>(null) }
     var aChangerMode by remember { mutableStateOf<ResumeContexte?>(null) }
+    var aExporter by remember { mutableStateOf<ResumeContexte?>(null) }
     var menuAppli by remember { mutableStateOf(false) }
     var aProposOuvert by remember { mutableStateOf(false) }
     var recherche by remember { mutableStateOf("") }
@@ -134,10 +135,11 @@ fun ListeContextesScreen(
 
     // Export CSV direct dans Téléchargements/Marculus/ (voir ExportFichier : visible en USB
     // avec sa vraie taille, sans débrancher le câble).
-    fun exporterCsv(id: String) {
+    // [net] : seules les tiges à comptabiliser (ni annulations, ni tiges annulées).
+    fun exporterCsv(id: String, net: Boolean) {
         scope.launch {
             val ctx = repository.contexte(id) ?: return@launch
-            val csv = ExportCsv.contexteCsv(ctx, repository.journalInstantane(id))
+            val csv = ExportCsv.contexteCsv(ctx, repository.journalInstantane(id), net = net)
             val emplacement = ExportFichier.enregistrer(context, "${ctx.nom}.csv", "text/csv") {
                 // BOM UTF-8 pour qu'Excel détecte l'encodage et affiche correctement les accents.
                 it.write("﻿$csv".toByteArray(Charsets.UTF_8))
@@ -280,7 +282,7 @@ fun ListeContextesScreen(
                 onDater = { aDater = resume },
                 onChangerMode = { aChangerMode = resume },
                 onDupliquer = { scope.launch { repository.dupliquerContexte(resume.contexte.id) } },
-                onExporter = { exporterCsv(resume.contexte.id) },
+                onExporter = { aExporter = resume },
                 onPartager = { partagerContexte(resume.contexte.id, resume.contexte.nom) },
             )
             when {
@@ -525,6 +527,45 @@ fun ListeContextesScreen(
             },
             dismissButton = {
                 TextButton(onClick = { aChangerMode = null }) { Text(stringResource(R.string.creation_action_annuler)) }
+            },
+        )
+    }
+
+    // Export CSV : journal complet, ou seulement les tiges à comptabiliser.
+    aExporter?.let { cible ->
+        var net by remember(cible) { mutableStateOf(false) }
+        AlertDialog(
+            onDismissRequest = { aExporter = null },
+            title = { Text(stringResource(R.string.liste_export_titre)) },
+            text = {
+                Column {
+                    listOf(
+                        false to R.string.liste_export_complet,
+                        true to R.string.liste_export_net,
+                    ).forEach { (valeur, libelle) ->
+                        Row(
+                            Modifier.fillMaxWidth().selectable(selected = net == valeur, onClick = { net = valeur }),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = net == valeur, onClick = { net = valeur })
+                            Text(stringResource(libelle))
+                        }
+                    }
+                    Text(
+                        stringResource(R.string.liste_export_aide),
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    exporterCsv(cible.contexte.id, net)
+                    aExporter = null
+                }) { Text(stringResource(R.string.liste_export_confirmer)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { aExporter = null }) { Text(stringResource(R.string.creation_action_annuler)) }
             },
         )
     }

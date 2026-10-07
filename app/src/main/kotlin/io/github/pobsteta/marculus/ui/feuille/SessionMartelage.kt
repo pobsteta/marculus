@@ -47,6 +47,7 @@ import fr.marculus.core.model.FixGnss
 import fr.marculus.core.model.OrigineFix
 import fr.marculus.core.model.Position
 import fr.marculus.core.model.QualiteFix
+import fr.marculus.core.model.Tige
 import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.Appareil
 import io.github.pobsteta.marculus.Langue
@@ -313,6 +314,7 @@ fun sessionMartelage(
         qualite: String? = null,
         hauteur: String? = null,
         lot: Int? = null,
+        lotComplet: Boolean = false,
     ) {
         val parties = buildList {
             if (reglages.annonceEtiquette || forcer) {
@@ -326,6 +328,8 @@ fun sessionMartelage(
             // Affouage : le lot se dit toujours, réglages d'annonce cochés ou non — c'est lui
             // qu'on marque sur l'arbre.
             lot?.let { add(androidContext.getString(R.string.voix_lot_annonce, it)) }
+            // La tige qui atteint le volume maximal ferme son lot : la suivante change de lot.
+            if (lot != null && lotComplet) add(androidContext.getString(R.string.voix_lot_complet, lot))
             if (reglages.annonceNombre) add(total.toString())
         }
         if (parties.isNotEmpty()) dire(parties.joinToString(", "), "tige", remplacer = true)
@@ -507,6 +511,15 @@ fun sessionMartelage(
         // Le lot est calculé avant l'écriture pour être dit sans attendre ; ce qui est dit est
         // ce qui est figé sur la tige.
         val lot = prochainLot(ctx)
+        val lotComplet = lot != null && AffouageLots.fermeLot(
+            ctx,
+            journal,
+            Tige(
+                uuid = "", contexteId = contexteId, essence = essence, classe = classe,
+                action = ActionTige.PLUS, horodatage = Long.MAX_VALUE, quantite = ctx.increment,
+                hauteurTexte = hauteurTexte, lot = lot,
+            ),
+        )
         annoncer(
             essence,
             classe,
@@ -515,6 +528,7 @@ fun sessionMartelage(
             qualite = qualite,
             hauteur = hauteurTexte,
             lot = lot,
+            lotComplet = lotComplet,
         )
         configs[cle]?.let { annoncerAvis(it, nouveauTotal) }
         val parcelleLabel = parcelleDe(fixEffectif()?.position)

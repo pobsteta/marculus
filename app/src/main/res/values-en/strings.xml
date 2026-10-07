@@ -425,4 +425,10 @@
     <string name="creation_affouage_aide">Lots start at 1. Each stem\'s merchantable volume is added up; once the lot reaches the maximum volume, the next stem opens the next lot. The lot number is announced for every stem. With EMERGE, a stem without height adds no volume.</string>
     <string name="creation_erreur_affouage_tarif">Affouage requires a volume tariff.</string>
     <string name="creation_erreur_affouage_volume">Invalid maximum lot volume (number &gt; 0).</string>
+    <string name="voix_lot_complet">lot %1$d complete</string>
+    <string name="liste_export_titre">Export to CSV</string>
+    <string name="liste_export_complet">Full log (including cancellations)</string>
+    <string name="liste_export_net">Only the stems to count</string>
+    <string name="liste_export_aide">Stems to count: each cancellation is removed together with the stem it cancels. Totals and volumes are the same either way.</string>
+    <string name="liste_export_confirmer">Export</string>
 </resources>

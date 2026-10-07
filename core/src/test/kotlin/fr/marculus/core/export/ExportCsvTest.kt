@@ -206,6 +206,22 @@ class ExportCsvTest {
         assertEquals(listOf("1", "2"), lignesJournal(csv).map { it.last() })
     }
 
+    @Test
+    fun `export net - ni annulations ni tiges annulees, totaux inchanges`() {
+        val journal = listOf(
+            Tige("u-a", "c1", "Chêne", 20, ActionTige.PLUS, horodatage = 1000L),
+            Tige("u-b", "c1", "Chêne", 20, ActionTige.PLUS, horodatage = 2000L),
+            Tige("u-x", "c1", "Chêne", 20, ActionTige.ANNULATION, horodatage = 3000L),
+        )
+        val complet = ExportCsv.contexteCsv(contexte, journal)
+        val net = ExportCsv.contexteCsv(contexte, journal, net = true)
+        assertTrue("Journal;COMPLET" in complet.split("\n"))
+        assertTrue("Journal;NET" in net.split("\n"))
+        assertEquals(listOf("u-a"), lignesJournal(net).map { it[12] })
+        assertEquals(3, lignesJournal(complet).size)
+        assertEquals(complet.substringBefore("JOURNAL").replace("COMPLET", "NET"), net.substringBefore("JOURNAL"))
+    }
+
     // --- Format 3 : volumes (brief nemetonshiny 2026-09-25) ---
 
     @Test

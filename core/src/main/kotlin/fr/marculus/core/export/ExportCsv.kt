@@ -1,5 +1,6 @@
 package fr.marculus.core.export
 
+import fr.marculus.core.JournalNet
 import fr.marculus.core.TotauxMartelage
 import fr.marculus.core.VolumesMartelage
 import fr.marculus.core.model.CompteurCle
@@ -22,7 +23,9 @@ import java.util.Locale
  *
  * **Format 4** (`FormatCsv;4`) : affouage — `Affouage` et `VolumeMaxLotM3` en en-tête (après
  * `Increment`, les quinze premières lignes ne bougent pas) et colonne `Lot` en fin de journal
- * (vide hors affouage).
+ * (vide hors affouage). `Journal;COMPLET` ou `Journal;NET` : en NET, le journal ne porte que les
+ * tiges à comptabiliser ([JournalNet]) — ni les annulations, ni les tiges qu'elles retirent.
+ * Les totaux et les volumes d'en-tête sont les mêmes dans les deux cas : ils sont déjà nets.
  */
 object ExportCsv {
     private const val SEP = ";"
@@ -30,7 +33,7 @@ object ExportCsv {
     /** Version du format, lue par Nemeton : son absence désigne le format 1, non réimportable. */
     const val FORMAT = 4
 
-    fun contexteCsv(contexte: Contexte, journal: List<Tige>): String {
+    fun contexteCsv(contexte: Contexte, journal: List<Tige>, net: Boolean = false): String {
         val sb = StringBuilder()
         sb.appendLine("Contexte${SEP}${champ(contexte.nom)}")
         sb.appendLine("FormatCsv${SEP}$FORMAT")
@@ -53,6 +56,7 @@ object ExportCsv {
         // Format 4 : affouage, après les quinze premières lignes.
         sb.appendLine("Affouage${SEP}${contexte.affouage}")
         sb.appendLine("VolumeMaxLotM3${SEP}${contexte.volumeMaxLotM3}")
+        sb.appendLine("Journal${SEP}${if (net) "NET" else "COMPLET"}")
         contexte.commentaire?.let { sb.appendLine("Commentaire${SEP}${champ(it)}") }
         sb.appendLine()
 
@@ -81,7 +85,7 @@ object ExportCsv {
                 "Lot",
             ).joinToString(SEP),
         )
-        journal.sortedBy { it.horodatage }.forEach { t ->
+        (if (net) JournalNet.tiges(journal) else journal).sortedBy { it.horodatage }.forEach { t ->
             val c = VolumesMartelage.cubage(contexte, t)
             sb.appendLine(
                 listOf(
