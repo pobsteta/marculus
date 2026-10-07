@@ -72,7 +72,7 @@ est ce qui est enregistré** — c'est l'invariant qui compte sur le terrain.
 | `.marsync` | `affouage`, `volumeMaxLotM3` (contexte), `lot` (tige) ; absents → défauts |
 | CSV | **format 4** : `Affouage` / `VolumeMaxLotM3` en en-tête après `Increment` (15 premières lignes inchangées), colonne `Lot` en fin de journal (vide hors affouage) — à signaler à Nemeton |
 
-## Fusion : les réglages du terrain survivent à un réexport (v0.56.0)
+## Fusion : les réglages du terrain survivent à un réexport (v0.55.1)
 
 Nemeton réémet les contextes de son plan, plus récents, sans `tarif` ni `affouage`. Or la fusion
 remplace la ligne entière : l'affouage se décochait. Désormais (`ReglagesTerrain`, appelé par
