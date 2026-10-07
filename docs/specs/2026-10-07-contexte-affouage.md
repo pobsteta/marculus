@@ -72,6 +72,16 @@ est ce qui est enregistré** — c'est l'invariant qui compte sur le terrain.
 | `.marsync` | `affouage`, `volumeMaxLotM3` (contexte), `lot` (tige) ; absents → défauts |
 | CSV | **format 4** : `Affouage` / `VolumeMaxLotM3` en en-tête après `Increment` (15 premières lignes inchangées), colonne `Lot` en fin de journal (vide hors affouage) — à signaler à Nemeton |
 
+## Fusion : les réglages du terrain survivent à un réexport (v0.56.0)
+
+Nemeton réémet les contextes de son plan, plus récents, sans `tarif` ni `affouage`. Or la fusion
+remplace la ligne entière : l'affouage se décochait. Désormais (`ReglagesTerrain`, appelé par
+`fusionnerJson`, donc par l'import de lot et la fusion `.marsync`) une clé **absente** du fichier
+garde la valeur locale : `affouage`, `volumeMaxLotM3`, `tarif`, `tarifNumero`,
+`coefficientForme`, `cheminGpkg` pour un contexte, `lot` pour une tige. Une clé **présente**
+l'emporte, même pour revenir au défaut. Contexte ou tige inconnus : défauts. Les contextes absents
+du fichier n'ont jamais été touchés par une fusion (seule la restauration de sauvegarde efface).
+
 ## Hors périmètre (à proposer ensuite)
 
 
@@ -108,5 +118,6 @@ lire (comme le CSV foncier) : décimaux dans la langue du téléphone, 3 décima
   rouvre un lot, tiges sans lot ignorées, quantité > 1, tarif AUCUN.
 - `AffouageLotsTest` : `fermeLot` (fermeture, égalité, hors affouage), `bilan` par lot.
 - `JournalNetTest` : retrait de la paire, case, ordre, paquet partiel, annulation orpheline, totaux égaux.
+- `ReglagesTerrainTest` (`:data`) : clé absente gardée, clé présente gagnante, contexte nouveau, lot de tige.
 - `ExportBilanLotsTest` : lignes, état, total, décimaux.
 - `ExportCsvTest` : format 4, en-tête affouage, colonne `Lot`, export net.

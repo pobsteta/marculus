@@ -73,12 +73,28 @@ class SauvegardeRepository(
     /**
      * Fusionne (synchro multi-opérateurs) le JSON d'un autre appareil : union par UUID des
      * contextes, tiges et avis, sans écraser le local. Atomique (transaction). Les référentiels
-     * ne sont pas fusionnés (chaque appareil garde les siens).
+     * ne sont pas fusionnés (chaque appareil garde les siens). Les réglages du terrain absents du
+     * fichier (tarif, affouage, lot…) gardent leur valeur locale ([ReglagesTerrain]).
      */
     suspend fun fusionnerJson(json: String) {
         val root = JSONObject(json)
-        val contextes = root.optJSONArray("contextes").objetsOuVide().map { it.versContexte() }
-        val tiges = root.optJSONArray("tiges").objetsOuVide().map { it.versTige() }
+        val contextes = root.optJSONArray("contextes").objetsOuVide().map { o ->
+            val presentes = ReglagesTerrain.CLES_CONTEXTE.filterTo(mutableSetOf()) { o.has(it) }
+            val entrant = o.versContexte()
+            if (presentes.size == ReglagesTerrain.CLES_CONTEXTE.size) {
+                entrant
+            } else {
+                ReglagesTerrain.completer(entrant, contexteDao.parId(entrant.id), presentes)
+            }
+        }
+        val tiges = root.optJSONArray("tiges").objetsOuVide().map { o ->
+            val entrant = o.versTige()
+            if (o.has(ReglagesTerrain.CLE_LOT)) {
+                entrant
+            } else {
+                ReglagesTerrain.completer(entrant, tigeDao.parUuid(entrant.uuid), emptySet())
+            }
+        }
         val configs = root.optJSONArray("configs").objetsOuVide().map { it.versConfig() }
         mergeDao.fusionner(contextes, tiges, configs)
     }

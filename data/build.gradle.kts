@@ -33,4 +33,5 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.geopackage.android)
     implementation(libs.kotlinx.coroutines.android)
+    testImplementation(kotlin("test-junit"))
 }
