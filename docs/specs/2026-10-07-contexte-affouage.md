@@ -1,6 +1,6 @@
 # Tranche « contexte Affouage » (lots de volume)
 
-Demande de Pascal du 2026-10-07. Statut : **en cours de codage**.
+Demande de Pascal du 2026-10-07. Statut : **livré** (2026-10-07).
 
 ## Besoin
 
@@ -69,11 +69,10 @@ est ce qui est enregistré** — c'est l'invariant qui compte sur le terrain.
 | `Tige` | `lot: Int? = null` |
 | Room | **v14**, `MIGRATION_13_14` : 2 colonnes `contexte`, 1 colonne `tige` (défauts 0 / NULL) |
 | `.marsync` | `affouage`, `volumeMaxLotM3` (contexte), `lot` (tige) ; absents → défauts |
+| CSV | **format 4** : `Affouage` / `VolumeMaxLotM3` en en-tête après `Increment` (15 premières lignes inchangées), colonne `Lot` en fin de journal (vide hors affouage) — à signaler à Nemeton |
 
 ## Hors périmètre (à proposer ensuite)
 
-- **Export CSV** : colonne `Lot` (format 4). Reporté — `FormatCsv` est lu par Nemeton, un
-  changement de format se coordonne par un brief vers Nemeton. Le lot part déjà dans le `.marsync`.
 
 - Annonce « lot N complet » à la fermeture d'un lot.
 - Récapitulatif par lot (nombre de tiges, volume) dans l'écran Statut.
@@ -88,3 +87,4 @@ est ce qui est enregistré** — c'est l'invariant qui compte sur le terrain.
 
 - `AffouageLotsTest` : départ à 1, cumul et bascule à l'égalité, débordement, annulation qui
   rouvre un lot, tiges sans lot ignorées, quantité > 1, tarif AUCUN.
+- `ExportCsvTest` : format 4, en-tête affouage, colonne `Lot`.
