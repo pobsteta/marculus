@@ -30,6 +30,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -62,6 +63,7 @@ import fr.marculus.core.AffouageLots
 import fr.marculus.core.AttributionSpatiale
 import fr.marculus.core.Cubage
 import fr.marculus.core.VolumesMartelage
+import fr.marculus.core.export.ExportBilanLots
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CategorieBois
 import fr.marculus.core.model.TarifCubage
@@ -116,6 +118,19 @@ fun StatutHistoriqueScreen(
         }
     }
 
+    // Affouage : bilan par lot, le tableau de l'onglet « Par lot ».
+    fun exporterLots() {
+        val ctx = contexte ?: return
+        val csv = ExportBilanLots.csv(ctx, journal, locale)
+        scopeStatut.launch {
+            val emplacement = ExportFichier.enregistrer(context, "${ctx.nom} - lots.csv", "text/csv") {
+                it.write("\uFEFF".toByteArray(Charsets.UTF_8))
+                it.write(csv.toByteArray(Charsets.UTF_8))
+            }
+            ExportFichier.annoncer(context, emplacement)
+        }
+    }
+
     Scaffold(
         topBar = {
             BandeauCompact(
@@ -141,7 +156,7 @@ fun StatutHistoriqueScreen(
             return@Scaffold
         }
         Column(Modifier.padding(padding).fillMaxSize()) {
-            // Identifiants d'onglet stables ; « Lots » n'existe que pour un contexte d'affouage.
+            // Identifiants d'onglet stables ; « Par lot » n'existe que pour un contexte d'affouage.
             val onglets = listOfNotNull(
                 ONGLET_STATUT to R.string.statut_onglet_statut,
                 (ONGLET_LOTS to R.string.statut_onglet_lots).takeIf { ctx.affouage },
@@ -156,7 +171,7 @@ fun StatutHistoriqueScreen(
             }
             when (ongletActif) {
                 ONGLET_STATUT -> OngletStatut(ctx, totaux, journal, seuils)
-                ONGLET_LOTS -> OngletLots(ctx, journal)
+                ONGLET_LOTS -> OngletLots(ctx, journal, onExporter = { exporterLots() })
                 ONGLET_PARCELLES -> OngletParcelles(ctx, journal, parcelles)
                 else -> OngletHistorique(ctx, journal, onEdit = { tigeEnEdition = it })
             }
@@ -309,7 +324,7 @@ private const val ONGLET_LOTS = 3
 
 /** Affouage : tiges et volume (bois fort tige) nets de chaque lot, annulations déduites. */
 @Composable
-private fun OngletLots(contexte: Contexte, journal: List<Tige>) {
+private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
     val bilan = AffouageLots.bilan(contexte, journal)
     fun m3(v: Double) = String.format(locale, "%.2f", v)
@@ -361,6 +376,11 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>) {
                 Text(stringResource(R.string.statut_lots_total), Modifier.weight(1.4f), fontWeight = FontWeight.Bold)
                 Text(bilan.sumOf { it.nbTiges }.toString(), Modifier.weight(1f), fontWeight = FontWeight.Bold)
                 Text(m3(bilan.sumOf { it.volumeM3 }), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+            }
+        }
+        item {
+            OutlinedButton(onClick = onExporter, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+                Text(stringResource(R.string.statut_lots_exporter))
             }
         }
     }

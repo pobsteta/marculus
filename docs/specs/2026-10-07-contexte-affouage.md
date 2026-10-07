@@ -90,12 +90,17 @@ retire (dernière tige de sa case, même règle que les volumes) ; un paquet (qu
 partie reste avec sa quantité restante ; une annulation sans tige à retirer est gardée. L'en-tête
 porte `Journal;NET` ou `Journal;COMPLET` ; totaux et volumes d'en-tête sont identiques.
 
-## Onglet « Lots » (Statut / historique)
+## Onglet « Par lot » (Statut / historique)
 
 Visible seulement pour un contexte d'affouage, entre « Statut » et « Par parcelle ». Pour chaque
 lot : nombre de tiges et volume bois fort tige (m³), **nets** (`AffouageLots.bilan`, sur
 `JournalNet` : une tige annulée ne compte dans aucun lot), avec « complet » / « en cours », puis
 une ligne Total. Les tiges comptées sans lot sont regroupées en dernier (« Sans lot »).
+
+Bouton **« Exporter le bilan par lot (CSV) »** → `Download/Marculus/<contexte> - lots.csv`
+(`ExportBilanLots`) : en-tête `Contexte`, `ContexteId`, `VolumeMaxLot_m3`, puis
+`Lot;Tiges;Volume_m3;Etat` (`COMPLET` / `EN_COURS` / `SANS_LOT`) et une ligne `Total`. Rapport à
+lire (comme le CSV foncier) : décimaux dans la langue du téléphone, 3 décimales.
 
 ## Tests
 
@@ -103,4 +108,5 @@ une ligne Total. Les tiges comptées sans lot sont regroupées en dernier (« Sa
   rouvre un lot, tiges sans lot ignorées, quantité > 1, tarif AUCUN.
 - `AffouageLotsTest` : `fermeLot` (fermeture, égalité, hors affouage), `bilan` par lot.
 - `JournalNetTest` : retrait de la paire, case, ordre, paquet partiel, annulation orpheline, totaux égaux.
+- `ExportBilanLotsTest` : lignes, état, total, décimaux.
 - `ExportCsvTest` : format 4, en-tête affouage, colonne `Lot`, export net.
