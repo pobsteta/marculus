@@ -81,6 +81,10 @@ data class Contexte(
     val modifie: Long = 0,
     /** Exporté au moins une fois : martelage fait. Ne retombe jamais, contrairement à [exporte]. */
     val dejaExporte: Boolean = false,
+    /** Martelage d'affouage : chaque tige est rangée dans un lot de volume borné. */
+    val affouage: Boolean = false,
+    /** Volume (m³, bois fort tige) au-delà duquel un lot d'affouage est clos. */
+    val volumeMaxLotM3: Double = 0.0,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 }
@@ -110,4 +114,6 @@ data class Tige(
     val precisionM: Double? = null,
     /** Dernière modification (ms epoch), comme dans le `.marsync`. */
     val modifie: Long = 0,
+    /** Lot d'affouage annoncé au martelage (instantané figé), ou null hors affouage. */
+    val lot: Int? = null,
 )

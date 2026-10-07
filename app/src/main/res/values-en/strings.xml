@@ -419,4 +419,10 @@
     <string name="apropos_desc">Forest marking app — tallying, volume estimation and RTK positioning.</string>
     <string name="apropos_licences">Speech recognition: Vosk (Alpha Cephei) and the vosk-model-small-fr-0.22 model, both under the Apache 2.0 licence. Mapping: osmdroid. GeoPackage: NGA.</string>
     <string name="apropos_github">Open on GitHub</string>
+    <string name="voix_lot_annonce">lot number %1$d</string>
+    <string name="creation_affouage">Firewood allotment (affouage)</string>
+    <string name="creation_affouage_volume_max">Maximum volume per lot (m³)</string>
+    <string name="creation_affouage_aide">Lots start at 1. Each stem\'s merchantable volume is added up; once the lot reaches the maximum volume, the next stem opens the next lot. The lot number is announced for every stem. With EMERGE, a stem without height adds no volume.</string>
+    <string name="creation_erreur_affouage_tarif">Affouage requires a volume tariff.</string>
+    <string name="creation_erreur_affouage_volume">Invalid maximum lot volume (number &gt; 0).</string>
 </resources>

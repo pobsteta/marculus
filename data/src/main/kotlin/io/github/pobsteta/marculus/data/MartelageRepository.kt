@@ -112,6 +112,8 @@ class MartelageRepository(
         tarifNumero: Int = 0,
         coefficientForme: Double = 0.5,
         dateMartelage: Long? = null,
+        affouage: Boolean = false,
+        volumeMaxLotM3: Double = 0.0,
     ): String {
         val id = UUID.randomUUID().toString()
         contexteDao.inserer(
@@ -134,6 +136,8 @@ class MartelageRepository(
                 coefficientForme = coefficientForme,
                 dateMartelage = dateMartelage,
                 modifie = horloge(),
+                affouage = affouage,
+                volumeMaxLotM3 = volumeMaxLotM3,
             ),
         )
         return id
@@ -152,6 +156,8 @@ class MartelageRepository(
         tarifNumero: Int = 0,
         coefficientForme: Double = 0.5,
         dateMartelage: Long? = null,
+        affouage: Boolean = false,
+        volumeMaxLotM3: Double = 0.0,
     ) {
         val existant = contexteDao.parId(id) ?: return
         contexteDao.inserer(
@@ -170,6 +176,8 @@ class MartelageRepository(
                 coefficientForme = coefficientForme,
                 dateMartelage = dateMartelage,
                 modifie = horloge(),
+                affouage = affouage,
+                volumeMaxLotM3 = volumeMaxLotM3,
             ),
         )
     }
@@ -237,6 +245,7 @@ class MartelageRepository(
         parcelle: String? = null,
         qualiteFix: QualiteFix? = null,
         precisionM: Double? = null,
+        lot: Int? = null,
     ): String {
         val uuid = UUID.randomUUID().toString()
         tigeDao.inserer(
@@ -257,6 +266,7 @@ class MartelageRepository(
                 qualiteFix = qualiteFix?.name,
                 precisionM = precisionM,
                 modifie = horloge(),
+                lot = lot,
             ),
         )
         marquerNonExporte(contexteId)

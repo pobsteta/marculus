@@ -48,6 +48,8 @@ internal fun ContexteEntity.versDomaine() = Contexte(
     statut = runCatching { EtatKanban.valueOf(statut) }.getOrDefault(EtatKanban.PROPOSEE),
     modifie = modifie,
     dejaExporte = dejaExporte,
+    affouage = affouage,
+    volumeMaxLotM3 = volumeMaxLotM3,
 )
 
 internal fun TigeEntity.versDomaine() = Tige(
@@ -66,4 +68,5 @@ internal fun TigeEntity.versDomaine() = Tige(
     qualiteFix = qualiteFix?.let { runCatching { QualiteFix.valueOf(it) }.getOrNull() },
     precisionM = precisionM,
     modifie = modifie,
+    lot = lot,
 )

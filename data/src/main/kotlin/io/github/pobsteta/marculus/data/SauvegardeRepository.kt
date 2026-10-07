@@ -134,6 +134,7 @@ class SauvegardeRepository(
         putOpt("cheminGpkg", cheminGpkg); put("tarif", tarif); put("tarifNumero", tarifNumero)
         put("coefficientForme", coefficientForme); putOpt("dateMartelage", dateMartelage)
         put("statut", statut); put("modifie", modifie); put("dejaExporte", dejaExporte)
+        put("affouage", affouage); put("volumeMaxLotM3", volumeMaxLotM3)
         volumes?.let {
             put("volumeTigeTotalM3", it.volumeTigeM3); put("volumeTotalM3", it.volumeTotalM3)
             put("surfaceTerriereTotaleM2", it.surfaceTerriereM2); put("nbTigesNonCubees", it.nbTigesNonCubees)
@@ -155,6 +156,8 @@ class SauvegardeRepository(
         modifie = if (has("modifie") && !isNull("modifie")) getLong("modifie") else 0,
         // Absent des fichiers d'avant la v13 : un contexte exporté l'a forcément été une fois.
         dejaExporte = optBoolean("dejaExporte", getBoolean("exporte")),
+        affouage = optBoolean("affouage", false),
+        volumeMaxLotM3 = optDouble("volumeMaxLotM3", 0.0).takeIf { it.isFinite() } ?: 0.0,
     )
 
     /** [cubage] : valeurs unitaires (une tige) calculées à l'export ; ignorées à la relecture. */
@@ -164,7 +167,7 @@ class SauvegardeRepository(
         putOpt("hauteurTexte", hauteurTexte); putOpt("qualiteArbre", qualiteArbre)
         putOpt("latitude", latitude); putOpt("longitude", longitude); putOpt("operateur", operateur)
         putOpt("parcelle", parcelle); putOpt("qualiteFix", qualiteFix); putOpt("precisionM", precisionM)
-        put("modifie", modifie)
+        put("modifie", modifie); putOpt("lot", lot)
         cubage?.let {
             put("volumeTigeM3", it.volumeTigeM3); put("volumeHouppierM3", it.volumeHouppierM3)
             put("volumeTotalM3", it.volumeTotalM3); put("surfaceTerriereM2", it.surfaceTerriereM2)
@@ -181,6 +184,7 @@ class SauvegardeRepository(
         parcelle = texteOuNull("parcelle"),
         qualiteFix = texteOuNull("qualiteFix"), precisionM = reelOuNull("precisionM"),
         modifie = if (has("modifie") && !isNull("modifie")) getLong("modifie") else 0,
+        lot = entierOuNull("lot"),
     )
 
     private fun CompteurConfigEntity.toJson() = JSONObject().apply {
