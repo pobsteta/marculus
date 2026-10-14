@@ -109,7 +109,7 @@ class ExportCsvTest {
         assertEquals(
             listOf(
                 "Contexte;Parcelle 12",
-                "FormatCsv;4",
+                "FormatCsv;5",
                 "ContexteId;act_20260923155141_xyz123",
                 "Statut;REALISEE",
                 "DateMartelage;2027-10-15",
@@ -136,7 +136,7 @@ class ExportCsvTest {
     }
 
     @Test
-    fun `le journal compte 21 colonnes dont les 15 du format 2 inchangees`() {
+    fun `le journal compte 23 colonnes dont les 15 du format 2 inchangees`() {
         val tige = Tige(
             uuid = "6f1c-uuid", contexteId = "c1", essence = "Chêne", classe = 20,
             action = ActionTige.PLUS, horodatage = 1000L, hauteurTexte = "27-6AB", qualiteArbre = "B",
@@ -146,16 +146,19 @@ class ExportCsvTest {
         val csv = ExportCsv.contexteCsv(contexte, listOf(tige))
         val lignes = csv.split("\n")
         val entete = cellules(lignes[lignes.indexOf("JOURNAL") + 1])
-        assertEquals(21, entete.size)
+        assertEquals(23, entete.size)
         assertEquals(colonnesFormat1, entete.take(12))
         assertEquals(listOf("Uuid", "Parcelle", "Modifie"), entete.subList(12, 15))
         assertEquals(
-            listOf("VolumeTigeM3", "VolumeHouppierM3", "VolumeTotalM3", "SurfaceTerriereM2", "Cubage", "Lot"),
+            listOf(
+                "VolumeTigeM3", "VolumeHouppierM3", "VolumeTotalM3", "SurfaceTerriereM2", "Cubage", "Lot",
+                "AffouageHouppierM3", "AffouageLotM3",
+            ),
             entete.drop(15),
         )
         val ligne = lignesJournal(csv).single()
-        assertEquals(21, ligne.size)
-        assertEquals("", ligne.last()) // hors affouage, pas de lot
+        assertEquals(23, ligne.size)
+        assertEquals("", ligne[20]) // hors affouage, pas de lot
         assertEquals(
             listOf(
                 "1970-01-01T00:00:01Z", "Chêne", "20", "PLUS", "1", "27-6AB", "B",
@@ -203,7 +206,41 @@ class ExportCsvTest {
         val lignes = csv.split("\n")
         assertTrue("Affouage;true" in lignes)
         assertTrue("VolumeMaxLotM3;12.5" in lignes)
-        assertEquals(listOf("1", "2"), lignesJournal(csv).map { it.last() })
+        assertEquals(listOf("1", "2"), lignesJournal(csv).map { it[20] })
+    }
+
+    // --- Format 5 : houppier ---
+
+    @Test
+    fun `houppier - parts en en-tete, volumes d'affouage par tige et totaux nets`() {
+        val ctx = contexte.copy(
+            tarif = TarifCubage.SCHAEFFER_RAPIDE, tarifNumero = 8, affouage = true, volumeMaxLotM3 = 50.0,
+            partHouppierAffouage = mapOf("Chêne" to 0.3),
+        )
+        val journal = listOf(
+            Tige("u-a", "c1", "Chêne", 40, ActionTige.PLUS, horodatage = 1000L, lot = 1),
+            Tige("u-b", "c1", "Hêtre", 40, ActionTige.PLUS, horodatage = 2000L, lot = 1),
+        )
+        val csv = ExportCsv.contexteCsv(ctx, journal)
+        val lignes = csv.split("\n")
+        val vTige = VolumesMartelage.cubage(ctx, journal[0]).volumeTigeM3
+        val h = vTige * 0.3 / 0.7
+        assertTrue("PartHouppierAffouage;Chêne=0.3" in lignes)
+        assertTrue("VolumeHouppierTotalM3;0.0000" in lignes) // Schaeffer : pas de houppier modèle
+        assertTrue("AffouageHouppierTotalM3;${"%.4f".format(Locale.ROOT, h)}" in lignes)
+        assertTrue("AffouageLotTotalM3;${"%.4f".format(Locale.ROOT, h + vTige)}" in lignes)
+        val j = lignesJournal(csv)
+        assertEquals(h, j[0][21].toDouble(), 1e-6)
+        assertEquals(h, j[0][22].toDouble(), 1e-6)
+        assertEquals(0.0, j[1][21].toDouble(), 1e-6)
+        assertEquals(vTige, j[1][22].toDouble(), 1e-6)
+    }
+
+    @Test
+    fun `houppier - hors affouage les colonnes d'affouage sont vides`() {
+        val csv = ExportCsv.contexteCsv(contexte, listOf(Tige("u-a", "c1", "Chêne", 20, ActionTige.PLUS, horodatage = 1L)))
+        assertTrue("PartHouppierAffouage;" in csv.split("\n"))
+        assertEquals(listOf("", ""), lignesJournal(csv).single().takeLast(2))
     }
 
     @Test

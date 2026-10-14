@@ -151,6 +151,7 @@ class SauvegardeRepository(
         put("coefficientForme", coefficientForme); putOpt("dateMartelage", dateMartelage)
         put("statut", statut); put("modifie", modifie); put("dejaExporte", dejaExporte)
         put("affouage", affouage); put("volumeMaxLotM3", volumeMaxLotM3)
+        put("partHouppierAffouage", JSONObject().apply { decodePartsHouppier(partHouppierAffouage).forEach { (e, p) -> put(e, p) } })
         volumes?.let {
             put("volumeTigeTotalM3", it.volumeTigeM3); put("volumeTotalM3", it.volumeTotalM3)
             put("surfaceTerriereTotaleM2", it.surfaceTerriereM2); put("nbTigesNonCubees", it.nbTigesNonCubees)
@@ -174,6 +175,11 @@ class SauvegardeRepository(
         dejaExporte = optBoolean("dejaExporte", getBoolean("exporte")),
         affouage = optBoolean("affouage", false),
         volumeMaxLotM3 = optDouble("volumeMaxLotM3", 0.0).takeIf { it.isFinite() } ?: 0.0,
+        partHouppierAffouage = encodePartsHouppier(
+            optJSONObject("partHouppierAffouage")?.let { o ->
+                o.keys().asSequence().associateWith { o.optDouble(it, 0.0) }.filterValues { it.isFinite() }
+            }.orEmpty(),
+        ),
     )
 
     /** [cubage] : valeurs unitaires (une tige) calculées à l'export ; ignorées à la relecture. */

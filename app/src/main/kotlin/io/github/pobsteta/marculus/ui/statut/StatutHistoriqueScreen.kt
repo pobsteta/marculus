@@ -322,12 +322,16 @@ private const val ONGLET_PARCELLES = 1
 private const val ONGLET_HISTORIQUE = 2
 private const val ONGLET_LOTS = 3
 
-/** Affouage : tiges et volume (bois fort tige) nets de chaque lot, annulations déduites. */
+/**
+ * Affouage : tiges et volume compté de chaque lot, nets des annulations. Tige et houppier ont leur
+ * colonne dès qu'un houppier compte (EMERGE ou part de houppier saisie).
+ */
 @Composable
 private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
     val bilan = AffouageLots.bilan(contexte, journal)
     fun m3(v: Double) = String.format(locale, "%.2f", v)
+    val detail = bilan.any { it.volumeHouppierM3 > 0.0 }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -347,6 +351,10 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -
             Row(Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.statut_lots_col_lot), Modifier.weight(1.4f), fontWeight = FontWeight.Bold)
                 Text(stringResource(R.string.statut_lots_col_tiges), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                if (detail) {
+                    Text(stringResource(R.string.statut_lots_col_tige), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.statut_lots_col_houppier), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                }
                 Text(stringResource(R.string.statut_lots_col_volume), Modifier.weight(1f), fontWeight = FontWeight.Bold)
             }
             HorizontalDivider()
@@ -367,6 +375,10 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -
                     }
                 }
                 Text(b.nbTiges.toString(), Modifier.weight(1f))
+                if (detail) {
+                    Text(m3(b.volumeTigeM3), Modifier.weight(1f))
+                    Text(m3(b.volumeHouppierM3), Modifier.weight(1f))
+                }
                 Text(m3(b.volumeM3), Modifier.weight(1f))
             }
         }
@@ -375,6 +387,10 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -
             Row(Modifier.fillMaxWidth().padding(top = 4.dp)) {
                 Text(stringResource(R.string.statut_lots_total), Modifier.weight(1.4f), fontWeight = FontWeight.Bold)
                 Text(bilan.sumOf { it.nbTiges }.toString(), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                if (detail) {
+                    Text(m3(bilan.sumOf { it.volumeTigeM3 }), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                    Text(m3(bilan.sumOf { it.volumeHouppierM3 }), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                }
                 Text(m3(bilan.sumOf { it.volumeM3 }), Modifier.weight(1f), fontWeight = FontWeight.Bold)
             }
         }

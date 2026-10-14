@@ -24,9 +24,16 @@ val MIGRATION_13_14 = object : Migration(13, 14) {
     }
 }
 
+/** v15 : part de houppier par essence pour l'affouage (tarifs sans houppier). */
+val MIGRATION_14_15 = object : Migration(14, 15) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE contexte ADD COLUMN partHouppierAffouage TEXT NOT NULL DEFAULT ''")
+    }
+}
+
 @Database(
     entities = [ContexteEntity::class, TigeEntity::class, CompteurConfigEntity::class],
-    version = 14,
+    version = 15,
     exportSchema = false,
 )
 abstract class MarculusDatabase : RoomDatabase() {
@@ -44,7 +51,7 @@ abstract class MarculusDatabase : RoomDatabase() {
             )
                 // Les données de terrain sont réelles depuis la v13 : chaque changement de schéma
                 // porte sa migration. Le repli destructif ne reste que pour les versions de dev.
-                .addMigrations(MIGRATION_12_13, MIGRATION_13_14)
+                .addMigrations(MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

@@ -31,6 +31,19 @@ internal fun decodeEssences(s: String): List<EssenceColonne> =
         }
     }
 
+internal fun encodePartsHouppier(parts: Map<String, Double>): String =
+    parts.filterValues { it > 0.0 }.entries.joinToString(RS) { "${it.key}$US${it.value}" }
+
+internal fun decodePartsHouppier(s: String): Map<String, Double> =
+    if (s.isEmpty()) {
+        emptyMap()
+    } else {
+        s.split(RS).mapNotNull { rec ->
+            val p = rec.split(US)
+            p.getOrNull(1)?.toDoubleOrNull()?.takeIf { p.size == 2 && it.isFinite() }?.let { p[0] to it }
+        }.toMap()
+    }
+
 internal fun ContexteEntity.versDomaine() = Contexte(
     id = id,
     nom = nom,
@@ -50,6 +63,7 @@ internal fun ContexteEntity.versDomaine() = Contexte(
     dejaExporte = dejaExporte,
     affouage = affouage,
     volumeMaxLotM3 = volumeMaxLotM3,
+    partHouppierAffouage = decodePartsHouppier(partHouppierAffouage),
 )
 
 internal fun TigeEntity.versDomaine() = Tige(

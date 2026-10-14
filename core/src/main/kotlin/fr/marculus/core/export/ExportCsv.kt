@@ -1,5 +1,6 @@
 package fr.marculus.core.export
 
+import fr.marculus.core.AffouageLots
 import fr.marculus.core.JournalNet
 import fr.marculus.core.TotauxMartelage
 import fr.marculus.core.VolumesMartelage
@@ -26,12 +27,18 @@ import java.util.Locale
  * (vide hors affouage). `Journal;COMPLET` ou `Journal;NET` : en NET, le journal ne porte que les
  * tiges à comptabiliser ([JournalNet]) — ni les annulations, ni les tiges qu'elles retirent.
  * Les totaux et les volumes d'en-tête sont les mêmes dans les deux cas : ils sont déjà nets.
+ *
+ * **Format 5** (`FormatCsv;5`) : houppier — en en-tête, après `VolumeMaxLotM3` : `VolumeHouppierTotalM3`
+ * (modèle EMERGE), `PartHouppierAffouage` (`essence=part`, séparées par `|`, parts en fraction) et
+ * les totaux nets d'affouage `AffouageHouppierTotalM3` / `AffouageLotTotalM3`. En fin de journal,
+ * `AffouageHouppierM3` et `AffouageLotM3` ([AffouageLots.volumes], unitaires, vides hors affouage) :
+ * le houppier compte aussi en Schaeffer, via la part de l'essence.
  */
 object ExportCsv {
     private const val SEP = ";"
 
     /** Version du format, lue par Nemeton : son absence désigne le format 1, non réimportable. */
-    const val FORMAT = 4
+    const val FORMAT = 5
 
     fun contexteCsv(contexte: Contexte, journal: List<Tige>, net: Boolean = false): String {
         val sb = StringBuilder()
@@ -56,6 +63,12 @@ object ExportCsv {
         // Format 4 : affouage, après les quinze premières lignes.
         sb.appendLine("Affouage${SEP}${contexte.affouage}")
         sb.appendLine("VolumeMaxLotM3${SEP}${contexte.volumeMaxLotM3}")
+        // Format 5 : houppier, avant la ligne Journal.
+        sb.appendLine("VolumeHouppierTotalM3${SEP}${decimal(totauxVolumes.volumeHouppierM3, DECIMALES_TOTAL)}")
+        sb.appendLine("PartHouppierAffouage${SEP}${champ(partsHouppier(contexte))}")
+        val bilanLots = if (contexte.affouage) AffouageLots.bilan(contexte, journal) else emptyList()
+        sb.appendLine("AffouageHouppierTotalM3${SEP}${decimal(bilanLots.sumOf { it.volumeHouppierM3 }, DECIMALES_TOTAL)}")
+        sb.appendLine("AffouageLotTotalM3${SEP}${decimal(bilanLots.sumOf { it.volumeM3 }, DECIMALES_TOTAL)}")
         sb.appendLine("Journal${SEP}${if (net) "NET" else "COMPLET"}")
         contexte.commentaire?.let { sb.appendLine("Commentaire${SEP}${champ(it)}") }
         sb.appendLine()
@@ -83,10 +96,13 @@ object ExportCsv {
                 "VolumeTigeM3", "VolumeHouppierM3", "VolumeTotalM3", "SurfaceTerriereM2", "Cubage",
                 // Format 4 : lot d'affouage figé au martelage.
                 "Lot",
+                // Format 5 : volumes unitaires d'affouage (houppier, volume compté au lot).
+                "AffouageHouppierM3", "AffouageLotM3",
             ).joinToString(SEP),
         )
         (if (net) JournalNet.tiges(journal) else journal).sortedBy { it.horodatage }.forEach { t ->
             val c = VolumesMartelage.cubage(contexte, t)
+            val a = if (contexte.affouage) AffouageLots.volumes(contexte, t) else null
             sb.appendLine(
                 listOf(
                     Instant.ofEpochMilli(t.horodatage).toString(),
@@ -110,10 +126,20 @@ object ExportCsv {
                     decimal(c.surfaceTerriereM2, DECIMALES_UNITAIRE),
                     c.cubage,
                     t.lot?.toString() ?: "",
+                    a?.let { decimal(it.houppierM3, DECIMALES_UNITAIRE) } ?: "",
+                    a?.let { decimal(it.lotM3, DECIMALES_UNITAIRE) } ?: "",
                 ).joinToString(SEP) { champ(it) },
             )
         }
         return sb.toString()
+    }
+
+    /** Parts de houppier non nulles, dans l'ordre des essences du contexte : `Chêne=0.3|Hêtre=0.25`. */
+    private fun partsHouppier(contexte: Contexte): String {
+        val ordre = contexte.essencesNoms + contexte.partHouppierAffouage.keys.sorted()
+        return ordre.distinct()
+            .mapNotNull { e -> contexte.partHouppierAffouage[e]?.takeIf { it > 0.0 }?.let { "$e=$it" } }
+            .joinToString("|")
     }
 
     /** Un petit bois dépasse rarement 0,05 m³ : six décimales gardent trois chiffres significatifs. */

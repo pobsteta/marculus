@@ -83,8 +83,14 @@ data class Contexte(
     val dejaExporte: Boolean = false,
     /** Martelage d'affouage : chaque tige est rangée dans un lot de volume borné. */
     val affouage: Boolean = false,
-    /** Volume (m³, bois fort tige) au-delà duquel un lot d'affouage est clos. */
+    /** Volume (m³ comptés au lot, voir `AffouageLots.volumes`) au-delà duquel un lot d'affouage est clos. */
     val volumeMaxLotM3: Double = 0.0,
+    /**
+     * Affouage, tarifs sans houppier (Schaeffer) : part du volume total, par essence (fraction
+     * 0 ≤ p < 1), qui est du houppier. Absente ou 0 : l'arbre entier compte dans le lot ; sinon
+     * seul le houppier compte. Ignorée en EMERGE, qui calcule le houppier lui-même.
+     */
+    val partHouppierAffouage: Map<String, Double> = emptyMap(),
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 }

@@ -13,7 +13,7 @@
 > tranche **dictée vocale hors ligne** (Vosk, grammaire fermée) est livrée
 > (`2026-08-21-tranche-dictee-vocale.md`).
 > **Mise à jour 2026-10-07** : **contexte d'affouage** livré (v0.52.0 → v0.55.1) : lots de volume
-> borné annoncés à chaque tige, bilan par lot, CSV `FormatCsv;4`, fusion qui préserve les
+> borné annoncés à chaque tige, bilan par lot, CSV `FormatCsv;5`, fusion qui préserve les
 > réglages du terrain (`2026-10-07-contexte-affouage.md`).
 > Légende d'état : ✅ fait · 🟡 partiel · 🔜 à faire.
 
@@ -56,7 +56,7 @@
 Contexte        : id, nom, mode (DIAMETRE | CIRCONFERENCE),
                   classeMin, classeMax, classePas, essencesActives[],
                   tarifCubage, coefForme, état Kanban, dateMartelage,
-                  affouage, volumeMaxLotM3,
+                  affouage, volumeMaxLotM3, partHouppierAffouage{essence→part},
                   dateCréation, opérateur, modifie (synchro)
 Référentiels    : Essence       — Chêne / Hêtre / Autres feuillus / Sapin / Épicéa /
                                    Autres résineux            (prédéfini, modifiable)
@@ -123,6 +123,15 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 - ✅ Onglet **« Par lot »** de Statut / historique (tiges et m³ nets par lot, complet / en cours,
   total) et **export CSV du bilan par lot** (rapport, décimaux de la langue).
 - En EMERGE, une tige sans hauteur vaut 0 m³ : Schaeffer est le choix naturel pour l'affouage.
+- ✅ **Tige / houppier** (`AffouageLots.volumes`) : un arbre **sans houppier compte en entier** dans
+  le lot ; avec un houppier, **seul le houppier compte** (la tige est vendue à part).
+  - **EMERGE** : houppier du modèle ; une essence non couverte (repli coefficient de forme) n'en a
+    pas et compte en entier.
+  - **Schaeffer** (tarif sans houppier) : **part de houppier par essence** p (0 à 95 %, défaut 0),
+    part du **volume total**. Le tarif donnant la tige (1 − p du total) : houppier = V_tige·p/(1 − p).
+    Champs grisés en EMERGE. Clé `.marsync` `partHouppierAffouage` (réglage du terrain).
+  - Onglet « Par lot » et CSV du bilan : colonnes tige, houppier et volume du lot ; CSV
+    d'échange en **format 5** (§7).
 
 ## 6. Écrans
 
@@ -156,8 +165,11 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 - **`−`** : enregistre une **annulation** (conservée au journal), décrémente le total.
 - **Bouton Hauteur / Qualité arbre** : annote la **dernière tige** ajoutée de la cellule
   (saisie hauteur en texte libre / sélection mono-choix de la qualité arbre).
-- **Export CSV** (`FormatCsv;4`) : feuille (totaux par essence × classe) **+** journal des
-  tiges (+ volumes cubés selon le tarif du contexte, + colonne `Lot`). À l'export, choix entre
+- **Export CSV** (`FormatCsv;5`) : feuille (totaux par essence × classe) **+** journal des
+  tiges (+ volumes cubés selon le tarif du contexte, + colonne `Lot`). Format 5 : houppier —
+  en-tête `VolumeHouppierTotalM3`, `PartHouppierAffouage` (`essence=part|…`),
+  `AffouageHouppierTotalM3`, `AffouageLotTotalM3` (avant `Journal`) ; colonnes
+  `AffouageHouppierM3`, `AffouageLotM3` en fin de journal (vides hors affouage). À l'export, choix entre
   **journal complet** et **tiges à comptabiliser** (`Journal;NET` : chaque annulation disparaît
   avec la tige qu'elle retire ; totaux identiques).
 
@@ -203,6 +215,7 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 - 🔜 **Bouton Flic 2** (BLE) comme troisième déclencheur de la dictée — reporté (dépendance
   JitPack écartée) ; `PttController` est prêt à le recevoir.
 - 🔜 **Recette terrain de l'affouage** (annonces, bascule de lot, bilan) et réponse de
-  nemetonshiny au brief `CSV format 4` (lecture du `lot`, règle « clé absente »).
+  nemetonshiny au brief `CSV format 4` (lecture du `lot`, règle « clé absente »), puis
+  signaler le **format 5** (houppier, parts par essence).
 - 🔜 **Recette terrain de la dictée** (7 cas, bruit réel, gants) — cf.
   `2026-08-21-tranche-dictee-vocale.md`.

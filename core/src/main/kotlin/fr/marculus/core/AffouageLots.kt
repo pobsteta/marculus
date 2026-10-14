@@ -3,12 +3,13 @@ package fr.marculus.core
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
+import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.Tige
 
 /**
  * Lots d'affouage : les tiges sont rangées, dans l'ordre du martelage, dans des lots dont le
- * volume (bois fort tige) est borné par [Contexte.volumeMaxLotM3]. La tige qui atteint ou dépasse
- * la borne **ferme** son lot ; la suivante ouvre le lot d'après.
+ * volume compté ([volumes]) est borné par [Contexte.volumeMaxLotM3]. La tige qui atteint ou
+ * dépasse la borne **ferme** son lot ; la suivante ouvre le lot d'après.
  *
  * Le lot d'une tige est **figé** sur elle au martelage (il a été dit à voix haute et marqué sur
  * l'arbre) : rien ici ne renumérote le passé. Seul l'état courant — lot ouvert et son cumul — est
@@ -16,11 +17,58 @@ import fr.marculus.core.model.Tige
  */
 object AffouageLots {
 
+    /** Part de houppier maximale saisissable : au-delà, V_tige·p/(1 − p) n'a plus de sens. */
+    const val PART_HOUPPIER_MAX = 0.95
+
     /**
-     * Bilan d'un lot : tiges et volume (m³, bois fort tige) **nets**, annulations déduites.
-     * [lot] null regroupe les tiges comptées sans lot (avant que l'affouage soit coché).
+     * Volumes **unitaires** d'une tige pour l'affouage : tige, houppier, et [lotM3], ce qui compte
+     * dans le lot. Une tige sans houppier compte en entier ; avec un houppier, seul lui compte
+     * (la tige est vendue à part).
      */
-    data class BilanLot(val lot: Int?, val nbTiges: Int, val volumeM3: Double, val complet: Boolean)
+    data class VolumesAffouage(val tigeM3: Double, val houppierM3: Double, val lotM3: Double)
+
+    /**
+     * - **EMERGE** : le houppier est celui du modèle ; une essence non couverte (repli coefficient
+     *   de forme) n'en a pas et compte en entier.
+     * - **Schaeffer** (tarif sans houppier) : p = [Contexte.partHouppierAffouage] de l'essence est
+     *   la part du volume **total** qui est du houppier. Le tarif ne donnant que la tige
+     *   (1 − p du total), houppier = V_tige·p/(1 − p). p = 0 : l'arbre compte en entier.
+     */
+    fun volumes(contexte: Contexte, tige: Tige): VolumesAffouage {
+        val c = VolumesMartelage.cubage(contexte, tige)
+        val vTige = c.volumeTigeM3
+        if (contexte.tarif == TarifCubage.EMERGE) {
+            return if (c.cubage == VolumesMartelage.Methode.EMERGE) {
+                VolumesAffouage(vTige, c.volumeHouppierM3, c.volumeHouppierM3)
+            } else {
+                VolumesAffouage(vTige, 0.0, vTige)
+            }
+        }
+        val p = partHouppier(contexte, tige.essence)
+        if (p <= 0.0) return VolumesAffouage(vTige, 0.0, vTige)
+        val houppier = vTige * p / (1.0 - p)
+        return VolumesAffouage(vTige, houppier, houppier)
+    }
+
+    /** Part de houppier saisie pour [essence] (0 si absente), bornée à [0 ; [PART_HOUPPIER_MAX]]. */
+    fun partHouppier(contexte: Contexte, essence: String): Double =
+        (contexte.partHouppierAffouage[essence] ?: 0.0)
+            .takeIf { it.isFinite() }
+            ?.coerceIn(0.0, PART_HOUPPIER_MAX) ?: 0.0
+
+    /**
+     * Bilan d'un lot : tiges et volumes (m³) **nets**, annulations déduites — tige, houppier et
+     * [volumeM3], le volume compté au lot. [lot] null regroupe les tiges comptées sans lot (avant
+     * que l'affouage soit coché).
+     */
+    data class BilanLot(
+        val lot: Int?,
+        val nbTiges: Int,
+        val volumeM3: Double,
+        val complet: Boolean,
+        val volumeTigeM3: Double = 0.0,
+        val volumeHouppierM3: Double = 0.0,
+    )
 
     /**
      * Bilan par lot, dans l'ordre des numéros (les tiges sans lot en dernier). Calculé sur le
@@ -32,17 +80,20 @@ object AffouageLots {
             .filter { it.action == ActionTige.PLUS }
             .groupBy { it.lot }
             .map { (lot, tiges) ->
-                val v = tiges.sumOf { VolumesMartelage.cubage(contexte, it).volumeTigeM3 * it.quantite }
+                val vols = tiges.map { volumes(contexte, it) to it.quantite }
+                val v = vols.sumOf { (vt, n) -> vt.lotM3 * n }
                 BilanLot(
                     lot = lot,
                     nbTiges = tiges.sumOf { it.quantite },
                     volumeM3 = v,
                     complet = lot != null && contexte.volumeMaxLotM3 > 0.0 && v >= contexte.volumeMaxLotM3,
+                    volumeTigeM3 = vols.sumOf { (vt, n) -> vt.tigeM3 * n },
+                    volumeHouppierM3 = vols.sumOf { (vt, n) -> vt.houppierM3 * n },
                 )
             }
             .sortedWith(compareBy(nullsLast()) { it.lot })
 
-    /** Lot ouvert et volume (m³) déjà cumulé dedans. */
+    /** Lot ouvert et volume (m³ comptés au lot) déjà cumulé dedans. */
     data class Etat(val lot: Int, val cumulM3: Double)
 
     /**
@@ -71,7 +122,7 @@ object AffouageLots {
         }
         val cumul = piles.values.sumOf { pile ->
             pile.filter { (t, _) -> t.lot == lot }
-                .sumOf { (t, n) -> VolumesMartelage.cubage(contexte, t).volumeTigeM3 * n }
+                .sumOf { (t, n) -> volumes(contexte, t).lotM3 * n }
         }
         return Etat(lot, cumul)
     }

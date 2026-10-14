@@ -39,13 +39,21 @@ class ExportBilanLotsTest {
                 "ContexteId;c1",
                 "VolumeMaxLot_m3;2,000",
                 "",
-                "Lot;Tiges;Volume_m3;Etat",
-                "1;2;${fr(2 * v40)};COMPLET",
-                "2;1;${fr(v40)};EN_COURS",
-                ";1;${fr(v40)};SANS_LOT",
-                "Total;4;${fr(4 * v40)};",
+                "Lot;Tiges;VolumeTige_m3;VolumeHouppier_m3;VolumeLot_m3;Etat",
+                "1;2;${fr(2 * v40)};0,000;${fr(2 * v40)};COMPLET",
+                "2;1;${fr(v40)};0,000;${fr(v40)};EN_COURS",
+                ";1;${fr(v40)};0,000;${fr(v40)};SANS_LOT",
+                "Total;4;${fr(4 * v40)};0,000;${fr(4 * v40)};",
             ),
             lignes,
         )
+    }
+
+    @Test
+    fun `avec une part de houppier, tige, houppier et volume du lot sont distincts`() {
+        val c = ctx.copy(partHouppierAffouage = mapOf("Chêne" to 0.5), volumeMaxLotM3 = 100.0)
+        val lignes = ExportBilanLots.csv(c, listOf(plus("a", 1, 1)), Locale.FRANCE).trimEnd().split("\n")
+        fun fr(v: Double) = String.format(Locale.FRANCE, "%.3f", v)
+        assertEquals("1;1;${fr(v40)};${fr(v40)};${fr(v40)};EN_COURS", lignes[5])
     }
 }

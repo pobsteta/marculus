@@ -17,11 +17,12 @@ class ReglagesTerrainTest {
         gpkg: String? = null,
         nom: String = "P12",
         modifie: Long = 1,
+        parts: String = "",
     ) = ContexteEntity(
         id = "c1", nom = nom, mode = "DIAMETRE", classeMin = 20, classeMax = 90, classePas = 5,
         essences = "", commentaire = null, increment = 1, exporte = false, dateCreation = 0,
         operateur = null, cheminGpkg = gpkg, tarif = tarif, tarifNumero = numero, coefficientForme = coef,
-        modifie = modifie, affouage = affouage, volumeMaxLotM3 = volumeMax,
+        modifie = modifie, affouage = affouage, volumeMaxLotM3 = volumeMax, partHouppierAffouage = parts,
     )
 
     private val local = contexte(true, 12.5, "SCHAEFFER_RAPIDE", 8, 0.45, "/data/p12.gpkg")
@@ -40,6 +41,21 @@ class ReglagesTerrainTest {
         assertEquals(false, r.affouage)
         assertEquals(0.0, r.volumeMaxLotM3)
         assertEquals("SCHAEFFER_RAPIDE", r.tarif) // absent : gardé
+    }
+
+    @Test
+    fun `part de houppier absente du fichier - la valeur locale est gardee`() {
+        val parts = encodePartsHouppier(mapOf("Chêne" to 0.3))
+        val loc = contexte(affouage = true, parts = parts)
+        assertEquals(parts, ReglagesTerrain.completer(contexte(modifie = 2), loc, emptySet()).partHouppierAffouage)
+        assertEquals("", ReglagesTerrain.completer(contexte(modifie = 2), loc, setOf("partHouppierAffouage")).partHouppierAffouage)
+    }
+
+    @Test
+    fun `parts de houppier - aller-retour, les parts nulles ne sont pas stockees`() {
+        val parts = mapOf("Chêne" to 0.3, "Hêtre" to 0.0, "Sapin pectiné" to 0.25)
+        assertEquals(mapOf("Chêne" to 0.3, "Sapin pectiné" to 0.25), decodePartsHouppier(encodePartsHouppier(parts)))
+        assertEquals(emptyMap(), decodePartsHouppier(""))
     }
 
     @Test

@@ -15,7 +15,7 @@ import io.github.pobsteta.marculus.data.db.TigeEntity
 internal object ReglagesTerrain {
 
     /** Clés JSON d'un contexte conservées quand le fichier ne les porte pas. */
-    val CLES_CONTEXTE = setOf("affouage", "volumeMaxLotM3", "tarif", "tarifNumero", "coefficientForme", "cheminGpkg")
+    val CLES_CONTEXTE = setOf("affouage", "volumeMaxLotM3", "partHouppierAffouage", "tarif", "tarifNumero", "coefficientForme", "cheminGpkg")
 
     /** Clé JSON d'une tige conservée quand le fichier ne la porte pas (lot figé au martelage). */
     const val CLE_LOT = "lot"
@@ -26,6 +26,7 @@ internal object ReglagesTerrain {
         return entrant.copy(
             affouage = if (absent("affouage")) local.affouage else entrant.affouage,
             volumeMaxLotM3 = if (absent("volumeMaxLotM3")) local.volumeMaxLotM3 else entrant.volumeMaxLotM3,
+            partHouppierAffouage = if (absent("partHouppierAffouage")) local.partHouppierAffouage else entrant.partHouppierAffouage,
             tarif = if (absent("tarif")) local.tarif else entrant.tarif,
             tarifNumero = if (absent("tarifNumero")) local.tarifNumero else entrant.tarifNumero,
             coefficientForme = if (absent("coefficientForme")) local.coefficientForme else entrant.coefficientForme,

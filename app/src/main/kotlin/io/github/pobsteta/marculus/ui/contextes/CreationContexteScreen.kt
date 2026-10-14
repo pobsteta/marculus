@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import fr.marculus.core.AffouageLots
 import fr.marculus.core.Referentiels
 import fr.marculus.core.model.AxeClasses
 import fr.marculus.core.model.Contexte
@@ -100,6 +101,12 @@ fun CreationContexteScreen(
     var volumeMaxLot by remember {
         mutableStateOf(contexteExistant?.volumeMaxLotM3?.takeIf { it > 0.0 }?.toString() ?: "")
     }
+    // Part de houppier (affouage) saisie en %, par essence ; vide = 0 %.
+    val partsHouppier = remember {
+        mutableStateMapOf<String, String>().apply {
+            contexteExistant?.partHouppierAffouage?.forEach { (e, p) -> put(e, formatPourcent(p * 100.0)) }
+        }
+    }
     var datePickerOuvert by remember { mutableStateOf(false) }
 
     val essencesDisponibles = remember {
@@ -142,6 +149,7 @@ fun CreationContexteScreen(
     val errEssence = stringResource(R.string.creation_erreur_essence_requise)
     val errAffouageTarif = stringResource(R.string.creation_erreur_affouage_tarif)
     val errAffouageVolume = stringResource(R.string.creation_erreur_affouage_volume)
+    val errAffouageHouppier = stringResource(R.string.creation_erreur_affouage_houppier)
 
     Scaffold(
         topBar = {
@@ -307,6 +315,26 @@ fun CreationContexteScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(stringResource(R.string.creation_affouage_aide), style = MaterialTheme.typography.bodySmall)
+                // Parts utiles aux seuls tarifs sans houppier (Schaeffer) : grisées en EMERGE.
+                val partsActives = tarif != TarifCubage.EMERGE
+                Text(stringResource(R.string.creation_affouage_houppier_titre), style = MaterialTheme.typography.titleSmall)
+                Text(
+                    stringResource(if (partsActives) R.string.creation_affouage_houppier_aide else R.string.creation_affouage_houppier_emerge),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                essencesDisponibles.filter { it in selection }.forEach { essence ->
+                    OutlinedTextField(
+                        value = partsHouppier[essence] ?: "",
+                        onValueChange = { saisie -> partsHouppier[essence] = saisie.filter { it.isDigit() || it == '.' || it == ',' }.take(5) },
+                        label = { Text(essence) },
+                        placeholder = { Text("0") },
+                        suffix = { Text("%") },
+                        enabled = partsActives,
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
 
             erreur?.let { Text(it, color = MaterialTheme.colorScheme.error) }
@@ -323,6 +351,14 @@ fun CreationContexteScreen(
                         val pa = pas.toIntOrNull()
                         val inc = increment.toIntOrNull()
                         val vMaxLot = volumeMaxLot.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 }
+                        // Essence → fraction ; null si une saisie est hors de [0 ; 95 %].
+                        val parts = partsHouppier
+                            .filterKeys { it in selection }
+                            .filterValues { it.isNotBlank() }
+                            .mapValues { (_, v) -> v.replace(',', '.').toDoubleOrNull()?.div(100.0) }
+                            .takeIf { m -> m.values.all { it != null && it in 0.0..AffouageLots.PART_HOUPPIER_MAX } }
+                            ?.mapValues { it.value!! }
+                            ?.filterValues { it > 0.0 }
                         erreur = when {
                             nom.isBlank() -> errNom
                             mi == null || ma == null || pa == null -> errNombres
@@ -332,6 +368,7 @@ fun CreationContexteScreen(
                             selection.isEmpty() -> errEssence
                             affouage && tarif == TarifCubage.AUCUN -> errAffouageTarif
                             affouage && vMaxLot == null -> errAffouageVolume
+                            affouage && tarif != TarifCubage.EMERGE && parts == null -> errAffouageHouppier
                             else -> {
                                 val essences = essencesDisponibles
                                     .filter { it in selection }
@@ -341,12 +378,14 @@ fun CreationContexteScreen(
                                 val coef = coefForme.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 } ?: 0.5
                                 // Décoché, le volume saisi est conservé : recocher retrouve la borne.
                                 val volumeLot = vMaxLot ?: contexteExistant?.volumeMaxLotM3 ?: 0.0
+                                // Idem pour les parts, gardées en EMERGE ou décoché (grisées, pas effacées).
+                                val partsFinales = parts ?: contexteExistant?.partHouppierAffouage ?: emptyMap()
                                 scope.launch {
                                     if (edition) {
                                         repository.modifierContexte(
                                             contexteExistant!!.id, nom.trim(), mode,
                                             AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg, tarif, numero, coef, dateMartelage,
-                                            affouage, volumeLot,
+                                            affouage, volumeLot, partsFinales,
                                         )
                                         onEnregistre(contexteExistant.id)
                                     } else {
@@ -356,6 +395,7 @@ fun CreationContexteScreen(
                                             cheminGpkg = cheminGpkg, tarif = tarif, tarifNumero = numero,
                                             coefficientForme = coef, dateMartelage = dateMartelage,
                                             affouage = affouage, volumeMaxLotM3 = volumeLot,
+                                            partHouppierAffouage = partsFinales,
                                         )
                                         onEnregistre(id)
                                     }
@@ -564,3 +604,7 @@ private fun AjoutEssenceDialog(onAnnuler: () -> Unit, onAjouter: (String) -> Uni
         dismissButton = { TextButton(onClick = onAnnuler) { Text(stringResource(R.string.creation_action_annuler)) } },
     )
 }
+
+/** Pourcentage sans zéros inutiles : 30.0 → « 30 », 12.5 → « 12.5 ». */
+private fun formatPourcent(v: Double): String =
+    if (v == Math.rint(v)) v.toLong().toString() else "%.2f".format(java.util.Locale.ROOT, v).trimEnd('0').trimEnd('.')

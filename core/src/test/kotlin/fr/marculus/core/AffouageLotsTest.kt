@@ -129,4 +129,72 @@ class AffouageLotsTest {
         assertEquals(v40, b[1].volumeM3, eps)
         assertEquals(listOf(true, false, false), b.map { it.complet })
     }
+
+    @Test
+    fun `Schaeffer sans part de houppier - l'arbre compte en entier`() {
+        val v = AffouageLots.volumes(contexte(5.0), plus("a", 1, 1))
+        assertEquals(v40, v.tigeM3, eps)
+        assertEquals(0.0, v.houppierM3, eps)
+        assertEquals(v40, v.lotM3, eps)
+    }
+
+    @Test
+    fun `Schaeffer avec 30 pourcent de houppier - seul le houppier compte`() {
+        val ctx = contexte(5.0).copy(partHouppierAffouage = mapOf("Chêne" to 0.3))
+        val v = AffouageLots.volumes(ctx, plus("a", 1, 1))
+        // Le tarif donne la tige, 70 % du total : total = v40 / 0,7, houppier = 30 % du total.
+        assertEquals(v40 * 0.3 / 0.7, v.houppierM3, eps)
+        assertEquals(v.houppierM3, v.lotM3, eps)
+        assertEquals(0.3, v.houppierM3 / (v.tigeM3 + v.houppierM3), eps)
+    }
+
+    @Test
+    fun `la part de houppier est propre a l'essence`() {
+        val ctx = contexte(5.0).copy(partHouppierAffouage = mapOf("Hêtre" to 0.3))
+        assertEquals(v40, AffouageLots.volumes(ctx, plus("a", 1, 1)).lotM3, eps)
+    }
+
+    @Test
+    fun `la part de houppier cumule les lots sur le houppier`() {
+        val ctx = contexte(1.0).copy(partHouppierAffouage = mapOf("Chêne" to 0.3))
+        val h = v40 * 0.3 / 0.7
+        val e = AffouageLots.etat(ctx, listOf(plus("a", 1, 1)))
+        assertEquals(h, e.cumulM3, eps)
+        assertEquals(1, AffouageLots.prochainLot(ctx, listOf(plus("a", 1, 1))))
+        assertEquals(true, AffouageLots.fermeLot(ctx, listOf(plus("a", 1, 1)), plus("b", 2, 1)))
+        val b = AffouageLots.bilan(ctx, listOf(plus("a", 1, 1), plus("b", 2, 1)))
+        assertEquals(2 * v40, b[0].volumeTigeM3, eps)
+        assertEquals(2 * h, b[0].volumeHouppierM3, eps)
+        assertEquals(2 * h, b[0].volumeM3, eps)
+    }
+
+    @Test
+    fun `une part de houppier aberrante est bornee`() {
+        val ctx = contexte(5.0).copy(partHouppierAffouage = mapOf("Chêne" to 1.0))
+        assertEquals(AffouageLots.PART_HOUPPIER_MAX, AffouageLots.partHouppier(ctx, "Chêne"), eps)
+        val neg = contexte(5.0).copy(partHouppierAffouage = mapOf("Chêne" to -0.2))
+        assertEquals(v40, AffouageLots.volumes(neg, plus("a", 1, 1)).lotM3, eps)
+    }
+
+    @Test
+    fun `EMERGE - le houppier du modele compte, la part saisie est ignoree`() {
+        val ctx = contexte(5.0, TarifCubage.EMERGE).copy(partHouppierAffouage = mapOf("Chêne" to 0.3))
+        val t = plus("a", 1, 1).copy(hauteurTexte = "25")
+        val c = VolumesMartelage.cubage(ctx, t)
+        val v = AffouageLots.volumes(ctx, t)
+        assertEquals(c.volumeTigeM3, v.tigeM3, eps)
+        assertEquals(c.volumeHouppierM3, v.houppierM3, eps)
+        assertEquals(c.volumeHouppierM3, v.lotM3, eps)
+        assert(v.houppierM3 > 0.0)
+    }
+
+    @Test
+    fun `EMERGE - essence non couverte, sans houppier, compte en entier`() {
+        val ctx = contexte(5.0, TarifCubage.EMERGE).copy(essences = listOf(EssenceColonne("Zzz inconnue", 0, 0)))
+        val t = Tige("a", "c1", "Zzz inconnue", 40, ActionTige.PLUS, horodatage = 1, hauteurTexte = "25", lot = 1)
+        val v = AffouageLots.volumes(ctx, t)
+        assertEquals(0.0, v.houppierM3, eps)
+        assertEquals(v.tigeM3, v.lotM3, eps)
+        assert(v.lotM3 > 0.0)
+    }
 }
