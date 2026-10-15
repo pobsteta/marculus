@@ -8,6 +8,7 @@
 ![Android](https://img.shields.io/badge/Android-min%2026%20%C2%B7%20cible%2036-3DDC84?logo=android&logoColor=white)
 ![Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=jetpackcompose&logoColor=white)
 [![Site](https://img.shields.io/badge/site-GitHub%20Pages-2e7d32?logo=github)](https://pobsteta.github.io/marculus/)
+[![Licence](https://img.shields.io/badge/licence-GPL--3.0-blue)](LICENSE)
 
 Application Android de **martelage forestier** (smartphones et tablettes), inspirée des
 compteurs multi-catégories mais transposée en véritable **feuille de martelage** : une
@@ -165,3 +166,16 @@ le sauvegarder hors dépôt.
 
 > Pour activer la publication : **Settings → Pages → Source = GitHub Actions** (une fois).
 > Note : GitHub Pages sur un dépôt **privé** nécessite un plan payant (Pro/Team).
+
+---
+
+## Licence
+
+Copyright © 2026 Pascal Obstétar.
+
+Marculus est un logiciel libre : vous pouvez le redistribuer et/ou le modifier selon les termes de
+la **GNU General Public License version 3** (ou, à votre choix, toute version ultérieure) publiée
+par la Free Software Foundation. Il est distribué **sans aucune garantie**. Voir [`LICENSE`](LICENSE).
+
+Composants tiers : Vosk et le modèle vosk-model-small-fr-0.22 (Apache 2.0), osmdroid (Apache 2.0),
+GeoPackage NGA (MIT) — licences compatibles avec la GPL-3.0.

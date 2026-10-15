@@ -420,7 +420,7 @@
     <string name="apropos_titre">À propos de Marculus</string>
     <string name="apropos_version">Version %1$s</string>
     <string name="apropos_desc">Application de martelage forestier — comptage, cubage et géolocalisation RTK.</string>
-    <string name="apropos_licences">Reconnaissance vocale : Vosk (Alpha Cephei) et le modèle vosk-model-small-fr-0.22, distribués sous licence Apache 2.0. Cartographie : osmdroid. GeoPackage : NGA.</string>
+    <string name="apropos_licences">Reconnaissance vocale : Vosk (Alpha Cephei) et le modèle vosk-model-small-fr-0.22, distribués sous licence Apache 2.0. Cartographie : osmdroid. GeoPackage : NGA. Marculus est un logiciel libre distribué sous licence GNU GPL v3 ou ultérieure, sans aucune garantie.</string>
     <string name="apropos_github">Ouvrir sur GitHub</string>
     <string name="voix_lot_annonce">lot numéro %1$d</string>
     <string name="creation_affouage">Affouage</string>
