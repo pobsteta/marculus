@@ -136,7 +136,7 @@ class ExportCsvTest {
     }
 
     @Test
-    fun `le journal compte 23 colonnes dont les 15 du format 2 inchangees`() {
+    fun `le journal compte 22 colonnes dont les 15 du format 2 inchangees`() {
         val tige = Tige(
             uuid = "6f1c-uuid", contexteId = "c1", essence = "Chêne", classe = 20,
             action = ActionTige.PLUS, horodatage = 1000L, hauteurTexte = "27-6AB", qualiteArbre = "B",
@@ -146,18 +146,18 @@ class ExportCsvTest {
         val csv = ExportCsv.contexteCsv(contexte, listOf(tige))
         val lignes = csv.split("\n")
         val entete = cellules(lignes[lignes.indexOf("JOURNAL") + 1])
-        assertEquals(23, entete.size)
+        assertEquals(22, entete.size)
         assertEquals(colonnesFormat1, entete.take(12))
         assertEquals(listOf("Uuid", "Parcelle", "Modifie"), entete.subList(12, 15))
         assertEquals(
             listOf(
                 "VolumeTigeM3", "VolumeHouppierM3", "VolumeTotalM3", "SurfaceTerriereM2", "Cubage", "Lot",
-                "AffouageHouppierM3", "AffouageLotM3",
+                "AffouageLotM3",
             ),
             entete.drop(15),
         )
         val ligne = lignesJournal(csv).single()
-        assertEquals(23, ligne.size)
+        assertEquals(22, ligne.size)
         assertEquals("", ligne[20]) // hors affouage, pas de lot
         assertEquals(
             listOf(
@@ -215,7 +215,7 @@ class ExportCsvTest {
     fun `houppier - parts en en-tete, volumes d'affouage par tige et totaux nets`() {
         val ctx = contexte.copy(
             tarif = TarifCubage.SCHAEFFER_RAPIDE, tarifNumero = 8, affouage = true, volumeMaxLotM3 = 50.0,
-            partHouppierAffouage = mapOf("Chêne" to 0.3),
+            partHouppier = mapOf("Chêne" to 0.3),
         )
         val journal = listOf(
             Tige("u-a", "c1", "Chêne", 40, ActionTige.PLUS, horodatage = 1000L, lot = 1),
@@ -225,22 +225,28 @@ class ExportCsvTest {
         val lignes = csv.split("\n")
         val vTige = VolumesMartelage.cubage(ctx, journal[0]).volumeTigeM3
         val h = vTige * 0.3 / 0.7
-        assertTrue("PartHouppierAffouage;Chêne=0.3" in lignes)
-        assertTrue("VolumeHouppierTotalM3;0.0000" in lignes) // Schaeffer : pas de houppier modèle
-        assertTrue("AffouageHouppierTotalM3;${"%.4f".format(Locale.ROOT, h)}" in lignes)
+        assertTrue("PartHouppier;Chêne=0.3" in lignes)
+        // Schaeffer : le houppier vient de la part de l'essence (Chêne seulement).
+        assertTrue("VolumeHouppierTotalM3;${"%.4f".format(Locale.ROOT, h)}" in lignes)
         assertTrue("AffouageLotTotalM3;${"%.4f".format(Locale.ROOT, h + vTige)}" in lignes)
         val j = lignesJournal(csv)
-        assertEquals(h, j[0][21].toDouble(), 1e-6)
-        assertEquals(h, j[0][22].toDouble(), 1e-6)
-        assertEquals(0.0, j[1][21].toDouble(), 1e-6)
-        assertEquals(vTige, j[1][22].toDouble(), 1e-6)
+        assertEquals(22, j[0].size)
+        assertEquals(vTige, j[0][15].toDouble(), 1e-6) // VolumeTigeM3
+        assertEquals(h, j[0][16].toDouble(), 1e-6) // VolumeHouppierM3
+        assertEquals(vTige + h, j[0][17].toDouble(), 1e-6) // VolumeTotalM3
+        assertEquals(h, j[0][21].toDouble(), 1e-6) // AffouageLotM3 : le houppier seul
+        assertEquals(0.0, j[1][16].toDouble(), 1e-6)
+        assertEquals(vTige, j[1][21].toDouble(), 1e-6) // Hêtre sans part : l'arbre entier
     }
 
     @Test
-    fun `houppier - hors affouage les colonnes d'affouage sont vides`() {
-        val csv = ExportCsv.contexteCsv(contexte, listOf(Tige("u-a", "c1", "Chêne", 20, ActionTige.PLUS, horodatage = 1L)))
-        assertTrue("PartHouppierAffouage;" in csv.split("\n"))
-        assertEquals(listOf("", ""), lignesJournal(csv).single().takeLast(2))
+    fun `houppier - hors affouage le houppier est la, la colonne d'affouage vide`() {
+        val ctx = contexte.copy(tarif = TarifCubage.SCHAEFFER_RAPIDE, tarifNumero = 8, partHouppier = mapOf("Chêne" to 0.3))
+        val csv = ExportCsv.contexteCsv(ctx, listOf(Tige("u-a", "c1", "Chêne", 40, ActionTige.PLUS, horodatage = 1L)))
+        val ligne = lignesJournal(csv).single()
+        assert(ligne[16].toDouble() > 0.0)
+        assertEquals("", ligne.last())
+        assertTrue("PartHouppier;" in ExportCsv.contexteCsv(contexte, emptyList()).split("\n"))
     }
 
     @Test

@@ -102,4 +102,24 @@ class CubageTest {
         assertEquals(0.0, Cubage.volumeForme(0.0, 20.0))
         assertEquals(0.0, Cubage.volumeForme(40.0, 0.0))
     }
+
+    @Test
+    fun `Schaeffer - la part de houppier donne houppier et total`() {
+        val base = contexte(TarifCubage.SCHAEFFER_RAPIDE, numero = 8)
+        val tige = Cubage.volume(TarifCubage.SCHAEFFER_RAPIDE, 8, 42.5)
+        val sans = Cubage.volumesUnitaire(base, "Chêne", 40, null)
+        assertEquals(0.0, sans.houppier)
+        assertEquals(tige, sans.total, 1e-12)
+        val avec = Cubage.volumesUnitaire(base.copy(partHouppier = mapOf("Chêne" to 0.3)), "Chêne", 40, null)
+        assertEquals(tige, avec.tige, 1e-12)
+        assertEquals(0.3, avec.houppier / avec.total, 1e-12) // 30 % du bois fort total
+        assertTrue(Cubage.aHouppier(base.copy(partHouppier = mapOf("Chêne" to 0.3))))
+        assertTrue(!Cubage.aHouppier(base))
+    }
+
+    @Test
+    fun `sans tarif la part de houppier ne sert pas`() {
+        val ctx = contexte(TarifCubage.AUCUN).copy(partHouppier = mapOf("Chêne" to 0.3))
+        assertEquals(0.0, Cubage.volumesUnitaire(ctx, "Chêne", 40, null).total)
+    }
 }

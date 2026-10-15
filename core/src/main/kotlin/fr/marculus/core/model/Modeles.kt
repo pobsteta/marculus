@@ -86,11 +86,11 @@ data class Contexte(
     /** Volume (m³ comptés au lot, voir `AffouageLots.volumes`) au-delà duquel un lot d'affouage est clos. */
     val volumeMaxLotM3: Double = 0.0,
     /**
-     * Affouage, tarifs sans houppier (Schaeffer) : part du volume total, par essence (fraction
-     * 0 ≤ p < 1), qui est du houppier. Absente ou 0 : l'arbre entier compte dans le lot ; sinon
-     * seul le houppier compte. Ignorée en EMERGE, qui calcule le houppier lui-même.
+     * Tarifs sans houppier (Schaeffer, bois fort tige) : part du volume bois fort **total**, par
+     * essence (fraction 0 ≤ p < 1), qui est du houppier — voir [fr.marculus.core.Cubage.volumesUnitaire].
+     * Absente ou 0 : pas de houppier. Ignorée en EMERGE, qui calcule le houppier lui-même.
      */
-    val partHouppierAffouage: Map<String, Double> = emptyMap(),
+    val partHouppier: Map<String, Double> = emptyMap(),
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 }

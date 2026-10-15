@@ -56,7 +56,7 @@
 Contexte        : id, nom, mode (DIAMETRE | CIRCONFERENCE),
                   classeMin, classeMax, classePas, essencesActives[],
                   tarifCubage, coefForme, état Kanban, dateMartelage,
-                  affouage, volumeMaxLotM3, partHouppierAffouage{essence→part},
+                  affouage, volumeMaxLotM3, partHouppier{essence→part},
                   dateCréation, opérateur, modifie (synchro)
 Référentiels    : Essence       — Chêne / Hêtre / Autres feuillus / Sapin / Épicéa /
                                    Autres résineux            (prédéfini, modifiable)
@@ -107,6 +107,12 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   (`EmergeCoefs.kt`, ne pas éditer à la main) ; replis feuillus/résineux.
 - ✅ **Coefficient de forme** réglable par contexte comme repli EMERGE pour une essence
   non couverte : V = f·π/4·D²·H.
+- ✅ **Part de houppier par essence** (`Contexte.partHouppier`, 0 à 95 %, défaut 0) pour les
+  tarifs Schaeffer, qui donnent le **bois fort tige** (découpe 7 cm) : p est la part du bois
+  fort **total** (tige + branches > 7 cm) qui est du houppier ; houppier = V_tige·p/(1 − p),
+  total = tige + houppier. Partout : écrans, CSV, `.marsync`. Champs grisés en EMERGE, dont le
+  modèle donne le houppier. Clé `.marsync` `partHouppier` (réglage du terrain ;
+  `partHouppierAffouage` lue en repli, nom des v0.56–v0.58).
 
 ## 5 bis. Affouage (livré 2026-10-07)
 
@@ -125,14 +131,10 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 - En EMERGE, une tige sans hauteur vaut 0 m³ : Schaeffer est le choix naturel pour l'affouage.
 - ✅ **Tige / houppier** (`AffouageLots.volumes`) : un arbre **sans houppier compte en entier** dans
   le lot ; avec un houppier, **seul le houppier compte** (la tige est vendue à part).
-  - **EMERGE** : houppier du modèle ; une essence non couverte (repli coefficient de forme) n'en a
-    pas et compte en entier.
-  - **Schaeffer** (tarif sans houppier) : **part de houppier par essence** p (0 à 95 %, défaut 0),
-    part du **volume total**. Le tarif donnant la tige (1 − p du total) : houppier = V_tige·p/(1 − p).
-    Champs grisés en EMERGE. Clé `.marsync` `partHouppierAffouage` (réglage du terrain).
-  - `.marsync` (lecture seule, ignorés à la relecture) : `volumeHouppierTotalM3`,
-    `affouageHouppierTotalM3`, `affouageLotTotalM3` par contexte ; `affouageHouppierM3`,
-    `affouageLotM3` par tige (contextes d'affouage seulement).
+  - L'arbre a un houppier quand son essence en a un **coefficient** : couverte par EMERGE, ou
+    part de houppier > 0 en Schaeffer (§5). Une essence EMERGE non couverte compte en entier.
+  - `.marsync` (lecture seule, ignorés à la relecture) : `volumeHouppierTotalM3` ; pour un
+    contexte d'affouage, `affouageLotTotalM3` (net) et `affouageLotM3` par tige.
   - Onglet « Par lot » et CSV du bilan : colonnes tige, houppier et volume du lot ; CSV
     d'échange en **format 5** (§7).
 
@@ -170,9 +172,9 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   (saisie hauteur en texte libre / sélection mono-choix de la qualité arbre).
 - **Export CSV** (`FormatCsv;5`) : feuille (totaux par essence × classe) **+** journal des
   tiges (+ volumes cubés selon le tarif du contexte, + colonne `Lot`). Format 5 : houppier —
-  en-tête `VolumeHouppierTotalM3`, `PartHouppierAffouage` (`essence=part|…`),
-  `AffouageHouppierTotalM3`, `AffouageLotTotalM3` (avant `Journal`) ; colonnes
-  `AffouageHouppierM3`, `AffouageLotM3` en fin de journal (vides hors affouage). À l'export, choix entre
+  en-tête `VolumeHouppierTotalM3`, `PartHouppier` (`essence=part|…`), `AffouageLotTotalM3`
+  (avant `Journal`) ; colonne `AffouageLotM3` en fin de journal (vide hors affouage), 22
+  colonnes. `VolumeHouppierM3` est rempli en Schaeffer via la part de houppier. À l'export, choix entre
   **journal complet** et **tiges à comptabiliser** (`Journal;NET` : chaque annulation disparaît
   avec la tige qu'elle retire ; totaux identiques).
 

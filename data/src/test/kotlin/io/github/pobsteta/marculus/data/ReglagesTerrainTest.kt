@@ -22,7 +22,7 @@ class ReglagesTerrainTest {
         id = "c1", nom = nom, mode = "DIAMETRE", classeMin = 20, classeMax = 90, classePas = 5,
         essences = "", commentaire = null, increment = 1, exporte = false, dateCreation = 0,
         operateur = null, cheminGpkg = gpkg, tarif = tarif, tarifNumero = numero, coefficientForme = coef,
-        modifie = modifie, affouage = affouage, volumeMaxLotM3 = volumeMax, partHouppierAffouage = parts,
+        modifie = modifie, affouage = affouage, volumeMaxLotM3 = volumeMax, partHouppier = parts,
     )
 
     private val local = contexte(true, 12.5, "SCHAEFFER_RAPIDE", 8, 0.45, "/data/p12.gpkg")
@@ -47,8 +47,8 @@ class ReglagesTerrainTest {
     fun `part de houppier absente du fichier - la valeur locale est gardee`() {
         val parts = encodePartsHouppier(mapOf("Chêne" to 0.3))
         val loc = contexte(affouage = true, parts = parts)
-        assertEquals(parts, ReglagesTerrain.completer(contexte(modifie = 2), loc, emptySet()).partHouppierAffouage)
-        assertEquals("", ReglagesTerrain.completer(contexte(modifie = 2), loc, setOf("partHouppierAffouage")).partHouppierAffouage)
+        assertEquals(parts, ReglagesTerrain.completer(contexte(modifie = 2), loc, emptySet()).partHouppier)
+        assertEquals("", ReglagesTerrain.completer(contexte(modifie = 2), loc, setOf("partHouppier")).partHouppier)
     }
 
     @Test

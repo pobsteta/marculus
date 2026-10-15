@@ -112,10 +112,35 @@ object Cubage {
         return VolumesEmerge(tige, houppier, tige + houppier)
     }
 
-    /** Volumes (m³) d'une tige selon le contexte : tige bois fort, houppier (EMERGE seul), total. */
+    /** Part de houppier saisissable maximale : au-delà, V_tige·p/(1 − p) n'a plus de sens. */
+    const val PART_HOUPPIER_MAX = 0.95
+
+    /** Part de houppier de [essence] (0 si absente), bornée à [0 ; [PART_HOUPPIER_MAX]]. */
+    fun partHouppier(contexte: Contexte, essence: String): Double =
+        (contexte.partHouppier[essence] ?: 0.0)
+            .takeIf { it.isFinite() }
+            ?.coerceIn(0.0, PART_HOUPPIER_MAX) ?: 0.0
+
+    /** Le contexte a-t-il un houppier : EMERGE, ou Schaeffer avec au moins une part saisie. */
+    fun aHouppier(contexte: Contexte): Boolean = when (contexte.tarif) {
+        TarifCubage.EMERGE -> true
+        TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT -> contexte.partHouppier.values.any { it > 0.0 }
+        TarifCubage.AUCUN -> false
+    }
+
+    /**
+     * Volumes (m³) d'une tige selon le contexte : tige bois fort, houppier, total.
+     * - **EMERGE** : houppier du modèle (0 pour une essence non couverte, repli coefficient de forme).
+     * - **Schaeffer** : le tarif donne le bois fort **tige**, soit (1 − p) du total quand p est la
+     *   part de houppier de l'essence ([Contexte.partHouppier]) : houppier = V_tige·p/(1 − p).
+     */
     fun volumesUnitaire(contexte: Contexte, essence: String, classe: Int, hauteurTexte: String?): VolumesEmerge {
         val tige = volumeUnitaireTige(contexte, essence, classe, hauteurTexte)
-        if (contexte.tarif != TarifCubage.EMERGE) return VolumesEmerge(tige, 0.0, tige)
+        if (contexte.tarif != TarifCubage.EMERGE) {
+            val p = if (contexte.tarif == TarifCubage.AUCUN) 0.0 else partHouppier(contexte, essence)
+            val houppier = if (p > 0.0) tige * p / (1.0 - p) else 0.0
+            return VolumesEmerge(tige, houppier, tige + houppier)
+        }
         val h = HauteurParser.parse(hauteurTexte ?: "").hauteurTotale ?: return VolumesEmerge(0.0, 0.0, 0.0)
         val k = coefEmerge(essence) ?: return VolumesEmerge(tige, 0.0, tige) // repli coefficient de forme : pas de houppier
         val centre = classe + contexte.axe.pas / 2.0

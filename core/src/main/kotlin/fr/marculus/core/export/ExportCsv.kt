@@ -28,11 +28,10 @@ import java.util.Locale
  * tiges à comptabiliser ([JournalNet]) — ni les annulations, ni les tiges qu'elles retirent.
  * Les totaux et les volumes d'en-tête sont les mêmes dans les deux cas : ils sont déjà nets.
  *
- * **Format 5** (`FormatCsv;5`) : houppier — en en-tête, après `VolumeMaxLotM3` : `VolumeHouppierTotalM3`
- * (modèle EMERGE), `PartHouppierAffouage` (`essence=part`, séparées par `|`, parts en fraction) et
- * les totaux nets d'affouage `AffouageHouppierTotalM3` / `AffouageLotTotalM3`. En fin de journal,
- * `AffouageHouppierM3` et `AffouageLotM3` ([AffouageLots.volumes], unitaires, vides hors affouage) :
- * le houppier compte aussi en Schaeffer, via la part de l'essence.
+ * **Format 5** (`FormatCsv;5`) : houppier — en en-tête, après `VolumeMaxLotM3` :
+ * `VolumeHouppierTotalM3`, `PartHouppier` (`essence=part`, séparées par `|`, parts en fraction) et
+ * `AffouageLotTotalM3` (net). En fin de journal, `AffouageLotM3` ([AffouageLots.volumes], unitaire,
+ * vide hors affouage). En Schaeffer, `VolumeHouppierM3` vient de la part de houppier de l'essence.
  */
 object ExportCsv {
     private const val SEP = ";"
@@ -65,9 +64,8 @@ object ExportCsv {
         sb.appendLine("VolumeMaxLotM3${SEP}${contexte.volumeMaxLotM3}")
         // Format 5 : houppier, avant la ligne Journal.
         sb.appendLine("VolumeHouppierTotalM3${SEP}${decimal(totauxVolumes.volumeHouppierM3, DECIMALES_TOTAL)}")
-        sb.appendLine("PartHouppierAffouage${SEP}${champ(partsHouppier(contexte))}")
+        sb.appendLine("PartHouppier${SEP}${champ(partsHouppier(contexte))}")
         val bilanLots = if (contexte.affouage) AffouageLots.bilan(contexte, journal) else emptyList()
-        sb.appendLine("AffouageHouppierTotalM3${SEP}${decimal(bilanLots.sumOf { it.volumeHouppierM3 }, DECIMALES_TOTAL)}")
         sb.appendLine("AffouageLotTotalM3${SEP}${decimal(bilanLots.sumOf { it.volumeM3 }, DECIMALES_TOTAL)}")
         sb.appendLine("Journal${SEP}${if (net) "NET" else "COMPLET"}")
         contexte.commentaire?.let { sb.appendLine("Commentaire${SEP}${champ(it)}") }
@@ -96,8 +94,8 @@ object ExportCsv {
                 "VolumeTigeM3", "VolumeHouppierM3", "VolumeTotalM3", "SurfaceTerriereM2", "Cubage",
                 // Format 4 : lot d'affouage figé au martelage.
                 "Lot",
-                // Format 5 : volumes unitaires d'affouage (houppier, volume compté au lot).
-                "AffouageHouppierM3", "AffouageLotM3",
+                // Format 5 : volume unitaire compté au lot d'affouage.
+                "AffouageLotM3",
             ).joinToString(SEP),
         )
         (if (net) JournalNet.tiges(journal) else journal).sortedBy { it.horodatage }.forEach { t ->
@@ -126,7 +124,6 @@ object ExportCsv {
                     decimal(c.surfaceTerriereM2, DECIMALES_UNITAIRE),
                     c.cubage,
                     t.lot?.toString() ?: "",
-                    a?.let { decimal(it.houppierM3, DECIMALES_UNITAIRE) } ?: "",
                     a?.let { decimal(it.lotM3, DECIMALES_UNITAIRE) } ?: "",
                 ).joinToString(SEP) { champ(it) },
             )
@@ -136,9 +133,9 @@ object ExportCsv {
 
     /** Parts de houppier non nulles, dans l'ordre des essences du contexte : `Chêne=0.3|Hêtre=0.25`. */
     private fun partsHouppier(contexte: Contexte): String {
-        val ordre = contexte.essencesNoms + contexte.partHouppierAffouage.keys.sorted()
+        val ordre = contexte.essencesNoms + contexte.partHouppier.keys.sorted()
         return ordre.distinct()
-            .mapNotNull { e -> contexte.partHouppierAffouage[e]?.takeIf { it > 0.0 }?.let { "$e=$it" } }
+            .mapNotNull { e -> contexte.partHouppier[e]?.takeIf { it > 0.0 }?.let { "$e=$it" } }
             .joinToString("|")
     }
 

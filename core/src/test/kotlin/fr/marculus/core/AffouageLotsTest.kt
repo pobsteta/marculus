@@ -140,7 +140,7 @@ class AffouageLotsTest {
 
     @Test
     fun `Schaeffer avec 30 pourcent de houppier - seul le houppier compte`() {
-        val ctx = contexte(5.0).copy(partHouppierAffouage = mapOf("Chêne" to 0.3))
+        val ctx = contexte(5.0).copy(partHouppier = mapOf("Chêne" to 0.3))
         val v = AffouageLots.volumes(ctx, plus("a", 1, 1))
         // Le tarif donne la tige, 70 % du total : total = v40 / 0,7, houppier = 30 % du total.
         assertEquals(v40 * 0.3 / 0.7, v.houppierM3, eps)
@@ -150,13 +150,13 @@ class AffouageLotsTest {
 
     @Test
     fun `la part de houppier est propre a l'essence`() {
-        val ctx = contexte(5.0).copy(partHouppierAffouage = mapOf("Hêtre" to 0.3))
+        val ctx = contexte(5.0).copy(partHouppier = mapOf("Hêtre" to 0.3))
         assertEquals(v40, AffouageLots.volumes(ctx, plus("a", 1, 1)).lotM3, eps)
     }
 
     @Test
     fun `la part de houppier cumule les lots sur le houppier`() {
-        val ctx = contexte(1.0).copy(partHouppierAffouage = mapOf("Chêne" to 0.3))
+        val ctx = contexte(1.0).copy(partHouppier = mapOf("Chêne" to 0.3))
         val h = v40 * 0.3 / 0.7
         val e = AffouageLots.etat(ctx, listOf(plus("a", 1, 1)))
         assertEquals(h, e.cumulM3, eps)
@@ -170,15 +170,15 @@ class AffouageLotsTest {
 
     @Test
     fun `une part de houppier aberrante est bornee`() {
-        val ctx = contexte(5.0).copy(partHouppierAffouage = mapOf("Chêne" to 1.0))
-        assertEquals(AffouageLots.PART_HOUPPIER_MAX, AffouageLots.partHouppier(ctx, "Chêne"), eps)
-        val neg = contexte(5.0).copy(partHouppierAffouage = mapOf("Chêne" to -0.2))
+        val ctx = contexte(5.0).copy(partHouppier = mapOf("Chêne" to 1.0))
+        assertEquals(Cubage.PART_HOUPPIER_MAX, Cubage.partHouppier(ctx, "Chêne"), eps)
+        val neg = contexte(5.0).copy(partHouppier = mapOf("Chêne" to -0.2))
         assertEquals(v40, AffouageLots.volumes(neg, plus("a", 1, 1)).lotM3, eps)
     }
 
     @Test
     fun `EMERGE - le houppier du modele compte, la part saisie est ignoree`() {
-        val ctx = contexte(5.0, TarifCubage.EMERGE).copy(partHouppierAffouage = mapOf("Chêne" to 0.3))
+        val ctx = contexte(5.0, TarifCubage.EMERGE).copy(partHouppier = mapOf("Chêne" to 0.3))
         val t = plus("a", 1, 1).copy(hauteurTexte = "25")
         val c = VolumesMartelage.cubage(ctx, t)
         val v = AffouageLots.volumes(ctx, t)

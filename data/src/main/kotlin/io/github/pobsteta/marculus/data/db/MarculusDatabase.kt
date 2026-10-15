@@ -24,7 +24,7 @@ val MIGRATION_13_14 = object : Migration(13, 14) {
     }
 }
 
-/** v15 : part de houppier par essence pour l'affouage (tarifs sans houppier). */
+/** v15 : part de houppier par essence (tarifs sans houppier) ; colonne nommée à sa création, pour l'affouage. */
 val MIGRATION_14_15 = object : Migration(14, 15) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE contexte ADD COLUMN partHouppierAffouage TEXT NOT NULL DEFAULT ''")

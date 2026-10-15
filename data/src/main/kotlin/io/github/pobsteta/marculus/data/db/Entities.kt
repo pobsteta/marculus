@@ -39,9 +39,9 @@ data class ContexteEntity(
     /** Volume maximal (m³) d'un lot d'affouage. */
     @ColumnInfo(defaultValue = "0")
     val volumeMaxLotM3: Double = 0.0,
-    /** Part de houppier par essence (affouage, Schaeffer) : encodé nom US part, séparés par RS. */
-    @ColumnInfo(defaultValue = "")
-    val partHouppierAffouage: String = "",
+    /** Part de houppier par essence (tarifs Schaeffer) : encodé nom US part, séparés par RS. */
+    @ColumnInfo(name = "partHouppierAffouage", defaultValue = "")
+    val partHouppier: String = "",
 )
 
 @Entity(

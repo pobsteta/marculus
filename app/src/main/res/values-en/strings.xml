@@ -424,10 +424,10 @@
     <string name="creation_affouage">Firewood allotment (affouage)</string>
     <string name="creation_affouage_volume_max">Maximum volume per lot (m³)</string>
     <string name="creation_affouage_aide">Lots start at 1. Each stem\'s volume is added up; once the lot reaches the maximum volume, the next stem opens the next lot. The lot number is announced for every stem. A tree without crown counts whole; otherwise only its crown counts (the stem is sold separately). With EMERGE, a stem without height adds no volume.</string>
-    <string name="creation_affouage_houppier_titre" formatted="false">Crown share per species (%)</string>
-    <string name="creation_affouage_houppier_aide" formatted="false">Share of the tree\'s total volume that is crown. 0 %: the whole tree counts in the lot. 30 %: only the crown counts, i.e. 30 % of the total volume.</string>
-    <string name="creation_affouage_houppier_emerge">With EMERGE, the crown is computed by the model: these shares are not used.</string>
-    <string name="creation_erreur_affouage_houppier">Invalid crown share (0 to 95 %).</string>
+    <string name="creation_houppier_titre" formatted="false">Crown share per species (%)</string>
+    <string name="creation_houppier_aide" formatted="false">The Schaeffer tariff gives the merchantable stem volume. Enter the share of the total merchantable volume that is crown: 0 % = no crown; 30 % = crown is 30 % of the total, the stem 70 %. In an affouage, a tree with a crown counts in the lot for its crown only.</string>
+    <string name="creation_houppier_emerge">With EMERGE, the crown is computed by the model: these shares are not used.</string>
+    <string name="creation_erreur_houppier" formatted="false">Invalid crown share (0 to 95 %).</string>
     <string name="creation_erreur_affouage_tarif">Affouage requires a volume tariff.</string>
     <string name="creation_erreur_affouage_volume">Invalid maximum lot volume (number &gt; 0).</string>
     <string name="voix_lot_complet">lot %1$d complete</string>

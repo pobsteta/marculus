@@ -17,9 +17,6 @@ import fr.marculus.core.model.Tige
  */
 object AffouageLots {
 
-    /** Part de houppier maximale saisissable : au-delà, V_tige·p/(1 − p) n'a plus de sens. */
-    const val PART_HOUPPIER_MAX = 0.95
-
     /**
      * Volumes **unitaires** d'une tige pour l'affouage : tige, houppier, et [lotM3], ce qui compte
      * dans le lot. Une tige sans houppier compte en entier ; avec un houppier, seul lui compte
@@ -28,33 +25,23 @@ object AffouageLots {
     data class VolumesAffouage(val tigeM3: Double, val houppierM3: Double, val lotM3: Double)
 
     /**
-     * - **EMERGE** : le houppier est celui du modèle ; une essence non couverte (repli coefficient
-     *   de forme) n'en a pas et compte en entier.
-     * - **Schaeffer** (tarif sans houppier) : p = [Contexte.partHouppierAffouage] de l'essence est
-     *   la part du volume **total** qui est du houppier. Le tarif ne donnant que la tige
-     *   (1 − p du total), houppier = V_tige·p/(1 − p). p = 0 : l'arbre compte en entier.
+     * Tige et houppier sont ceux du cubage ([Cubage.volumesUnitaire]). L'arbre a un houppier quand
+     * son essence en a un **coefficient** : couverte par EMERGE, ou part de houppier > 0 en
+     * Schaeffer. Une essence EMERGE non couverte (repli coefficient de forme) compte en entier.
      */
     fun volumes(contexte: Contexte, tige: Tige): VolumesAffouage {
         val c = VolumesMartelage.cubage(contexte, tige)
-        val vTige = c.volumeTigeM3
-        if (contexte.tarif == TarifCubage.EMERGE) {
-            return if (c.cubage == VolumesMartelage.Methode.EMERGE) {
-                VolumesAffouage(vTige, c.volumeHouppierM3, c.volumeHouppierM3)
-            } else {
-                VolumesAffouage(vTige, 0.0, vTige)
-            }
+        val aHouppier = when (contexte.tarif) {
+            TarifCubage.EMERGE -> c.cubage == VolumesMartelage.Methode.EMERGE
+            TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT -> Cubage.partHouppier(contexte, tige.essence) > 0.0
+            TarifCubage.AUCUN -> false
         }
-        val p = partHouppier(contexte, tige.essence)
-        if (p <= 0.0) return VolumesAffouage(vTige, 0.0, vTige)
-        val houppier = vTige * p / (1.0 - p)
-        return VolumesAffouage(vTige, houppier, houppier)
+        return VolumesAffouage(
+            c.volumeTigeM3,
+            c.volumeHouppierM3,
+            if (aHouppier) c.volumeHouppierM3 else c.volumeTigeM3,
+        )
     }
-
-    /** Part de houppier saisie pour [essence] (0 si absente), bornée à [0 ; [PART_HOUPPIER_MAX]]. */
-    fun partHouppier(contexte: Contexte, essence: String): Double =
-        (contexte.partHouppierAffouage[essence] ?: 0.0)
-            .takeIf { it.isFinite() }
-            ?.coerceIn(0.0, PART_HOUPPIER_MAX) ?: 0.0
 
     /**
      * Bilan d'un lot : tiges et volumes (m³) **nets**, annulations déduites — tige, houppier et

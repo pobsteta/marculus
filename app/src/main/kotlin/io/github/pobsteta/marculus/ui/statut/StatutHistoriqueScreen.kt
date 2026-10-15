@@ -221,7 +221,8 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
     }
     val maxEssence = parEssence.maxOfOrNull { it.second } ?: 0
     val locale = LocalConfiguration.current.locales[0]
-    val emerge = contexte.tarif == TarifCubage.EMERGE
+    // Houppier : modèle EMERGE, ou part de houppier en Schaeffer.
+    val avecHouppier = Cubage.aHouppier(contexte)
     // Même calcul que les exports (.marsync, CSV) : une annulation retire la dernière tige de sa
     // case, avec son volume — elle est saisie sans hauteur et ne retirerait rien en EMERGE.
     val volumes = VolumesMartelage.totaux(contexte, journal)
@@ -252,7 +253,7 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                     )
-                    if (emerge) {
+                    if (avecHouppier) {
                         Text(
                             stringResource(R.string.statut_volume_houppier, String.format(locale, "%.2f", volHoup)),
                             style = MaterialTheme.typography.titleSmall,
@@ -440,7 +441,8 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
     val rattachees = geo.map { it to parcelleDe(it) }
     fun total(l: List<Pair<Tige, ParcelleGpkg?>>) = l.sumOf { it.first.quantite }
     val tarifActif = contexte.tarif != TarifCubage.AUCUN
-    val emerge = contexte.tarif == TarifCubage.EMERGE
+    // Houppier : modèle EMERGE, ou part de houppier en Schaeffer.
+    val avecHouppier = Cubage.aHouppier(contexte)
     // (tige, houppier, total) sommés sur un lot de tiges.
     fun vols(l: List<Pair<Tige, ParcelleGpkg?>>): Triple<Double, Double, Double> {
         var t = 0.0; var h = 0.0; var tot = 0.0
@@ -491,7 +493,7 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 val vP = vols(tigesProp)
                 LigneNiveau(prop, total(tigesProp), surf(tigesProp), if (tarifActif) vP.first else null, 0, MaterialTheme.typography.titleMedium, locale)
-                if (emerge) LigneVolumesEmerge(vP.second, vP.third, 0, locale)
+                if (avecHouppier) LigneVolumesEmerge(vP.second, vP.third, 0, locale)
                 if (prop == strHorsParcelle) {
                     essencesAvecVolume(tigesProp.map { it.first }).forEach { LigneEssenceParc(it, couleurs, 1, locale) }
                 } else {
@@ -500,7 +502,7 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
                         .forEach { (foret, tigesForet) ->
                             val vF = vols(tigesForet)
                             LigneNiveau(foret, total(tigesForet), surf(tigesForet), if (tarifActif) vF.first else null, 1, MaterialTheme.typography.titleSmall, locale)
-                            if (emerge) LigneVolumesEmerge(vF.second, vF.third, 1, locale)
+                            if (avecHouppier) LigneVolumesEmerge(vF.second, vF.third, 1, locale)
                             tigesForet.groupBy { (_, p) -> p }
                                 .toList().sortedByDescending { (_, l) -> total(l) }
                                 .forEach { (pcl, tigesParc) ->
@@ -509,7 +511,7 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
                                     val tot = total(tigesParc)
                                     val vPa = vols(tigesParc)
                                     LigneNiveau(libelle, tot, surf(tigesParc), if (tarifActif) vPa.first else null, 2, MaterialTheme.typography.bodyMedium, locale)
-                                    if (emerge) LigneVolumesEmerge(vPa.second, vPa.third, 2, locale)
+                                    if (avecHouppier) LigneVolumesEmerge(vPa.second, vPa.third, 2, locale)
                                     val ha = pcl?.surfaceHa ?: 0.0
                                     if (ha > 0.0) {
                                         val gHa = String.format(locale, "%.1f", surf(tigesParc) / ha)
@@ -568,7 +570,8 @@ private fun csvFoncier(
     fun champ(s: String) = s.replace(';', ' ').replace('\n', ' ')
     val sb = StringBuilder()
     val tarif = contexte.tarif != TarifCubage.AUCUN
-    val emerge = contexte.tarif == TarifCubage.EMERGE
+    // Houppier : modèle EMERGE, ou part de houppier en Schaeffer.
+    val avecHouppier = Cubage.aHouppier(contexte)
     sb.append("Proprietaire;Foret;Commune;Parcelle;Surface_ha;Essence;Classe;Nombre;Tiges_ha;G_m2;G_ha;Volume_m3;Volume_ha;Houppier_m3;Total_m3\n")
     plus.groupBy { parcelleDe(it) }.forEach { (pcl, tiges) ->
         val ha = pcl?.surfaceHa ?: 0.0
@@ -593,8 +596,8 @@ private fun csvFoncier(
                         }
                     }
                     val volRow = if (tarif) String.format(locale, "%.3f", vTige) else ""
-                    val houpRow = if (emerge) String.format(locale, "%.3f", vHoup) else ""
-                    val totRow = if (emerge) String.format(locale, "%.3f", vTot) else ""
+                    val houpRow = if (avecHouppier) String.format(locale, "%.3f", vHoup) else ""
+                    val totRow = if (avecHouppier) String.format(locale, "%.3f", vTot) else ""
                     sb.append(champ(pcl?.proprietaire ?: "")).append(';')
                         .append(champ(pcl?.foret ?: "")).append(';')
                         .append(champ(pcl?.commune ?: "")).append(';')
@@ -645,7 +648,7 @@ private fun LigneNiveau(
     }
 }
 
-/** Ligne secondaire EMERGE : volumes houppier et total aérien. */
+/** Ligne secondaire : volumes houppier et total (EMERGE, ou part de houppier en Schaeffer). */
 @Composable
 private fun LigneVolumesEmerge(houppier: Double, total: Double, niveau: Int, locale: java.util.Locale) {
     Text(

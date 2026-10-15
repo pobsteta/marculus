@@ -51,7 +51,7 @@ class ExportBilanLotsTest {
 
     @Test
     fun `avec une part de houppier, tige, houppier et volume du lot sont distincts`() {
-        val c = ctx.copy(partHouppierAffouage = mapOf("Chêne" to 0.5), volumeMaxLotM3 = 100.0)
+        val c = ctx.copy(partHouppier = mapOf("Chêne" to 0.5), volumeMaxLotM3 = 100.0)
         val lignes = ExportBilanLots.csv(c, listOf(plus("a", 1, 1)), Locale.FRANCE).trimEnd().split("\n")
         fun fr(v: Double) = String.format(Locale.FRANCE, "%.3f", v)
         assertEquals("1;1;${fr(v40)};${fr(v40)};${fr(v40)};EN_COURS", lignes[5])

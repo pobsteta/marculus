@@ -63,7 +63,7 @@ internal fun ContexteEntity.versDomaine() = Contexte(
     dejaExporte = dejaExporte,
     affouage = affouage,
     volumeMaxLotM3 = volumeMaxLotM3,
-    partHouppierAffouage = decodePartsHouppier(partHouppierAffouage),
+    partHouppier = decodePartsHouppier(partHouppier),
 )
 
 internal fun TigeEntity.versDomaine() = Tige(

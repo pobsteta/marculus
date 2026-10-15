@@ -114,7 +114,7 @@ class MartelageRepository(
         dateMartelage: Long? = null,
         affouage: Boolean = false,
         volumeMaxLotM3: Double = 0.0,
-        partHouppierAffouage: Map<String, Double> = emptyMap(),
+        partHouppier: Map<String, Double> = emptyMap(),
     ): String {
         val id = UUID.randomUUID().toString()
         contexteDao.inserer(
@@ -139,7 +139,7 @@ class MartelageRepository(
                 modifie = horloge(),
                 affouage = affouage,
                 volumeMaxLotM3 = volumeMaxLotM3,
-                partHouppierAffouage = encodePartsHouppier(partHouppierAffouage),
+                partHouppier = encodePartsHouppier(partHouppier),
             ),
         )
         return id
@@ -160,7 +160,7 @@ class MartelageRepository(
         dateMartelage: Long? = null,
         affouage: Boolean = false,
         volumeMaxLotM3: Double = 0.0,
-        partHouppierAffouage: Map<String, Double> = emptyMap(),
+        partHouppier: Map<String, Double> = emptyMap(),
     ) {
         val existant = contexteDao.parId(id) ?: return
         contexteDao.inserer(
@@ -181,7 +181,7 @@ class MartelageRepository(
                 modifie = horloge(),
                 affouage = affouage,
                 volumeMaxLotM3 = volumeMaxLotM3,
-                partHouppierAffouage = encodePartsHouppier(partHouppierAffouage),
+                partHouppier = encodePartsHouppier(partHouppier),
             ),
         )
     }

@@ -122,7 +122,7 @@ class SauvegardeRepository(
     private class Volumes(
         val totaux: Map<String, VolumesMartelage.Totaux>,
         val parTige: Map<String, VolumesMartelage.CubageTige>,
-        /** Contextes d'affouage seulement : houppier et volume compté au lot, nets ou unitaires. */
+        /** Contextes d'affouage seulement : volume compté au lot, net ou unitaire. */
         val affouageTotaux: Map<String, AffouageLots.VolumesAffouage>,
         val affouageParTige: Map<String, AffouageLots.VolumesAffouage>,
     )
@@ -167,13 +167,13 @@ class SauvegardeRepository(
         put("coefficientForme", coefficientForme); putOpt("dateMartelage", dateMartelage)
         put("statut", statut); put("modifie", modifie); put("dejaExporte", dejaExporte)
         put("affouage", affouage); put("volumeMaxLotM3", volumeMaxLotM3)
-        put("partHouppierAffouage", JSONObject().apply { decodePartsHouppier(partHouppierAffouage).forEach { (e, p) -> put(e, p) } })
+        put("partHouppier", JSONObject().apply { decodePartsHouppier(partHouppier).forEach { (e, p) -> put(e, p) } })
         volumes?.let {
             put("volumeTigeTotalM3", it.volumeTigeM3); put("volumeTotalM3", it.volumeTotalM3)
             put("volumeHouppierTotalM3", it.volumeHouppierM3)
             put("surfaceTerriereTotaleM2", it.surfaceTerriereM2); put("nbTigesNonCubees", it.nbTigesNonCubees)
         }
-        affouageNet?.let { put("affouageHouppierTotalM3", it.houppierM3); put("affouageLotTotalM3", it.lotM3) }
+        affouageNet?.let { put("affouageLotTotalM3", it.lotM3) }
     }
 
     private fun JSONObject.versContexte() = ContexteEntity(
@@ -193,8 +193,9 @@ class SauvegardeRepository(
         dejaExporte = optBoolean("dejaExporte", getBoolean("exporte")),
         affouage = optBoolean("affouage", false),
         volumeMaxLotM3 = optDouble("volumeMaxLotM3", 0.0).takeIf { it.isFinite() } ?: 0.0,
-        partHouppierAffouage = encodePartsHouppier(
-            optJSONObject("partHouppierAffouage")?.let { o ->
+        partHouppier = encodePartsHouppier(
+            // `partHouppierAffouage` : nom de la clé en v0.56.0–v0.58.0.
+            (optJSONObject("partHouppier") ?: optJSONObject("partHouppierAffouage"))?.let { o ->
                 o.keys().asSequence().associateWith { o.optDouble(it, 0.0) }.filterValues { it.isFinite() }
             }.orEmpty(),
         ),
@@ -216,7 +217,7 @@ class SauvegardeRepository(
             put("volumeTotalM3", it.volumeTotalM3); put("surfaceTerriereM2", it.surfaceTerriereM2)
             put("cubage", it.cubage)
         }
-        affouage?.let { put("affouageHouppierM3", it.houppierM3); put("affouageLotM3", it.lotM3) }
+        affouage?.let { put("affouageLotM3", it.lotM3) }
     }
 
     private fun JSONObject.versTige() = TigeEntity(
