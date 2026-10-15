@@ -130,6 +130,9 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   - **Schaeffer** (tarif sans houppier) : **part de houppier par essence** p (0 à 95 %, défaut 0),
     part du **volume total**. Le tarif donnant la tige (1 − p du total) : houppier = V_tige·p/(1 − p).
     Champs grisés en EMERGE. Clé `.marsync` `partHouppierAffouage` (réglage du terrain).
+  - `.marsync` (lecture seule, ignorés à la relecture) : `volumeHouppierTotalM3`,
+    `affouageHouppierTotalM3`, `affouageLotTotalM3` par contexte ; `affouageHouppierM3`,
+    `affouageLotM3` par tige (contextes d'affouage seulement).
   - Onglet « Par lot » et CSV du bilan : colonnes tige, houppier et volume du lot ; CSV
     d'échange en **format 5** (§7).
 

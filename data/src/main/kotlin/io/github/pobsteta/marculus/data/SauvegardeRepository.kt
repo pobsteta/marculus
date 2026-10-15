@@ -7,6 +7,7 @@ import io.github.pobsteta.marculus.data.db.ContexteEntity
 import io.github.pobsteta.marculus.data.db.MergeDao
 import io.github.pobsteta.marculus.data.db.TigeDao
 import io.github.pobsteta.marculus.data.db.TigeEntity
+import fr.marculus.core.AffouageLots
 import fr.marculus.core.LotMartelage
 import kotlinx.coroutines.flow.first
 import fr.marculus.core.VolumesMartelage
@@ -27,8 +28,8 @@ class SauvegardeRepository(
         val contextes = contexteDao.toutes()
         val tiges = tigeDao.toutes()
         val v = volumes(contextes, tiges)
-        root.put("contextes", JSONArray().apply { contextes.forEach { put(it.toJson(v.totaux[it.id])) } })
-        root.put("tiges", JSONArray().apply { tiges.forEach { put(it.toJson(v.parTige[it.uuid])) } })
+        root.put("contextes", JSONArray().apply { contextes.forEach { put(it.toJson(v.totaux[it.id], v.affouageTotaux[it.id])) } })
+        root.put("tiges", JSONArray().apply { tiges.forEach { put(it.toJson(v.parTige[it.uuid], v.affouageParTige[it.uuid])) } })
         root.put("configs", JSONArray().apply { configDao.toutes().forEach { put(it.toJson()) } })
         root.put(
             "referentiels",
@@ -64,8 +65,8 @@ class SauvegardeRepository(
         val contextes = listOfNotNull(contexteDao.parId(contexteId))
         val tiges = tigeDao.listeParContexte(contexteId)
         val v = volumes(contextes, tiges)
-        root.put("contextes", JSONArray().apply { contextes.forEach { put(it.toJson(v.totaux[it.id])) } })
-        root.put("tiges", JSONArray().apply { tiges.forEach { put(it.toJson(v.parTige[it.uuid])) } })
+        root.put("contextes", JSONArray().apply { contextes.forEach { put(it.toJson(v.totaux[it.id], v.affouageTotaux[it.id])) } })
+        root.put("tiges", JSONArray().apply { tiges.forEach { put(it.toJson(v.parTige[it.uuid], v.affouageParTige[it.uuid])) } })
         root.put("configs", JSONArray().apply { configDao.listeParContexte(contexteId).forEach { put(it.toJson()) } })
         return root.toString(2)
     }
@@ -121,19 +122,31 @@ class SauvegardeRepository(
     private class Volumes(
         val totaux: Map<String, VolumesMartelage.Totaux>,
         val parTige: Map<String, VolumesMartelage.CubageTige>,
+        /** Contextes d'affouage seulement : houppier et volume compté au lot, nets ou unitaires. */
+        val affouageTotaux: Map<String, AffouageLots.VolumesAffouage>,
+        val affouageParTige: Map<String, AffouageLots.VolumesAffouage>,
     )
 
     private fun volumes(contextes: List<ContexteEntity>, tiges: List<TigeEntity>): Volumes {
         val parContexte = tiges.groupBy { it.contexteId }
         val totaux = mutableMapOf<String, VolumesMartelage.Totaux>()
         val parTige = mutableMapOf<String, VolumesMartelage.CubageTige>()
+        val affouageTotaux = mutableMapOf<String, AffouageLots.VolumesAffouage>()
+        val affouageParTige = mutableMapOf<String, AffouageLots.VolumesAffouage>()
         contextes.forEach { entite ->
             val contexte = runCatching { entite.versDomaine() }.getOrNull() ?: return@forEach
             val journal = parContexte[entite.id].orEmpty().mapNotNull { runCatching { it.versDomaine() }.getOrNull() }
             totaux[entite.id] = VolumesMartelage.totaux(contexte, journal)
             journal.forEach { parTige[it.uuid] = VolumesMartelage.cubage(contexte, it) }
+            if (contexte.affouage) {
+                val bilan = AffouageLots.bilan(contexte, journal)
+                affouageTotaux[entite.id] = AffouageLots.VolumesAffouage(
+                    bilan.sumOf { it.volumeTigeM3 }, bilan.sumOf { it.volumeHouppierM3 }, bilan.sumOf { it.volumeM3 },
+                )
+                journal.forEach { affouageParTige[it.uuid] = AffouageLots.volumes(contexte, it) }
+            }
         }
-        return Volumes(totaux, parTige)
+        return Volumes(totaux, parTige, affouageTotaux, affouageParTige)
     }
 
     // --- Sérialisation des entités ---
@@ -142,7 +155,10 @@ class SauvegardeRepository(
      * [volumes] : totaux nets calculés sur le téléphone (lecture seule, ignorés à la relecture).
      * Marculus est la seule source des volumes de martelage.
      */
-    private fun ContexteEntity.toJson(volumes: VolumesMartelage.Totaux? = null) = JSONObject().apply {
+    private fun ContexteEntity.toJson(
+        volumes: VolumesMartelage.Totaux? = null,
+        affouageNet: AffouageLots.VolumesAffouage? = null,
+    ) = JSONObject().apply {
         put("id", id); put("nom", nom); put("mode", mode)
         put("classeMin", classeMin); put("classeMax", classeMax); put("classePas", classePas)
         put("essences", essences); putOpt("commentaire", commentaire); put("increment", increment)
@@ -154,8 +170,10 @@ class SauvegardeRepository(
         put("partHouppierAffouage", JSONObject().apply { decodePartsHouppier(partHouppierAffouage).forEach { (e, p) -> put(e, p) } })
         volumes?.let {
             put("volumeTigeTotalM3", it.volumeTigeM3); put("volumeTotalM3", it.volumeTotalM3)
+            put("volumeHouppierTotalM3", it.volumeHouppierM3)
             put("surfaceTerriereTotaleM2", it.surfaceTerriereM2); put("nbTigesNonCubees", it.nbTigesNonCubees)
         }
+        affouageNet?.let { put("affouageHouppierTotalM3", it.houppierM3); put("affouageLotTotalM3", it.lotM3) }
     }
 
     private fun JSONObject.versContexte() = ContexteEntity(
@@ -183,7 +201,10 @@ class SauvegardeRepository(
     )
 
     /** [cubage] : valeurs unitaires (une tige) calculées à l'export ; ignorées à la relecture. */
-    private fun TigeEntity.toJson(cubage: VolumesMartelage.CubageTige? = null) = JSONObject().apply {
+    private fun TigeEntity.toJson(
+        cubage: VolumesMartelage.CubageTige? = null,
+        affouage: AffouageLots.VolumesAffouage? = null,
+    ) = JSONObject().apply {
         put("uuid", uuid); put("contexteId", contexteId); put("essence", essence); put("classe", classe)
         put("action", action); put("horodatage", horodatage); put("quantite", quantite)
         putOpt("hauteurTexte", hauteurTexte); putOpt("qualiteArbre", qualiteArbre)
@@ -195,6 +216,7 @@ class SauvegardeRepository(
             put("volumeTotalM3", it.volumeTotalM3); put("surfaceTerriereM2", it.surfaceTerriereM2)
             put("cubage", it.cubage)
         }
+        affouage?.let { put("affouageHouppierM3", it.houppierM3); put("affouageLotM3", it.lotM3) }
     }
 
     private fun JSONObject.versTige() = TigeEntity(
