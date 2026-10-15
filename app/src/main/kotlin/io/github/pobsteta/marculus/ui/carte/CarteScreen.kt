@@ -40,6 +40,8 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SmallFloatingActionButton
@@ -118,6 +120,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.views.overlay.TilesOverlay
 import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.floor
@@ -135,7 +138,24 @@ private const val SURZOOM = 5
 /** Au-delà de cette vitesse (m/s ≈ 2,9 km/h), on oriente le cône par le cap GNSS plutôt que la boussole. */
 private const val SEUIL_VITESSE_MS = 0.8
 
-/** Une couche du GeoPackage dans le menu : sa case, son libellé, son nombre d'objets. */
+/** Titre d'une section du menu de la carte (« Fond de carte », « Couches affichées »). */
+@Composable
+private fun TitreSection(texte: String) {
+    Text(texte, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+}
+
+/** Un fond dans le menu : bouton radio, grisé si indisponible (ortho chantier sans GPKG). */
+@Composable
+private fun LigneFond(libelle: String, choisi: Boolean, disponible: Boolean, onChoisir: () -> Unit) {
+    DropdownMenuItem(
+        enabled = disponible,
+        text = { Text(libelle) },
+        leadingIcon = { RadioButton(selected = choisi, enabled = disponible, onClick = null) },
+        onClick = onChoisir,
+    )
+}
+
+/** Une couche dans le menu : sa case, son libellé, son nombre d'objets. */
 @Composable
 private fun LigneCouche(libelle: String, coche: Boolean, disponible: Boolean, onChange: (Boolean) -> Unit) {
     DropdownMenuItem(
@@ -160,32 +180,52 @@ private val PALETTE_FONCIER = listOf(
     0xFFFDD835.toInt(), 0xFF00ACC1.toInt(), 0xFF6D4C41.toInt(), 0xFFEC407A.toInt(),
 )
 
+private const val ATTRIBUTION_IGN = "© IGN Géoplateforme, Licence Ouverte Etalab 2.0"
+
 /**
- * Fonds de carte. [attribution] est la mention exigée par la licence de la source, affichée sous
- * l'échelle ; l'ortho du chantier vient du GeoPackage, déjà attribué par celui qui l'a produit.
+ * Fonds de carte, dans l'ordre du menu. [attribution] est la mention exigée par la licence de la
+ * source, affichée sous l'échelle ; l'ortho du chantier vient du GeoPackage, déjà attribué par
+ * celui qui l'a produit.
  */
 private enum class Fond(val libelle: String, val attribution: String?) {
-    OSM("OSM", "© OpenStreetMap"),
-    IGN("Ortho IGN", "© IGN"),
+    PLAN_IGN("Plan IGN", ATTRIBUTION_IGN),
+    IGN("Ortho IGN", ATTRIBUTION_IGN),
+    OSM("OpenStreetMap", "© contributeurs OpenStreetMap (ODbL)"),
     ORTHO("Ortho chantier", null),
 }
 
 /**
- * Orthophotos IGN (BD ORTHO®, 20 cm) servies par la Géoplateforme en WMTS : gratuites, sans clé,
- * sous Licence Ouverte Etalab 2.0. Le jeu de matrices `PM_0_19` est la grille Web Mercator
- * d'osmdroid (0 à 19) : TILEROW/TILECOL sont directement Y/X.
+ * Couche WMTS de la Géoplateforme IGN : gratuite, sans clé, sous Licence Ouverte Etalab 2.0. Le
+ * jeu de matrices `PM_0_19` est la grille Web Mercator d'osmdroid (0 à 19) : TILEROW/TILECOL sont
+ * directement Y/X.
  */
-private val SOURCE_ORTHO_IGN: OnlineTileSourceBase = object : OnlineTileSourceBase(
-    "OrthoIGN", 0, 19, 256, ".jpg",
-    arrayOf("https://data.geopf.fr/wmts"),
-) {
+private class SourceGeoplateforme(nom: String, private val couche: String, private val style: String, private val format: String) :
+    OnlineTileSourceBase(nom, 0, 19, 256, if (format == "image/png") ".png" else ".jpg", arrayOf("https://data.geopf.fr/wmts")) {
     override fun getTileURLString(pMapTileIndex: Long): String =
         getBaseUrl() + "?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0" +
-            "&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&STYLE=normal&FORMAT=image/jpeg&TILEMATRIXSET=PM_0_19" +
+            "&LAYER=" + couche + "&STYLE=" + style.replace(" ", "%20") + "&FORMAT=" + format +
+            "&TILEMATRIXSET=PM_0_19" +
             "&TILEMATRIX=" + MapTileIndex.getZoom(pMapTileIndex) +
             "&TILEROW=" + MapTileIndex.getY(pMapTileIndex) +
             "&TILECOL=" + MapTileIndex.getX(pMapTileIndex)
 }
+
+/** Plan IGN v2 : le fond par défaut, lisible en forêt (routes, lieux-dits, courbes). */
+private val SOURCE_PLAN_IGN: OnlineTileSourceBase =
+    SourceGeoplateforme("PlanIGN", "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2", "normal", "image/png")
+
+/** Orthophotos IGN (BD ORTHO®, 20 cm). */
+private val SOURCE_ORTHO_IGN: OnlineTileSourceBase =
+    SourceGeoplateforme("OrthoIGN", "ORTHOIMAGERY.ORTHOPHOTOS", "normal", "image/jpeg")
+
+/** Parcellaire Express (cadastre IGN), transparent : se superpose à n'importe quel fond. */
+private val SOURCE_CADASTRE: OnlineTileSourceBase =
+    SourceGeoplateforme("CadastreIGN", "CADASTRALPARCELS.PARCELLAIRE_EXPRESS", "PCI vecteur", "image/png")
+
+/** Préférences de la carte : fond et cadastre retrouvés d'une ouverture à l'autre. */
+private const val PREFS_CARTE = "carte"
+private const val CLE_FOND = "fond"
+private const val CLE_CADASTRE = "cadastre"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -204,7 +244,14 @@ fun CarteScreen(
         value = repository.contexte(contexteId)
     }
     val journal by repository.journal(contexteId).collectAsStateWithLifecycle(emptyList())
-    var fond by remember { mutableStateOf(Fond.OSM) }
+    val prefsCarte = remember { context.getSharedPreferences(PREFS_CARTE, Context.MODE_PRIVATE) }
+    var fond by remember {
+        mutableStateOf(
+            prefsCarte.getString(CLE_FOND, null)?.let { n -> Fond.entries.firstOrNull { it.name == n && it != Fond.ORTHO } }
+                ?: Fond.PLAN_IGN,
+        )
+    }
+    var voirCadastre by remember { mutableStateOf(prefsCarte.getBoolean(CLE_CADASTRE, false)) }
     var centre by remember { mutableStateOf(false) }
     var chargement by remember { mutableStateOf(false) }
     var legendeOuverte by remember { mutableStateOf(false) }
@@ -235,6 +282,13 @@ fun CarteScreen(
     var voirDesserte by rememberSaveable { mutableStateOf(true) }
     var voirHouppiers by rememberSaveable { mutableStateOf(false) }
     var menuCouches by remember { mutableStateOf(false) }
+    // Cadastre IGN : couche de tuiles transparente, sous les surcouches du chantier.
+    val coucheCadastre = remember {
+        TilesOverlay(MapTileProviderBasic(context.applicationContext, SOURCE_CADASTRE), context.applicationContext).apply {
+            loadingBackgroundColor = android.graphics.Color.TRANSPARENT
+            loadingLineColor = android.graphics.Color.TRANSPARENT
+        }
+    }
     val orthoSource by produceState<OrthoSource?>(initialValue = null, cheminGpkg) {
         value = null
         val chemin = cheminGpkg
@@ -292,7 +346,10 @@ fun CarteScreen(
 
     DisposableEffect(Unit) {
         mapView.onResume()
-        onDispose { mapView.onPause() }
+        onDispose {
+            mapView.onPause()
+            coucheCadastre.onDetach(mapView)
+        }
     }
 
     // === Indicateur « ma position » : point bleu + cercle de précision + cône de direction ===
@@ -359,8 +416,11 @@ fun CarteScreen(
 
     // Bascule de fond : un fournisseur NEUF à chaque changement (osmdroid détache l'ancien).
     LaunchedEffect(fond, orthoSource) {
+        // L'ortho du chantier n'est pas mémorisée : à la réouverture, le GPKG peut ne plus en avoir.
+        if (fond != Fond.ORTHO) prefsCarte.edit().putString(CLE_FOND, fond.name).apply()
         val provider = when (fond) {
             Fond.OSM -> MapTileProviderBasic(context.applicationContext, TileSourceFactory.MAPNIK)
+            Fond.PLAN_IGN -> MapTileProviderBasic(context.applicationContext, SOURCE_PLAN_IGN)
             Fond.IGN -> MapTileProviderBasic(context.applicationContext, SOURCE_ORTHO_IGN)
             Fond.ORTHO -> orthoSource?.let { src ->
                 // Tuiles natives jusqu'à src.zoomMax ; au-delà, l'approximateur les agrandit (overzoom).
@@ -371,14 +431,14 @@ fun CarteScreen(
                     null,
                     arrayOf(gpkgModule, approximateur),
                 )
-            } ?: MapTileProviderBasic(context.applicationContext, TileSourceFactory.MAPNIK)
+            } ?: MapTileProviderBasic(context.applicationContext, SOURCE_PLAN_IGN)
         }
         mapView.tileProvider = provider
-        // Orthos IGN et chantier : surzoom au-delà de la résolution native (≈20 cm), jusqu'à l'échelle
-        // du mètre. OSM n'en a pas besoin : ses tuiles sont un dessin, pas une image du terrain.
+        // Fonds IGN et ortho chantier : surzoom au-delà des tuiles natives, jusqu'à l'échelle du
+        // mètre, pour viser un arbre précis. OSM reste à ses tuiles natives.
         mapView.maxZoomLevel = when (fond) {
             Fond.OSM -> ZOOM_MAX
-            Fond.IGN -> ZOOM_MAX + SURZOOM
+            Fond.PLAN_IGN, Fond.IGN -> ZOOM_MAX + SURZOOM
             Fond.ORTHO -> ((orthoSource?.zoomMax ?: 19) + SURZOOM).toDouble()
         }
         // Retour vers un fond moins profond (ortho IGN → OSM) : on redescend, sinon fond blanc.
@@ -388,10 +448,12 @@ fun CarteScreen(
 
     val ctx = contexte
     // Surcouches reconstruites quand contexte, journal, parcelles ou desserte changent.
-    LaunchedEffect(ctx, journal, parcelles, dessertes, houppiers, voirParcelles, voirDesserte, voirHouppiers) {
+    LaunchedEffect(ctx, journal, parcelles, dessertes, houppiers, voirParcelles, voirDesserte, voirHouppiers, voirCadastre) {
         if (ctx == null) return@LaunchedEffect
         val couleurs = ctx.essences.associate { it.nom to it.couleurFondArgb }
         mapView.overlays.clear()
+        // Cadastre IGN tout en dessous : les parcelles du chantier et les tiges restent lisibles.
+        if (voirCadastre) mapView.overlays.add(coucheCadastre)
         // Parcelles (dessous), colorées par propriétaire, avec étiquette au centre.
         val proprios = parcelles.mapNotNull { it.proprietaire }.distinct()
         fun couleurFonciere(p: String?): Int =
@@ -591,9 +653,10 @@ fun CarteScreen(
                     }
                 },
                 actions = {
-                    // Couches du GeoPackage : chacune se coche, et celles que le fichier ne
-                    // contient pas restent grisées — mieux vaut voir qu'il n'y a rien à afficher
-                    // que de cocher une case sans effet.
+                    // Un seul menu, comme Groma : le fond (un choix) puis les couches (des cases).
+                    // Ce que le GeoPackage ne contient pas reste grisé — mieux vaut voir qu'il n'y
+                    // a rien à afficher que de cocher une case sans effet. Le menu reste ouvert
+                    // après un choix : on règle fond et couches d'un même geste.
                     Box {
                         IconButton(onClick = { menuCouches = true }) {
                             Icon(
@@ -603,6 +666,16 @@ fun CarteScreen(
                             )
                         }
                         DropdownMenu(expanded = menuCouches, onDismissRequest = { menuCouches = false }) {
+                            TitreSection(stringResource(R.string.carte_fond_de_carte))
+                            Fond.entries.forEach { f ->
+                                LigneFond(
+                                    libelle = f.libelle,
+                                    choisi = fond == f,
+                                    disponible = f != Fond.ORTHO || orthoSource != null,
+                                ) { fond = f }
+                            }
+                            HorizontalDivider()
+                            TitreSection(stringResource(R.string.carte_couches))
                             LigneCouche(
                                 libelle = stringResource(R.string.carte_couche_parcelles, parcelles.size),
                                 coche = voirParcelles,
@@ -618,19 +691,18 @@ fun CarteScreen(
                                 coche = voirDesserte,
                                 disponible = dessertes.isNotEmpty(),
                             ) { voirDesserte = it }
+                            LigneCouche(
+                                libelle = stringResource(R.string.carte_couche_cadastre),
+                                coche = voirCadastre,
+                                disponible = true,
+                            ) {
+                                voirCadastre = it
+                                prefsCarte.edit().putBoolean(CLE_CADASTRE, it).apply()
+                            }
                         }
                     }
                     TextButton(onClick = { importGpkgLauncher.launch(arrayOf("*/*")) }) {
                         Text(stringResource(R.string.carte_charge_gpkg), color = MaterialTheme.colorScheme.onPrimary)
-                    }
-                    TextButton(onClick = {
-                        fond = when (fond) {
-                            Fond.OSM -> Fond.IGN
-                            Fond.IGN -> if (orthoSource != null) Fond.ORTHO else Fond.OSM
-                            Fond.ORTHO -> Fond.OSM
-                        }
-                    }) {
-                        Text(stringResource(R.string.carte_fond_label, fond.libelle), color = MaterialTheme.colorScheme.onPrimary)
                     }
                 },
             )
@@ -670,7 +742,12 @@ fun CarteScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 EchelleCarte(metresParPixel = metresParPixel, densite = densite)
-                fond.attribution?.let { Text(it, style = MaterialTheme.typography.labelSmall) }
+                // Le cadastre est de l'IGN : mention ajoutée quand le fond n'en est pas déjà.
+                val mentionCadastre = voirCadastre && fond != Fond.PLAN_IGN && fond != Fond.IGN
+                listOfNotNull(fond.attribution, if (mentionCadastre) "cadastre © IGN" else null)
+                    .joinToString(" · ")
+                    .takeIf { it.isNotEmpty() }
+                    ?.let { Text(it, style = MaterialTheme.typography.labelSmall) }
             }
             if (chargement) {
                 IndicateurImport(Modifier.align(Alignment.Center))

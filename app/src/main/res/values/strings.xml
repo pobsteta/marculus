@@ -191,7 +191,8 @@
     <string name="carte_recentrer">Recentrer</string>
     <string name="carte_retour">Retour</string>
     <string name="carte_charge_gpkg">Charge : gpkg</string>
-    <string name="carte_fond_label">Fond : %1$s</string>
+    <string name="carte_fond_de_carte">Fond de carte</string>
+    <string name="carte_couche_cadastre">Cadastre IGN</string>
     <string name="carte_parcelle_titre">Parcelle %1$s</string>
     <string name="carte_parcelle_chiffres">%1$s ha · %2$d tige(s)</string>
     <string name="carte_couches">Couches affichées</string>
