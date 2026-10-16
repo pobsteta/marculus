@@ -73,9 +73,15 @@ Sans ces fichiers dans l'APK, `TarifsIfnRepository.referentiel()` vaut null : la
 - À propos : « données de l'Inventaire forestier national (millésime) © IGN — Licence Ouverte
   Etalab 2.0 ; méthode PPtools », affiché quand les tables sont embarquées.
 
+## Tables embarquées
+
+nemeton 2026.10.8 (commit b1e8670), millésime IFN **2011-2025** : 14 752 lignes de tarifs (11 476 SER,
+2 748 GRECO, 528 France), 41 550 couples commune × SER pour 34 791 communes, 86 SER. 2,1 Mo de CSV,
+~0,5 Mo compressés dans l'APK. `tarifs_ser.csv` = `ifn_tarif_schaeffer_ser.csv` de nemeton renommé.
+Contrôles : `TarifsIfnReelsTest` (Gevrey-Chambertin C20 : Chêne sessile SchL 7,8 → 8, Hêtre 8,5 → 9).
+
 ## Reste à faire
 
-- Recevoir les tables de nemeton, les copier dans les assets (< 3 Mo), vérifier la taille de l'APK.
 - Démo en mode avion : commune à cheval sur deux SER, Schaeffer lent, trois essences dont une rare
   (repli GRECO) et une sans code ; numéro modifié à la main puis changement de SER → valeur gardée.
 - Option GNSS (SER depuis la position, `AttributionSpatiale`) : seulement si un contour simplifié
