@@ -436,6 +436,7 @@
     <string name="creation_houppier_court">Crown</string>
     <string name="creation_cd_tarif_essence">Tariff for %1$s</string>
     <string name="creation_essences_aide" formatted="false">For each ticked species: volume tariff, tariff number (Schaeffer, 1–20) and crown share in %. EMERGE = 2-input merchantable stem volume; it uses the entered height and computes the crown itself.</string>
+    <string name="creation_essences_autres">Other available species</string>
     <string name="creation_affouage_m3">Max lot (m³)</string>
     <string name="creation_affouage_steres">Max lot (steres)</string>
     <string name="creation_affouage_coef_steres">Steres / m³</string>

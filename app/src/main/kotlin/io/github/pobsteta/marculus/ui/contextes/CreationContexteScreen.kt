@@ -141,6 +141,9 @@ fun CreationContexteScreen(
             contexteExistant?.essences?.forEach { put(it.nom, it.couleurFondArgb to it.couleurTexteArgb) }
         }
     }
+    // Essences cochées à l'ouverture (et ajoutées) : affichées en tête. Figé pendant la saisie,
+    // pour qu'une ligne ne saute pas quand on la coche ou la décoche.
+    val essencesEnTete = remember { mutableStateListOf<String>().apply { addAll(selection) } }
     // Tarif par essence (type + numéro saisi) : celui de l'essence, sinon le tarif par défaut du contexte.
     val tarifs = remember {
         mutableStateMapOf<String, TarifCubage>().apply {
@@ -269,7 +272,15 @@ fun CreationContexteScreen(
             }
             Text(stringResource(R.string.creation_essences_aide), style = MaterialTheme.typography.bodySmall)
             val paysageEssences = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-            essencesDisponibles.forEach { essence ->
+            val (enTete, autres) = essencesDisponibles.partition { it in essencesEnTete }
+            (enTete + autres).forEach { essence ->
+                if (essence == autres.firstOrNull() && enTete.isNotEmpty()) {
+                    Text(
+                        stringResource(R.string.creation_essences_autres),
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
                 LigneEssence(
                     nom = essence,
                     coche = essence in selection,
@@ -472,6 +483,7 @@ fun CreationContexteScreen(
                         numerosTarif[modele]?.let { numerosTarif[nouvelle] = it }
                     }
                     essencesDisponibles.add(nouvelle)
+                    essencesEnTete.add(nouvelle)
                     selection.add(nouvelle)
                 }
                 ajoutOuvert = false

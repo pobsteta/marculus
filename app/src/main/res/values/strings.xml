@@ -438,6 +438,7 @@
     <string name="creation_houppier_court">Houppier</string>
     <string name="creation_cd_tarif_essence">Tarif de %1$s</string>
     <string name="creation_essences_aide" formatted="false">Pour chaque essence cochée : tarif de cubage, numéro de tarif (Schaeffer, 1–20) et part de houppier en %. EMERGE = volume bois fort tige à 2 entrées, il utilise la hauteur saisie et calcule lui-même le houppier.</string>
+    <string name="creation_essences_autres">Autres essences disponibles</string>
     <string name="creation_affouage_m3">Lot max. (m³)</string>
     <string name="creation_affouage_steres">Lot max. (stères)</string>
     <string name="creation_affouage_coef_steres">Stères / m³</string>
