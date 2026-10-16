@@ -97,6 +97,36 @@ class TarifsIfnTest {
     }
 
     @Test
+    fun `part de houppier - meme cascade que le numero, part vide sautee`() {
+        val chs = assertNotNull(ifn.proposerPartHouppier("C20", "Chêne sessile"))
+        assertEquals(12.4, chs.pourcent)
+        assertEquals(Niveau.SER, chs.niveau)
+        // Hêtre en C20 : 29 arbres → GRECO, malgré la part de la ligne SER.
+        assertEquals(Niveau.GRECO, ifn.proposerPartHouppier("C20", "Hêtre")?.niveau)
+        // Hêtre en C51 : 871 arbres mais part vide → GRECO.
+        assertEquals(13.0, ifn.proposerPartHouppier("C51", "Hêtre")?.pourcent)
+        // Alisier : GRECO à 12 arbres → France.
+        val alt = assertNotNull(ifn.proposerPartHouppier("C20", "Alisier torminal"))
+        assertEquals(Niveau.FRANCE, alt.niveau)
+        assertEquals(15.0, alt.pourcent)
+        // Chêne sessile en C51 : part vide en SER, rien au-dessus → pas de part.
+        assertNull(ifn.proposerPartHouppier("C51", "Chêne sessile"))
+        assertNull(ifn.proposerPartHouppier("C20", "Catalpa"))
+    }
+
+    @Test
+    fun `tables sans colonne part_houppier - pas de part, numeros intacts`() {
+        val t = TarifsIfn.charger(
+            "niveau;code;espar;essence_libelle;type;numero;n_arbres;cv;millesime\n" +
+                "SER;C20;03;Chêne sessile;SCHL;7.2;500;1;m\n",
+            "",
+            "",
+        )
+        assertEquals(7, t.proposer("C20", "Chêne sessile", TarifCubage.SCHAEFFER_LENT)?.numero)
+        assertNull(t.proposerPartHouppier("C20", "Chêne sessile"))
+    }
+
+    @Test
     fun `type conseille - plus faible CV`() {
         assertEquals(TarifCubage.SCHAEFFER_INTERMEDIAIRE, ifn.typeConseille("C20", "Chêne sessile"))
         assertNull(ifn.typeConseille("C20", "Sorbier des oiseleurs"))

@@ -42,6 +42,16 @@ class TarifsIfnReelsTest {
     }
 
     @Test
+    fun `parts de houppier de controle - France`() {
+        // Valeurs France du brief nemeton 2026.10.9 ; une SER fictive force le repli sur la France.
+        fun france(essence: String) = ifn.proposerPartHouppier("Z99", essence)?.pourcent
+        assertEquals(12.1, france("Chêne sessile"))
+        assertEquals(14.5, france("Chêne pédonculé"))
+        assertEquals(12.5, france("Hêtre"))
+        assertEquals(0.6, france("Douglas"))
+    }
+
+    @Test
     fun `millesime et couverture`() {
         assertEquals("2011-2025", ifn.millesime)
         // Zéro initial et codes corses gardés tels quels.

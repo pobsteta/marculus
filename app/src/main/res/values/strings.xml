@@ -456,6 +456,10 @@
     <string name="creation_source_france">repli France — %1$s arbres, CV %2$s %%</string>
     <string name="creation_source_aucune">Pas de donnée IFN suffisante pour ce tarif</string>
     <string name="creation_type_conseille">type conseillé : %1$s</string>
+    <string name="creation_source_houppier">houppier %1$s %% (%2$s, EMERGE)</string>
+    <string name="creation_niveau_ser">SER %1$s</string>
+    <string name="creation_niveau_greco">GRECO %1$s</string>
+    <string name="creation_niveau_france">France</string>
     <string name="creation_affouage_m3">Lot max. (m³)</string>
     <string name="creation_affouage_steres">Lot max. (stères)</string>
     <string name="creation_affouage_coef_steres">Stères / m³</string>

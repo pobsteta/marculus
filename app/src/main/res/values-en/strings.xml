@@ -454,6 +454,10 @@
     <string name="creation_source_france">France fallback — %1$s trees, CV %2$s %%</string>
     <string name="creation_source_aucune">Not enough NFI data for this tariff</string>
     <string name="creation_type_conseille">suggested type: %1$s</string>
+    <string name="creation_source_houppier">crown %1$s %% (%2$s, EMERGE)</string>
+    <string name="creation_niveau_ser">SER %1$s</string>
+    <string name="creation_niveau_greco">GRECO %1$s</string>
+    <string name="creation_niveau_france">France</string>
     <string name="creation_affouage_m3">Max lot (m³)</string>
     <string name="creation_affouage_steres">Max lot (steres)</string>
     <string name="creation_affouage_coef_steres">Steres / m³</string>

@@ -64,7 +64,20 @@ class TarifsIfn private constructor(
 
     private data class Cle(val niveau: Niveau, val code: String, val essence: String, val type: TypeIfn)
 
-    private data class LigneTarif(val numero: Double, val nArbres: Int, val cv: Double, val millesime: String)
+    /**
+     * Part de houppier proposée, en % (0..100) : part du bois fort total qui est du houppier,
+     * modélisée par EMERGE sur les arbres IFN à hauteur mesurée (nemeton). [code] est celui du
+     * [niveau] retenu.
+     */
+    data class PropositionPart(val pourcent: Double, val niveau: Niveau, val code: String, val nArbres: Int)
+
+    private data class LigneTarif(
+        val numero: Double,
+        val nArbres: Int,
+        val cv: Double,
+        val millesime: String,
+        val partHouppier: Double?,
+    )
 
     /** SER de la commune, de la plus grande part à la plus petite ; vide si commune inconnue. */
     fun serDeCommune(insee: String): List<SerPart> = communesParInsee[insee.trim()].orEmpty()
@@ -121,6 +134,25 @@ class TarifsIfn private constructor(
     }
 
     /**
+     * Part de houppier de [essence] dans la SER [ser] : même cascade que [proposer] (niveau retenu
+     * s'il compte au moins [SEUIL_ARBRES] arbres **et** une part renseignée), indépendante du type
+     * de Schaeffer (nemeton écrit la même valeur pour les quatre). Null pour une essence sans code
+     * ONF ou sans part à aucun niveau.
+     */
+    fun proposerPartHouppier(ser: String, essence: String): PropositionPart? {
+        val code = Cubage.codeEssence(essence) ?: return null
+        val greco = sers[ser]?.greco ?: ser.take(1)
+        return listOf(Niveau.SER to ser, Niveau.GRECO to greco, Niveau.FRANCE to CODE_FRANCE)
+            .firstNotNullOfOrNull { (niveau, c) ->
+                TypeIfn.entries
+                    .mapNotNull { t -> lignes[Cle(niveau, c, code, t)] }
+                    .filter { it.nArbres >= SEUIL_ARBRES && it.partHouppier != null }
+                    .maxByOrNull { it.nArbres }
+                    ?.let { PropositionPart(it.partHouppier!!, niveau, c, it.nArbres) }
+            }
+    }
+
+    /**
      * Type de Schaeffer au plus faible CV pour [essence] dans [ser] (chaque type avec son propre
      * repli), ou null si aucun n'a de proposition. Indicatif : rien n'est imposé.
      */
@@ -138,7 +170,8 @@ class TarifsIfn private constructor(
 
         /**
          * Lit les trois tables (séparateur `;`, en-tête obligatoire, colonnes trouvées par leur nom) :
-         *  - [tarifsCsv] `niveau;code;espar;essence_libelle;type;numero;n_arbres;cv;millesime` ;
+         *  - [tarifsCsv] `niveau;code;espar;essence_libelle;type;numero;n_arbres;cv;millesime[;part_houppier]`
+         *    (`part_houppier` en %, vide ou absente = pas de part) ;
          *  - [communesCsv] `insee;nom;departement;ser;part;greco` ;
          *  - [serCsv] `code;nom;greco`.
          * Les lignes illisibles sont ignorées. À deux lignes pour un même code ONF (deux espèces IFN
@@ -154,7 +187,8 @@ class TarifsIfn private constructor(
                 val code = codes.getOrPut(libelle) { Cubage.codeEssence(libelle) } ?: return@forEach
                 val numero = r["numero"]?.toDoubleOrNull()?.takeIf { it.isFinite() } ?: return@forEach
                 val n = r["n_arbres"]?.toIntOrNull() ?: return@forEach
-                val l = LigneTarif(numero, n, r["cv"]?.toDoubleOrNull() ?: Double.NaN, r["millesime"].orEmpty())
+                val part = r["part_houppier"]?.toDoubleOrNull()?.takeIf { it.isFinite() && it in 0.0..100.0 }
+                val l = LigneTarif(numero, n, r["cv"]?.toDoubleOrNull() ?: Double.NaN, r["millesime"].orEmpty(), part)
                 val cle = Cle(niveau, r["code"].orEmpty(), code, type)
                 if ((lignes[cle]?.nArbres ?: -1) < n) lignes[cle] = l
             }

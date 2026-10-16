@@ -172,13 +172,22 @@ fun CreationContexteScreen(
     // Dernier numéro proposé par essence : un champ encore égal à lui (ou vide) suit les propositions,
     // un champ retouché à la main n'est plus jamais réécrit (sauf « Reproposer »).
     val derniersProposes = remember { mutableStateMapOf<String, String>() }
+    // Même règle pour la part de houppier (EMERGE sur les arbres IFN), proposée en Schaeffer seulement.
+    val dernieresParts = remember { mutableStateMapOf<String, String>() }
     fun proposition(e: String) = ser?.let { s -> ifn?.proposer(s, e, tarifDe(e)) }
     fun appliquerPropositions(essences: Collection<String> = selection, forcer: Boolean = false) {
+        fun suivre(champs: MutableMap<String, String>, derniers: MutableMap<String, String>, e: String, p: String?) {
+            if (p == null) return
+            val actuel = champs[e].orEmpty()
+            if (forcer || actuel.isBlank() || actuel == derniers[e]) champs[e] = p
+            derniers[e] = p
+        }
         essences.filter { it in selection }.forEach { e ->
-            val p = proposition(e)?.numero?.toString() ?: return@forEach
-            val actuel = numerosTarif[e].orEmpty()
-            if (forcer || actuel.isBlank() || actuel == derniersProposes[e]) numerosTarif[e] = p
-            derniersProposes[e] = p
+            suivre(numerosTarif, derniersProposes, e, proposition(e)?.numero?.toString())
+            if (tarifDe(e).estSchaeffer) {
+                val part = ser?.let { s -> ifn?.proposerPartHouppier(s, e) }?.let { formatPourcent(it.pourcent) }
+                suivre(partsHouppier, dernieresParts, e, part)
+            }
         }
     }
     fun choisirCommune(insee: String?) {
@@ -950,6 +959,15 @@ private fun sourceProposition(ifn: TarifsIfn?, ser: String?, essence: String, ta
         TarifsIfn.Niveau.FRANCE -> stringResource(R.string.creation_source_france, arbres, cv)
     }
     val conseille = ifn.typeConseille(ser, essence)?.takeIf { it != tarif }
-    return if (conseille == null) origine else origine + " · " + stringResource(R.string.creation_type_conseille, conseille.libelleLong())
+        ?.let { stringResource(R.string.creation_type_conseille, it.libelleLong()) }
+    val houppier = ifn.proposerPartHouppier(ser, essence)?.let { pp ->
+        val niveau = when (pp.niveau) {
+            TarifsIfn.Niveau.SER -> stringResource(R.string.creation_niveau_ser, pp.code)
+            TarifsIfn.Niveau.GRECO -> stringResource(R.string.creation_niveau_greco, pp.code)
+            TarifsIfn.Niveau.FRANCE -> stringResource(R.string.creation_niveau_france)
+        }
+        stringResource(R.string.creation_source_houppier, String.format(locale, "%.1f", pp.pourcent), niveau)
+    }
+    return listOfNotNull(origine, conseille, houppier).joinToString(" · ")
 }
 

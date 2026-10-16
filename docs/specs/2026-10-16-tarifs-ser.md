@@ -19,12 +19,16 @@ lues par leur nom (l'ordre importe peu, une colonne en trop est ignorée) :
 
 | Fichier | Colonnes |
 |---|---|
-| `tarifs_ser.csv` | `niveau;code;espar;essence_libelle;type;numero;n_arbres;cv;millesime` |
+| `tarifs_ser.csv` | `niveau;code;espar;essence_libelle;type;numero;n_arbres;cv;millesime;part_houppier` |
 | `communes_ser.csv` | `insee;nom;departement;ser;part;greco` |
 | `ser.csv` | `code;nom;greco` |
 
 - `niveau` ∈ `SER`, `GRECO`, `FRANCE` (code `FR`) ; `type` ∈ `SCHR`, `SCHI`, `SCHL`, `SCHTL`
   (rapide, intermédiaire, lent, très lent) ; `numero` décimal à 0,1 ; `cv` en %.
+- `part_houppier` (nemeton 2026.10.9) : part du bois fort total qui est du houppier, en % au
+  dixième, modélisée par EMERGE (`hdec = 0,8·htot`) sur les arbres IFN à hauteur mesurée —
+  un modèle, l'IFN ne mesure pas les branches. Même valeur pour les 4 types d'un groupe ; vide
+  sous 3 arbres à hauteur mesurée. Colonne absente ou vide = pas de proposition.
 - `communes_ser.csv` : une ligne par couple commune × SER ; `part` = part de la **surface totale**
   de la commune dans la SER (somme 1 par commune).
 - Méthode (PPtools, M. Bruciamacchie) : arbres vifs cubés, C13 ≥ 50 cm, 17,5 ≤ D ≤ 80 cm ;
@@ -42,6 +46,8 @@ Sans ces fichiers dans l'APK, `TarifsIfnRepository.referentiel()` vaut null : la
 - **Repli** : la ligne SER si elle compte au moins `TarifsIfn.SEUIL_ARBRES` = 30 arbres, sinon la
   GRECO de la SER, sinon la France ; aucune ligne au seuil → pas de proposition.
 - **Numéro** : `numeroBrut` arrondi à l'entier le plus proche (x,5 vers le haut), borné à 1..20.
+- **Part de houppier** (`proposerPartHouppier`) : même cascade, un niveau n'est retenu que s'il a
+  ≥ 30 arbres **et** une part renseignée ; indépendante du type de Schaeffer.
 - **Type conseillé** : le type au plus faible CV (chacun avec son repli) ; affiché s'il diffère du
   type choisi, jamais imposé.
 - AUCUN et EMERGE : rien n'est proposé.
@@ -54,10 +60,10 @@ Sans ces fichiers dans l'APK, `TarifsIfnRepository.referentiel()` vaut null : la
   si un seul nom correspond, sinon placée dans la recherche (homonymes). Seulement à la création ou
   quand on rattache un autre GeoPackage.
 - **SER** : code + nom ; commune à cheval → puces triées par part, la principale retenue.
-- Chaque essence cochée en Schaeffer : n° prérempli, source en dessous
-  (« SER C20 — 1 240 arbres, CV 38 % », « repli GRECO C — … », « repli France — … »).
-- **Jamais d'écrasement d'une saisie** : une proposition ne remplit qu'un champ vide ou encore égal
-  à la dernière proposition. « Reproposer les numéros » réapplique tout. Un contexte existant n'est
+- Chaque essence cochée en Schaeffer : n° et % houppier préremplis, source en dessous
+  (« SER C20 — 1 240 arbres, CV 38 % · houppier 12,1 % (France, EMERGE) », « repli GRECO C — … »).
+- **Jamais d'écrasement d'une saisie** (numéro comme part de houppier) : une proposition ne
+  remplit qu'un champ vide ou encore égal à la dernière proposition. « Reproposer les numéros » réapplique tout. Un contexte existant n'est
   jamais recalculé à son ouverture.
 - `Contexte.tarifNumero` reste le numéro par défaut des essences sans tarif propre.
 
@@ -75,7 +81,7 @@ Sans ces fichiers dans l'APK, `TarifsIfnRepository.referentiel()` vaut null : la
 
 ## Tables embarquées
 
-nemeton 2026.10.8 (commit b1e8670), millésime IFN **2011-2025** : 14 752 lignes de tarifs (11 476 SER,
+nemeton **2026.10.9** (part de houppier ajoutée ; 2026.10.8 pour la première livraison), millésime IFN **2011-2025** : 14 752 lignes de tarifs (11 476 SER,
 2 748 GRECO, 528 France), 41 550 couples commune × SER pour 34 791 communes, 86 SER. 2,1 Mo de CSV,
 ~0,5 Mo compressés dans l'APK. `tarifs_ser.csv` = `ifn_tarif_schaeffer_ser.csv` de nemeton renommé.
 Contrôles : `TarifsIfnReelsTest` (Gevrey-Chambertin C20 : Chêne sessile SchL 7,8 → 8, Hêtre 8,5 → 9).
