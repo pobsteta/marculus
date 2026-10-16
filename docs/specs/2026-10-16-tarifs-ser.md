@@ -1,6 +1,6 @@
 # Numéro de tarif Schaeffer proposé par sylvoécorégion (IFN)
 
-*Spec du 16 octobre 2026. Brief d'origine : `~/dev/briefs/vers-marculus/BRIEF-claude-code-tarifs-ser.md`.
+*Spec du 16 octobre 2026. Brief d'origine (traité) : `~/dev/briefs/traites/2026-10-16-traite-marculus-tarifs-ser.md`.
 Tables produites par nemeton : `~/dev/briefs/vers-nemeton/2026-10-16-tarifs-schaeffer-ser.md`.*
 
 ## But
@@ -80,9 +80,9 @@ nemeton 2026.10.8 (commit b1e8670), millésime IFN **2011-2025** : 14 752 lignes
 ~0,5 Mo compressés dans l'APK. `tarifs_ser.csv` = `ifn_tarif_schaeffer_ser.csv` de nemeton renommé.
 Contrôles : `TarifsIfnReelsTest` (Gevrey-Chambertin C20 : Chêne sessile SchL 7,8 → 8, Hêtre 8,5 → 9).
 
+Livré en v0.62.0, affichage vérifié sur le téléphone le 16 octobre 2026.
+
 ## Reste à faire
 
-- Démo en mode avion : commune à cheval sur deux SER, Schaeffer lent, trois essences dont une rare
-  (repli GRECO) et une sans code ; numéro modifié à la main puis changement de SER → valeur gardée.
 - Option GNSS (SER depuis la position, `AttributionSpatiale`) : seulement si un contour simplifié
   des SER est fourni.
