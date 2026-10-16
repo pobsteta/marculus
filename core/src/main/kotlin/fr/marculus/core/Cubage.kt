@@ -3,6 +3,7 @@ package fr.marculus.core
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.TarifCubage
+import fr.marculus.core.model.TarifEssence
 import java.text.Normalizer
 import kotlin.math.PI
 import kotlin.math.ln
@@ -121,11 +122,40 @@ object Cubage {
             .takeIf { it.isFinite() }
             ?.coerceIn(0.0, PART_HOUPPIER_MAX) ?: 0.0
 
-    /** Le contexte a-t-il un houppier : EMERGE, ou Schaeffer avec au moins une part saisie. */
-    fun aHouppier(contexte: Contexte): Boolean = when (contexte.tarif) {
+    /** Tarif de [essence] : le sien ([Contexte.tarifsEssence]), sinon le tarif par défaut du contexte. */
+    fun tarifDe(contexte: Contexte, essence: String): TarifEssence =
+        contexte.tarifsEssence[essence] ?: TarifEssence(contexte.tarif, contexte.tarifNumero)
+
+    /** Essences dont on regarde le tarif : celles du contexte et celles réglées ; vide → tarif par défaut seul. */
+    private fun essencesReglees(contexte: Contexte): List<String> =
+        (contexte.essencesNoms + contexte.tarifsEssence.keys + contexte.partHouppier.keys).distinct()
+
+    /** Au moins une essence est cubée (tarif autre qu'AUCUN). */
+    fun aTarif(contexte: Contexte): Boolean {
+        val essences = essencesReglees(contexte)
+        if (essences.isEmpty()) return contexte.tarif != TarifCubage.AUCUN
+        return essences.any { tarifDe(contexte, it).tarif != TarifCubage.AUCUN }
+    }
+
+    /** Au moins une essence est en EMERGE (le coefficient de forme sert alors de repli). */
+    fun aEmerge(contexte: Contexte): Boolean {
+        val essences = essencesReglees(contexte)
+        if (essences.isEmpty()) return contexte.tarif == TarifCubage.EMERGE
+        return essences.any { tarifDe(contexte, it).tarif == TarifCubage.EMERGE }
+    }
+
+    /** L'essence a-t-elle un houppier : EMERGE, ou Schaeffer avec une part saisie. */
+    fun aHouppier(contexte: Contexte, essence: String): Boolean = when (tarifDe(contexte, essence).tarif) {
         TarifCubage.EMERGE -> true
-        TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT -> contexte.partHouppier.values.any { it > 0.0 }
+        TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT -> partHouppier(contexte, essence) > 0.0
         TarifCubage.AUCUN -> false
+    }
+
+    /** Le contexte a-t-il un houppier : au moins une essence en EMERGE, ou en Schaeffer avec une part saisie. */
+    fun aHouppier(contexte: Contexte): Boolean {
+        val essences = essencesReglees(contexte)
+        if (essences.isEmpty()) return contexte.tarif == TarifCubage.EMERGE
+        return essences.any { aHouppier(contexte, it) }
     }
 
     /**
@@ -136,8 +166,9 @@ object Cubage {
      */
     fun volumesUnitaire(contexte: Contexte, essence: String, classe: Int, hauteurTexte: String?): VolumesEmerge {
         val tige = volumeUnitaireTige(contexte, essence, classe, hauteurTexte)
-        if (contexte.tarif != TarifCubage.EMERGE) {
-            val p = if (contexte.tarif == TarifCubage.AUCUN) 0.0 else partHouppier(contexte, essence)
+        val tarif = tarifDe(contexte, essence).tarif
+        if (tarif != TarifCubage.EMERGE) {
+            val p = if (tarif == TarifCubage.AUCUN) 0.0 else partHouppier(contexte, essence)
             val houppier = if (p > 0.0) tige * p / (1.0 - p) else 0.0
             return VolumesEmerge(tige, houppier, tige + houppier)
         }
@@ -155,16 +186,17 @@ object Cubage {
         return f * (PI / 4.0) * dM * dM * hM
     }
 
-    /** Volume (m³) d'une tige individuelle selon le tarif du contexte, sa classe et sa hauteur saisie. */
+    /** Volume (m³) d'une tige individuelle selon le tarif de son essence, sa classe et sa hauteur saisie. */
     fun volumeUnitaireTige(contexte: Contexte, essence: String, classe: Int, hauteurTexte: String?): Double {
-        if (contexte.tarif == TarifCubage.AUCUN) return 0.0
+        val t = tarifDe(contexte, essence)
+        if (t.tarif == TarifCubage.AUCUN) return 0.0
         val centre = classe + contexte.axe.pas / 2.0
         val circ = contexte.mode == ModeMesure.CIRCONFERENCE
         val dCm = if (circ) centre / PI else centre
         val cCm = if (circ) centre else centre * PI
-        return when (contexte.tarif) {
+        return when (t.tarif) {
             TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT ->
-                volume(contexte.tarif, contexte.tarifNumero, dCm)
+                volume(t.tarif, t.numero, dCm)
             TarifCubage.EMERGE -> {
                 val h = HauteurParser.parse(hauteurTexte ?: "").hauteurTotale
                 when {

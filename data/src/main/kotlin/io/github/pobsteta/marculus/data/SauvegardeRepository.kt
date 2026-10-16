@@ -11,6 +11,9 @@ import fr.marculus.core.AffouageLots
 import fr.marculus.core.LotMartelage
 import kotlinx.coroutines.flow.first
 import fr.marculus.core.VolumesMartelage
+import fr.marculus.core.model.Contexte
+import fr.marculus.core.model.TarifCubage
+import fr.marculus.core.model.TarifEssence
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -168,6 +171,15 @@ class SauvegardeRepository(
         put("statut", statut); put("modifie", modifie); put("dejaExporte", dejaExporte)
         put("affouage", affouage); put("volumeMaxLotM3", volumeMaxLotM3)
         put("partHouppier", JSONObject().apply { decodePartsHouppier(partHouppier).forEach { (e, p) -> put(e, p) } })
+        put(
+            "tarifsEssence",
+            JSONObject().apply {
+                decodeTarifsEssence(tarifsEssence).forEach { (e, t) ->
+                    put(e, JSONObject().apply { put("tarif", t.tarif.name); put("numero", t.numero) })
+                }
+            },
+        )
+        put("steresParM3", steresParM3)
         volumes?.let {
             put("volumeTigeTotalM3", it.volumeTigeM3); put("volumeTotalM3", it.volumeTotalM3)
             put("volumeHouppierTotalM3", it.volumeHouppierM3)
@@ -199,6 +211,17 @@ class SauvegardeRepository(
                 o.keys().asSequence().associateWith { o.optDouble(it, 0.0) }.filterValues { it.isFinite() }
             }.orEmpty(),
         ),
+        tarifsEssence = encodeTarifsEssence(
+            optJSONObject("tarifsEssence")?.let { o ->
+                o.keys().asSequence().mapNotNull { e ->
+                    val t = o.optJSONObject(e) ?: return@mapNotNull null
+                    val tarif = runCatching { TarifCubage.valueOf(t.optString("tarif")) }.getOrNull() ?: return@mapNotNull null
+                    e to TarifEssence(tarif, t.optInt("numero", 0))
+                }.toMap()
+            }.orEmpty(),
+        ),
+        steresParM3 = optDouble("steresParM3", Contexte.STERES_PAR_M3_DEFAUT)
+            .takeIf { it.isFinite() && it > 0.0 } ?: Contexte.STERES_PAR_M3_DEFAUT,
     )
 
     /** [cubage] : valeurs unitaires (une tige) calculées à l'export ; ignorées à la relecture. */

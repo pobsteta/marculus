@@ -12,6 +12,7 @@ import fr.marculus.core.model.EtatKanban
 import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.Position
 import fr.marculus.core.model.TarifCubage
+import fr.marculus.core.model.TarifEssence
 import fr.marculus.core.model.Tige
 import io.github.pobsteta.marculus.data.db.CompteurConfigDao
 import io.github.pobsteta.marculus.data.db.CompteurConfigEntity
@@ -115,6 +116,8 @@ class MartelageRepository(
         affouage: Boolean = false,
         volumeMaxLotM3: Double = 0.0,
         partHouppier: Map<String, Double> = emptyMap(),
+        tarifsEssence: Map<String, TarifEssence> = emptyMap(),
+        steresParM3: Double = Contexte.STERES_PAR_M3_DEFAUT,
     ): String {
         val id = UUID.randomUUID().toString()
         contexteDao.inserer(
@@ -140,6 +143,8 @@ class MartelageRepository(
                 affouage = affouage,
                 volumeMaxLotM3 = volumeMaxLotM3,
                 partHouppier = encodePartsHouppier(partHouppier),
+                tarifsEssence = encodeTarifsEssence(tarifsEssence),
+                steresParM3 = steresParM3,
             ),
         )
         return id
@@ -161,6 +166,8 @@ class MartelageRepository(
         affouage: Boolean = false,
         volumeMaxLotM3: Double = 0.0,
         partHouppier: Map<String, Double> = emptyMap(),
+        tarifsEssence: Map<String, TarifEssence> = emptyMap(),
+        steresParM3: Double = Contexte.STERES_PAR_M3_DEFAUT,
     ) {
         val existant = contexteDao.parId(id) ?: return
         contexteDao.inserer(
@@ -182,6 +189,8 @@ class MartelageRepository(
                 affouage = affouage,
                 volumeMaxLotM3 = volumeMaxLotM3,
                 partHouppier = encodePartsHouppier(partHouppier),
+                tarifsEssence = encodeTarifsEssence(tarifsEssence),
+                steresParM3 = steresParM3,
             ),
         )
     }

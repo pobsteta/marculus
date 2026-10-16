@@ -428,6 +428,19 @@
     <string name="creation_houppier_aide" formatted="false">The Schaeffer tariff gives the merchantable stem volume. Enter the share of the total merchantable volume that is crown: 0 % = no crown; 30 % = crown is 30 % of the total, the stem 70 %. In an affouage, a tree with a crown counts in the lot for its crown only.</string>
     <string name="creation_houppier_emerge">With EMERGE, the crown is computed by the model: these shares are not used.</string>
     <string name="creation_erreur_houppier" formatted="false">Invalid crown share (0 to 95 %).</string>
+    <string name="creation_tarif_court_aucun">None</string>
+    <string name="creation_tarif_court_rapide">Sch. fast</string>
+    <string name="creation_tarif_court_lent">Sch. slow</string>
+    <string name="creation_tarif_court_emerge">EMERGE</string>
+    <string name="creation_tarif_numero_court">No.</string>
+    <string name="creation_houppier_court">Crown</string>
+    <string name="creation_cd_tarif_essence">Tariff for %1$s</string>
+    <string name="creation_essences_aide" formatted="false">For each ticked species: volume tariff, tariff number (Schaeffer, 1–20) and crown share in %. EMERGE = 2-input merchantable stem volume; it uses the entered height and computes the crown itself.</string>
+    <string name="creation_affouage_m3">Max lot (m³)</string>
+    <string name="creation_affouage_steres">Max lot (steres)</string>
+    <string name="creation_affouage_coef_steres">Steres / m³</string>
+    <string name="creation_affouage_steres_aide">Steres are an estimate: steres = m³ × factor (≈ 1.5 for 1 m logs). Filling one updates the other.</string>
+    <string name="creation_erreur_steres">Invalid steres / m³ factor (number &gt; 0).</string>
     <string name="creation_erreur_affouage_tarif">Affouage requires a volume tariff.</string>
     <string name="creation_erreur_affouage_volume">Invalid maximum lot volume (number &gt; 0).</string>
     <string name="voix_lot_complet">lot %1$d complete</string>

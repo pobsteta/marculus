@@ -9,6 +9,7 @@ import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.Position
 import fr.marculus.core.model.QualiteFix
 import fr.marculus.core.model.TarifCubage
+import fr.marculus.core.model.TarifEssence
 import fr.marculus.core.model.Tige
 import io.github.pobsteta.marculus.data.db.ContexteEntity
 import io.github.pobsteta.marculus.data.db.TigeEntity
@@ -44,6 +45,21 @@ internal fun decodePartsHouppier(s: String): Map<String, Double> =
         }.toMap()
     }
 
+internal fun encodeTarifsEssence(tarifs: Map<String, TarifEssence>): String =
+    tarifs.entries.joinToString(RS) { "${it.key}$US${it.value.tarif.name}$US${it.value.numero}" }
+
+internal fun decodeTarifsEssence(s: String): Map<String, TarifEssence> =
+    if (s.isEmpty()) {
+        emptyMap()
+    } else {
+        s.split(RS).mapNotNull { rec ->
+            val p = rec.split(US)
+            if (p.size != 3) return@mapNotNull null
+            val tarif = runCatching { TarifCubage.valueOf(p[1]) }.getOrNull() ?: return@mapNotNull null
+            p[0] to TarifEssence(tarif, p[2].toIntOrNull() ?: 0)
+        }.toMap()
+    }
+
 internal fun ContexteEntity.versDomaine() = Contexte(
     id = id,
     nom = nom,
@@ -64,6 +80,8 @@ internal fun ContexteEntity.versDomaine() = Contexte(
     affouage = affouage,
     volumeMaxLotM3 = volumeMaxLotM3,
     partHouppier = decodePartsHouppier(partHouppier),
+    tarifsEssence = decodeTarifsEssence(tarifsEssence),
+    steresParM3 = steresParM3.takeIf { it.isFinite() && it > 0.0 } ?: Contexte.STERES_PAR_M3_DEFAUT,
 )
 
 internal fun TigeEntity.versDomaine() = Tige(

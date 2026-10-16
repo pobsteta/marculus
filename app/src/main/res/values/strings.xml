@@ -430,6 +430,19 @@
     <string name="creation_houppier_aide" formatted="false">Le tarif Schaeffer donne le bois fort tige. Indiquez la part du bois fort total qui est du houppier : 0 % = pas de houppier ; 30 % = houppier égal à 30 % du total, la tige faisant 70 %. En affouage, un arbre avec houppier ne compte dans le lot que pour son houppier.</string>
     <string name="creation_houppier_emerge">En EMERGE, le houppier est calculé par le modèle : ces parts ne servent pas.</string>
     <string name="creation_erreur_houppier" formatted="false">Part de houppier invalide (de 0 à 95 %).</string>
+    <string name="creation_tarif_court_aucun">Aucun</string>
+    <string name="creation_tarif_court_rapide">Sch. rapide</string>
+    <string name="creation_tarif_court_lent">Sch. lent</string>
+    <string name="creation_tarif_court_emerge">EMERGE</string>
+    <string name="creation_tarif_numero_court">n°</string>
+    <string name="creation_houppier_court">Houppier</string>
+    <string name="creation_cd_tarif_essence">Tarif de %1$s</string>
+    <string name="creation_essences_aide" formatted="false">Pour chaque essence cochée : tarif de cubage, numéro de tarif (Schaeffer, 1–20) et part de houppier en %. EMERGE = volume bois fort tige à 2 entrées, il utilise la hauteur saisie et calcule lui-même le houppier.</string>
+    <string name="creation_affouage_m3">Lot max. (m³)</string>
+    <string name="creation_affouage_steres">Lot max. (stères)</string>
+    <string name="creation_affouage_coef_steres">Stères / m³</string>
+    <string name="creation_affouage_steres_aide">Les stères sont une estimation : stères = m³ × coefficient (≈ 1,5 pour des bûches de 1 m). Remplir l\'un met l\'autre à jour.</string>
+    <string name="creation_erreur_steres">Coefficient stères / m³ invalide (nombre &gt; 0).</string>
     <string name="creation_erreur_affouage_tarif">L\'affouage nécessite un tarif de cubage.</string>
     <string name="creation_erreur_affouage_volume">Volume maximal d\'un lot invalide (nombre &gt; 0).</string>
     <string name="voix_lot_complet">lot %1$d complet</string>

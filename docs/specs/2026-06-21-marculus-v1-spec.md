@@ -113,11 +113,21 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   total = tige + houppier. Partout : écrans, CSV, `.marsync`. Champs grisés en EMERGE, dont le
   modèle donne le houppier. Clé `.marsync` `partHouppier` (réglage du terrain ;
   `partHouppierAffouage` lue en repli, nom des v0.56–v0.58).
+- ✅ **Tarif par essence** (2026-10-16, `Contexte.tarifsEssence` : type + numéro) : dans
+  « Modifier le contexte », chaque essence cochée porte sur sa ligne son tarif, son numéro
+  (Schaeffer) et sa part de houppier (une seule ligne en paysage, sous le nom en portrait).
+  Une essence absente de la table prend le tarif **par défaut** (`tarif` / `tarifNumero`,
+  enregistré = celui de la première essence cubée) : contextes anciens, plans Nemeton,
+  lecteurs anciens. Clé `.marsync` `tarifsEssence` (`{essence: {tarif, numero}}`, réglage du
+  terrain) ; base v16. La colonne `Cubage` du journal dit le tarif appliqué à chaque tige.
 
 ## 5 bis. Affouage (livré 2026-10-07)
 
 - ✅ Case **Affouage** sur le contexte + **volume maximal d'un lot** (m³, bois fort tige).
-  Exige un tarif de cubage (≠ `AUCUN`) : sans volume par tige, aucun lot ne se ferme.
+  Exige au moins une essence cubée (tarif ≠ `AUCUN`) : sans volume par tige, aucun lot ne se ferme.
+- ✅ **Estimation en stères** du volume maximal (2026-10-16) : champ stères à côté des m³,
+  liés dans les deux sens par `Contexte.steresParM3` (réglable, défaut 1,5). Seuls les m³ sont
+  la borne du lot. Clé `.marsync` `steresParM3`, ligne CSV `SteresParM3`.
 - ✅ Lots numérotés **à partir de 1** : le volume de chaque tige est cumulé dans le lot ouvert ;
   dès que le cumul est **≥ au maximum**, la tige qui l'atteint **ferme** son lot et la suivante
   ouvre le lot d'après. Un `−` juste après la tige qui a fermé un lot le rouvre.
@@ -170,13 +180,15 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 - **`−`** : enregistre une **annulation** (conservée au journal), décrémente le total.
 - **Bouton Hauteur / Qualité arbre** : annote la **dernière tige** ajoutée de la cellule
   (saisie hauteur en texte libre / sélection mono-choix de la qualité arbre).
-- **Export CSV** (`FormatCsv;5`) : feuille (totaux par essence × classe) **+** journal des
+- **Export CSV** (`FormatCsv;6`) : feuille (totaux par essence × classe) **+** journal des
   tiges (+ volumes cubés selon le tarif du contexte, + colonne `Lot`). Format 5 : houppier —
   en-tête `VolumeHouppierTotalM3`, `PartHouppier` (`essence=part|…`), `AffouageLotTotalM3`
   (avant `Journal`) ; colonne `AffouageLotM3` en fin de journal (vide hors affouage), 22
   colonnes. `VolumeHouppierM3` est rempli en Schaeffer via la part de houppier. À l'export, choix entre
   **journal complet** et **tiges à comptabiliser** (`Journal;NET` : chaque annulation disparaît
-  avec la tige qu'elle retire ; totaux identiques).
+  avec la tige qu'elle retire ; totaux identiques). Format 6 : `TarifsEssence`
+  (`essence=TARIF:numéro|…`) et `SteresParM3` après `AffouageLotTotalM3` ; `Tarif` /
+  `TarifNumero` restent le tarif par défaut.
 
 ## 8. Synchro multi-opérateurs (v2, partiel)
 
@@ -221,6 +233,7 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   JitPack écartée) ; `PttController` est prêt à le recevoir.
 - 🔜 **Recette terrain de l'affouage** (annonces, bascule de lot, bilan) et réponse de
   nemetonshiny au brief `CSV format 4` (lecture du `lot`, règle « clé absente »), puis
-  signaler le **format 5** (houppier, parts par essence).
+  signaler le **format 5** (houppier, parts par essence) et le **format 6** (tarif par essence,
+  stères).
 - 🔜 **Recette terrain de la dictée** (7 cas, bruit réel, gants) — cf.
   `2026-08-21-tranche-dictee-vocale.md`.

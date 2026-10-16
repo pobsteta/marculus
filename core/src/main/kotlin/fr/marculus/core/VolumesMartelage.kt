@@ -47,13 +47,14 @@ object VolumesMartelage {
         val nbTigesNonCubees: Int,
     )
 
-    /** Cubage d'une tige sur **sa propre saisie** (classe, essence, hauteur), avec le tarif du contexte. */
+    /** Cubage d'une tige sur **sa propre saisie** (classe, essence, hauteur), avec le tarif de son essence. */
     fun cubage(contexte: Contexte, tige: Tige): CubageTige {
         val g = Cubage.surfaceTerriereUnitaire(contexte, tige.classe)
-        val methode = when (contexte.tarif) {
+        val t = Cubage.tarifDe(contexte, tige.essence)
+        val methode = when (t.tarif) {
             TarifCubage.AUCUN -> Methode.AUCUN
             TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT ->
-                Methode.schaeffer(contexte.tarif, contexte.tarifNumero)
+                Methode.schaeffer(t.tarif, t.numero)
             TarifCubage.EMERGE -> when {
                 HauteurParser.parse(tige.hauteurTexte ?: "").hauteurTotale == null -> Methode.NON_CUBABLE
                 Cubage.estCouverteEmerge(tige.essence) -> Methode.EMERGE

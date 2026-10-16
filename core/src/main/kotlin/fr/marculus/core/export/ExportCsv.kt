@@ -1,6 +1,7 @@
 package fr.marculus.core.export
 
 import fr.marculus.core.AffouageLots
+import fr.marculus.core.Cubage
 import fr.marculus.core.JournalNet
 import fr.marculus.core.TotauxMartelage
 import fr.marculus.core.VolumesMartelage
@@ -32,12 +33,17 @@ import java.util.Locale
  * `VolumeHouppierTotalM3`, `PartHouppier` (`essence=part`, séparées par `|`, parts en fraction) et
  * `AffouageLotTotalM3` (net). En fin de journal, `AffouageLotM3` ([AffouageLots.volumes], unitaire,
  * vide hors affouage). En Schaeffer, `VolumeHouppierM3` vient de la part de houppier de l'essence.
+ *
+ * **Format 6** (`FormatCsv;6`) : tarif par essence — en en-tête, après `AffouageLotTotalM3` :
+ * `TarifsEssence` (`essence=TARIF:numéro`, séparées par `|`) et `SteresParM3`. `Tarif` et
+ * `TarifNumero` restent le tarif par défaut (essences sans tarif propre) ; la colonne `Cubage`
+ * du journal donne, tige par tige, le tarif réellement appliqué.
  */
 object ExportCsv {
     private const val SEP = ";"
 
     /** Version du format, lue par Nemeton : son absence désigne le format 1, non réimportable. */
-    const val FORMAT = 5
+    const val FORMAT = 6
 
     fun contexteCsv(contexte: Contexte, journal: List<Tige>, net: Boolean = false): String {
         val sb = StringBuilder()
@@ -67,6 +73,9 @@ object ExportCsv {
         sb.appendLine("PartHouppier${SEP}${champ(partsHouppier(contexte))}")
         val bilanLots = if (contexte.affouage) AffouageLots.bilan(contexte, journal) else emptyList()
         sb.appendLine("AffouageLotTotalM3${SEP}${decimal(bilanLots.sumOf { it.volumeM3 }, DECIMALES_TOTAL)}")
+        // Format 6 : tarif par essence et conversion en stères.
+        sb.appendLine("TarifsEssence${SEP}${champ(tarifsEssence(contexte))}")
+        sb.appendLine("SteresParM3${SEP}${contexte.steresParM3}")
         sb.appendLine("Journal${SEP}${if (net) "NET" else "COMPLET"}")
         contexte.commentaire?.let { sb.appendLine("Commentaire${SEP}${champ(it)}") }
         sb.appendLine()
@@ -130,6 +139,11 @@ object ExportCsv {
         }
         return sb.toString()
     }
+
+    /** Tarif de chaque essence, dans l'ordre du contexte : `Chêne=SCHAEFFER_RAPIDE:9|Hêtre=EMERGE:0`. */
+    private fun tarifsEssence(contexte: Contexte): String =
+        (contexte.essencesNoms + contexte.tarifsEssence.keys.sorted()).distinct()
+            .joinToString("|") { e -> Cubage.tarifDe(contexte, e).let { "$e=${it.tarif.name}:${it.numero}" } }
 
     /** Parts de houppier non nulles, dans l'ordre des essences du contexte : `Chêne=0.3|Hêtre=0.25`. */
     private fun partsHouppier(contexte: Contexte): String {

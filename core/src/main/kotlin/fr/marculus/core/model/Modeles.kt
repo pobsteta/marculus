@@ -6,6 +6,9 @@ enum class ModeMesure { DIAMETRE, CIRCONFERENCE }
 /** Tarif de cubage à une entrée appliqué au contexte (volume bois fort tige). */
 enum class TarifCubage { AUCUN, SCHAEFFER_RAPIDE, SCHAEFFER_LENT, EMERGE }
 
+/** Tarif de cubage d'une essence : type et numéro (1..20, Schaeffer seulement). */
+data class TarifEssence(val tarif: TarifCubage, val numero: Int = 0)
+
 /** Un `+` ajoute une tige ; un `−` enregistre une annulation (jamais d'effacement). */
 enum class ActionTige { PLUS, ANNULATION }
 
@@ -67,9 +70,12 @@ data class Contexte(
     val exporte: Boolean = false,
     /** Chemin du GeoPackage (parcelles + ortho) rattaché à ce contexte, ou null. */
     val cheminGpkg: String? = null,
-    /** Tarif de cubage choisi pour estimer les volumes (ou AUCUN). */
+    /**
+     * Tarif **par défaut** (ou AUCUN) : celui des essences absentes de [tarifsEssence] — contextes
+     * d'avant le tarif par essence, plans Nemeton, lecteurs anciens du `.marsync` et du CSV.
+     */
     val tarif: TarifCubage = TarifCubage.AUCUN,
-    /** Numéro de tarif (1..20) : fixe M = 0,8 + 0,1·N (volume de l'arbre de 45 cm). */
+    /** Numéro du tarif par défaut (1..20) : fixe M = 0,8 + 0,1·N (volume de l'arbre de 45 cm). */
     val tarifNumero: Int = 0,
     /** Coefficient de forme (repli EMERGE pour essence non couverte) : V = f·π/4·D²·H. */
     val coefficientForme: Double = 0.5,
@@ -91,8 +97,17 @@ data class Contexte(
      * Absente ou 0 : pas de houppier. Ignorée en EMERGE, qui calcule le houppier lui-même.
      */
     val partHouppier: Map<String, Double> = emptyMap(),
+    /** Tarif propre à chaque essence ; une essence absente prend [tarif] / [tarifNumero]. */
+    val tarifsEssence: Map<String, TarifEssence> = emptyMap(),
+    /** Conversion d'affichage du volume maximal d'un lot : stères pour 1 m³. */
+    val steresParM3: Double = STERES_PAR_M3_DEFAUT,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
+
+    companion object {
+        /** Bûches de 1 m : environ 1,5 stère pour 1 m³ de bois plein. */
+        const val STERES_PAR_M3_DEFAUT = 1.5
+    }
 }
 
 /**

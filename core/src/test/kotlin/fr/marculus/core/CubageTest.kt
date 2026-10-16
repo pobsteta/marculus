@@ -4,6 +4,7 @@ import fr.marculus.core.model.AxeClasses
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.TarifCubage
+import fr.marculus.core.model.TarifEssence
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -121,5 +122,38 @@ class CubageTest {
     fun `sans tarif la part de houppier ne sert pas`() {
         val ctx = contexte(TarifCubage.AUCUN).copy(partHouppier = mapOf("Chêne" to 0.3))
         assertEquals(0.0, Cubage.volumesUnitaire(ctx, "Chêne", 40, null).total)
+    }
+
+    @Test
+    fun `tarif par essence - chaque essence est cubee avec le sien`() {
+        val ctx = contexte(TarifCubage.SCHAEFFER_RAPIDE, numero = 8).copy(
+            tarifsEssence = mapOf(
+                "Hêtre" to TarifEssence(TarifCubage.SCHAEFFER_LENT, 11),
+                "Charme" to TarifEssence(TarifCubage.AUCUN),
+            ),
+        )
+        // Chêne : absent de la table, prend le tarif par défaut du contexte.
+        assertEquals(Cubage.volume(TarifCubage.SCHAEFFER_RAPIDE, 8, 42.5), Cubage.volumeUnitaireTige(ctx, "Chêne", 40, null), 1e-12)
+        assertEquals(Cubage.volume(TarifCubage.SCHAEFFER_LENT, 11, 42.5), Cubage.volumeUnitaireTige(ctx, "Hêtre", 40, null), 1e-12)
+        assertEquals(0.0, Cubage.volumeUnitaireTige(ctx, "Charme", 40, null))
+        assertEquals(TarifEssence(TarifCubage.SCHAEFFER_RAPIDE, 8), Cubage.tarifDe(ctx, "Chêne"))
+    }
+
+    @Test
+    fun `tarif par essence - aTarif aHouppier et aEmerge regardent toutes les essences`() {
+        val aucun = contexte(TarifCubage.AUCUN)
+        assertTrue(!Cubage.aTarif(aucun))
+        val unEmerge = aucun.copy(tarifsEssence = mapOf("Sapin" to TarifEssence(TarifCubage.EMERGE)))
+        assertTrue(Cubage.aTarif(unEmerge))
+        assertTrue(Cubage.aEmerge(unEmerge))
+        assertTrue(Cubage.aHouppier(unEmerge))
+        val schaeffer = aucun.copy(
+            tarifsEssence = mapOf("Chêne" to TarifEssence(TarifCubage.SCHAEFFER_RAPIDE, 9)),
+            partHouppier = mapOf("Chêne" to 0.25, "Hêtre" to 0.2), // Hêtre sans tarif : sa part ne compte pas
+        )
+        assertTrue(Cubage.aHouppier(schaeffer))
+        assertTrue(Cubage.aHouppier(schaeffer, "Chêne"))
+        assertTrue(!Cubage.aHouppier(schaeffer, "Hêtre"))
+        assertTrue(!Cubage.aEmerge(schaeffer))
     }
 }

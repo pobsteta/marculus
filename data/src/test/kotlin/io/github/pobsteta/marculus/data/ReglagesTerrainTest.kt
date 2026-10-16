@@ -1,5 +1,7 @@
 package io.github.pobsteta.marculus.data
 
+import fr.marculus.core.model.TarifCubage
+import fr.marculus.core.model.TarifEssence
 import io.github.pobsteta.marculus.data.db.ContexteEntity
 import io.github.pobsteta.marculus.data.db.TigeEntity
 import kotlin.test.Test
@@ -75,5 +77,23 @@ class ReglagesTerrainTest {
         assertEquals(3, ReglagesTerrain.completer(tige(null, 2), tige(3), emptySet()).lot)
         assertEquals(null, ReglagesTerrain.completer(tige(null, 2), tige(3), setOf("lot")).lot)
         assertEquals(null, ReglagesTerrain.completer(tige(null, 2), null, emptySet()).lot)
+    }
+
+    @Test
+    fun `tarif par essence et steres - absents du fichier, les valeurs locales restent`() {
+        val avecTarifs = local.copy(tarifsEssence = encodeTarifsEssence(mapOf("Hêtre" to TarifEssence(TarifCubage.SCHAEFFER_LENT, 11))), steresParM3 = 1.4)
+        val fusion = ReglagesTerrain.completer(contexte(nom = "P12 bis", modifie = 2), avecTarifs, setOf("id", "nom", "modifie"))
+        assertEquals(avecTarifs.tarifsEssence, fusion.tarifsEssence)
+        assertEquals(1.4, fusion.steresParM3)
+    }
+
+    @Test
+    fun `tarifs par essence - encodage aller-retour`() {
+        val tarifs = mapOf(
+            "Chêne" to TarifEssence(TarifCubage.SCHAEFFER_RAPIDE, 9),
+            "Sapin" to TarifEssence(TarifCubage.EMERGE),
+        )
+        assertEquals(tarifs, decodeTarifsEssence(encodeTarifsEssence(tarifs)))
+        assertEquals(emptyMap(), decodeTarifsEssence(""))
     }
 }

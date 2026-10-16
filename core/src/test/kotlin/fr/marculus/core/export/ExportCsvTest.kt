@@ -10,6 +10,7 @@ import fr.marculus.core.model.ModeMesure
 import fr.marculus.core.model.Position
 import fr.marculus.core.model.QualiteFix
 import fr.marculus.core.model.TarifCubage
+import fr.marculus.core.model.TarifEssence
 import fr.marculus.core.model.Tige
 import java.util.Locale
 import kotlin.test.Test
@@ -109,7 +110,7 @@ class ExportCsvTest {
         assertEquals(
             listOf(
                 "Contexte;Parcelle 12",
-                "FormatCsv;5",
+                "FormatCsv;6",
                 "ContexteId;act_20260923155141_xyz123",
                 "Statut;REALISEE",
                 "DateMartelage;2027-10-15",
@@ -126,6 +127,22 @@ class ExportCsvTest {
             ),
             lignes.take(15),
         )
+    }
+
+    @Test
+    fun `format 6 - tarif par essence et steres par m3 en en-tete`() {
+        val ctx = contexte.copy(
+            tarif = TarifCubage.SCHAEFFER_RAPIDE, tarifNumero = 9,
+            tarifsEssence = mapOf("Hêtre" to TarifEssence(TarifCubage.SCHAEFFER_LENT, 11)),
+            steresParM3 = 1.4,
+        )
+        val lignes = ExportCsv.contexteCsv(ctx, emptyList()).split("\n")
+        val noms = ctx.essencesNoms.joinToString("|") { e ->
+            if (e == "Hêtre") "Hêtre=SCHAEFFER_LENT:11" else "$e=SCHAEFFER_RAPIDE:9"
+        }
+        assertTrue("TarifsEssence;$noms" in lignes, lignes.joinToString("\n"))
+        assertTrue("SteresParM3;1.4" in lignes)
+        assertTrue(lignes.indexOf("SteresParM3;1.4") < lignes.indexOf("Journal;COMPLET"))
     }
 
     @Test

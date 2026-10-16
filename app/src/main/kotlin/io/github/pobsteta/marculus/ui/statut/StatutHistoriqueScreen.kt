@@ -66,7 +66,6 @@ import fr.marculus.core.VolumesMartelage
 import fr.marculus.core.export.ExportBilanLots
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.CategorieBois
-import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.SeuilsCategories
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
@@ -245,7 +244,7 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
                 )
             }
         }
-        if (contexte.tarif != TarifCubage.AUCUN && total > 0) {
+        if (Cubage.aTarif(contexte) && total > 0) {
             item {
                 Column {
                     Text(
@@ -417,7 +416,7 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
         parcelles.firstOrNull { AttributionSpatiale.contient(it.anneaux, t.position!!) }
 
     fun essencesAvecVolume(tiges: List<Tige>): List<StatEssence> {
-        val avecTarif = contexte.tarif != TarifCubage.AUCUN
+        val avecTarif = Cubage.aTarif(contexte)
         val noms = (contexte.essencesNoms + tiges.map { it.essence }).distinct()
         return noms.mapNotNull { nom ->
             val lot = tiges.filter { it.essence == nom }
@@ -440,7 +439,7 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
     val locale = LocalConfiguration.current.locales[0]
     val rattachees = geo.map { it to parcelleDe(it) }
     fun total(l: List<Pair<Tige, ParcelleGpkg?>>) = l.sumOf { it.first.quantite }
-    val tarifActif = contexte.tarif != TarifCubage.AUCUN
+    val tarifActif = Cubage.aTarif(contexte)
     // Houppier : modèle EMERGE, ou part de houppier en Schaeffer.
     val avecHouppier = Cubage.aHouppier(contexte)
     // (tige, houppier, total) sommés sur un lot de tiges.
@@ -569,7 +568,7 @@ private fun csvFoncier(
     fun parcelleDe(t: Tige) = parcelles.firstOrNull { p -> t.position?.let { AttributionSpatiale.contient(p.anneaux, it) } == true }
     fun champ(s: String) = s.replace(';', ' ').replace('\n', ' ')
     val sb = StringBuilder()
-    val tarif = contexte.tarif != TarifCubage.AUCUN
+    val tarif = Cubage.aTarif(contexte)
     // Houppier : modèle EMERGE, ou part de houppier en Schaeffer.
     val avecHouppier = Cubage.aHouppier(contexte)
     sb.append("Proprietaire;Foret;Commune;Parcelle;Surface_ha;Essence;Classe;Nombre;Tiges_ha;G_m2;G_ha;Volume_m3;Volume_ha;Houppier_m3;Total_m3\n")
@@ -813,7 +812,7 @@ private fun OngletHistorique(contexte: Contexte, journal: List<Tige>, onEdit: (T
                             tige.hauteurTexte?.takeIf { it.isNotBlank() }?.let { add("h $it") }
                             tige.qualiteArbre?.let { add(it) }
                             tige.parcelle?.takeIf { it.isNotBlank() }?.let { add("⌖ $it") }
-                            if (contexte.tarif != TarifCubage.AUCUN) {
+                            if (Cubage.aTarif(contexte)) {
                                 val v = Cubage.volumeUnitaireTige(contexte, tige.essence, tige.classe, tige.hauteurTexte) * tige.quantite
                                 if (v > 0.0) add(String.format(locale, "%.3f m³", v))
                             }

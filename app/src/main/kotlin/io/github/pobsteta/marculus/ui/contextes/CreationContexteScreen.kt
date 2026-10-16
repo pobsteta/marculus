@@ -54,6 +54,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import fr.marculus.core.model.TarifEssence
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.PaddingValues
 import fr.marculus.core.Cubage
 import fr.marculus.core.Referentiels
 import fr.marculus.core.model.AxeClasses
@@ -91,15 +100,21 @@ fun CreationContexteScreen(
     var max by remember { mutableStateOf(contexteExistant?.axe?.max?.toString() ?: "90") }
     var pas by remember { mutableStateOf(contexteExistant?.axe?.pas?.toString() ?: "5") }
     var increment by remember { mutableStateOf(contexteExistant?.increment?.toString() ?: "1") }
-    var tarif by remember { mutableStateOf(contexteExistant?.tarif ?: TarifCubage.AUCUN) }
-    var tarifNumero by remember {
-        mutableStateOf(contexteExistant?.tarifNumero?.takeIf { it > 0 }?.toString() ?: "")
-    }
     var coefForme by remember { mutableStateOf((contexteExistant?.coefficientForme ?: 0.5).toString()) }
     var dateMartelage by remember { mutableStateOf(contexteExistant?.dateMartelage) }
     var affouage by remember { mutableStateOf(contexteExistant?.affouage ?: false) }
     var volumeMaxLot by remember {
-        mutableStateOf(contexteExistant?.volumeMaxLotM3?.takeIf { it > 0.0 }?.toString() ?: "")
+        mutableStateOf(contexteExistant?.volumeMaxLotM3?.takeIf { it > 0.0 }?.let { formatDecimal(it, 3) } ?: "")
+    }
+    var steresParM3 by remember {
+        mutableStateOf(formatDecimal(contexteExistant?.steresParM3 ?: Contexte.STERES_PAR_M3_DEFAUT))
+    }
+    fun coefSteres(): Double? = steresParM3.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 && it.isFinite() }
+    // Estimation en stères du volume maximal : tenue à jour avec les m³, dans les deux sens.
+    var volumeMaxLotSteres by remember {
+        mutableStateOf(
+            volumeMaxLot.toDoubleOrNull()?.let { m3 -> coefSteres()?.let { formatDecimal(m3 * it) } } ?: "",
+        )
     }
     // Part de houppier (Schaeffer) saisie en %, par essence ; vide = 0 %.
     val partsHouppier = remember {
@@ -126,6 +141,20 @@ fun CreationContexteScreen(
             contexteExistant?.essences?.forEach { put(it.nom, it.couleurFondArgb to it.couleurTexteArgb) }
         }
     }
+    // Tarif par essence (type + numéro saisi) : celui de l'essence, sinon le tarif par défaut du contexte.
+    val tarifs = remember {
+        mutableStateMapOf<String, TarifCubage>().apply {
+            essencesDisponibles.forEach { e -> put(e, contexteExistant?.let { Cubage.tarifDe(it, e).tarif } ?: TarifCubage.AUCUN) }
+        }
+    }
+    val numerosTarif = remember {
+        mutableStateMapOf<String, String>().apply {
+            essencesDisponibles.forEach { e ->
+                contexteExistant?.let { Cubage.tarifDe(it, e).numero }?.takeIf { it > 0 }?.let { put(e, it.toString()) }
+            }
+        }
+    }
+    fun tarifDe(e: String) = tarifs[e] ?: TarifCubage.AUCUN
     fun fond(e: String) = couleurs[e]?.first ?: Referentiels.couleurFondDefaut(essencesDisponibles.indexOf(e))
     fun texte(e: String) = couleurs[e]?.second ?: Referentiels.COULEUR_TEXTE_DEFAUT
 
@@ -150,6 +179,7 @@ fun CreationContexteScreen(
     val errAffouageTarif = stringResource(R.string.creation_erreur_affouage_tarif)
     val errAffouageVolume = stringResource(R.string.creation_erreur_affouage_volume)
     val errHouppier = stringResource(R.string.creation_erreur_houppier)
+    val errSteres = stringResource(R.string.creation_erreur_steres)
 
     Scaffold(
         topBar = {
@@ -237,41 +267,32 @@ fun CreationContexteScreen(
                     Icon(Icons.Filled.Info, contentDescription = stringResource(R.string.creation_cd_info_couleurs))
                 }
             }
+            Text(stringResource(R.string.creation_essences_aide), style = MaterialTheme.typography.bodySmall)
+            val paysageEssences = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
             essencesDisponibles.forEach { essence ->
                 LigneEssence(
                     nom = essence,
                     coche = essence in selection,
                     fond = Color(fond(essence)),
                     texte = Color(texte(essence)),
+                    tarif = tarifDe(essence),
+                    numero = numerosTarif[essence] ?: "",
+                    part = partsHouppier[essence] ?: "",
+                    surUneLigne = paysageEssences,
                     onToggle = { if (essence in selection) selection.remove(essence) else selection.add(essence) },
                     onPickFond = { picker = essence to true },
                     onPickTexte = { picker = essence to false },
+                    onTarif = { tarifs[essence] = it },
+                    onNumero = { saisie -> numerosTarif[essence] = saisie.filter { it.isDigit() }.take(2) },
+                    onPart = { saisie -> partsHouppier[essence] = saisie.filter { it.isDigit() || it == '.' || it == ',' }.take(5) },
                 )
             }
-            OutlinedButton(onClick = { ajoutOuvert = true }, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.creation_btn_ajouter_essence))
+            val tarifsCoches = selection.map { tarifDe(it) }.toSet()
+            if (TarifCubage.SCHAEFFER_RAPIDE in tarifsCoches || TarifCubage.SCHAEFFER_LENT in tarifsCoches) {
+                Text(stringResource(R.string.creation_houppier_aide), style = MaterialTheme.typography.bodySmall)
             }
-
-            HorizontalDivider()
-            Text(stringResource(R.string.creation_tarif_section), style = MaterialTheme.typography.titleSmall)
-            Text(stringResource(R.string.creation_tarif_aide), style = MaterialTheme.typography.bodySmall)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                FilterChip(selected = tarif == TarifCubage.AUCUN, onClick = { tarif = TarifCubage.AUCUN }, label = { Text(stringResource(R.string.creation_tarif_aucun)) })
-                FilterChip(selected = tarif == TarifCubage.SCHAEFFER_RAPIDE, onClick = { tarif = TarifCubage.SCHAEFFER_RAPIDE }, label = { Text(stringResource(R.string.creation_tarif_rapide)) })
-                FilterChip(selected = tarif == TarifCubage.SCHAEFFER_LENT, onClick = { tarif = TarifCubage.SCHAEFFER_LENT }, label = { Text(stringResource(R.string.creation_tarif_lent)) })
-                FilterChip(selected = tarif == TarifCubage.EMERGE, onClick = { tarif = TarifCubage.EMERGE }, label = { Text(stringResource(R.string.creation_tarif_emerge)) })
-            }
-            if (tarif == TarifCubage.SCHAEFFER_RAPIDE || tarif == TarifCubage.SCHAEFFER_LENT) {
-                OutlinedTextField(
-                    value = tarifNumero,
-                    onValueChange = { saisie -> tarifNumero = saisie.filter { it.isDigit() }.take(2) },
-                    label = { Text(stringResource(R.string.creation_tarif_numero)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-            if (tarif == TarifCubage.EMERGE) {
+            if (TarifCubage.EMERGE in tarifsCoches) {
+                Text(stringResource(R.string.creation_houppier_emerge), style = MaterialTheme.typography.bodySmall)
                 OutlinedTextField(
                     value = coefForme,
                     onValueChange = { saisie -> coefForme = saisie.filter { it.isDigit() || it == '.' || it == ',' } },
@@ -282,27 +303,8 @@ fun CreationContexteScreen(
                 )
                 Text(stringResource(R.string.creation_coef_forme_aide), style = MaterialTheme.typography.bodySmall)
             }
-            // Part de houppier : utile aux seuls tarifs sans houppier (Schaeffer), grisée en EMERGE.
-            if (tarif != TarifCubage.AUCUN) {
-                val partsActives = tarif != TarifCubage.EMERGE
-                Text(stringResource(R.string.creation_houppier_titre), style = MaterialTheme.typography.titleSmall)
-                Text(
-                    stringResource(if (partsActives) R.string.creation_houppier_aide else R.string.creation_houppier_emerge),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-                essencesDisponibles.filter { it in selection }.forEach { essence ->
-                    OutlinedTextField(
-                        value = partsHouppier[essence] ?: "",
-                        onValueChange = { saisie -> partsHouppier[essence] = saisie.filter { it.isDigit() || it == '.' || it == ',' }.take(5) },
-                        label = { Text(essence) },
-                        placeholder = { Text("0") },
-                        suffix = { Text("%") },
-                        enabled = partsActives,
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
+            OutlinedButton(onClick = { ajoutOuvert = true }, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.creation_btn_ajouter_essence))
             }
 
             HorizontalDivider()
@@ -311,14 +313,41 @@ fun CreationContexteScreen(
                 Text(stringResource(R.string.creation_affouage), style = MaterialTheme.typography.titleSmall)
             }
             if (affouage) {
-                OutlinedTextField(
-                    value = volumeMaxLot,
-                    onValueChange = { saisie -> volumeMaxLot = saisie.filter { it.isDigit() || it == '.' || it == ',' } },
-                    label = { Text(stringResource(R.string.creation_affouage_volume_max)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    modifier = Modifier.fillMaxWidth(),
-                )
+                fun decimal(saisie: String) = saisie.filter { it.isDigit() || it == '.' || it == ',' }
+                fun nombre(saisie: String) = saisie.replace(',', '.').toDoubleOrNull()
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ChampDecimal(
+                        stringResource(R.string.creation_affouage_m3), volumeMaxLot,
+                        { saisie ->
+                            volumeMaxLot = decimal(saisie)
+                            val m3 = nombre(volumeMaxLot)
+                            val coef = coefSteres()
+                            volumeMaxLotSteres = if (m3 != null && coef != null) formatDecimal(m3 * coef) else ""
+                        },
+                        Modifier.weight(1f),
+                    )
+                    ChampDecimal(
+                        stringResource(R.string.creation_affouage_steres), volumeMaxLotSteres,
+                        { saisie ->
+                            volumeMaxLotSteres = decimal(saisie)
+                            val st = nombre(volumeMaxLotSteres)
+                            val coef = coefSteres()
+                            if (coef != null) volumeMaxLot = st?.let { formatDecimal(it / coef, 3) } ?: ""
+                        },
+                        Modifier.weight(1f),
+                    )
+                    ChampDecimal(
+                        stringResource(R.string.creation_affouage_coef_steres), steresParM3,
+                        { saisie ->
+                            steresParM3 = decimal(saisie)
+                            val m3 = nombre(volumeMaxLot)
+                            val coef = coefSteres()
+                            if (m3 != null && coef != null) volumeMaxLotSteres = formatDecimal(m3 * coef)
+                        },
+                        Modifier.weight(0.8f),
+                    )
+                }
+                Text(stringResource(R.string.creation_affouage_steres_aide), style = MaterialTheme.typography.bodySmall)
                 Text(stringResource(R.string.creation_affouage_aide), style = MaterialTheme.typography.bodySmall)
             }
 
@@ -353,14 +382,15 @@ fun CreationContexteScreen(
                         val pa = pas.toIntOrNull()
                         val inc = increment.toIntOrNull()
                         val vMaxLot = volumeMaxLot.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 }
-                        // Essence → fraction ; null si une saisie est hors de [0 ; 95 %].
-                        val parts = partsHouppier
+                        // Essence → fraction (null si illisible). Seules les essences en Schaeffer s'en servent.
+                        val partsSaisies = partsHouppier
                             .filterKeys { it in selection }
                             .filterValues { it.isNotBlank() }
                             .mapValues { (_, v) -> v.replace(',', '.').toDoubleOrNull()?.div(100.0) }
-                            .takeIf { m -> m.values.all { it != null && it in 0.0..Cubage.PART_HOUPPIER_MAX } }
-                            ?.mapValues { it.value!! }
-                            ?.filterValues { it > 0.0 }
+                        fun partValide(p: Double?) = p != null && p in 0.0..Cubage.PART_HOUPPIER_MAX
+                        val schaeffer = setOf(TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT)
+                        val partInvalide = partsSaisies.any { (e, p) -> tarifDe(e) in schaeffer && !partValide(p) }
+                        val essencesCubees = selection.filter { tarifDe(it) != TarifCubage.AUCUN }
                         erreur = when {
                             nom.isBlank() -> errNom
                             mi == null || ma == null || pa == null -> errNombres
@@ -368,36 +398,46 @@ fun CreationContexteScreen(
                             mi > ma -> errMinMax
                             inc == null || inc <= 0 -> errInc
                             selection.isEmpty() -> errEssence
-                            affouage && tarif == TarifCubage.AUCUN -> errAffouageTarif
+                            affouage && essencesCubees.isEmpty() -> errAffouageTarif
                             affouage && vMaxLot == null -> errAffouageVolume
-                            (tarif == TarifCubage.SCHAEFFER_RAPIDE || tarif == TarifCubage.SCHAEFFER_LENT) && parts == null -> errHouppier
+                            affouage && coefSteres() == null -> errSteres
+                            partInvalide -> errHouppier
                             else -> {
                                 val essences = essencesDisponibles
                                     .filter { it in selection }
                                     .map { EssenceColonne(it, fond(it), texte(it)) }
                                 val commentaireFinal = commentaire.trim().ifBlank { null }
-                                val numero = tarifNumero.toIntOrNull() ?: 0
+                                val tarifsFinaux = essences.associate { e ->
+                                    e.nom to TarifEssence(tarifDe(e.nom), numerosTarif[e.nom]?.toIntOrNull() ?: 0)
+                                }
+                                // Tarif par défaut (lecteurs anciens, essences ajoutées par Nemeton) : la première essence cubée.
+                                val defaut = essencesCubees.firstOrNull()?.let { tarifsFinaux[it] } ?: TarifEssence(TarifCubage.AUCUN)
+                                val steres = coefSteres() ?: contexteExistant?.steresParM3 ?: Contexte.STERES_PAR_M3_DEFAUT
                                 val coef = coefForme.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 } ?: 0.5
                                 // Décoché, le volume saisi est conservé : recocher retrouve la borne.
                                 val volumeLot = vMaxLot ?: contexteExistant?.volumeMaxLotM3 ?: 0.0
-                                // Parts invalides ou grisées (EMERGE) : on garde celles déjà enregistrées.
-                                val partsFinales = parts ?: contexteExistant?.partHouppier ?: emptyMap()
+                                // Parts lisibles et > 0 ; celles d'une essence hors Schaeffer sont gardées pour un retour au Schaeffer.
+                                val partsFinales = partsSaisies
+                                    .filterValues { partValide(it) && it!! > 0.0 }
+                                    .mapValues { it.value!! }
                                 scope.launch {
                                     if (edition) {
                                         repository.modifierContexte(
                                             contexteExistant!!.id, nom.trim(), mode,
-                                            AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg, tarif, numero, coef, dateMartelage,
-                                            affouage, volumeLot, partsFinales,
+                                            AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg,
+                                            defaut.tarif, defaut.numero, coef, dateMartelage,
+                                            affouage, volumeLot, partsFinales, tarifsFinaux, steres,
                                         )
                                         onEnregistre(contexteExistant.id)
                                     } else {
                                         val id = repository.creerContexte(
                                             nom.trim(), mode, AxeClasses(mi, ma, pa),
                                             essences, commentaireFinal, inc,
-                                            cheminGpkg = cheminGpkg, tarif = tarif, tarifNumero = numero,
+                                            cheminGpkg = cheminGpkg, tarif = defaut.tarif, tarifNumero = defaut.numero,
                                             coefficientForme = coef, dateMartelage = dateMartelage,
                                             affouage = affouage, volumeMaxLotM3 = volumeLot,
-                                            partHouppier = partsFinales,
+                                            partHouppier = partsFinales, tarifsEssence = tarifsFinaux,
+                                            steresParM3 = steres,
                                         )
                                         onEnregistre(id)
                                     }
@@ -426,6 +466,11 @@ fun CreationContexteScreen(
             onAnnuler = { ajoutOuvert = false },
             onAjouter = { nouvelle ->
                 if (nouvelle.isNotBlank() && nouvelle !in essencesDisponibles) {
+                    // La nouvelle essence reprend le tarif de la première essence cubée, à ajuster.
+                    selection.firstOrNull { tarifDe(it) != TarifCubage.AUCUN }?.let { modele ->
+                        tarifs[nouvelle] = tarifDe(modele)
+                        numerosTarif[modele]?.let { numerosTarif[nouvelle] = it }
+                    }
                     essencesDisponibles.add(nouvelle)
                     selection.add(nouvelle)
                 }
@@ -518,27 +563,136 @@ private fun ChampNombre(label: String, valeur: String, onChange: (String) -> Uni
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ChampDecimal(label: String, valeur: String, onChange: (String) -> Unit, modifier: Modifier = Modifier) {
+    OutlinedTextField(
+        value = valeur,
+        onValueChange = onChange,
+        label = { Text(label, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        modifier = modifier,
+    )
+}
+
+/**
+ * Une essence : case, nom, réglages de cubage (tarif, numéro Schaeffer, part de houppier) et
+ * couleurs. Réglages sur la même ligne en paysage ; en portrait, sous le nom, faute de largeur.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun LigneEssence(
     nom: String,
     coche: Boolean,
     fond: Color,
     texte: Color,
+    tarif: TarifCubage,
+    numero: String,
+    part: String,
+    surUneLigne: Boolean,
     onToggle: () -> Unit,
     onPickFond: () -> Unit,
     onPickTexte: () -> Unit,
+    onTarif: (TarifCubage) -> Unit,
+    onNumero: (String) -> Unit,
+    onPart: (String) -> Unit,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Checkbox(checked = coche, onCheckedChange = { onToggle() })
-        Text(nom, modifier = Modifier.weight(1f))
-        Echantillon(couleur = fond, onClick = onPickFond)
-        EchantillonTexte(fond = fond, texte = texte, onClick = onPickTexte)
+    @Composable
+    fun Reglages() {
+        SelecteurTarif(nom, tarif, onTarif)
+        if (tarif == TarifCubage.SCHAEFFER_RAPIDE || tarif == TarifCubage.SCHAEFFER_LENT) {
+            OutlinedTextField(
+                value = numero,
+                onValueChange = onNumero,
+                label = { Text(stringResource(R.string.creation_tarif_numero_court), maxLines = 1) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.width(68.dp),
+            )
+        }
+        // Part de houppier : utile aux seuls tarifs sans houppier (Schaeffer), grisée en EMERGE.
+        if (tarif != TarifCubage.AUCUN) {
+            OutlinedTextField(
+                value = part,
+                onValueChange = onPart,
+                label = { Text(stringResource(R.string.creation_houppier_court), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                placeholder = { Text("0") },
+                suffix = { Text("%") },
+                enabled = tarif != TarifCubage.EMERGE,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                modifier = Modifier.width(100.dp),
+            )
+        }
+    }
+    Column(Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Checkbox(checked = coche, onCheckedChange = { onToggle() })
+            Text(nom, modifier = Modifier.weight(1f))
+            if (coche && surUneLigne) Reglages()
+            Echantillon(couleur = fond, onClick = onPickFond)
+            EchantillonTexte(fond = fond, texte = texte, onClick = onPickTexte)
+        }
+        if (coche && !surUneLigne) {
+            FlowRow(
+                modifier = Modifier.padding(start = 40.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) { Reglages() }
+        }
     }
 }
+
+/** Menu déroulant du tarif d'une essence. */
+@Composable
+private fun SelecteurTarif(essence: String, tarif: TarifCubage, onTarif: (TarifCubage) -> Unit) {
+    var ouvert by remember { mutableStateOf(false) }
+    val description = stringResource(R.string.creation_cd_tarif_essence, essence)
+    Box {
+        OutlinedButton(
+            onClick = { ouvert = true },
+            contentPadding = PaddingValues(start = 12.dp, end = 4.dp),
+            modifier = Modifier.semantics { contentDescription = description },
+        ) {
+            Text(tarif.libelleCourt(), maxLines = 1)
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+        }
+        DropdownMenu(expanded = ouvert, onDismissRequest = { ouvert = false }) {
+            TarifCubage.entries.forEach { t ->
+                DropdownMenuItem(
+                    text = { Text(t.libelleLong()) },
+                    onClick = { onTarif(t); ouvert = false },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TarifCubage.libelleCourt(): String = stringResource(
+    when (this) {
+        TarifCubage.AUCUN -> R.string.creation_tarif_court_aucun
+        TarifCubage.SCHAEFFER_RAPIDE -> R.string.creation_tarif_court_rapide
+        TarifCubage.SCHAEFFER_LENT -> R.string.creation_tarif_court_lent
+        TarifCubage.EMERGE -> R.string.creation_tarif_court_emerge
+    },
+)
+
+@Composable
+private fun TarifCubage.libelleLong(): String = stringResource(
+    when (this) {
+        TarifCubage.AUCUN -> R.string.creation_tarif_aucun
+        TarifCubage.SCHAEFFER_RAPIDE -> R.string.creation_tarif_rapide
+        TarifCubage.SCHAEFFER_LENT -> R.string.creation_tarif_lent
+        TarifCubage.EMERGE -> R.string.creation_tarif_emerge
+    },
+)
 
 @Composable
 private fun Echantillon(couleur: Color, onClick: () -> Unit) {
@@ -608,5 +762,8 @@ private fun AjoutEssenceDialog(onAnnuler: () -> Unit, onAjouter: (String) -> Uni
 }
 
 /** Pourcentage sans zéros inutiles : 30.0 → « 30 », 12.5 → « 12.5 ». */
-private fun formatPourcent(v: Double): String =
-    if (v == Math.rint(v)) v.toLong().toString() else "%.2f".format(java.util.Locale.ROOT, v).trimEnd('0').trimEnd('.')
+private fun formatPourcent(v: Double): String = formatDecimal(v)
+
+/** Nombre sans zéros inutiles, arrondi à [decimales] : 6.6667 → « 6.667 » (3), 10.0 → « 10 ». */
+private fun formatDecimal(v: Double, decimales: Int = 2): String =
+    "%.${decimales}f".format(java.util.Locale.ROOT, v).let { if ('.' in it) it.trimEnd('0').trimEnd('.') else it }

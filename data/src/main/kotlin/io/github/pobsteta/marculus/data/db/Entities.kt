@@ -42,6 +42,12 @@ data class ContexteEntity(
     /** Part de houppier par essence (tarifs Schaeffer) : encodé nom US part, séparés par RS. */
     @ColumnInfo(name = "partHouppierAffouage", defaultValue = "")
     val partHouppier: String = "",
+    /** Tarif par essence : encodé nom US TARIF US numéro, séparés par RS ; vide = tarif par défaut partout. */
+    @ColumnInfo(defaultValue = "")
+    val tarifsEssence: String = "",
+    /** Stères pour 1 m³ (affichage du volume maximal d'un lot). */
+    @ColumnInfo(defaultValue = "1.5")
+    val steresParM3: Double = 1.5,
 )
 
 @Entity(

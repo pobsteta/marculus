@@ -31,9 +31,17 @@ val MIGRATION_14_15 = object : Migration(14, 15) {
     }
 }
 
+/** v16 : tarif par essence et conversion m³ → stères. */
+val MIGRATION_15_16 = object : Migration(15, 16) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE contexte ADD COLUMN tarifsEssence TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE contexte ADD COLUMN steresParM3 REAL NOT NULL DEFAULT 1.5")
+    }
+}
+
 @Database(
     entities = [ContexteEntity::class, TigeEntity::class, CompteurConfigEntity::class],
-    version = 15,
+    version = 16,
     exportSchema = false,
 )
 abstract class MarculusDatabase : RoomDatabase() {
@@ -51,7 +59,7 @@ abstract class MarculusDatabase : RoomDatabase() {
             )
                 // Les données de terrain sont réelles depuis la v13 : chaque changement de schéma
                 // porte sa migration. Le repli destructif ne reste que pour les versions de dev.
-                .addMigrations(MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15)
+                .addMigrations(MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

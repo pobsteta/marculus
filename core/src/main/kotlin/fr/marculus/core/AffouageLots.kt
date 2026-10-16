@@ -31,7 +31,7 @@ object AffouageLots {
      */
     fun volumes(contexte: Contexte, tige: Tige): VolumesAffouage {
         val c = VolumesMartelage.cubage(contexte, tige)
-        val aHouppier = when (contexte.tarif) {
+        val aHouppier = when (Cubage.tarifDe(contexte, tige.essence).tarif) {
             TarifCubage.EMERGE -> c.cubage == VolumesMartelage.Methode.EMERGE
             TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT -> Cubage.partHouppier(contexte, tige.essence) > 0.0
             TarifCubage.AUCUN -> false
