@@ -253,23 +253,6 @@ fun CreationContexteScreen(
             }
 
             HorizontalDivider()
-            Text(stringResource(R.string.creation_section_fond_carto), style = MaterialTheme.typography.titleSmall)
-            Text(stringResource(R.string.creation_fond_carto_description), style = MaterialTheme.typography.bodySmall)
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { gpkgLauncher.launch(arrayOf("*/*")) }) {
-                    Text(stringResource(if (cheminGpkg == null) R.string.creation_btn_choisir_gpkg else R.string.creation_btn_remplacer_gpkg))
-                }
-                Text(
-                    cheminGpkg?.substringAfterLast('/') ?: stringResource(R.string.creation_gpkg_aucun_fichier),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.weight(1f),
-                )
-                if (cheminGpkg != null) {
-                    TextButton(onClick = { cheminGpkg = null }) { Text(stringResource(R.string.creation_btn_retirer_gpkg)) }
-                }
-            }
-
-            HorizontalDivider()
             Text(stringResource(R.string.creation_tarif_section), style = MaterialTheme.typography.titleSmall)
             Text(stringResource(R.string.creation_tarif_aide), style = MaterialTheme.typography.bodySmall)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -337,6 +320,23 @@ fun CreationContexteScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(stringResource(R.string.creation_affouage_aide), style = MaterialTheme.typography.bodySmall)
+            }
+
+            HorizontalDivider()
+            Text(stringResource(R.string.creation_section_fond_carto), style = MaterialTheme.typography.titleSmall)
+            Text(stringResource(R.string.creation_fond_carto_description), style = MaterialTheme.typography.bodySmall)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = { gpkgLauncher.launch(arrayOf("*/*")) }) {
+                    Text(stringResource(if (cheminGpkg == null) R.string.creation_btn_choisir_gpkg else R.string.creation_btn_remplacer_gpkg))
+                }
+                Text(
+                    cheminGpkg?.substringAfterLast('/') ?: stringResource(R.string.creation_gpkg_aucun_fichier),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.weight(1f),
+                )
+                if (cheminGpkg != null) {
+                    TextButton(onClick = { cheminGpkg = null }) { Text(stringResource(R.string.creation_btn_retirer_gpkg)) }
+                }
             }
 
             erreur?.let { Text(it, color = MaterialTheme.colorScheme.error) }
