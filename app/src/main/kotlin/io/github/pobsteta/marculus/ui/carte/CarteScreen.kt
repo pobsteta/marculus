@@ -82,13 +82,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import io.github.pobsteta.marculus.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import fr.marculus.core.AttributionSpatiale
+import fr.nemeton.terrain.geo.AttributionSpatiale
 import fr.marculus.core.Houppier
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
-import fr.marculus.core.model.Position
-import fr.marculus.core.model.QualiteFix
+import fr.nemeton.terrain.geo.Position
+import fr.nemeton.terrain.gnss.QualiteFix
 import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.MartelageRepository

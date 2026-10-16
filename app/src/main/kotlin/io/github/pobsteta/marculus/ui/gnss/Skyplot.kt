@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import fr.marculus.core.model.SatelliteGsv
+import fr.nemeton.terrain.gnss.SatelliteGsv
 import kotlin.math.cos
 import kotlin.math.sin
 

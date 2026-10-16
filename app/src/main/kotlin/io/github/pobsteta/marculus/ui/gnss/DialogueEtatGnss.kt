@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import fr.marculus.core.model.FixGnss
+import fr.nemeton.terrain.gnss.FixGnss
 import io.github.pobsteta.marculus.R
 import java.util.Locale
 

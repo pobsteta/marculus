@@ -1,8 +1,8 @@
 package io.github.pobsteta.marculus.gnss
 
-import fr.marculus.core.EntreeSourcetable
-import fr.marculus.core.Ntrip
-import fr.marculus.core.StatutNtrip
+import fr.nemeton.terrain.gnss.EntreeSourcetable
+import fr.nemeton.terrain.gnss.Ntrip
+import fr.nemeton.terrain.gnss.StatutNtrip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

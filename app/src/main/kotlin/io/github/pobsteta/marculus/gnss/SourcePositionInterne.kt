@@ -9,10 +9,10 @@ import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import androidx.core.content.ContextCompat
-import fr.marculus.core.model.FixGnss
-import fr.marculus.core.model.OrigineFix
-import fr.marculus.core.model.Position
-import fr.marculus.core.model.QualiteFix
+import fr.nemeton.terrain.gnss.FixGnss
+import fr.nemeton.terrain.gnss.OrigineFix
+import fr.nemeton.terrain.geo.Position
+import fr.nemeton.terrain.gnss.QualiteFix
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow

@@ -1,5 +1,8 @@
 package fr.marculus.core.model
 
+import fr.nemeton.terrain.geo.Position
+import fr.nemeton.terrain.gnss.QualiteFix
+
 /** Convention de mesure fixée au niveau du contexte, commune à toutes les essences. */
 enum class ModeMesure { DIAMETRE, CIRCONFERENCE }
 
@@ -25,9 +28,6 @@ enum class ActionTige { PLUS, ANNULATION }
 
 /** Colonne Kanban / workflow d'un contexte de martelage. */
 enum class EtatKanban { PROPOSEE, VALIDEE, PLANIFIEE, REALISEE, ABANDONNEE }
-
-/** Position GPS brute (pas de carte en v1). */
-data class Position(val latitude: Double, val longitude: Double)
 
 /**
  * Axe des classes (diamètre ou circonférence) d'un contexte : commun à toutes les essences,

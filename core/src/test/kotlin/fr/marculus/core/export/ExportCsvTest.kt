@@ -7,8 +7,8 @@ import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.EtatKanban
 import fr.marculus.core.model.ModeMesure
-import fr.marculus.core.model.Position
-import fr.marculus.core.model.QualiteFix
+import fr.nemeton.terrain.geo.Position
+import fr.nemeton.terrain.gnss.QualiteFix
 import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.TarifEssence
 import fr.marculus.core.model.Tige

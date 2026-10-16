@@ -23,8 +23,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import fr.marculus.core.model.FixGnss
-import fr.marculus.core.model.QualiteFix
+import fr.nemeton.terrain.gnss.FixGnss
+import fr.nemeton.terrain.gnss.QualiteFix
 import io.github.pobsteta.marculus.R
 
 /**

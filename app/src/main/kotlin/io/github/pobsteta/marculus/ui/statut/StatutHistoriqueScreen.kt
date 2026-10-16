@@ -60,7 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.AffouageLots
-import fr.marculus.core.AttributionSpatiale
+import fr.nemeton.terrain.geo.AttributionSpatiale
 import fr.marculus.core.Cubage
 import fr.marculus.core.VolumesMartelage
 import fr.marculus.core.export.ExportBilanLots

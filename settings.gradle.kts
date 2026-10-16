@@ -17,6 +17,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Bibliothèques communes de terrain (github.com/pobsteta/terrain), publiées par tag.
+        maven("https://jitpack.io") { content { includeModule("com.github.pobsteta", "terrain") } }
     }
 }
 

@@ -4,12 +4,12 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import fr.marculus.core.CouchesGpkg
-import fr.marculus.core.Geodesie
+import fr.nemeton.terrain.geo.Geodesie
 import fr.marculus.core.GrilleWebMercator
 import fr.marculus.core.MatriceTuiles
 import fr.marculus.core.Houppier
 import fr.marculus.core.TypeCouche
-import fr.marculus.core.model.Position
+import fr.nemeton.terrain.geo.Position
 import mil.nga.geopackage.GeoPackage
 import mil.nga.geopackage.GeoPackageFactory
 import mil.nga.geopackage.tiles.reproject.TileReprojection

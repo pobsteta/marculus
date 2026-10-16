@@ -14,10 +14,10 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import android.location.LocationManager
-import fr.marculus.core.StatutNtrip
+import fr.nemeton.terrain.gnss.StatutNtrip
 import fr.marculus.core.model.ConfigRtk
-import fr.marculus.core.model.FixGnss
-import fr.marculus.core.model.Position
+import fr.nemeton.terrain.gnss.FixGnss
+import fr.nemeton.terrain.geo.Position
 import fr.marculus.core.model.TransportRtk
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope

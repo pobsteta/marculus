@@ -1,6 +1,6 @@
 package fr.marculus.core
 
-import fr.marculus.core.model.Position
+import fr.nemeton.terrain.geo.Position
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull

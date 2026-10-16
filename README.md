@@ -95,13 +95,18 @@ d'événements *append-only* (chaque tige possède un UUID).
 
 | Module    | Rôle |
 |-----------|------|
-| **`:core`** | Domaine Kotlin pur (testé JVM) : modèle, axe des classes, cubage (Schaeffer + EMERGE), géodésie (aires), attribution spatiale, analyse des hauteurs, grammaire et parseur de la dictée vocale. |
+| **`:core`** | Domaine Kotlin pur (testé JVM) : modèle, axe des classes, cubage (Schaeffer + EMERGE), analyse des hauteurs, grammaire et parseur de la dictée vocale. |
 | **`:data`** | Persistance **Room** (journal `tige`, `contexte`, configs) + **DataStore** (réglages), `GpkgRepository`, sauvegarde/synchro JSON. |
 | **`:app`**  | UI **Jetpack Compose / Material 3** : liste, création, feuille, carte (osmdroid), statut, paramètres. |
 
 Pile : Gradle 9.4.1 · AGP 9.2.1 (Kotlin intégré) · Kotlin 2.2.10 · Compose BOM 2026.02.01 ·
 Room 2.8.1 · osmdroid 6.1.20 · NGA geopackage-android 6.7.4 · proj4j · Vosk 0.3.47 ·
 minSdk 26 / compileSdk 36.
+
+NMEA, NTRIP, géodésie (aires, point dans polygone) et projections viennent de la bibliothèque
+commune [`terrain`](https://github.com/pobsteta/terrain) (`terrain-gnss`, paquets
+`fr.nemeton.terrain.gnss` et `.geo`), partagée avec Groma et Surculus et publiée par tag sur
+JitPack ; version dans `gradle/libs.versions.toml`. Une correction de ces briques se fait là-bas.
 
 ---
 

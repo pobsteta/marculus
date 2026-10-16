@@ -1,15 +1,15 @@
 package io.github.pobsteta.marculus.gnss
 
-import fr.marculus.core.AccumulateurSkyplot
-import fr.marculus.core.NmeaDecoupeur
-import fr.marculus.core.NmeaParser
-import fr.marculus.core.Ntrip
-import fr.marculus.core.StatutNtrip
-import fr.marculus.core.TrameGsa
-import fr.marculus.core.TrameGst
-import fr.marculus.core.TrameRmc
-import fr.marculus.core.model.FixGnss
-import fr.marculus.core.model.Position
+import fr.nemeton.terrain.gnss.AccumulateurSkyplot
+import fr.nemeton.terrain.gnss.NmeaDecoupeur
+import fr.nemeton.terrain.gnss.NmeaParser
+import fr.nemeton.terrain.gnss.Ntrip
+import fr.nemeton.terrain.gnss.StatutNtrip
+import fr.nemeton.terrain.gnss.TrameGsa
+import fr.nemeton.terrain.gnss.TrameGst
+import fr.nemeton.terrain.gnss.TrameRmc
+import fr.nemeton.terrain.gnss.FixGnss
+import fr.nemeton.terrain.geo.Position
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow

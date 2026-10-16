@@ -1,6 +1,6 @@
 package io.github.pobsteta.marculus.gnss
 
-import fr.marculus.core.model.FixGnss
+import fr.nemeton.terrain.gnss.FixGnss
 import kotlinx.coroutines.flow.Flow
 
 /**

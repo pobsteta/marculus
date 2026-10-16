@@ -1,6 +1,7 @@
 package fr.marculus.core
 
-import fr.marculus.core.model.Position
+import fr.nemeton.terrain.geo.AttributionSpatiale
+import fr.nemeton.terrain.geo.Position
 import kotlin.math.roundToInt
 
 /** Un houppier segmenté depuis un MNH : son contour (WGS84) et la hauteur de son apex, en mètres. */

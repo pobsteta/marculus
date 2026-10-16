@@ -36,11 +36,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import fr.marculus.core.model.FixGnss
-import fr.marculus.core.model.OrigineFix
-import fr.marculus.core.model.Position
-import fr.marculus.core.model.QualiteFix
-import fr.marculus.core.model.SatelliteGsv
+import fr.nemeton.terrain.gnss.FixGnss
+import fr.nemeton.terrain.gnss.OrigineFix
+import fr.nemeton.terrain.geo.Position
+import fr.nemeton.terrain.gnss.QualiteFix
+import fr.nemeton.terrain.gnss.SatelliteGsv
 import io.github.pobsteta.marculus.R
 import kotlinx.coroutines.delay
 

@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    `java-library`
     jacoco
 }
 
@@ -18,6 +19,8 @@ kotlin {
 }
 
 dependencies {
+    // NMEA, NTRIP, géodésie : types exposés par l'API de :core (Position, FixGnss).
+    api(libs.terrain.gnss)
     testImplementation(kotlin("test"))
 }
 

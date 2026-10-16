@@ -39,12 +39,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import fr.marculus.core.StatutNtrip
+import fr.nemeton.terrain.gnss.StatutNtrip
 import fr.marculus.core.model.ConfigRtk
-import fr.marculus.core.model.OrigineFix
+import fr.nemeton.terrain.gnss.OrigineFix
 import fr.marculus.core.model.Reglages
 import fr.marculus.core.model.TransportRtk
-import fr.marculus.core.EntreeSourcetable
+import fr.nemeton.terrain.gnss.EntreeSourcetable
 import io.github.pobsteta.marculus.R
 import io.github.pobsteta.marculus.gnss.ClientNtrip
 import io.github.pobsteta.marculus.gnss.ServiceGnssRtk

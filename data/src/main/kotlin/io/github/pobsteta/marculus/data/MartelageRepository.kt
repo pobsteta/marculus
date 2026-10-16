@@ -2,7 +2,7 @@ package io.github.pobsteta.marculus.data
 
 import fr.marculus.core.TotauxMartelage
 import fr.marculus.core.model.ActionTige
-import fr.marculus.core.model.QualiteFix
+import fr.nemeton.terrain.gnss.QualiteFix
 import fr.marculus.core.model.AxeClasses
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.ConfigCompteur
@@ -10,7 +10,7 @@ import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.EtatKanban
 import fr.marculus.core.model.ModeMesure
-import fr.marculus.core.model.Position
+import fr.nemeton.terrain.geo.Position
 import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.TarifEssence
 import fr.marculus.core.model.Tige

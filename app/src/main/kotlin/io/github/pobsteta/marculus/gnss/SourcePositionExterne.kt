@@ -1,10 +1,10 @@
 package io.github.pobsteta.marculus.gnss
 
-import fr.marculus.core.NmeaDecoupeur
-import fr.marculus.core.NmeaParser
-import fr.marculus.core.TrameGst
-import fr.marculus.core.TrameRmc
-import fr.marculus.core.model.FixGnss
+import fr.nemeton.terrain.gnss.NmeaDecoupeur
+import fr.nemeton.terrain.gnss.NmeaParser
+import fr.nemeton.terrain.gnss.TrameGst
+import fr.nemeton.terrain.gnss.TrameRmc
+import fr.nemeton.terrain.gnss.FixGnss
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
