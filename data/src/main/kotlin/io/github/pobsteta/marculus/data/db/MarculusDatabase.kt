@@ -39,10 +39,19 @@ val MIGRATION_15_16 = object : Migration(15, 16) {
     }
 }
 
+/** v17 : commune (INSEE), sylvoécorégion et millésime des tarifs IFN proposés. */
+val MIGRATION_16_17 = object : Migration(16, 17) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE contexte ADD COLUMN communeInsee TEXT")
+        db.execSQL("ALTER TABLE contexte ADD COLUMN ser TEXT")
+        db.execSQL("ALTER TABLE contexte ADD COLUMN millesimeTarifs TEXT")
+    }
+}
+
 @Database(
     entities = [ContexteEntity::class, TigeEntity::class, CompteurConfigEntity::class],
-    version = 16,
-    exportSchema = false,
+    version = 17,
+    exportSchema = true,
 )
 abstract class MarculusDatabase : RoomDatabase() {
     abstract fun contexteDao(): ContexteDao
@@ -59,7 +68,7 @@ abstract class MarculusDatabase : RoomDatabase() {
             )
                 // Les données de terrain sont réelles depuis la v13 : chaque changement de schéma
                 // porte sa migration. Le repli destructif ne reste que pour les versions de dev.
-                .addMigrations(MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16)
+                .addMigrations(MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

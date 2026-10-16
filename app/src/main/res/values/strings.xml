@@ -421,6 +421,7 @@
     <string name="apropos_version">Version %1$s</string>
     <string name="apropos_desc">Application de martelage forestier — comptage, cubage et géolocalisation RTK.</string>
     <string name="apropos_licences">Reconnaissance vocale : Vosk (Alpha Cephei) et le modèle vosk-model-small-fr-0.22, distribués sous licence Apache 2.0. Cartographie : osmdroid. GeoPackage : NGA. Marculus est un logiciel libre distribué sous licence GNU GPL v3 ou ultérieure, sans aucune garantie.</string>
+    <string name="apropos_donnees_ifn">Numéros de tarif Schaeffer proposés : données de l\'Inventaire forestier national (%1$s) © IGN — Licence Ouverte Etalab 2.0 ; méthode PPtools (M. Bruciamacchie).</string>
     <string name="apropos_github">Ouvrir sur GitHub</string>
     <string name="voix_lot_annonce">lot numéro %1$d</string>
     <string name="creation_affouage">Affouage</string>
@@ -434,11 +435,27 @@
     <string name="creation_tarif_court_rapide">Sch. rapide</string>
     <string name="creation_tarif_court_lent">Sch. lent</string>
     <string name="creation_tarif_court_emerge">EMERGE</string>
+    <string name="creation_tarif_intermediaire">Schaeffer intermédiaire</string>
+    <string name="creation_tarif_tres_lent">Schaeffer très lent</string>
+    <string name="creation_tarif_court_intermediaire">Sch. interm.</string>
+    <string name="creation_tarif_court_tres_lent">Sch. très lent</string>
     <string name="creation_tarif_numero_court">n°</string>
     <string name="creation_houppier_court">Houppier</string>
     <string name="creation_cd_tarif_essence">Tarif de %1$s</string>
     <string name="creation_essences_aide" formatted="false">Pour chaque essence cochée : tarif de cubage, numéro de tarif (Schaeffer, 1–20) et part de houppier en %. EMERGE = volume bois fort tige à 2 entrées, il utilise la hauteur saisie et calcule lui-même le houppier.</string>
     <string name="creation_essences_autres">Autres essences disponibles</string>
+    <string name="creation_commune_titre">Commune et sylvoécorégion</string>
+    <string name="creation_commune_aide">Commune du martelage : Marculus propose pour chaque essence en Schaeffer le numéro de tarif de sa sylvoécorégion (données IFN). Le numéro reste modifiable.</string>
+    <string name="creation_commune_label">Commune (nom ou code INSEE)</string>
+    <string name="creation_commune_changer">Changer</string>
+    <string name="creation_ser_part">%1$s (%2$d %%)</string>
+    <string name="creation_ser_libelle">SER %1$s — %2$s</string>
+    <string name="creation_reproposer">Reproposer les numéros</string>
+    <string name="creation_source_ser">SER %1$s — %2$s arbres, CV %3$s %%</string>
+    <string name="creation_source_greco">repli GRECO %1$s — %2$s arbres, CV %3$s %%</string>
+    <string name="creation_source_france">repli France — %1$s arbres, CV %2$s %%</string>
+    <string name="creation_source_aucune">Pas de donnée IFN suffisante pour ce tarif</string>
+    <string name="creation_type_conseille">type conseillé : %1$s</string>
     <string name="creation_affouage_m3">Lot max. (m³)</string>
     <string name="creation_affouage_steres">Lot max. (stères)</string>
     <string name="creation_affouage_coef_steres">Stères / m³</string>

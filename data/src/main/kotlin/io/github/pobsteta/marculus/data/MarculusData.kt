@@ -12,6 +12,7 @@ object MarculusData {
         val sauvegarde: SauvegardeRepository,
         val gpkg: GpkgRepository,
         val lot: LotRepository,
+        val tarifsIfn: TarifsIfnRepository,
     )
 
     fun creer(context: Context): Conteneur {
@@ -27,6 +28,7 @@ object MarculusData {
             sauvegarde = sauvegarde,
             gpkg = GpkgRepository(context),
             lot = LotRepository(context, sauvegarde, martelage),
+            tarifsIfn = TarifsIfnRepository(context),
         )
     }
 }

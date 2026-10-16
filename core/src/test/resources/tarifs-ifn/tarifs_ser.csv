@@ -1,0 +1,15 @@
+niveau;code;espar;essence_libelle;type;numero;n_arbres;cv;millesime
+SER;C20;03;Chêne sessile;SCHR;8.0;500;40.4;IFN test
+SER;C20;03;Chêne sessile;SCHI;7.9;500;37.5;IFN test
+SER;C20;03;Chêne sessile;SCHL;7.7;500;38.6;IFN test
+SER;C20;03;Chêne sessile;SCHTL;7.7;500;41.3;IFN test
+SER;C20;09;Hêtre;SCHL;8.4;29;36.8;IFN test
+SER;C51;03;Chêne sessile;SCHL;9.5;30;27.8;IFN test
+SER;C51;09;Hêtre;SCHL;9.4;871;28.4;IFN test
+GRECO;C;09;Hêtre;SCHL;8.6;1200;33.0;IFN test
+GRECO;C;21;Alisier torminal;SCHL;6.1;12;40.0;IFN test
+FRANCE;FR;21;Alisier torminal;SCHL;6.4;40;42.0;IFN test
+FRANCE;FR;22;Sorbier des oiseleurs;SCHL;5.0;20;50.0;IFN test
+FRANCE;FR;40;Robinier faux acacia;SCHR;24.6;300;30.0;IFN test
+FRANCE;FR;19;Tremble;SCHR;0.3;300;30.0;IFN test
+FRANCE;FR;29CT;Catalpa;SCHL;6.0;100;30.0;IFN test

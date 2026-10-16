@@ -13,10 +13,21 @@ android {
         minSdk = 26
     }
 
+    // Tests de migration Room sous Robolectric : les schémas exportés servent d'assets de test.
+    sourceSets {
+        named("test") { assets.directories.add("$projectDir/schemas") }
+    }
+    testOptions.unitTests.isIncludeAndroidResources = true
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+}
+
+// Schémas Room versionnés : base des tests de migration (MigrationTestHelper).
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 kotlin {
@@ -34,4 +45,7 @@ dependencies {
     implementation(libs.geopackage.android)
     implementation(libs.kotlinx.coroutines.android)
     testImplementation(kotlin("test-junit"))
+    testImplementation(libs.room.testing)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 }

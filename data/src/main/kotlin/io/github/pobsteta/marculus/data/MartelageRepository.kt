@@ -118,6 +118,9 @@ class MartelageRepository(
         partHouppier: Map<String, Double> = emptyMap(),
         tarifsEssence: Map<String, TarifEssence> = emptyMap(),
         steresParM3: Double = Contexte.STERES_PAR_M3_DEFAUT,
+        communeInsee: String? = null,
+        ser: String? = null,
+        millesimeTarifs: String? = null,
     ): String {
         val id = UUID.randomUUID().toString()
         contexteDao.inserer(
@@ -145,6 +148,9 @@ class MartelageRepository(
                 partHouppier = encodePartsHouppier(partHouppier),
                 tarifsEssence = encodeTarifsEssence(tarifsEssence),
                 steresParM3 = steresParM3,
+                communeInsee = communeInsee,
+                ser = ser,
+                millesimeTarifs = millesimeTarifs,
             ),
         )
         return id
@@ -168,6 +174,9 @@ class MartelageRepository(
         partHouppier: Map<String, Double> = emptyMap(),
         tarifsEssence: Map<String, TarifEssence> = emptyMap(),
         steresParM3: Double = Contexte.STERES_PAR_M3_DEFAUT,
+        communeInsee: String? = null,
+        ser: String? = null,
+        millesimeTarifs: String? = null,
     ) {
         val existant = contexteDao.parId(id) ?: return
         contexteDao.inserer(
@@ -191,6 +200,9 @@ class MartelageRepository(
                 partHouppier = encodePartsHouppier(partHouppier),
                 tarifsEssence = encodeTarifsEssence(tarifsEssence),
                 steresParM3 = steresParM3,
+                communeInsee = communeInsee,
+                ser = ser,
+                millesimeTarifs = millesimeTarifs,
             ),
         )
     }

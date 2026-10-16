@@ -54,6 +54,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
+import io.github.pobsteta.marculus.data.TarifsIfnRepository
+import fr.marculus.core.TarifsIfn
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.produceState
 import fr.marculus.core.model.TarifEssence
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.semantics.semantics
@@ -84,6 +89,7 @@ import kotlinx.coroutines.withContext
 fun CreationContexteScreen(
     repository: MartelageRepository,
     gpkgRepository: GpkgRepository,
+    tarifsIfnRepository: TarifsIfnRepository,
     contexteExistant: Contexte?,
     essencesReferentiel: List<String>,
     onAnnuler: () -> Unit,
@@ -158,6 +164,29 @@ fun CreationContexteScreen(
         }
     }
     fun tarifDe(e: String) = tarifs[e] ?: TarifCubage.AUCUN
+
+    // Tarifs IFN par sylvoécorégion : null tant que non lus, ou si les tables ne sont pas embarquées.
+    val ifn by produceState<TarifsIfn?>(initialValue = null) { value = tarifsIfnRepository.referentiel() }
+    var communeInsee by remember { mutableStateOf(contexteExistant?.communeInsee) }
+    var ser by remember { mutableStateOf(contexteExistant?.ser) }
+    // Dernier numéro proposé par essence : un champ encore égal à lui (ou vide) suit les propositions,
+    // un champ retouché à la main n'est plus jamais réécrit (sauf « Reproposer »).
+    val derniersProposes = remember { mutableStateMapOf<String, String>() }
+    fun proposition(e: String) = ser?.let { s -> ifn?.proposer(s, e, tarifDe(e)) }
+    fun appliquerPropositions(essences: Collection<String> = selection, forcer: Boolean = false) {
+        essences.filter { it in selection }.forEach { e ->
+            val p = proposition(e)?.numero?.toString() ?: return@forEach
+            val actuel = numerosTarif[e].orEmpty()
+            if (forcer || actuel.isBlank() || actuel == derniersProposes[e]) numerosTarif[e] = p
+            derniersProposes[e] = p
+        }
+    }
+    fun choisirCommune(insee: String?) {
+        communeInsee = insee
+        val sers = insee?.let { ifn?.serDeCommune(it) }.orEmpty()
+        ser = sers.firstOrNull { it.ser == ser }?.ser ?: sers.firstOrNull()?.ser
+        appliquerPropositions()
+    }
     fun fond(e: String) = couleurs[e]?.first ?: Referentiels.couleurFondDefaut(essencesDisponibles.indexOf(e))
     fun texte(e: String) = couleurs[e]?.second ?: Referentiels.COULEUR_TEXTE_DEFAUT
 
@@ -166,6 +195,28 @@ fun CreationContexteScreen(
     var ajoutOuvert by remember { mutableStateOf(false) }
     var infoOuvert by remember { mutableStateOf(false) }
     var cheminGpkg by remember { mutableStateOf(contexteExistant?.cheminGpkg) }
+    // Commune portée par les parcelles du GeoPackage (la plus fréquente), pour préremplir la recherche.
+    // Seulement à la création ou quand on rattache un autre GeoPackage : un contexte existant n'est
+    // jamais recalculé à l'ouverture.
+    val communeGpkg by produceState<String?>(initialValue = null, cheminGpkg) {
+        value = cheminGpkg?.takeIf { !edition || it != contexteExistant?.cheminGpkg }?.let { chemin ->
+            withContext(Dispatchers.IO) {
+                runCatching { gpkgRepository.parcellesDetail(chemin) }.getOrNull()
+                    ?.mapNotNull { it.commune?.takeIf { c -> c.isNotBlank() } }
+                    ?.groupingBy { it }?.eachCount()?.maxByOrNull { it.value }?.key
+            }
+        }
+    }
+    // Commune unique de ce nom dans le GeoPackage : retenue une fois, sans revenir après « Changer ».
+    var communeGpkgAppliquee by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(communeGpkg, ifn) {
+        val nom = communeGpkg ?: return@LaunchedEffect
+        val referentiel = ifn ?: return@LaunchedEffect
+        if (communeInsee == null && communeGpkgAppliquee != nom) {
+            communeGpkgAppliquee = nom
+            referentiel.communesNommees(nom).singleOrNull()?.let { choisirCommune(it.insee) }
+        }
+    }
     val gpkgLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) {
             scope.launch { cheminGpkg = withContext(Dispatchers.IO) { gpkgRepository.importer(uri) } }
@@ -259,6 +310,19 @@ fun CreationContexteScreen(
                 )
             }
 
+            ifn?.let { referentiel ->
+                HorizontalDivider()
+                SectionCommune(
+                    ifn = referentiel,
+                    communeInsee = communeInsee,
+                    ser = ser,
+                    communeGpkg = communeGpkg,
+                    onCommune = { choisirCommune(it) },
+                    onSer = { code -> ser = code; appliquerPropositions() },
+                    onReproposer = { appliquerPropositions(forcer = true) },
+                )
+            }
+
             HorizontalDivider()
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -289,17 +353,29 @@ fun CreationContexteScreen(
                     tarif = tarifDe(essence),
                     numero = numerosTarif[essence] ?: "",
                     part = partsHouppier[essence] ?: "",
+                    source = if (essence in selection && tarifDe(essence).estSchaeffer) {
+                        sourceProposition(ifn, ser, essence, tarifDe(essence))
+                    } else {
+                        null
+                    },
                     surUneLigne = paysageEssences,
-                    onToggle = { if (essence in selection) selection.remove(essence) else selection.add(essence) },
+                    onToggle = {
+                        if (essence in selection) {
+                            selection.remove(essence)
+                        } else {
+                            selection.add(essence)
+                            appliquerPropositions(listOf(essence))
+                        }
+                    },
                     onPickFond = { picker = essence to true },
                     onPickTexte = { picker = essence to false },
-                    onTarif = { tarifs[essence] = it },
+                    onTarif = { tarifs[essence] = it; appliquerPropositions(listOf(essence)) },
                     onNumero = { saisie -> numerosTarif[essence] = saisie.filter { it.isDigit() }.take(2) },
                     onPart = { saisie -> partsHouppier[essence] = saisie.filter { it.isDigit() || it == '.' || it == ',' }.take(5) },
                 )
             }
             val tarifsCoches = selection.map { tarifDe(it) }.toSet()
-            if (TarifCubage.SCHAEFFER_RAPIDE in tarifsCoches || TarifCubage.SCHAEFFER_LENT in tarifsCoches) {
+            if (tarifsCoches.any { it.estSchaeffer }) {
                 Text(stringResource(R.string.creation_houppier_aide), style = MaterialTheme.typography.bodySmall)
             }
             if (TarifCubage.EMERGE in tarifsCoches) {
@@ -399,8 +475,7 @@ fun CreationContexteScreen(
                             .filterValues { it.isNotBlank() }
                             .mapValues { (_, v) -> v.replace(',', '.').toDoubleOrNull()?.div(100.0) }
                         fun partValide(p: Double?) = p != null && p in 0.0..Cubage.PART_HOUPPIER_MAX
-                        val schaeffer = setOf(TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT)
-                        val partInvalide = partsSaisies.any { (e, p) -> tarifDe(e) in schaeffer && !partValide(p) }
+                        val partInvalide = partsSaisies.any { (e, p) -> tarifDe(e).estSchaeffer && !partValide(p) }
                         val essencesCubees = selection.filter { tarifDe(it) != TarifCubage.AUCUN }
                         erreur = when {
                             nom.isBlank() -> errNom
@@ -424,6 +499,12 @@ fun CreationContexteScreen(
                                 // Tarif par défaut (lecteurs anciens, essences ajoutées par Nemeton) : la première essence cubée.
                                 val defaut = essencesCubees.firstOrNull()?.let { tarifsFinaux[it] } ?: TarifEssence(TarifCubage.AUCUN)
                                 val steres = coefSteres() ?: contexteExistant?.steresParM3 ?: Contexte.STERES_PAR_M3_DEFAUT
+                                // Millésime des tables qui ont servi : gardé tel quel tant que la SER ne change pas.
+                                val millesime = if (ser != null && ser == contexteExistant?.ser) {
+                                    contexteExistant?.millesimeTarifs
+                                } else {
+                                    ser?.let { s -> essences.firstNotNullOfOrNull { ifn?.proposer(s, it.nom, tarifDe(it.nom)) }?.millesime }
+                                }
                                 val coef = coefForme.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 } ?: 0.5
                                 // Décoché, le volume saisi est conservé : recocher retrouve la borne.
                                 val volumeLot = vMaxLot ?: contexteExistant?.volumeMaxLotM3 ?: 0.0
@@ -438,6 +519,7 @@ fun CreationContexteScreen(
                                             AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg,
                                             defaut.tarif, defaut.numero, coef, dateMartelage,
                                             affouage, volumeLot, partsFinales, tarifsFinaux, steres,
+                                            communeInsee, ser, millesime,
                                         )
                                         onEnregistre(contexteExistant.id)
                                     } else {
@@ -449,6 +531,7 @@ fun CreationContexteScreen(
                                             affouage = affouage, volumeMaxLotM3 = volumeLot,
                                             partHouppier = partsFinales, tarifsEssence = tarifsFinaux,
                                             steresParM3 = steres,
+                                            communeInsee = communeInsee, ser = ser, millesimeTarifs = millesime,
                                         )
                                         onEnregistre(id)
                                     }
@@ -602,6 +685,8 @@ private fun LigneEssence(
     tarif: TarifCubage,
     numero: String,
     part: String,
+    /** Origine du numéro proposé (texte secondaire), ou null. */
+    source: String?,
     surUneLigne: Boolean,
     onToggle: () -> Unit,
     onPickFond: () -> Unit,
@@ -613,7 +698,7 @@ private fun LigneEssence(
     @Composable
     fun Reglages() {
         SelecteurTarif(nom, tarif, onTarif)
-        if (tarif == TarifCubage.SCHAEFFER_RAPIDE || tarif == TarifCubage.SCHAEFFER_LENT) {
+        if (tarif.estSchaeffer) {
             OutlinedTextField(
                 value = numero,
                 onValueChange = onNumero,
@@ -658,6 +743,14 @@ private fun LigneEssence(
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) { Reglages() }
         }
+        source?.let {
+            Text(
+                it,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 40.dp, bottom = 4.dp),
+            )
+        }
     }
 }
 
@@ -691,7 +784,9 @@ private fun TarifCubage.libelleCourt(): String = stringResource(
     when (this) {
         TarifCubage.AUCUN -> R.string.creation_tarif_court_aucun
         TarifCubage.SCHAEFFER_RAPIDE -> R.string.creation_tarif_court_rapide
+        TarifCubage.SCHAEFFER_INTERMEDIAIRE -> R.string.creation_tarif_court_intermediaire
         TarifCubage.SCHAEFFER_LENT -> R.string.creation_tarif_court_lent
+        TarifCubage.SCHAEFFER_TRES_LENT -> R.string.creation_tarif_court_tres_lent
         TarifCubage.EMERGE -> R.string.creation_tarif_court_emerge
     },
 )
@@ -701,7 +796,9 @@ private fun TarifCubage.libelleLong(): String = stringResource(
     when (this) {
         TarifCubage.AUCUN -> R.string.creation_tarif_aucun
         TarifCubage.SCHAEFFER_RAPIDE -> R.string.creation_tarif_rapide
+        TarifCubage.SCHAEFFER_INTERMEDIAIRE -> R.string.creation_tarif_intermediaire
         TarifCubage.SCHAEFFER_LENT -> R.string.creation_tarif_lent
+        TarifCubage.SCHAEFFER_TRES_LENT -> R.string.creation_tarif_tres_lent
         TarifCubage.EMERGE -> R.string.creation_tarif_emerge
     },
 )
@@ -779,3 +876,80 @@ private fun formatPourcent(v: Double): String = formatDecimal(v)
 /** Nombre sans zéros inutiles, arrondi à [decimales] : 6.6667 → « 6.667 » (3), 10.0 → « 10 ». */
 private fun formatDecimal(v: Double, decimales: Int = 2): String =
     "%.${decimales}f".format(java.util.Locale.ROOT, v).let { if ('.' in it) it.trimEnd('0').trimEnd('.') else it }
+
+/**
+ * Commune du martelage (recherche par nom) et sa sylvoécorégion : choix parmi les SER de la
+ * commune, triées par part, la principale retenue par défaut.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SectionCommune(
+    ifn: TarifsIfn,
+    communeInsee: String?,
+    ser: String?,
+    communeGpkg: String?,
+    onCommune: (String?) -> Unit,
+    onSer: (String) -> Unit,
+    onReproposer: () -> Unit,
+) {
+    Text(stringResource(R.string.creation_commune_titre), style = MaterialTheme.typography.titleSmall)
+    Text(stringResource(R.string.creation_commune_aide), style = MaterialTheme.typography.bodySmall)
+    val commune = communeInsee?.let { ifn.commune(it) }
+    if (commune == null) {
+        var saisie by remember(communeGpkg) { mutableStateOf(communeGpkg.orEmpty()) }
+        OutlinedTextField(
+            value = saisie,
+            onValueChange = { saisie = it },
+            label = { Text(stringResource(R.string.creation_commune_label)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        ifn.rechercherCommunes(saisie, max = 6).forEach { c ->
+            TextButton(onClick = { onCommune(c.insee) }, modifier = Modifier.fillMaxWidth()) {
+                Text("${c.nom} (${c.departement})", modifier = Modifier.fillMaxWidth())
+            }
+        }
+        return
+    }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("${commune.nom} (${commune.departement})", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        TextButton(onClick = { onCommune(null) }) { Text(stringResource(R.string.creation_commune_changer)) }
+    }
+    val sers = ifn.serDeCommune(commune.insee)
+    if (sers.size > 1) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            sers.forEach { p ->
+                FilterChip(
+                    selected = p.ser == ser,
+                    onClick = { onSer(p.ser) },
+                    label = { Text(stringResource(R.string.creation_ser_part, p.ser, (p.part * 100).roundToInt())) },
+                )
+            }
+        }
+    }
+    ser?.let { code ->
+        Text(
+            stringResource(R.string.creation_ser_libelle, code, ifn.ser(code)?.nom.orEmpty()),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        OutlinedButton(onClick = onReproposer) { Text(stringResource(R.string.creation_reproposer)) }
+    }
+}
+
+/** « SER C20 — 1 240 arbres, CV 12 % », repli indiqué, et le type au plus faible CV s'il diffère. */
+@Composable
+private fun sourceProposition(ifn: TarifsIfn?, ser: String?, essence: String, tarif: TarifCubage): String? {
+    if (ifn == null || ser == null) return null
+    val p = ifn.proposer(ser, essence, tarif) ?: return stringResource(R.string.creation_source_aucune)
+    val locale = LocalConfiguration.current.locales[0]
+    val arbres = String.format(locale, "%,d", p.nArbres)
+    val cv = String.format(locale, "%.0f", p.cv)
+    val origine = when (p.niveau) {
+        TarifsIfn.Niveau.SER -> stringResource(R.string.creation_source_ser, p.code, arbres, cv)
+        TarifsIfn.Niveau.GRECO -> stringResource(R.string.creation_source_greco, p.code, arbres, cv)
+        TarifsIfn.Niveau.FRANCE -> stringResource(R.string.creation_source_france, arbres, cv)
+    }
+    val conseille = ifn.typeConseille(ser, essence)?.takeIf { it != tarif }
+    return if (conseille == null) origine else origine + " · " + stringResource(R.string.creation_type_conseille, conseille.libelleLong())
+}
+

@@ -1,0 +1,352 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 17,
+    "identityHash": "f75ab27429d5eb575d7159490b08806b",
+    "entities": [
+      {
+        "tableName": "contexte",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `nom` TEXT NOT NULL, `mode` TEXT NOT NULL, `classeMin` INTEGER NOT NULL, `classeMax` INTEGER NOT NULL, `classePas` INTEGER NOT NULL, `essences` TEXT NOT NULL, `commentaire` TEXT, `increment` INTEGER NOT NULL, `exporte` INTEGER NOT NULL, `dateCreation` INTEGER NOT NULL, `operateur` TEXT, `cheminGpkg` TEXT, `tarif` TEXT NOT NULL, `tarifNumero` INTEGER NOT NULL, `coefficientForme` REAL NOT NULL, `dateMartelage` INTEGER, `statut` TEXT NOT NULL, `modifie` INTEGER NOT NULL, `dejaExporte` INTEGER NOT NULL DEFAULT 0, `affouage` INTEGER NOT NULL DEFAULT 0, `volumeMaxLotM3` REAL NOT NULL DEFAULT 0, `partHouppierAffouage` TEXT NOT NULL DEFAULT '', `tarifsEssence` TEXT NOT NULL DEFAULT '', `steresParM3` REAL NOT NULL DEFAULT 1.5, `communeInsee` TEXT, `ser` TEXT, `millesimeTarifs` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nom",
+            "columnName": "nom",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mode",
+            "columnName": "mode",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "classeMin",
+            "columnName": "classeMin",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "classeMax",
+            "columnName": "classeMax",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "classePas",
+            "columnName": "classePas",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "essences",
+            "columnName": "essences",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "commentaire",
+            "columnName": "commentaire",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "increment",
+            "columnName": "increment",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exporte",
+            "columnName": "exporte",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateCreation",
+            "columnName": "dateCreation",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "operateur",
+            "columnName": "operateur",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cheminGpkg",
+            "columnName": "cheminGpkg",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "tarif",
+            "columnName": "tarif",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tarifNumero",
+            "columnName": "tarifNumero",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "coefficientForme",
+            "columnName": "coefficientForme",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateMartelage",
+            "columnName": "dateMartelage",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "statut",
+            "columnName": "statut",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifie",
+            "columnName": "modifie",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dejaExporte",
+            "columnName": "dejaExporte",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "affouage",
+            "columnName": "affouage",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "volumeMaxLotM3",
+            "columnName": "volumeMaxLotM3",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "partHouppier",
+            "columnName": "partHouppierAffouage",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "tarifsEssence",
+            "columnName": "tarifsEssence",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "''"
+          },
+          {
+            "fieldPath": "steresParM3",
+            "columnName": "steresParM3",
+            "affinity": "REAL",
+            "notNull": true,
+            "defaultValue": "1.5"
+          },
+          {
+            "fieldPath": "communeInsee",
+            "columnName": "communeInsee",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ser",
+            "columnName": "ser",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "millesimeTarifs",
+            "columnName": "millesimeTarifs",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "tige",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` TEXT NOT NULL, `contexteId` TEXT NOT NULL, `essence` TEXT NOT NULL, `classe` INTEGER NOT NULL, `action` TEXT NOT NULL, `horodatage` INTEGER NOT NULL, `quantite` INTEGER NOT NULL, `hauteurTexte` TEXT, `qualiteArbre` TEXT, `latitude` REAL, `longitude` REAL, `operateur` TEXT, `parcelle` TEXT, `qualiteFix` TEXT, `precisionM` REAL, `modifie` INTEGER NOT NULL, `lot` INTEGER, PRIMARY KEY(`uuid`))",
+        "fields": [
+          {
+            "fieldPath": "uuid",
+            "columnName": "uuid",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contexteId",
+            "columnName": "contexteId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "essence",
+            "columnName": "essence",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "classe",
+            "columnName": "classe",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "action",
+            "columnName": "action",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "horodatage",
+            "columnName": "horodatage",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "quantite",
+            "columnName": "quantite",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hauteurTexte",
+            "columnName": "hauteurTexte",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "qualiteArbre",
+            "columnName": "qualiteArbre",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "operateur",
+            "columnName": "operateur",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "parcelle",
+            "columnName": "parcelle",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "qualiteFix",
+            "columnName": "qualiteFix",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "precisionM",
+            "columnName": "precisionM",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "modifie",
+            "columnName": "modifie",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lot",
+            "columnName": "lot",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "uuid"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tige_contexteId_essence_classe",
+            "unique": false,
+            "columnNames": [
+              "contexteId",
+              "essence",
+              "classe"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tige_contexteId_essence_classe` ON `${TABLE_NAME}` (`contexteId`, `essence`, `classe`)"
+          }
+        ]
+      },
+      {
+        "tableName": "compteur_config",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contexteId` TEXT NOT NULL, `essence` TEXT NOT NULL, `classe` INTEGER NOT NULL, `avisSiPlus` INTEGER, `avisSiMoins` INTEGER, PRIMARY KEY(`contexteId`, `essence`, `classe`))",
+        "fields": [
+          {
+            "fieldPath": "contexteId",
+            "columnName": "contexteId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "essence",
+            "columnName": "essence",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "classe",
+            "columnName": "classe",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "avisSiPlus",
+            "columnName": "avisSiPlus",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "avisSiMoins",
+            "columnName": "avisSiMoins",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "contexteId",
+            "essence",
+            "classe"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f75ab27429d5eb575d7159490b08806b')"
+    ]
+  }
+}

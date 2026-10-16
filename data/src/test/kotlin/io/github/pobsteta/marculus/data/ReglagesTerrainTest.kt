@@ -96,4 +96,16 @@ class ReglagesTerrainTest {
         assertEquals(tarifs, decodeTarifsEssence(encodeTarifsEssence(tarifs)))
         assertEquals(emptyMap(), decodeTarifsEssence(""))
     }
+
+    @Test
+    fun `commune SER et millesime - absents du fichier gardes, presents l emportent`() {
+        val avec = local.copy(communeInsee = "21295", ser = "C20", millesimeTarifs = "IFN 2005-2025")
+        val garde = ReglagesTerrain.completer(contexte(modifie = 2), avec, setOf("id", "nom", "modifie"))
+        assertEquals("21295", garde.communeInsee)
+        assertEquals("C20", garde.ser)
+        assertEquals("IFN 2005-2025", garde.millesimeTarifs)
+        val efface = ReglagesTerrain.completer(contexte(modifie = 2), avec, setOf("communeInsee", "ser", "millesimeTarifs"))
+        assertEquals(null, efface.communeInsee)
+        assertEquals(null, efface.ser)
+    }
 }

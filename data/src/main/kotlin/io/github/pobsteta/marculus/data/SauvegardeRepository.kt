@@ -180,6 +180,7 @@ class SauvegardeRepository(
             },
         )
         put("steresParM3", steresParM3)
+        putOpt("communeInsee", communeInsee); putOpt("ser", ser); putOpt("millesimeTarifs", millesimeTarifs)
         volumes?.let {
             put("volumeTigeTotalM3", it.volumeTigeM3); put("volumeTotalM3", it.volumeTotalM3)
             put("volumeHouppierTotalM3", it.volumeHouppierM3)
@@ -222,6 +223,9 @@ class SauvegardeRepository(
         ),
         steresParM3 = optDouble("steresParM3", Contexte.STERES_PAR_M3_DEFAUT)
             .takeIf { it.isFinite() && it > 0.0 } ?: Contexte.STERES_PAR_M3_DEFAUT,
+        communeInsee = texteOuNull("communeInsee"),
+        ser = texteOuNull("ser"),
+        millesimeTarifs = texteOuNull("millesimeTarifs"),
     )
 
     /** [cubage] : valeurs unitaires (une tige) calculées à l'export ; ignorées à la relecture. */

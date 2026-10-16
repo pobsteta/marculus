@@ -51,7 +51,9 @@ d'événements *append-only* (chaque tige possède un UUID).
 - Voir `docs/specs/2026-08-21-tranche-dictee-vocale.md` (formes à dicter, recette de terrain).
 
 ### Cubage (volumes)
-- **Schaeffer** rapide / lent (une entrée, diamètre ; numéro de tarif).
+- **Schaeffer** rapide / intermédiaire / lent / très lent (une entrée, diamètre), **tarif et
+  numéro par essence**. Numéro **proposé** par sylvoécorégion à partir de la commune
+  (données IFN © IGN, méthode PPtools, hors ligne) — voir `docs/specs/2026-10-16-tarifs-ser.md`.
 - **EMERGE** (deux entrées, projet ANR/IGN, d'après C. Deleuze – RDV Techniques ONF 44) :
   **volume bois fort tige**, **houppier** et **total aérien** affichés séparément.
   Table complète des **226 essences** (coefficients générés depuis le package R `gftools`),

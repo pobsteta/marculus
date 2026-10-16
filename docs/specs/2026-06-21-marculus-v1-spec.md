@@ -100,7 +100,9 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 - ✅ Tarif réglable **par contexte** (`TarifCubage`) :
   - `AUCUN`
   - `SCHAEFFER_RAPIDE` — V = (M/1400)(D−5)(D−10)
+  - `SCHAEFFER_INTERMEDIAIRE` — V = (M/1600)(D−2,5)(D−7,5) (2026-10-16)
   - `SCHAEFFER_LENT`   — V = (M/1800)·D·(D−5)
+  - `SCHAEFFER_TRES_LENT` — V = (M/2025)·D² (2026-10-16)
   - `EMERGE` — **vrai volume bois fort tige** (modèle + coefficients gftools/EMERGE),
     avec **part de tige** et **houppier** → **volume total aérien**.
 - ✅ Table EMERGE **complète (226 essences)** générée depuis `gftools::ListTarEmerge`
@@ -120,6 +122,12 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   enregistré = celui de la première essence cubée) : contextes anciens, plans Nemeton,
   lecteurs anciens. Clé `.marsync` `tarifsEssence` (`{essence: {tarif, numero}}`, réglage du
   terrain) ; base v16. La colonne `Cubage` du journal dit le tarif appliqué à chaque tige.
+- 🟡 **Numéro proposé par sylvoécorégion** (2026-10-16, `TarifsIfn`, spec
+  `2026-10-16-tarifs-ser.md`) : commune du martelage → SER (puces si à cheval) → numéro IFN de
+  chaque essence en Schaeffer, repli SER → GRECO → France sous 30 arbres, jamais réécrit après
+  saisie manuelle (« Reproposer » pour forcer). `Contexte.communeInsee`, `ser`,
+  `millesimeTarifs` ; base v17 ; CSV format 7. **Code livré, tables en attente de nemeton**
+  (brief `vers-nemeton/2026-10-16-tarifs-schaeffer-ser.md`) : sans elles, la section n'apparaît pas.
 
 ## 5 bis. Affouage (livré 2026-10-07)
 
@@ -180,7 +188,7 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 - **`−`** : enregistre une **annulation** (conservée au journal), décrémente le total.
 - **Bouton Hauteur / Qualité arbre** : annote la **dernière tige** ajoutée de la cellule
   (saisie hauteur en texte libre / sélection mono-choix de la qualité arbre).
-- **Export CSV** (`FormatCsv;6`) : feuille (totaux par essence × classe) **+** journal des
+- **Export CSV** (`FormatCsv;7`) : feuille (totaux par essence × classe) **+** journal des
   tiges (+ volumes cubés selon le tarif du contexte, + colonne `Lot`). Format 5 : houppier —
   en-tête `VolumeHouppierTotalM3`, `PartHouppier` (`essence=part|…`), `AffouageLotTotalM3`
   (avant `Journal`) ; colonne `AffouageLotM3` en fin de journal (vide hors affouage), 22
@@ -188,7 +196,8 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   **journal complet** et **tiges à comptabiliser** (`Journal;NET` : chaque annulation disparaît
   avec la tige qu'elle retire ; totaux identiques). Format 6 : `TarifsEssence`
   (`essence=TARIF:numéro|…`) et `SteresParM3` après `AffouageLotTotalM3` ; `Tarif` /
-  `TarifNumero` restent le tarif par défaut.
+  `TarifNumero` restent le tarif par défaut. Format 7 : `CommuneInsee`, `Ser`, `MillesimeTarifs`
+  après `SteresParM3`.
 
 ## 8. Synchro multi-opérateurs (v2, partiel)
 
@@ -233,7 +242,9 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   JitPack écartée) ; `PttController` est prêt à le recevoir.
 - 🔜 **Recette terrain de l'affouage** (annonces, bascule de lot, bilan) et réponse de
   nemetonshiny au brief `CSV format 4` (lecture du `lot`, règle « clé absente »), puis
-  signaler le **format 5** (houppier, parts par essence) et le **format 6** (tarif par essence,
-  stères).
+  signaler le **format 5** (houppier, parts par essence), le **format 6** (tarif par essence,
+  stères) et le **format 7** (commune, SER, millésime des tarifs).
+- 🔜 **Tables IFN des tarifs Schaeffer** à recevoir de nemeton puis copier dans
+  `data/src/main/assets/tarifs-ifn/` ; démo en mode avion (spec `2026-10-16-tarifs-ser.md`).
 - 🔜 **Recette terrain de la dictée** (7 cas, bruit réel, gants) — cf.
   `2026-08-21-tranche-dictee-vocale.md`.

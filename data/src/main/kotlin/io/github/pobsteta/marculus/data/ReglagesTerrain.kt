@@ -15,7 +15,10 @@ import io.github.pobsteta.marculus.data.db.TigeEntity
 internal object ReglagesTerrain {
 
     /** Clés JSON d'un contexte conservées quand le fichier ne les porte pas. */
-    val CLES_CONTEXTE = setOf("affouage", "volumeMaxLotM3", "partHouppier", "tarif", "tarifNumero", "coefficientForme", "cheminGpkg", "tarifsEssence", "steresParM3")
+    val CLES_CONTEXTE = setOf(
+        "affouage", "volumeMaxLotM3", "partHouppier", "tarif", "tarifNumero", "coefficientForme",
+        "cheminGpkg", "tarifsEssence", "steresParM3", "communeInsee", "ser", "millesimeTarifs",
+    )
 
     /** Clé JSON d'une tige conservée quand le fichier ne la porte pas (lot figé au martelage). */
     const val CLE_LOT = "lot"
@@ -33,6 +36,9 @@ internal object ReglagesTerrain {
             cheminGpkg = if (absent("cheminGpkg")) local.cheminGpkg else entrant.cheminGpkg,
             tarifsEssence = if (absent("tarifsEssence")) local.tarifsEssence else entrant.tarifsEssence,
             steresParM3 = if (absent("steresParM3")) local.steresParM3 else entrant.steresParM3,
+            communeInsee = if (absent("communeInsee")) local.communeInsee else entrant.communeInsee,
+            ser = if (absent("ser")) local.ser else entrant.ser,
+            millesimeTarifs = if (absent("millesimeTarifs")) local.millesimeTarifs else entrant.millesimeTarifs,
         )
     }
 

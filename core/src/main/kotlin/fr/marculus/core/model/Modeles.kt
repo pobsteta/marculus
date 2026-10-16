@@ -3,8 +3,19 @@ package fr.marculus.core.model
 /** Convention de mesure fixée au niveau du contexte, commune à toutes les essences. */
 enum class ModeMesure { DIAMETRE, CIRCONFERENCE }
 
-/** Tarif de cubage à une entrée appliqué au contexte (volume bois fort tige). */
-enum class TarifCubage { AUCUN, SCHAEFFER_RAPIDE, SCHAEFFER_LENT, EMERGE }
+/**
+ * Tarif de cubage (volume bois fort tige). Les quatre Schaeffer à une entrée sont les types des
+ * tables IFN (rapide, intermédiaire, lent, très lent). Stocké par son nom (base, `.marsync`, CSV) :
+ * l'ordre ne sert qu'au menu.
+ */
+enum class TarifCubage {
+    AUCUN, SCHAEFFER_RAPIDE, SCHAEFFER_INTERMEDIAIRE, SCHAEFFER_LENT, SCHAEFFER_TRES_LENT, EMERGE;
+
+    /** Tarif Schaeffer (une entrée, numéro 1..20), sans houppier. */
+    val estSchaeffer: Boolean
+        get() = this == SCHAEFFER_RAPIDE || this == SCHAEFFER_INTERMEDIAIRE ||
+            this == SCHAEFFER_LENT || this == SCHAEFFER_TRES_LENT
+}
 
 /** Tarif de cubage d'une essence : type et numéro (1..20, Schaeffer seulement). */
 data class TarifEssence(val tarif: TarifCubage, val numero: Int = 0)
@@ -101,6 +112,12 @@ data class Contexte(
     val tarifsEssence: Map<String, TarifEssence> = emptyMap(),
     /** Conversion d'affichage du volume maximal d'un lot : stères pour 1 m³. */
     val steresParM3: Double = STERES_PAR_M3_DEFAUT,
+    /** Commune du martelage (code INSEE), qui donne la SER des tarifs IFN ; null si non renseignée. */
+    val communeInsee: String? = null,
+    /** Sylvoécorégion retenue pour les tarifs proposés (code IFN, ex. `C20`), ou null. */
+    val ser: String? = null,
+    /** Millésime des tables IFN des numéros proposés (ex. `IFN 2005-2025`), pour la reproductibilité. */
+    val millesimeTarifs: String? = null,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
 

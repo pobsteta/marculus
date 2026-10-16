@@ -38,12 +38,16 @@ import java.util.Locale
  * `TarifsEssence` (`essence=TARIF:numéro`, séparées par `|`) et `SteresParM3`. `Tarif` et
  * `TarifNumero` restent le tarif par défaut (essences sans tarif propre) ; la colonne `Cubage`
  * du journal donne, tige par tige, le tarif réellement appliqué.
+ *
+ * **Format 7** (`FormatCsv;7`) : tarifs IFN par sylvoécorégion — en en-tête, après `SteresParM3` :
+ * `CommuneInsee`, `Ser` et `MillesimeTarifs` (vides si non renseignés). Le journal ne change pas :
+ * le numéro de l'essence de chaque tige est déjà dans `Cubage`.
  */
 object ExportCsv {
     private const val SEP = ";"
 
     /** Version du format, lue par Nemeton : son absence désigne le format 1, non réimportable. */
-    const val FORMAT = 6
+    const val FORMAT = 7
 
     fun contexteCsv(contexte: Contexte, journal: List<Tige>, net: Boolean = false): String {
         val sb = StringBuilder()
@@ -76,6 +80,10 @@ object ExportCsv {
         // Format 6 : tarif par essence et conversion en stères.
         sb.appendLine("TarifsEssence${SEP}${champ(tarifsEssence(contexte))}")
         sb.appendLine("SteresParM3${SEP}${contexte.steresParM3}")
+        // Format 7 : commune, SER et millésime des tarifs IFN proposés.
+        sb.appendLine("CommuneInsee${SEP}${champ(contexte.communeInsee.orEmpty())}")
+        sb.appendLine("Ser${SEP}${champ(contexte.ser.orEmpty())}")
+        sb.appendLine("MillesimeTarifs${SEP}${champ(contexte.millesimeTarifs.orEmpty())}")
         sb.appendLine("Journal${SEP}${if (net) "NET" else "COMPLET"}")
         contexte.commentaire?.let { sb.appendLine("Commentaire${SEP}${champ(it)}") }
         sb.appendLine()

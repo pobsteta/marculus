@@ -48,6 +48,10 @@ data class ContexteEntity(
     /** Stères pour 1 m³ (affichage du volume maximal d'un lot). */
     @ColumnInfo(defaultValue = "1.5")
     val steresParM3: Double = 1.5,
+    /** Commune du martelage (INSEE), SER et millésime des tarifs IFN proposés. */
+    val communeInsee: String? = null,
+    val ser: String? = null,
+    val millesimeTarifs: String? = null,
 )
 
 @Entity(

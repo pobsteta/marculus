@@ -110,7 +110,7 @@ class ExportCsvTest {
         assertEquals(
             listOf(
                 "Contexte;Parcelle 12",
-                "FormatCsv;6",
+                "FormatCsv;7",
                 "ContexteId;act_20260923155141_xyz123",
                 "Statut;REALISEE",
                 "DateMartelage;2027-10-15",
@@ -143,6 +143,18 @@ class ExportCsvTest {
         assertTrue("TarifsEssence;$noms" in lignes, lignes.joinToString("\n"))
         assertTrue("SteresParM3;1.4" in lignes)
         assertTrue(lignes.indexOf("SteresParM3;1.4") < lignes.indexOf("Journal;COMPLET"))
+    }
+
+    @Test
+    fun `format 7 - commune SER et millesime en en-tete, vides par defaut`() {
+        val vide = ExportCsv.contexteCsv(contexte, emptyList()).split("\n")
+        assertTrue("CommuneInsee;" in vide && "Ser;" in vide && "MillesimeTarifs;" in vide)
+        val ctx = contexte.copy(communeInsee = "21295", ser = "C20", millesimeTarifs = "IFN 2005-2025")
+        val lignes = ExportCsv.contexteCsv(ctx, emptyList()).split("\n")
+        assertTrue("CommuneInsee;21295" in lignes)
+        assertTrue("Ser;C20" in lignes)
+        assertTrue("MillesimeTarifs;IFN 2005-2025" in lignes)
+        assertTrue(lignes.indexOf("MillesimeTarifs;IFN 2005-2025") < lignes.indexOf("Journal;COMPLET"))
     }
 
     @Test

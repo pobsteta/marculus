@@ -156,4 +156,24 @@ class CubageTest {
         assertTrue(!Cubage.aHouppier(schaeffer, "Hêtre"))
         assertTrue(!Cubage.aEmerge(schaeffer))
     }
+
+    @Test
+    fun `les quatre Schaeffer sont les inverses des formules IFN du numero (PPtools)`() {
+        // Numéro d'un arbre (TarifIFN / TarifFindSch) : N = v/5·K/f(D) − 8.
+        fun numero(tarif: TarifCubage, v: Double, d: Double) = when (tarif) {
+            TarifCubage.SCHAEFFER_RAPIDE -> v / 5 * 70000 / ((d - 5) * (d - 10)) - 8
+            TarifCubage.SCHAEFFER_INTERMEDIAIRE -> v / 5 * 80000 / ((d - 2.5) * (d - 7.5)) - 8
+            TarifCubage.SCHAEFFER_LENT -> v / 5 * 90000 / (d * (d - 5)) - 8
+            TarifCubage.SCHAEFFER_TRES_LENT -> v / 5 * 101250 / (d * d) - 8
+            else -> error("pas un Schaeffer")
+        }
+        TarifCubage.entries.filter { it.estSchaeffer }.forEach { t ->
+            listOf(1, 9, 20).forEach { n ->
+                listOf(25.0, 42.5, 70.0).forEach { d ->
+                    assertEquals(n.toDouble(), numero(t, Cubage.volume(t, n, d), d), 1e-9, "$t n°$n D=$d")
+                }
+            }
+        }
+        assertEquals(4, TarifCubage.entries.count { it.estSchaeffer })
+    }
 }

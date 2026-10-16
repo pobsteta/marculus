@@ -68,7 +68,9 @@ object Cubage {
         val m = 0.8 + 0.1 * numero
         val v = when (tarif) {
             TarifCubage.SCHAEFFER_RAPIDE -> m / 1400.0 * (dCm - 5.0) * (dCm - 10.0)
+            TarifCubage.SCHAEFFER_INTERMEDIAIRE -> m / 1600.0 * (dCm - 2.5) * (dCm - 7.5)
             TarifCubage.SCHAEFFER_LENT -> m / 1800.0 * dCm * (dCm - 5.0)
+            TarifCubage.SCHAEFFER_TRES_LENT -> m / 2025.0 * dCm * dCm
             else -> 0.0
         }
         return v.coerceAtLeast(0.0)
@@ -147,7 +149,8 @@ object Cubage {
     /** L'essence a-t-elle un houppier : EMERGE, ou Schaeffer avec une part saisie. */
     fun aHouppier(contexte: Contexte, essence: String): Boolean = when (tarifDe(contexte, essence).tarif) {
         TarifCubage.EMERGE -> true
-        TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT -> partHouppier(contexte, essence) > 0.0
+        TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_INTERMEDIAIRE,
+        TarifCubage.SCHAEFFER_LENT, TarifCubage.SCHAEFFER_TRES_LENT -> partHouppier(contexte, essence) > 0.0
         TarifCubage.AUCUN -> false
     }
 
@@ -195,7 +198,8 @@ object Cubage {
         val dCm = if (circ) centre / PI else centre
         val cCm = if (circ) centre else centre * PI
         return when (t.tarif) {
-            TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT ->
+            TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_INTERMEDIAIRE,
+            TarifCubage.SCHAEFFER_LENT, TarifCubage.SCHAEFFER_TRES_LENT ->
                 volume(t.tarif, t.numero, dCm)
             TarifCubage.EMERGE -> {
                 val h = HauteurParser.parse(hauteurTexte ?: "").hauteurTotale

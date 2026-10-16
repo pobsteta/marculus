@@ -1,5 +1,7 @@
 package io.github.pobsteta.marculus.ui.contextes
 
+import io.github.pobsteta.marculus.data.TarifsIfnRepository
+import androidx.compose.runtime.produceState
 import io.github.pobsteta.marculus.ExportFichier
 import fr.marculus.core.model.ModeMesure
 import androidx.compose.foundation.selection.selectable
@@ -102,6 +104,7 @@ fun ListeContextesScreen(
     repository: MartelageRepository,
     sauvegardeRepository: SauvegardeRepository,
     lotRepository: LotRepository,
+    tarifsIfnRepository: TarifsIfnRepository,
     operateur: String,
     vueKanban: Boolean = false,
     onCreer: () -> Unit,
@@ -430,6 +433,13 @@ fun ListeContextesScreen(
                         stringResource(R.string.apropos_licences),
                         style = MaterialTheme.typography.bodySmall,
                     )
+                    val millesimeIfn by produceState<String?>(initialValue = null) {
+                        value = tarifsIfnRepository.referentiel()?.millesime
+                    }
+                    millesimeIfn?.let {
+                        Spacer(Modifier.height(8.dp))
+                        Text(stringResource(R.string.apropos_donnees_ifn, it), style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             },
             confirmButton = {

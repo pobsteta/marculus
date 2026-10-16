@@ -27,4 +27,5 @@ class MarculusApplication : Application() {
     val sauvegarde get() = data.sauvegarde
     val gpkg get() = data.gpkg
     val lot get() = data.lot
+    val tarifsIfn get() = data.tarifsIfn
 }

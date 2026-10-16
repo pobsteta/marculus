@@ -32,6 +32,7 @@ import fr.marculus.core.model.SeuilsCategories
 import io.github.pobsteta.marculus.Appareil
 import io.github.pobsteta.marculus.data.GpkgRepository
 import io.github.pobsteta.marculus.data.LotRepository
+import io.github.pobsteta.marculus.data.TarifsIfnRepository
 import io.github.pobsteta.marculus.data.MartelageRepository
 import io.github.pobsteta.marculus.data.ReferentielsRepository
 import io.github.pobsteta.marculus.data.ReglagesRepository
@@ -98,6 +99,7 @@ fun AppRoot(
     sauvegardeRepository: SauvegardeRepository,
     gpkgRepository: GpkgRepository,
     lotRepository: LotRepository,
+    tarifsIfnRepository: TarifsIfnRepository,
 ) {
     // rememberSaveable : la navigation survit aux rotations / recréations d'activité.
     var route: Route by rememberSaveable(stateSaver = RouteSaver) { mutableStateOf<Route>(Route.Liste) }
@@ -158,6 +160,7 @@ fun AppRoot(
             repository = repository,
             sauvegardeRepository = sauvegardeRepository,
             lotRepository = lotRepository,
+            tarifsIfnRepository = tarifsIfnRepository,
             operateur = reglages.operateur?.takeIf { it.isNotBlank() } ?: Appareil.id(context),
             vueKanban = reglages.vueKanban,
             onCreer = { route = Route.Creation },
@@ -170,6 +173,7 @@ fun AppRoot(
         Route.Creation -> CreationContexteScreen(
             repository = repository,
             gpkgRepository = gpkgRepository,
+            tarifsIfnRepository = tarifsIfnRepository,
             contexteExistant = null,
             essencesReferentiel = essences,
             onAnnuler = { route = Route.Liste },
@@ -201,6 +205,7 @@ fun AppRoot(
                 CreationContexteScreen(
                     repository = repository,
                     gpkgRepository = gpkgRepository,
+                    tarifsIfnRepository = tarifsIfnRepository,
                     contexteExistant = ctx,
                     essencesReferentiel = essences,
                     onAnnuler = { route = Route.Liste },

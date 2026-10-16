@@ -419,6 +419,7 @@
     <string name="apropos_version">Version %1$s</string>
     <string name="apropos_desc">Forest marking app — tallying, volume estimation and RTK positioning.</string>
     <string name="apropos_licences">Speech recognition: Vosk (Alpha Cephei) and the vosk-model-small-fr-0.22 model, both under the Apache 2.0 licence. Mapping: osmdroid. GeoPackage: NGA. Marculus is free software released under the GNU GPL v3 or later, with no warranty.</string>
+    <string name="apropos_donnees_ifn">Suggested Schaeffer tariff numbers: French National Forest Inventory data (%1$s) © IGN — Licence Ouverte Etalab 2.0; PPtools method (M. Bruciamacchie).</string>
     <string name="apropos_github">Open on GitHub</string>
     <string name="voix_lot_annonce">lot number %1$d</string>
     <string name="creation_affouage">Firewood allotment (affouage)</string>
@@ -432,11 +433,27 @@
     <string name="creation_tarif_court_rapide">Sch. fast</string>
     <string name="creation_tarif_court_lent">Sch. slow</string>
     <string name="creation_tarif_court_emerge">EMERGE</string>
+    <string name="creation_tarif_intermediaire">Schaeffer intermediate</string>
+    <string name="creation_tarif_tres_lent">Schaeffer very slow</string>
+    <string name="creation_tarif_court_intermediaire">Sch. interm.</string>
+    <string name="creation_tarif_court_tres_lent">Sch. very slow</string>
     <string name="creation_tarif_numero_court">No.</string>
     <string name="creation_houppier_court">Crown</string>
     <string name="creation_cd_tarif_essence">Tariff for %1$s</string>
     <string name="creation_essences_aide" formatted="false">For each ticked species: volume tariff, tariff number (Schaeffer, 1–20) and crown share in %. EMERGE = 2-input merchantable stem volume; it uses the entered height and computes the crown itself.</string>
     <string name="creation_essences_autres">Other available species</string>
+    <string name="creation_commune_titre">Municipality and sylvo-ecoregion</string>
+    <string name="creation_commune_aide">Municipality of the marking: Marculus suggests, for each species on a Schaeffer tariff, the tariff number of its sylvo-ecoregion (French NFI data). The number stays editable.</string>
+    <string name="creation_commune_label">Municipality (name or INSEE code)</string>
+    <string name="creation_commune_changer">Change</string>
+    <string name="creation_ser_part">%1$s (%2$d %%)</string>
+    <string name="creation_ser_libelle">SER %1$s — %2$s</string>
+    <string name="creation_reproposer">Suggest the numbers again</string>
+    <string name="creation_source_ser">SER %1$s — %2$s trees, CV %3$s %%</string>
+    <string name="creation_source_greco">GRECO %1$s fallback — %2$s trees, CV %3$s %%</string>
+    <string name="creation_source_france">France fallback — %1$s trees, CV %2$s %%</string>
+    <string name="creation_source_aucune">Not enough NFI data for this tariff</string>
+    <string name="creation_type_conseille">suggested type: %1$s</string>
     <string name="creation_affouage_m3">Max lot (m³)</string>
     <string name="creation_affouage_steres">Max lot (steres)</string>
     <string name="creation_affouage_coef_steres">Steres / m³</string>

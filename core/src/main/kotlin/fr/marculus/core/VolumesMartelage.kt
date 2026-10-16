@@ -53,7 +53,8 @@ object VolumesMartelage {
         val t = Cubage.tarifDe(contexte, tige.essence)
         val methode = when (t.tarif) {
             TarifCubage.AUCUN -> Methode.AUCUN
-            TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_LENT ->
+            TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_INTERMEDIAIRE,
+            TarifCubage.SCHAEFFER_LENT, TarifCubage.SCHAEFFER_TRES_LENT ->
                 Methode.schaeffer(t.tarif, t.numero)
             TarifCubage.EMERGE -> when {
                 HauteurParser.parse(tige.hauteurTexte ?: "").hauteurTotale == null -> Methode.NON_CUBABLE

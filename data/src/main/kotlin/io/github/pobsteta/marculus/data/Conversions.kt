@@ -82,6 +82,9 @@ internal fun ContexteEntity.versDomaine() = Contexte(
     partHouppier = decodePartsHouppier(partHouppier),
     tarifsEssence = decodeTarifsEssence(tarifsEssence),
     steresParM3 = steresParM3.takeIf { it.isFinite() && it > 0.0 } ?: Contexte.STERES_PAR_M3_DEFAUT,
+    communeInsee = communeInsee,
+    ser = ser,
+    millesimeTarifs = millesimeTarifs,
 )
 
 internal fun TigeEntity.versDomaine() = Tige(
