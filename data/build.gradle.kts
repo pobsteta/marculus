@@ -38,6 +38,7 @@ kotlin {
 
 dependencies {
     implementation(project(":core"))
+    implementation(libs.terrain.journal)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)

@@ -5,14 +5,16 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import fr.nemeton.terrain.journal.Fusion
 
 /** Projection (uuid/id, horodatage de modification) pour décider du « dernière écriture gagne ». */
 data class CleModifie(val cle: String, val modifie: Long)
 
 /**
  * Fusion (synchro multi-opérateurs) dans une seule transaction (tout ou rien).
- * « Dernière écriture gagne » : une donnée entrante remplace la locale seulement si elle est
- * plus récente (modifie supérieur) ; les nouvelles sont insérées ; les avis sont ajoutés si absents.
+ * « Dernière écriture gagne » ([Fusion], terrain-journal) : une donnée entrante remplace la locale
+ * seulement si elle est plus récente (modifie supérieur) ; les nouvelles sont insérées ; les avis
+ * sont ajoutés si absents.
  */
 @Dao
 interface MergeDao {
@@ -45,11 +47,11 @@ interface MergeDao {
         // ne l'a pas encore exporté ne l'efface pas ici.
         val dejaExportes = contextesDejaExportes().toSet()
         remplacerContextes(
-            contextes.filter { (cMod[it.id] ?: Long.MIN_VALUE) < it.modifie }
+            Fusion.aEcrire(contextes, cMod, ContexteEntity::id, ContexteEntity::modifie)
                 .map { if (it.id in dejaExportes) it.copy(dejaExporte = true) else it },
         )
         val tMod = tigesModifie().associate { it.cle to it.modifie }
-        remplacerTiges(tiges.filter { (tMod[it.uuid] ?: Long.MIN_VALUE) < it.modifie })
+        remplacerTiges(Fusion.aEcrire(tiges, tMod, TigeEntity::uuid, TigeEntity::modifie))
         insererConfigs(configs)
     }
 }
