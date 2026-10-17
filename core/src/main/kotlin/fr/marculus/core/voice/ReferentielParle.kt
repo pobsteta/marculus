@@ -1,6 +1,7 @@
 package fr.marculus.core.voice
 
 import fr.marculus.core.Cubage
+import fr.nemeton.terrain.voix.AlphabetRadio
 import java.text.Normalizer
 
 /**
@@ -38,47 +39,11 @@ object ReferentielParle {
         fun versGrammaire(): SpokenEssence = SpokenEssence(codeOnf, spoken)
     }
 
-    /**
-     * Alphabet radio : le mot de l'OTAN d'abord, puis des replis présents dans les modèles
-     * français quand il en est absent. Le premier mot connu du modèle gagne.
-     */
-    private val RADIO: Map<Char, List<String>> = mapOf(
-        'A' to listOf("alpha"),
-        'B' to listOf("bravo"),
-        'C' to listOf("charlie"),
-        'D' to listOf("delta"),
-        'E' to listOf("echo"),
-        'F' to listOf("foxtrot", "fox"),
-        'G' to listOf("golf"),
-        'H' to listOf("hotel"),
-        'I' to listOf("india"),
-        'J' to listOf("juliett", "juliette"),
-        'K' to listOf("kilo"),
-        'L' to listOf("lima"),
-        'M' to listOf("mike"),
-        'N' to listOf("november"),
-        'O' to listOf("oscar"),
-        'P' to listOf("papa"),
-        'Q' to listOf("quebec"),
-        'R' to listOf("romeo"),
-        'S' to listOf("sierra"),
-        'T' to listOf("tango"),
-        'U' to listOf("uniform", "uniforme"),
-        'V' to listOf("victor"),
-        'W' to listOf("whisky"),
-        'X' to listOf("xray", "xavier"),
-        'Y' to listOf("yankee"),
-        'Z' to listOf("zoulou"),
-    )
-
     /** Alphabet radio canonique (premier choix par lettre), pour l'affichage et les tests. */
-    val ALPHABET_RADIO: Map<Char, String> = RADIO.mapValues { it.value.first() }
+    val ALPHABET_RADIO: Map<Char, String> = AlphabetRadio.CANONIQUE
 
-    /** Mot radio d'une lettre, en préférant une variante que le modèle sait décoder. */
-    fun motRadio(lettre: Char, motConnu: (String) -> Boolean = { true }): String {
-        val variantes = RADIO[lettre.uppercaseChar()] ?: return "unite"
-        return variantes.firstOrNull(motConnu) ?: variantes.first()
-    }
+    /** Mot radio d'une lettre, en préférant une variante que le modèle sait décoder ([AlphabetRadio]). */
+    fun motRadio(lettre: Char, motConnu: (String) -> Boolean = { true }): String = AlphabetRadio.mot(lettre, motConnu)
 
     /**
      * Familles de premiers mots acoustiquement voisins : deux essences d'une même famille sont
@@ -176,7 +141,7 @@ object ReferentielParle {
         (essences + qualites).forEach { libelle ->
             addAll(normaliser(libelle).split(" ").filter { it.isNotEmpty() })
         }
-        RADIO.values.forEach { addAll(it) }
+        addAll(AlphabetRadio.TOUS_LES_MOTS)
         add(VoiceCommands.ANNULE)
         add(VoiceCommands.REPETE)
         add(VoiceCommands.HAUTEUR)

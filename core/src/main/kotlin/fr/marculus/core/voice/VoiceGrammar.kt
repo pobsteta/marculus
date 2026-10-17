@@ -1,5 +1,8 @@
 package fr.marculus.core.voice
 
+import fr.nemeton.terrain.voix.GrammaireFermee
+import fr.nemeton.terrain.voix.NombresFrancais
+
 /**
  * Grammaire fermée pour la reconnaissance vocale Vosk (module :core, pur JVM).
  *
@@ -81,18 +84,17 @@ object GrammarBuilder {
     ): String {
         val phrases = buildSet {
             essences.forEach { add(it.spoken.joinToString(" ")) }
-            classes.forEach { add(FrenchNumbers.toTokens(it).joinToString(" ")) }
+            classes.forEach { add(NombresFrancais.jetons(it).joinToString(" ")) }
             qualites.forEach { add(it.spoken) }
             addAll(VoiceCommands.ALL)
             if (hauteur != null) {
                 add(VoiceCommands.HAUTEUR)
                 addAll(VoiceCommands.DECOUPE)
-                (1..hauteur.maxMetres).forEach { add(FrenchNumbers.toTokens(it).joinToString(" ")) }
+                (1..hauteur.maxMetres).forEach { add(NombresFrancais.jetons(it).joinToString(" ")) }
                 hauteur.lettresBois.forEach { add(hauteur.motRadio(it)) }
             }
-            add("[unk]")
         }
-        return phrases.joinToString(prefix = "[", postfix = "]") { "\"${it.replace("\"", "")}\"" }
+        return GrammaireFermee.json(phrases)
     }
 
     /** Index inverse : suite de jetons parlés -> valeur métier. Utilisé par le parseur. */
@@ -103,11 +105,11 @@ object GrammarBuilder {
         hauteur: OptionsHauteur? = null,
     ): Lexicon = Lexicon(
         essences = essences.associateBy { it.spoken },
-        classes = classes.associateBy { FrenchNumbers.toTokens(it) },
+        classes = classes.associateBy { NombresFrancais.jetons(it) },
         // Les qualités sont multi-mots dès qu'elles sont épelées en radio ("alpha bravo").
         qualites = qualites.associateBy { it.spoken.split(" ").filter(String::isNotEmpty) },
         nombres = hauteur?.let { h ->
-            (1..h.maxMetres).associateBy { FrenchNumbers.toTokens(it) }
+            (1..h.maxMetres).associateBy { NombresFrancais.jetons(it) }
         } ?: emptyMap(),
         lettresBois = hauteur?.let { h ->
             h.lettresBois.associateBy { listOf(h.motRadio(it)) }
@@ -131,37 +133,4 @@ data class Lexicon(
 
     /** La hauteur est dictable dans ce contexte. */
     val hauteurDictable: Boolean get() = nombres.isNotEmpty()
-}
-
-/**
- * Nombres français en jetons séparés (pas de traits d'union : Vosk sort des mots).
- * Couvre 1..999 — les classes de circonférence dépassent 200 cm sur les gros bois.
- * "zéro accent" volontaire pour coller à la normalisation de la grammaire.
- */
-object FrenchNumbers {
-    private val units = arrayOf(
-        "", "un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf",
-        "dix", "onze", "douze", "treize", "quatorze", "quinze", "seize",
-        "dix sept", "dix huit", "dix neuf",
-    )
-
-    fun toTokens(n: Int): List<String> {
-        require(n in 1..999) { "Classe hors bornes: $n" }
-        val words = when {
-            n < 20 -> units[n]
-            n < 70 -> tens(n / 10) + joinUnit(n % 10)
-            n < 80 -> "soixante" + joinTeens(n - 60)
-            n < 100 -> "quatre vingt" + if (n == 80) "" else " " + units[n - 80]
-            // Centaines sans le « s » du pluriel : Vosk restitue « cent » dans les deux cas.
-            else -> {
-                val tete = if (n / 100 == 1) "cent" else units[n / 100] + " cent"
-                if (n % 100 == 0) tete else tete + " " + toTokens(n % 100).joinToString(" ")
-            }
-        }
-        return words.trim().split(" ")
-    }
-
-    private fun tens(t: Int) = arrayOf("", "", "vingt", "trente", "quarante", "cinquante", "soixante")[t]
-    private fun joinUnit(u: Int) = when (u) { 0 -> ""; 1 -> " et un"; else -> " " + units[u] }
-    private fun joinTeens(v: Int) = if (v == 11) " et onze" else " " + units[v]
 }

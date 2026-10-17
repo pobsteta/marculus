@@ -108,7 +108,9 @@ commune [`terrain`](https://github.com/pobsteta/terrain) (`terrain-gnss`, paquet
 `fr.nemeton.terrain.gnss` et `.geo`), la règle de fusion de la synchronisation
 (`terrain-journal`, `fr.nemeton.terrain.journal.Fusion`) et la lecture des couches vecteur du
 GeoPackage (`terrain-gpkg`, en SQL simple sur le SQLite d'Android ; Lambert-93, WGS 84 ou Web
-Mercator — l'ortho tuilée reste lue par NGA geopackage-android), partagée avec Groma et Surculus et publiée par tag sur
+Mercator — l'ortho tuilée reste lue par NGA geopackage-android) et les briques génériques de
+la dictée (`terrain-voix` : push-to-talk, nombres, alphabet radio, grammaire fermée, vocabulaire
+et installation du modèle Vosk), partagée avec Groma et Surculus et publiée par tag sur
 JitPack ; version dans `gradle/libs.versions.toml`. Une correction de ces briques se fait là-bas.
 
 ---

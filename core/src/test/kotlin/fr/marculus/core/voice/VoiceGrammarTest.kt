@@ -1,45 +1,12 @@
 package fr.marculus.core.voice
 
+import fr.nemeton.terrain.voix.NombresFrancais
+
 import fr.marculus.core.model.AxeClasses
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
-
-class FrenchNumbersTest {
-
-    @Test
-    fun `unites et dizaines simples`() {
-        assertEquals(listOf("cinq"), FrenchNumbers.toTokens(5))
-        assertEquals(listOf("quarante", "cinq"), FrenchNumbers.toTokens(45))
-        assertEquals(listOf("vingt"), FrenchNumbers.toTokens(20))
-        assertEquals(listOf("vingt", "et", "un"), FrenchNumbers.toTokens(21))
-    }
-
-    @Test
-    fun `septante et huitante a la francaise`() {
-        assertEquals(listOf("soixante", "dix"), FrenchNumbers.toTokens(70))
-        assertEquals(listOf("soixante", "et", "onze"), FrenchNumbers.toTokens(71))
-        assertEquals(listOf("soixante", "quinze"), FrenchNumbers.toTokens(75))
-        assertEquals(listOf("quatre", "vingt"), FrenchNumbers.toTokens(80))
-        assertEquals(listOf("quatre", "vingt", "quinze"), FrenchNumbers.toTokens(95))
-        assertEquals(listOf("quatre", "vingt", "dix"), FrenchNumbers.toTokens(90))
-    }
-
-    @Test
-    fun `centaines`() {
-        assertEquals(listOf("cent"), FrenchNumbers.toTokens(100))
-        assertEquals(listOf("cent", "vingt", "cinq"), FrenchNumbers.toTokens(125))
-        assertEquals(listOf("deux", "cent"), FrenchNumbers.toTokens(200))
-        assertEquals(listOf("deux", "cent", "quarante"), FrenchNumbers.toTokens(240))
-    }
-
-    @Test
-    fun `hors bornes refuse`() {
-        assertFailsWith<IllegalArgumentException> { FrenchNumbers.toTokens(0) }
-        assertFailsWith<IllegalArgumentException> { FrenchNumbers.toTokens(1000) }
-    }
-}
 
 class GrammarBuilderTest {
 
@@ -79,7 +46,7 @@ class GrammarBuilderTest {
         val classesAxe = AxeClasses(min = 15, max = 195, pas = 5).classes()
         val parser = UtteranceParser(GrammarBuilder.buildLexicon(essences, classesAxe, qualites))
         classesAxe.forEach { classe ->
-            val dictee = "hetre " + FrenchNumbers.toTokens(classe).joinToString(" ")
+            val dictee = "hetre " + NombresFrancais.jetons(classe).joinToString(" ")
             assertEquals(
                 VoiceEvent.Tige("HET", classe, null),
                 parser.parse(dictee),

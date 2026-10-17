@@ -43,7 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import io.github.pobsteta.marculus.R
-import fr.marculus.core.voice.FrenchNumbers
+import fr.nemeton.terrain.voix.NombresFrancais
 import fr.marculus.core.voice.OptionsHauteur
 import fr.marculus.core.voice.ReferentielParle
 import fr.marculus.core.voice.SpokenQualite
@@ -51,7 +51,7 @@ import fr.marculus.core.voice.VoiceCommands
 import fr.marculus.core.voice.VoiceEvent
 import io.github.pobsteta.marculus.voice.ModeleVosk
 import io.github.pobsteta.marculus.voice.PttController
-import io.github.pobsteta.marculus.voice.VocabulaireVosk
+import fr.nemeton.terrain.voix.VocabulaireVosk
 import io.github.pobsteta.marculus.voice.VoskVoiceService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -273,17 +273,17 @@ fun rememberDicteeVocale(
         dictee.formesBois = lettresBois.map { it to ReferentielParle.motRadio(it, motConnu) }
         dictee.exempleHauteur = optionsHauteur?.let { options ->
             val lettre = options.motRadio(lettresBois.first())
-            "${VoiceCommands.HAUTEUR} " + FrenchNumbers.toTokens(EXEMPLE_HAUTEUR_M).joinToString(" ") +
-                " " + FrenchNumbers.toTokens(EXEMPLE_BILLON_M).joinToString(" ") + " " + lettre
+            "${VoiceCommands.HAUTEUR} " + NombresFrancais.jetons(EXEMPLE_HAUTEUR_M).joinToString(" ") +
+                " " + NombresFrancais.jetons(EXEMPLE_BILLON_M).joinToString(" ") + " " + lettre
         } ?: ""
         dictee.exempleDecoupe = optionsHauteur?.let { options ->
             val lettre = options.motRadio(lettresBois.first())
             val motCle = VoiceCommands.DECOUPE.firstOrNull(motConnu) ?: VoiceCommands.DECOUPE.first()
-            "$motCle " + FrenchNumbers.toTokens(EXEMPLE_BILLON_M).joinToString(" ") + " " + lettre
+            "$motCle " + NombresFrancais.jetons(EXEMPLE_BILLON_M).joinToString(" ") + " " + lettre
         } ?: ""
         dictee.exemple = listOfNotNull(
             parlees.firstOrNull()?.spoken?.joinToString(" "),
-            classes.getOrNull(classes.size / 2)?.let { FrenchNumbers.toTokens(it).joinToString(" ") },
+            classes.getOrNull(classes.size / 2)?.let { NombresFrancais.jetons(it).joinToString(" ") },
             qualitesParlees.firstOrNull()?.spoken,
         ).joinToString(" ")
         val configure = service.chargerModele().mapCatching {

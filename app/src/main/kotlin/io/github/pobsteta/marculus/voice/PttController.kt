@@ -1,8 +1,8 @@
 package io.github.pobsteta.marculus.voice
 
 import android.media.ToneGenerator
-import fr.marculus.core.voice.MicroPtt
-import fr.marculus.core.voice.NoyauPtt
+import fr.nemeton.terrain.voix.MicroPtt
+import fr.nemeton.terrain.voix.NoyauPtt
 
 /**
  * Point de convergence unique des déclencheurs push-to-talk (bouton micro de la feuille, appui

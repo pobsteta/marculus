@@ -21,6 +21,8 @@ kotlin {
 dependencies {
     // NMEA, NTRIP, géodésie : types exposés par l'API de :core (Position, FixGnss).
     api(libs.terrain.gnss)
+    // Push-to-talk, nombres et alphabet radio, grammaire fermée : briques de dictée communes.
+    api(libs.terrain.voix)
     testImplementation(kotlin("test"))
 }
 

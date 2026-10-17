@@ -15,7 +15,7 @@ vosk = "0.3.47"
 jna = "5.13.0"
 robolectric = "4.17"
 androidxTestCore = "1.7.0"
-terrain = "v0.3.0"
+terrain = "v0.4.0"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -28,6 +28,7 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 [libraries]
 terrain-gnss = { group = "com.github.pobsteta.terrain", name = "terrain-gnss", version.ref = "terrain" }
 terrain-journal = { group = "com.github.pobsteta.terrain", name = "terrain-journal", version.ref = "terrain" }
+terrain-voix = { group = "com.github.pobsteta.terrain", name = "terrain-voix", version.ref = "terrain" }
 terrain-gpkg = { group = "com.github.pobsteta.terrain", name = "terrain-gpkg", version.ref = "terrain" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
