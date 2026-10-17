@@ -82,6 +82,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import io.github.pobsteta.marculus.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.nemeton.terrain.carte.Attributions
+import fr.nemeton.terrain.carte.CoucheWmts
+import fr.nemeton.terrain.carte.Echelle
+import fr.nemeton.terrain.carte.Geoplateforme
 import fr.nemeton.terrain.geo.AttributionSpatiale
 import fr.marculus.core.Houppier
 import fr.marculus.core.model.ActionTige
@@ -122,10 +126,6 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.TilesOverlay
 import java.util.Locale
-import kotlin.math.cos
-import kotlin.math.floor
-import kotlin.math.log10
-import kotlin.math.pow
 
 private const val ZOOM_MAX = 19.0
 
@@ -180,47 +180,33 @@ private val PALETTE_FONCIER = listOf(
     0xFFFDD835.toInt(), 0xFF00ACC1.toInt(), 0xFF6D4C41.toInt(), 0xFFEC407A.toInt(),
 )
 
-private const val ATTRIBUTION_IGN = "© IGN Géoplateforme, Licence Ouverte Etalab 2.0"
-
 /**
  * Fonds de carte, dans l'ordre du menu. [attribution] est la mention exigée par la licence de la
  * source, affichée sous l'échelle ; l'ortho du chantier vient du GeoPackage, déjà attribué par
  * celui qui l'a produit.
  */
 private enum class Fond(val libelle: String, val attribution: String?) {
-    PLAN_IGN("Plan IGN", ATTRIBUTION_IGN),
-    IGN("Ortho IGN", ATTRIBUTION_IGN),
-    OSM("OpenStreetMap", "© contributeurs OpenStreetMap (ODbL)"),
+    PLAN_IGN("Plan IGN", Attributions.IGN),
+    IGN("Ortho IGN", Attributions.IGN),
+    OSM("OpenStreetMap", Attributions.OSM),
     ORTHO("Ortho chantier", null),
 }
 
-/**
- * Couche WMTS de la Géoplateforme IGN : gratuite, sans clé, sous Licence Ouverte Etalab 2.0. Le
- * jeu de matrices `PM_0_19` est la grille Web Mercator d'osmdroid (0 à 19) : TILEROW/TILECOL sont
- * directement Y/X.
- */
-private class SourceGeoplateforme(nom: String, private val couche: String, private val style: String, private val format: String) :
-    OnlineTileSourceBase(nom, 0, 19, 256, if (format == "image/png") ".png" else ".jpg", arrayOf("https://data.geopf.fr/wmts")) {
+/** Source osmdroid d'une couche WMTS de la Géoplateforme (URL construite par terrain-carte). */
+private class SourceGeoplateforme(private val couche: CoucheWmts) :
+    OnlineTileSourceBase(couche.nom, couche.zoomMin, couche.zoomMax, 256, couche.extension, arrayOf(CoucheWmts.BASE)) {
     override fun getTileURLString(pMapTileIndex: Long): String =
-        getBaseUrl() + "?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0" +
-            "&LAYER=" + couche + "&STYLE=" + style.replace(" ", "%20") + "&FORMAT=" + format +
-            "&TILEMATRIXSET=PM_0_19" +
-            "&TILEMATRIX=" + MapTileIndex.getZoom(pMapTileIndex) +
-            "&TILEROW=" + MapTileIndex.getY(pMapTileIndex) +
-            "&TILECOL=" + MapTileIndex.getX(pMapTileIndex)
+        couche.url(MapTileIndex.getZoom(pMapTileIndex), MapTileIndex.getX(pMapTileIndex), MapTileIndex.getY(pMapTileIndex))
 }
 
 /** Plan IGN v2 : le fond par défaut, lisible en forêt (routes, lieux-dits, courbes). */
-private val SOURCE_PLAN_IGN: OnlineTileSourceBase =
-    SourceGeoplateforme("PlanIGN", "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2", "normal", "image/png")
+private val SOURCE_PLAN_IGN: OnlineTileSourceBase = SourceGeoplateforme(Geoplateforme.PLAN_IGN)
 
 /** Orthophotos IGN (BD ORTHO®, 20 cm). */
-private val SOURCE_ORTHO_IGN: OnlineTileSourceBase =
-    SourceGeoplateforme("OrthoIGN", "ORTHOIMAGERY.ORTHOPHOTOS", "normal", "image/jpeg")
+private val SOURCE_ORTHO_IGN: OnlineTileSourceBase = SourceGeoplateforme(Geoplateforme.ORTHO_IGN)
 
 /** Parcellaire Express (cadastre IGN), transparent : se superpose à n'importe quel fond. */
-private val SOURCE_CADASTRE: OnlineTileSourceBase =
-    SourceGeoplateforme("CadastreIGN", "CADASTRALPARCELS.PARCELLAIRE_EXPRESS", "PCI vecteur", "image/png")
+private val SOURCE_CADASTRE: OnlineTileSourceBase = SourceGeoplateforme(Geoplateforme.CADASTRE)
 
 /** Préférences de la carte : fond et cadastre retrouvés d'une ouverture à l'autre. */
 private const val PREFS_CARTE = "carte"
@@ -357,7 +343,7 @@ fun CarteScreen(
     val positionOverlay = remember { PositionOverlay(densite) }
     // Résolution au sol du centre de la carte (m/pixel) pour l'échelle Compose (bas-centre).
     fun majEchelle() {
-        metresParPixel = resolutionAuSol(mapView.mapCenter.latitude, mapView.zoomLevelDouble)
+        metresParPixel = Echelle.resolutionAuSol(mapView.mapCenter.latitude, mapView.zoomLevelDouble)
     }
 
     // Permission de localisation (le GNSS interne alimente le point quand le RTK n'est pas actif).
@@ -744,7 +730,7 @@ fun CarteScreen(
                 EchelleCarte(metresParPixel = metresParPixel, densite = densite)
                 // Le cadastre est de l'IGN : mention ajoutée quand le fond n'en est pas déjà.
                 val mentionCadastre = voirCadastre && fond != Fond.PLAN_IGN && fond != Fond.IGN
-                listOfNotNull(fond.attribution, if (mentionCadastre) "cadastre © IGN" else null)
+                listOfNotNull(fond.attribution, if (mentionCadastre) Attributions.CADASTRE else null)
                     .joinToString(" · ")
                     .takeIf { it.isNotEmpty() }
                     ?.let { Text(it, style = MaterialTheme.typography.labelSmall) }
@@ -765,11 +751,10 @@ fun CarteScreen(
 private fun EchelleCarte(metresParPixel: Double, densite: Float, modifier: Modifier = Modifier) {
     if (metresParPixel <= 0.0) return
     val largeurCiblePx = 90f * densite
-    val metresJolis = distanceRonde(metresParPixel * largeurCiblePx)
+    val metresJolis = Echelle.distanceRonde(metresParPixel * largeurCiblePx)
     if (metresJolis <= 0.0) return
     val largeurDp = ((metresJolis / metresParPixel) / densite).toFloat()
-    val libelle = if (metresJolis >= 1000) "${(metresJolis / 1000).let { if (it == it.toInt().toDouble()) it.toInt().toString() else String.format(Locale.ROOT, "%.1f", it) }} km"
-    else "${metresJolis.toInt()} m"
+    val libelle = Echelle.libelle(metresJolis)
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -781,24 +766,6 @@ private fun EchelleCarte(metresParPixel: Double, densite: Float, modifier: Modif
         )
     }
 }
-
-/** Plus grande distance « ronde » (1, 2 ou 5 × 10ⁿ) inférieure ou égale à [metres]. */
-private fun distanceRonde(metres: Double): Double {
-    if (metres <= 0.0) return 0.0
-    val exposant = floor(log10(metres))
-    val base = 10.0.pow(exposant)
-    val facteur = metres / base
-    val joli = when {
-        facteur >= 5.0 -> 5.0
-        facteur >= 2.0 -> 2.0
-        else -> 1.0
-    }
-    return joli * base
-}
-
-/** Résolution au sol (m/pixel) en projection Web Mercator, pour [latitude] (°) et [zoom] (osmdroid). */
-private fun resolutionAuSol(latitude: Double, zoom: Double): Double =
-    156543.03392 * cos(Math.toRadians(latitude)) / 2.0.pow(zoom)
 
 @Composable
 private fun LegendeEssences(

@@ -5,10 +5,10 @@ import android.net.Uri
 import android.util.Log
 import fr.marculus.core.CouchesGpkg
 import fr.nemeton.terrain.geo.Geodesie
-import fr.marculus.core.GrilleWebMercator
-import fr.marculus.core.MatriceTuiles
 import fr.marculus.core.Houppier
 import fr.marculus.core.TypeCouche
+import fr.nemeton.terrain.carte.GrilleWebMercator
+import fr.nemeton.terrain.carte.MatriceTuiles
 import fr.nemeton.terrain.geo.Position
 import fr.nemeton.terrain.gpkg.Entite
 import fr.nemeton.terrain.gpkg.Systeme

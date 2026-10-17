@@ -40,6 +40,7 @@ dependencies {
     implementation(project(":core"))
     implementation(libs.terrain.journal)
     implementation(libs.terrain.gpkg)
+    implementation(libs.terrain.carte)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
