@@ -105,8 +105,10 @@ minSdk 26 / compileSdk 36.
 
 NMEA, NTRIP, géodésie (aires, point dans polygone) et projections viennent de la bibliothèque
 commune [`terrain`](https://github.com/pobsteta/terrain) (`terrain-gnss`, paquets
-`fr.nemeton.terrain.gnss` et `.geo`), ainsi que la règle de fusion de la synchronisation
-(`terrain-journal`, `fr.nemeton.terrain.journal.Fusion`), partagée avec Groma et Surculus et publiée par tag sur
+`fr.nemeton.terrain.gnss` et `.geo`), la règle de fusion de la synchronisation
+(`terrain-journal`, `fr.nemeton.terrain.journal.Fusion`) et la lecture des couches vecteur du
+GeoPackage (`terrain-gpkg`, en SQL simple sur le SQLite d'Android ; Lambert-93, WGS 84 ou Web
+Mercator — l'ortho tuilée reste lue par NGA geopackage-android), partagée avec Groma et Surculus et publiée par tag sur
 JitPack ; version dans `gradle/libs.versions.toml`. Une correction de ces briques se fait là-bas.
 
 ---

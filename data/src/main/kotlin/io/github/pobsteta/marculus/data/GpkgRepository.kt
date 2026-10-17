@@ -10,22 +10,15 @@ import fr.marculus.core.MatriceTuiles
 import fr.marculus.core.Houppier
 import fr.marculus.core.TypeCouche
 import fr.nemeton.terrain.geo.Position
+import fr.nemeton.terrain.gpkg.Entite
+import fr.nemeton.terrain.gpkg.Systeme
+import fr.nemeton.terrain.gpkg.GeoPackage as GeoPackageVecteur
 import mil.nga.geopackage.GeoPackage
 import mil.nga.geopackage.GeoPackageFactory
 import mil.nga.geopackage.tiles.reproject.TileReprojection
 import mil.nga.geopackage.tiles.reproject.TileReprojectionOptimize
 import mil.nga.geopackage.tiles.retriever.GeoPackageTileRetriever
 import mil.nga.geopackage.tiles.user.TileDao
-import mil.nga.proj.ProjectionConstants
-import mil.nga.proj.ProjectionFactory
-import mil.nga.proj.ProjectionTransform
-import mil.nga.sf.Geometry
-import mil.nga.sf.GeometryCollection
-import mil.nga.sf.LineString
-import mil.nga.sf.MultiLineString
-import mil.nga.sf.MultiPolygon
-import mil.nga.sf.Polygon
-import org.locationtech.proj4j.ProjCoordinate
 import java.io.File
 
 /** Suffixe de la table ortho reprojetée en Web Mercator, créée à la première ouverture. */
@@ -101,174 +94,82 @@ class GpkgRepository(private val context: Context) {
     }
 
     /** Anneaux (contours) de toutes les parcelles, en WGS84 : chaque anneau = liste de positions. */
-    fun parcelles(chemin: String): List<List<Position>> {
-        val fichier = File(chemin)
-        if (!fichier.exists()) {
-            Log.w("Marculus.Gpkg", "Fichier absent: $chemin")
-            return emptyList()
-        }
-        val anneaux = mutableListOf<List<Position>>()
-        try {
-            val manager = GeoPackageFactory.getManager(context)
-            val gpkg = manager.openExternal(fichier) ?: run {
-                Log.w("Marculus.Gpkg", "openExternal a renvoyé null pour $chemin")
-                return emptyList()
-            }
-            try {
-                Log.d("Marculus.Gpkg", "tables features=${gpkg.featureTables}, tiles=${gpkg.tileTables}")
-                val wgs84 = ProjectionFactory.getProjection(ProjectionConstants.EPSG_WORLD_GEODETIC_SYSTEM.toLong())
-                for (table in gpkg.featureTables) {
-                    if (CouchesGpkg.type(table) != TypeCouche.PARCELLE) continue
-                    val dao = gpkg.getFeatureDao(table)
-                    val transform = dao.projection.getTransformation(wgs84)
-                    val rs = dao.queryForAll()
-                    try {
-                        while (rs.moveToNext()) {
-                            val geom = rs.row.geometry?.geometry ?: continue
-                            collecter(geom, transform, anneaux)
-                        }
-                    } finally {
-                        rs.close()
-                    }
-                }
-            } finally {
-                gpkg.close()
-            }
-        } catch (e: Exception) {
-            Log.e("Marculus.Gpkg", "Erreur lecture GPKG", e)
-        }
-        Log.d("Marculus.Gpkg", "anneaux lus = ${anneaux.size}")
-        return anneaux
-    }
+    fun parcelles(chemin: String): List<List<Position>> =
+        entites(chemin, TypeCouche.PARCELLE) { e, systeme -> e.anneauxWgs84(systeme) }.flatten()
 
     /** Parcelles détaillées (attributs + anneaux WGS84), pour le rattachement spatial et la carte. */
-    fun parcellesDetail(chemin: String): List<ParcelleGpkg> {
-        val fichier = File(chemin)
-        if (!fichier.exists()) return emptyList()
-        val out = mutableListOf<ParcelleGpkg>()
-        try {
-            val manager = GeoPackageFactory.getManager(context)
-            val gpkg = manager.openExternal(fichier) ?: return emptyList()
-            try {
-                val wgs84 = ProjectionFactory.getProjection(ProjectionConstants.EPSG_WORLD_GEODETIC_SYSTEM.toLong())
-                for (table in gpkg.featureTables) {
-                    // Houppiers et dessertes ne sont pas des parcelles : sans ce filtre, un
-                    // houppier deviendrait candidat au rattachement spatial de la tige.
-                    if (CouchesGpkg.type(table) != TypeCouche.PARCELLE) continue
-                    val dao = gpkg.getFeatureDao(table)
-                    val transform = dao.projection.getTransformation(wgs84)
-                    val geomCol = dao.geometryColumnName
-                    val colonnes = dao.columnNames.filter { it != geomCol }
-                    val rs = dao.queryForAll()
-                    try {
-                        while (rs.moveToNext()) {
-                            val row = rs.row
-                            val geom = row.geometry?.geometry ?: continue
-                            val anneaux = mutableListOf<List<Position>>()
-                            collecter(geom, transform, anneaux)
-                            if (anneaux.isEmpty()) continue
-                            val attrs = colonnes.mapNotNull { c ->
-                                val v = runCatching { row.getValue(c) }.getOrNull()
-                                if (v != null) c to v.toString() else null
-                            }.toMap()
-                            val prop = trouver(attrs, "proprietaire", "propriétaire", "owner", "prop")
-                            val foret = trouver(attrs, "foret", "forêt", "forest")
-                            val commune = trouver(attrs, "commune", "nom_com", "ville")
-                            val section = trouver(attrs, "section", "sect")
-                            val numero = trouver(attrs, "numero", "num", "n_parcelle", "parcelle", "id_parcelle", "idu")
-                            val parcelleNom = if (section != null && numero != null) "$section $numero" else numero
-                            val proprietaires = prop?.split(';', '/', '&')
-                                ?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
-                            val surfaceHa = Geodesie.aireHa(anneaux)
-                            val parties = listOfNotNull(prop, foret, commune, parcelleNom?.let { "Parc. $it" })
-                            val label = if (parties.isEmpty()) "Parcelle ${row.id}" else parties.joinToString(" · ")
-                            out.add(
-                                ParcelleGpkg(
-                                    row.id, label, prop, proprietaires, foret, parcelleNom, commune, surfaceHa, attrs, anneaux,
-                                ),
-                            )
-                        }
-                    } finally {
-                        rs.close()
-                    }
-                }
-            } finally {
-                gpkg.close()
-            }
-        } catch (e: Exception) {
-            Log.e("Marculus.Gpkg", "parcellesDetail", e)
+    fun parcellesDetail(chemin: String): List<ParcelleGpkg> =
+        // Houppiers et dessertes ne sont pas des parcelles : sans ce filtre, un houppier
+        // deviendrait candidat au rattachement spatial de la tige.
+        entites(chemin, TypeCouche.PARCELLE) { e, systeme ->
+            val anneaux = e.anneauxWgs84(systeme)
+            if (anneaux.isEmpty()) return@entites null
+            val attrs = e.attributs
+            val prop = trouver(attrs, "proprietaire", "propriétaire", "owner", "prop")
+            val foret = trouver(attrs, "foret", "forêt", "forest")
+            val commune = trouver(attrs, "commune", "nom_com", "ville")
+            val section = trouver(attrs, "section", "sect")
+            val numero = trouver(attrs, "numero", "num", "n_parcelle", "parcelle", "id_parcelle", "idu")
+            val parcelleNom = if (section != null && numero != null) "$section $numero" else numero
+            val proprietaires = prop?.split(';', '/', '&')
+                ?.map { it.trim() }?.filter { it.isNotEmpty() } ?: emptyList()
+            val surfaceHa = Geodesie.aireHa(anneaux)
+            val parties = listOfNotNull(prop, foret, commune, parcelleNom?.let { "Parc. $it" })
+            val label = if (parties.isEmpty()) "Parcelle ${e.id}" else parties.joinToString(" · ")
+            ParcelleGpkg(e.id, label, prop, proprietaires, foret, parcelleNom, commune, surfaceHa, attrs, anneaux)
         }
-        return out
-    }
 
     /**
      * Houppiers du GPKG (couche `houppier`) : contour en WGS84 + hauteur d'apex en mètres.
      * Une entité sans attribut de hauteur exploitable est ignorée — elle ne pourrait rien estimer.
      */
     fun houppiers(chemin: String): List<Houppier> =
-        entites(chemin, TypeCouche.HOUPPIER) { _, attrs, geom, transform ->
-            val h = CouchesGpkg.attribut(attrs, CouchesGpkg.ALIAS_HAUTEUR)
+        entites(chemin, TypeCouche.HOUPPIER) { e, systeme ->
+            val h = CouchesGpkg.attribut(e.attributs, CouchesGpkg.ALIAS_HAUTEUR)
                 ?.replace(',', '.')?.toDoubleOrNull() ?: return@entites null
-            val anneaux = mutableListOf<List<Position>>()
-            collecter(geom, transform, anneaux)
+            val anneaux = e.anneauxWgs84(systeme)
             if (anneaux.isEmpty()) null else Houppier(hauteurM = h, anneaux = anneaux)
         }
 
     /** Dessertes du GPKG (couche `desserte`) : routes, pistes et chemins, en lignes WGS84. */
     fun dessertes(chemin: String): List<DesserteGpkg> =
-        entites(chemin, TypeCouche.DESSERTE) { id, attrs, geom, transform ->
-            val lignes = mutableListOf<List<Position>>()
-            collecterLignes(geom, transform, lignes)
+        entites(chemin, TypeCouche.DESSERTE) { e, systeme ->
+            // Une desserte cartographiée en surface (route large) : on en garde les contours.
+            val lignes = e.lignesWgs84(systeme)
             if (lignes.isEmpty()) {
                 null
             } else {
-                val nom = CouchesGpkg.attribut(attrs, CouchesGpkg.ALIAS_NOM)
-                val type = CouchesGpkg.attribut(attrs, CouchesGpkg.ALIAS_TYPE)
-                DesserteGpkg(id = id, label = nom ?: type, type = type, lignes = lignes)
+                val nom = CouchesGpkg.attribut(e.attributs, CouchesGpkg.ALIAS_NOM)
+                val type = CouchesGpkg.attribut(e.attributs, CouchesGpkg.ALIAS_TYPE)
+                DesserteGpkg(id = e.id, label = nom ?: type, type = type, lignes = lignes)
             }
         }
 
     /**
-     * Parcourt les entités des tables jouant le rôle `type` et applique `extraire` à chacune.
-     * Le GPKG est ouvert, lu et refermé ici : les erreurs de lecture (fichier absent, table
-     * illisible) rendent une liste vide plutôt qu'une exception — la carte doit survivre à un
+     * Parcourt les entités des tables jouant le rôle `type` (lues par terrain-gpkg, en SQL simple)
+     * et applique `extraire` à chacune. Le GPKG est ouvert en lecture seule, lu et refermé ici :
+     * un fichier absent ou illisible rend une liste vide, une couche illisible ou dans un système
+     * non géré (ni Lambert-93, ni WGS 84, ni Web Mercator) est sautée — la carte doit survivre à un
      * GPKG imparfait.
      */
-    private fun <T> entites(
-        chemin: String,
-        type: TypeCouche,
-        extraire: (Long, Map<String, String>, Geometry, ProjectionTransform) -> T?,
-    ): List<T> {
-        val fichier = File(chemin)
-        if (!fichier.exists()) return emptyList()
+    private fun <T> entites(chemin: String, type: TypeCouche, extraire: (Entite, Systeme) -> T?): List<T> {
+        if (!File(chemin).exists()) {
+            Log.w("Marculus.Gpkg", "Fichier absent: $chemin")
+            return emptyList()
+        }
         val out = mutableListOf<T>()
         try {
-            val manager = GeoPackageFactory.getManager(context)
-            val gpkg = manager.openExternal(fichier) ?: return emptyList()
-            try {
-                val wgs84 = ProjectionFactory.getProjection(ProjectionConstants.EPSG_WORLD_GEODETIC_SYSTEM.toLong())
-                for (table in gpkg.featureTables) {
-                    if (CouchesGpkg.type(table) != type) continue
-                    val dao = gpkg.getFeatureDao(table)
-                    val transform = dao.projection.getTransformation(wgs84)
-                    val colonnes = dao.columnNames.filter { it != dao.geometryColumnName }
-                    val rs = dao.queryForAll()
+            SqliteAndroid.lecture(chemin).use { base ->
+                val gpkg = GeoPackageVecteur(base)
+                for (couche in gpkg.couches()) {
+                    if (CouchesGpkg.type(couche.table) != type) continue
                     try {
-                        while (rs.moveToNext()) {
-                            val row = rs.row
-                            val geom = row.geometry?.geometry ?: continue
-                            val attrs = colonnes.mapNotNull { c ->
-                                val v = runCatching { row.getValue(c) }.getOrNull()
-                                if (v != null) c to v.toString() else null
-                            }.toMap()
-                            extraire(row.id, attrs, geom, transform)?.let { out.add(it) }
-                        }
-                    } finally {
-                        rs.close()
+                        val systeme = couche.systeme
+                        gpkg.entites(couche).forEach { e -> if (systeme != null) extraire(e, systeme)?.let { out.add(it) } }
+                    } catch (e: Exception) {
+                        Log.e("Marculus.Gpkg", "Couche ${couche.table} ignorée", e)
                     }
                 }
-            } finally {
-                gpkg.close()
             }
         } catch (e: Exception) {
             Log.e("Marculus.Gpkg", "entites($type)", e)
@@ -354,38 +255,5 @@ class GpkgRepository(private val context: Context) {
             srs?.organization, srs?.organizationCoordsysId ?: -1,
             jeu.minX, jeu.minY, jeu.maxX, jeu.maxY, matrices,
         )
-    }
-
-    /** Polylignes d'une géométrie linéaire (une desserte peut être un MULTILINESTRING). */
-    private fun collecterLignes(g: Geometry, transform: ProjectionTransform, sortie: MutableList<List<Position>>) {
-        when (g) {
-            is MultiLineString -> g.lineStrings.forEach { collecterLignes(it, transform, sortie) }
-            is LineString -> sortie.add(
-                g.points.map { p ->
-                    val w = transform.transform(ProjCoordinate(p.x, p.y))
-                    Position(latitude = w.y, longitude = w.x)
-                },
-            )
-            // Une desserte cartographiée en surface (route large) : on en garde les contours.
-            is MultiPolygon, is Polygon -> collecter(g, transform, sortie)
-            is GeometryCollection<*> -> g.geometries.forEach { collecterLignes(it as Geometry, transform, sortie) }
-            else -> Unit
-        }
-    }
-
-    private fun collecter(g: Geometry, transform: ProjectionTransform, sortie: MutableList<List<Position>>) {
-        when (g) {
-            is MultiPolygon -> g.polygons.forEach { collecter(it, transform, sortie) }
-            is Polygon -> g.rings.forEach { anneau ->
-                sortie.add(
-                    anneau.points.map { p ->
-                        val w = transform.transform(ProjCoordinate(p.x, p.y))
-                        Position(latitude = w.y, longitude = w.x)
-                    },
-                )
-            }
-            is GeometryCollection<*> -> g.geometries.forEach { collecter(it as Geometry, transform, sortie) }
-            else -> Unit
-        }
     }
 }
