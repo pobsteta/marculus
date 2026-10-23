@@ -1,0 +1,1 @@
+JAVA_HOME=/home/pascal/.gradle/jdks/eclipse_adoptium-21-amd64-linux.2 ./gradlew :core:test :data:testDebugUnitTest --no-daemon -q
