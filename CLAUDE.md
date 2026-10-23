@@ -25,7 +25,7 @@ l'effort.**
 | Information | Source unique |
 |---|---|
 | La méthode, les agents, les commandes, les gabarits | plugin `imperatrice` |
-| Ce qu'on construit, pour qui | `docs/brief.md` puis `docs/spec.md` |
+| Ce qu'on construit, pour qui | `docs/brief.md` puis `docs/spec.md` (écrite à l'étape 5 de `/brief` ; d'ici là, `docs/specs/2026-06-21-marculus-v1-spec.md`) |
 | Les décisions d'architecture | `docs/adr/NNNN-titre.md` |
 | L'équipe validée, le plafond humain | `pilotage/equipe.md` |
 | Les missions | `pilotage/missions/NNN-titre.md` |
