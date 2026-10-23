@@ -458,8 +458,8 @@
     <string name="creation_niveau_ser">SER %1$s</string>
     <string name="creation_niveau_greco">GRECO %1$s</string>
     <string name="creation_niveau_france">France</string>
-    <string name="creation_affouage_m3">Max lot (m³)</string>
-    <string name="creation_affouage_steres">Max lot (steres)</string>
+    <string name="creation_affouage_m3">(m³) max lot</string>
+    <string name="creation_affouage_steres">(steres) max lot</string>
     <string name="creation_affouage_coef_steres">Steres / m³</string>
     <string name="creation_affouage_steres_aide">Steres are an estimate: steres = m³ × factor (≈ 1.5 for 1 m logs). Filling one updates the other.</string>
     <string name="creation_erreur_steres">Invalid steres / m³ factor (number &gt; 0).</string>

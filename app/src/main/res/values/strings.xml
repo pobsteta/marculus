@@ -460,8 +460,8 @@
     <string name="creation_niveau_ser">SER %1$s</string>
     <string name="creation_niveau_greco">GRECO %1$s</string>
     <string name="creation_niveau_france">France</string>
-    <string name="creation_affouage_m3">Lot max. (m³)</string>
-    <string name="creation_affouage_steres">Lot max. (stères)</string>
+    <string name="creation_affouage_m3">(m³) lot max.</string>
+    <string name="creation_affouage_steres">(stères) lot max.</string>
     <string name="creation_affouage_coef_steres">Stères / m³</string>
     <string name="creation_affouage_steres_aide">Les stères sont une estimation : stères = m³ × coefficient (≈ 1,5 pour des bûches de 1 m). Remplir l\'un met l\'autre à jour.</string>
     <string name="creation_erreur_steres">Coefficient stères / m³ invalide (nombre &gt; 0).</string>
