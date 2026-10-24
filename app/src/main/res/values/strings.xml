@@ -229,6 +229,7 @@
     <string name="param_theme_systeme">Système</string>
     <string name="param_theme_clair">Clair</string>
     <string name="param_theme_sombre">Sombre</string>
+    <string name="param_theme_choix_actuel">Choix actuel</string>
     <string name="param_veille_titre">Empêcher la mise en veille</string>
     <string name="param_veille_desc">Garde l\'écran allumé pendant le martelage.</string>
     <string name="param_plein_titre">Plein écran</string>
