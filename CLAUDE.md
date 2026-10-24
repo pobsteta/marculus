@@ -40,6 +40,9 @@ Un lien plutôt qu'une copie. Si une information existe à deux endroits, l'un d
 (porte n° 2 : Pascal valide l'équipe) → `/imperatrice:boucle` (porte n° 3 : Pascal valide
 chaque PR vers `main`) → `/imperatrice:bilan`.
 
+Le plugin `imperatrice` (pobsteta) porte la méthode, les agents et les hooks ; sans lui on lit
+`pilotage/` mais on ne rejoue pas la boucle.
+
 ## Règles métier du projet
 
 La description à jour du produit est dans `docs/specs/2026-06-21-marculus-v1-spec.md`
