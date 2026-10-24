@@ -33,11 +33,11 @@ jobs:
       - name: Configurer Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Tests unitaires + couverture
-        run: ./gradlew :core:test :data:testDebugUnitTest :app:testDebugUnitTest :core:jacocoTestReport --no-daemon
+      - name: Tests unitaires + couverture (:core)
+        run: ./gradlew :core:test :core:jacocoTestReport --no-daemon
 
-      - name: Tests unitaires (:data, migration Room et réglages du terrain)
-        run: ./gradlew :data:testDebugUnitTest --no-daemon
+      - name: Tests unitaires (:data, migration Room et réglages du terrain ; :app, thème)
+        run: ./gradlew :data:testDebugUnitTest :app:testDebugUnitTest --no-daemon
 
       - name: Publier les rapports de test de :data
         if: always()
