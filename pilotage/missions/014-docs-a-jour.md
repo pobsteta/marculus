@@ -65,3 +65,23 @@ _Rempli par Pascal seul, avant de lire le travail de l'agent._
 ## Comment saura-t-on que ça marche ?
 
 Un successeur installe la dernière release sur un téléphone en suivant le README seul.
+
+## Remarques du relecteur — aller-retour 1/3 (2026-10-24)
+
+Rendu : commit f3d1f6e (worktree `.claude/worktrees/agent-af5c7f5a4c271d86c`). Procédure conforme à
+`release.yml`, à `.claude/test-command` et à `app/build.gradle.kts` ; clé sans invention. À reprendre :
+
+1. **« tables en attente »** : la preuve existe, la mettre : spec v1 l. 19-20 et l. 135-136,
+   journal l. 36 ; retirer « n'a pas été revérifié ici ».
+2. **Règle du sommier** : dans `docs/brief.md` § Échanges avec Nemeton, la phrase du 2026-10-23
+   (« `nemetonshiny` ne lit que les formats 2 à 5 … ») a été réécrite sur place : la garder telle
+   quelle, ou la citer en entier dans la ligne datée. Même chose pour « Version installée :
+   **v0.63.6** (2026-10-23) » : citer sa forme exacte.
+3. **README l. 162, fait faux** : `release.yml` ne lance aucun test (ni `needs` ni `workflow_run`) ;
+   les tests sont dans `ci.yml`. Corriger le fait ; ne pas trancher la conséquence (question posée à
+   Pascal par l'orchestrateur).
+4. **Preuves « journal 2026-10-24 »** : donner les numéros de ligne (urgence l. 72, règle du lot
+   l. 73, dépôt l. 57, constat du relecteur l. 43 — à recontrôler).
+5. **Règle du lot** : la nuance EMERGE n'est plus ouverte : **confirmée par Pascal** (journal,
+   ligne « règle EMERGE confirmée (« oui pour EMERGE ») ») : houppier seul dès qu'EMERGE couvre
+   l'essence, sinon tige entière. L'écrire comme décidée, avec sa ligne.
