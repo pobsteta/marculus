@@ -43,6 +43,8 @@
 | [006](missions/006-theme-terrain-style.md) thème = jetons `terrain-style` | `dev` | sonnet | tenir (plan d'abord) | oui · à moitié · oui | 2, annulée ; attend v0.6.1 |
 | [007](missions/007-test-choix-theme.md) tests du choix du thème | `testeur` | sonnet | appuyer | oui · oui · oui | 3 |
 | [008](missions/008-choix-theme.md) choix du thème Système / Clair / Sombre | `dev` | sonnet | appuyer | oui · oui · oui | 3 |
+| [009](missions/009-test-numero-hors-schaeffer.md) tests numéro hors Schaeffer | `testeur` | sonnet | appuyer | oui · oui · oui | 3 |
+| [010](missions/010-numero-hors-schaeffer.md) numéro à 0 hors Schaeffer | `dev` | sonnet | appuyer | oui · oui · oui | 3 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
