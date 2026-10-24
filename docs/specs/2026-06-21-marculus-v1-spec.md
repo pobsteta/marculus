@@ -141,8 +141,9 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 - ✅ Case **Affouage** sur le contexte + **volume maximal d'un lot** (m³).
   Règle de Pascal (2026-10-24) : « le volume total d'un lot est la somme du volume total de
   chaque tige si le pourcentage de houppier est à 0, sinon c'est le volume houppier si il y a un
-  pourcentage houppier renseigné ». En EMERGE, le code (`AffouageLots.volumes`) compte le houppier
-  dès qu'EMERGE couvre l'essence — **à confirmer par Pascal**. (Remplace « m³, bois fort tige ».)
+  pourcentage houppier renseigné ». En EMERGE, le houppier seul compte
+  dès qu’EMERGE couvre l’essence, sinon la tige entière (confirmé par Pascal le 2026-10-24 ;
+  `AffouageLots.volumes`). (Remplace « m³, bois fort tige ».)
   Exige au moins une essence cubée (tarif ≠ `AUCUN`) : sans volume par tige, aucun lot ne se ferme.
 - ✅ **Estimation en stères** du volume maximal (2026-10-16) : champ stères à côté des m³,
   liés dans les deux sens par `Contexte.steresParM3` (réglable, défaut 1,5). Seuls les m³ sont
