@@ -111,8 +111,9 @@ GeoPackage (`terrain-gpkg`, en SQL simple sur le SQLite d'Android ; Lambert-93, 
 Mercator — l'ortho tuilée reste lue par NGA geopackage-android) et les briques génériques de
 la dictée (`terrain-voix` : push-to-talk, nombres, alphabet radio, grammaire fermée, vocabulaire
 et installation du modèle Vosk) et les briques de la carte (`terrain-carte` : couches WMTS de la
-Géoplateforme, attributions, échelle, grille Web Mercator), partagée avec Groma et Surculus et publiée par tag sur
-JitPack ; version dans `gradle/libs.versions.toml`. Une correction de ces briques se fait là-bas.
+Géoplateforme, attributions, échelle, grille Web Mercator). Bibliothèque utilisée par Marculus ;
+Groma et Surculus doivent l'adopter (état au 2026-10-24 : ni l'un ni l'autre ne la déclare dans son
+build ; à mettre à jour quand l'un des deux l'adopte). Publiée par tag sur JitPack ; version dans `gradle/libs.versions.toml`. Une correction de ces briques se fait là-bas.
 
 ---
 

@@ -6,7 +6,7 @@
 Groma et Surculus » alors qu'aucun des deux ne la déclare dans son build, pour qu'un successeur
 ne croie pas qu'une correction de `terrain` touche déjà trois applications.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** corriger le README pour que `terrain` soit dite « utilisée par Marculus ; Groma et Surculus doivent l'adopter », afin qu'un successeur ne croie pas qu'une correction de `terrain` touche déjà trois applications. _(reportée par l'orchestrateur, 2026-10-24)_
 
 ## Les trois questions (règle de staffing)
 
