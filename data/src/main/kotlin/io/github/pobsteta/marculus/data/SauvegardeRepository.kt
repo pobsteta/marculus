@@ -189,6 +189,14 @@ class SauvegardeRepository(
         affouageNet?.let { put("affouageLotTotalM3", it.lotM3) }
     }
 
+    /** Numéro de tarif du contexte, remis à 0 hors Schaeffer (mission 010). */
+    private fun JSONObject.tarifNumeroImporte(): Int {
+        val tarif = if (has("tarif") && !isNull("tarif")) getString("tarif") else "AUCUN"
+        val numero = if (has("tarifNumero") && !isNull("tarifNumero")) getInt("tarifNumero") else 0
+        val type = runCatching { TarifCubage.valueOf(tarif) }.getOrNull() ?: return numero
+        return TarifEssence(type, numero).normalise().numero
+    }
+
     private fun JSONObject.versContexte() = ContexteEntity(
         id = getString("id"), nom = getString("nom"), mode = getString("mode"),
         classeMin = getInt("classeMin"), classeMax = getInt("classeMax"), classePas = getInt("classePas"),
@@ -197,7 +205,7 @@ class SauvegardeRepository(
         dateCreation = getLong("dateCreation"), operateur = texteOuNull("operateur"),
         cheminGpkg = texteOuNull("cheminGpkg"),
         tarif = if (has("tarif") && !isNull("tarif")) getString("tarif") else "AUCUN",
-        tarifNumero = if (has("tarifNumero") && !isNull("tarifNumero")) getInt("tarifNumero") else 0,
+        tarifNumero = tarifNumeroImporte(),
         coefficientForme = if (has("coefficientForme") && !isNull("coefficientForme")) getDouble("coefficientForme") else 0.5,
         dateMartelage = if (has("dateMartelage") && !isNull("dateMartelage")) getLong("dateMartelage") else null,
         statut = if (has("statut") && !isNull("statut")) getString("statut") else "PROPOSEE",
@@ -217,7 +225,7 @@ class SauvegardeRepository(
                 o.keys().asSequence().mapNotNull { e ->
                     val t = o.optJSONObject(e) ?: return@mapNotNull null
                     val tarif = runCatching { TarifCubage.valueOf(t.optString("tarif")) }.getOrNull() ?: return@mapNotNull null
-                    e to TarifEssence(tarif, t.optInt("numero", 0))
+                    e to TarifEssence(tarif, t.optInt("numero", 0)).normalise()
                 }.toMap()
             }.orEmpty(),
         ),

@@ -503,7 +503,7 @@ fun CreationContexteScreen(
                                     .map { EssenceColonne(it, fond(it), texte(it)) }
                                 val commentaireFinal = commentaire.trim().ifBlank { null }
                                 val tarifsFinaux = essences.associate { e ->
-                                    e.nom to TarifEssence(tarifDe(e.nom), numerosTarif[e.nom]?.toIntOrNull() ?: 0)
+                                    e.nom to TarifEssence(tarifDe(e.nom), numerosTarif[e.nom]?.toIntOrNull() ?: 0).normalise()
                                 }
                                 // Tarif par défaut (lecteurs anciens, essences ajoutées par Nemeton) : la première essence cubée.
                                 val defaut = essencesCubees.firstOrNull()?.let { tarifsFinaux[it] } ?: TarifEssence(TarifCubage.AUCUN)

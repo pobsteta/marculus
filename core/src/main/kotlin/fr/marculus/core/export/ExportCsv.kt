@@ -7,6 +7,7 @@ import fr.marculus.core.TotauxMartelage
 import fr.marculus.core.VolumesMartelage
 import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
+import fr.marculus.core.model.TarifEssence
 import fr.marculus.core.model.Tige
 import java.time.Instant
 import java.time.ZoneOffset
@@ -61,7 +62,7 @@ object ExportCsv {
         // Format 3 : tarif et totaux nets, tels que l'écran Statut les affiche.
         val totauxVolumes = VolumesMartelage.totaux(contexte, journal)
         sb.appendLine("Tarif${SEP}${contexte.tarif.name}")
-        sb.appendLine("TarifNumero${SEP}${contexte.tarifNumero}")
+        sb.appendLine("TarifNumero${SEP}${TarifEssence(contexte.tarif, contexte.tarifNumero).normalise().numero}")
         sb.appendLine("CoefficientForme${SEP}${contexte.coefficientForme}")
         sb.appendLine("VolumeTigeTotalM3${SEP}${decimal(totauxVolumes.volumeTigeM3, DECIMALES_TOTAL)}")
         sb.appendLine("VolumeTotalM3${SEP}${decimal(totauxVolumes.volumeTotalM3, DECIMALES_TOTAL)}")
@@ -151,7 +152,7 @@ object ExportCsv {
     /** Tarif de chaque essence, dans l'ordre du contexte : `Chêne=SCHAEFFER_RAPIDE:9|Hêtre=EMERGE:0`. */
     private fun tarifsEssence(contexte: Contexte): String =
         (contexte.essencesNoms + contexte.tarifsEssence.keys.sorted()).distinct()
-            .joinToString("|") { e -> Cubage.tarifDe(contexte, e).let { "$e=${it.tarif.name}:${it.numero}" } }
+            .joinToString("|") { e -> Cubage.tarifDe(contexte, e).normalise().let { "$e=${it.tarif.name}:${it.numero}" } }
 
     /** Parts de houppier non nulles, dans l'ordre des essences du contexte : `Chêne=0.3|Hêtre=0.25`. */
     private fun partsHouppier(contexte: Contexte): String {

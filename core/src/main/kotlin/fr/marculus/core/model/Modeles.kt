@@ -21,7 +21,10 @@ enum class TarifCubage {
 }
 
 /** Tarif de cubage d'une essence : type et numéro (1..20, Schaeffer seulement). */
-data class TarifEssence(val tarif: TarifCubage, val numero: Int = 0)
+data class TarifEssence(val tarif: TarifCubage, val numero: Int = 0) {
+    /** Remet le numéro à 0 hors Schaeffer (EMERGE et AUCUN n'utilisent pas de numéro). */
+    fun normalise(): TarifEssence = if (tarif.estSchaeffer || numero == 0) this else copy(numero = 0)
+}
 
 /** Un `+` ajoute une tige ; un `−` enregistre une annulation (jamais d'effacement). */
 enum class ActionTige { PLUS, ANNULATION }
