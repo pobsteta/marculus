@@ -9,7 +9,7 @@
 
 ## Plafond humain
 
-- **PR ouvertes en même temps, au plus :** 3
+- **PR ouvertes en même temps, au plus :** 3 (confirmé par Pascal le 2026-10-24)
 - **Rythme de relecture de Pascal :** _à fixer par Pascal._
 - **Ce qui est lâché (décision de Pascal du 2026-10-24, « rend la main sur tout ce qui est possible ») :**
   - les PR de pilotage seul (`pilotage/`, sans code ni spec) : fusionnées par l'orchestrateur, CI verte ;

@@ -87,3 +87,24 @@ Le `contradicteur`, relancé sur la spec, ne relève plus d'écart de fait avec 
    le 2026-10-24 par le brief `vers-nemetonshiny/2026-10-24-marculus-csv-formats-6-7.md`).
 
 Version de référence : renvoyer aux releases GitHub plutôt que recopier un numéro (v0.64.2 au 2026-10-24).
+
+## Remarques du relecteur — aller-retour 1/3 (2026-10-24)
+
+Rendu : commit b5e1bce (worktree `.claude/worktrees/agent-a36ede3210423478a`). Sept points sur neuf
+vérifiés exacts. À reprendre dans cette même branche :
+
+1. **§ 10, ligne nemetonshiny : fait faux.** Le format 5 a été signalé le 2026-10-15 et traité le
+   2026-10-16 (nemetonshiny `52edbfcd` lit `FormatCsv;5`, `~/dev/briefs/traites/INDEX.md` l. 191) ;
+   le format 4 aussi (nemetonshiny 2026.10.1, `traites/2026-10-15-traite-nemetonshiny-format-4-affouage.md`,
+   INDEX l. 151). Seuls 6 et 7 datent du brief du 2026-10-24, **urgence faible** (décision de
+   Pascal), le lecteur importe déjà le format 7. Ne garder en 🔜 que la recette terrain de
+   l'affouage et ce brief 6-7.
+2. **§ 1, l. 32 : versions des fonds.** Ortho IGN à la place d'ESRI en **v0.47.0** (`da84eb8`,
+   2026-09-24) ; Plan IGN (défaut) et cadastre IGN en **v0.57.0** (`c847712`). (L'erreur venait
+   de la fiche.)
+3. **`contexte-affouage.md` l. 110** (onglet « Par lot » : « volume bois fort tige ») : ajouter une
+   note datée de même facture que celle des l. 26-29 (le code `AffouageLots.bilan` affiche tige,
+   houppier et volume du lot).
+4. **Spec v1 l. 140** (« volume maximal d'un lot (m³, bois fort tige) ») : **ne pas toucher**,
+   question de sens posée à Pascal par l'orchestrateur.
+5. En-tête : « v0.64.2 au 2026-10-24 » est déjà dépassé ; renvoyer aux releases sans numéro.
