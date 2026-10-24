@@ -60,7 +60,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            MarculusTheme(darkTheme = reglages.themeSombre || isSystemInDarkTheme()) {
+            MarculusTheme(darkTheme = reglages.theme.estSombre(isSystemInDarkTheme())) {
                 Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     AppRoot(repository, reglagesRepo, reglages, referentielsRepo, sauvegardeRepo, gpkgRepo, lotRepo, tarifsIfnRepo)
                 }

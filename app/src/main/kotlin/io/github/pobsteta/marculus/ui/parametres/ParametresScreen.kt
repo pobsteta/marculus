@@ -15,7 +15,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.RadioButton
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -49,6 +54,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import fr.marculus.core.model.ChoixTheme
 import fr.marculus.core.model.Reglages
 import io.github.pobsteta.marculus.Appareil
 import io.github.pobsteta.marculus.ui.BandeauCompact
@@ -162,9 +168,7 @@ fun ParametresScreen(
             Modifier.padding(padding).fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            LigneReglage(stringResource(R.string.param_theme_titre), stringResource(R.string.param_theme_desc), reglages.themeSombre) {
-                maj(reglages.copy(themeSombre = it))
-            }
+            ChoixThemeReglage(reglages.theme) { maj(reglages.copy(theme = it)) }
             LigneReglage(stringResource(R.string.param_veille_titre), stringResource(R.string.param_veille_desc), reglages.antiVeille) {
                 maj(reglages.copy(antiVeille = it))
             }
@@ -428,6 +432,33 @@ private fun lireJsonDepuisZip(context: android.content.Context, uri: Uri): Strin
             contenu
         }
     }
+
+@Composable
+private fun ChoixThemeReglage(valeur: ChoixTheme, onChange: (ChoixTheme) -> Unit) {
+    Column(Modifier.fillMaxWidth().padding(vertical = 6.dp).selectableGroup()) {
+        Text(stringResource(R.string.param_theme_titre), style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.param_theme_desc), style = MaterialTheme.typography.bodySmall)
+        for (choix in ChoixTheme.entries) {
+            Row(
+                Modifier.fillMaxWidth().heightIn(min = 48.dp)
+                    .selectable(selected = valeur == choix, onClick = { onChange(choix) }, role = Role.RadioButton),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RadioButton(selected = valeur == choix, onClick = null)
+                Text(
+                    stringResource(
+                        when (choix) {
+                            ChoixTheme.SYSTEME -> R.string.param_theme_systeme
+                            ChoixTheme.CLAIR -> R.string.param_theme_clair
+                            ChoixTheme.SOMBRE -> R.string.param_theme_sombre
+                        },
+                    ),
+                    Modifier.padding(start = 12.dp),
+                )
+            }
+        }
+    }
+}
 
 @Composable
 private fun LigneReglage(titre: String, description: String, valeur: Boolean, onChange: (Boolean) -> Unit) {

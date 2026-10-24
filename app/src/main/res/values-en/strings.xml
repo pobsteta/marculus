@@ -222,8 +222,11 @@
     <!-- Settings -->
     <string name="param_titre">Settings</string>
     <string name="param_retour">Back</string>
-    <string name="param_theme_titre">Dark theme</string>
-    <string name="param_theme_desc">Force the app dark theme.</string>
+    <string name="param_theme_titre">Theme</string>
+    <string name="param_theme_desc">Follow the phone, or force the light or dark theme.</string>
+    <string name="param_theme_systeme">System</string>
+    <string name="param_theme_clair">Light</string>
+    <string name="param_theme_sombre">Dark</string>
     <string name="param_veille_titre">Keep screen awake</string>
     <string name="param_veille_desc">Keeps the screen on during marking.</string>
     <string name="param_plein_titre">Full screen</string>
