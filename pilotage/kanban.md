@@ -6,7 +6,7 @@
 > colonne ; on change ce numéro chaque fois qu'elle change de colonne.
 > **Une carte qui ne bouge pas est souvent la mauvaise nouvelle à dire tout de suite.**
 
-**Dernier cycle :** 3 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
+**Dernier cycle :** 4 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
 rien lancé. Une carte est immobile quand dernier cycle − N ≥ 2.)_
 
 _Modèle de carte :_
@@ -33,6 +33,19 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
+
+- [012](missions/012-adr-decisions.md) · depuis le cycle 4
+  - Homme : archiviste (sonnet), appuyer
+  - Mission : ADR 0001 à 0006 des décisions déjà prises
+  - Moyens : journal, specs, gabarit `adr-france.md`
+- [013](missions/013-test-migration-theme.md) · depuis le cycle 4
+  - Homme : testeur (sonnet), appuyer
+  - Mission : test de la reprise de l'ancienne clé `theme_sombre`
+  - Moyens : `data/src/test/`, une PR
+- [014](missions/014-docs-a-jour.md) · depuis le cycle 4
+  - Homme : archiviste (sonnet), appuyer
+  - Mission : README « Déployer et publier », brief à jour, ligne du plugin dans CLAUDE.md
+  - Moyens : README, `docs/brief.md`, `release.yml`
 
 
 
@@ -136,3 +149,5 @@ l'inscrit avec ce qu'elle nous apprend._
 - cycle 2 · Marculus v0.64.0 : thème aux jetons de `terrain-style` (texte 7:1, mêmes couleurs que Surculus et Groma) · pour les marteleurs · première livraison sur le téléphone depuis la méthode ; à juger au soleil le 2026-10-30 (proposée par l’orchestrateur)
 - cycle 2 · mauvaise nouvelle : le thème `terrain-style` v0.6.0 efface le vert (vu par Pascal sur le téléphone), annulé en v0.64.2 · pour les marteleurs · un test d'égalité ne voit pas la couleur : le nuancier se montre à Pascal avant de publier, et l'aspect se juge à l'écran avant la fusion
 - cycle 3 · Marculus v0.64.6 : choix du thème Système / Clair / Sombre · pour les marteleurs · le thème clair au soleil même sur un téléphone en sombre (proposée par l’orchestrateur)
+- cycle 3 · Marculus v0.64.9 et v0.65.0 : CSV sans faux numéro de tarif (`EMERGE:0`), thème en liste déroulante · pour nemetonshiny et les marteleurs · données justes en aval ; v0.65.0 jugée « parfaite » au soleil par Pascal
+- bilan du 2026-10-24 · Marculus v0.65.0 lisible au soleil (clair et sombre vérifiés par Pascal), unité du lot lisible en portrait, thème en deux appuis ; contrat des formats 6-7 et CSV justes · pour les marteleurs et nemetonshiny · premier bilan : pas de livraison de bilan antérieure

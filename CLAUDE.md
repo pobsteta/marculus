@@ -63,6 +63,9 @@ La description à jour du produit est dans `docs/specs/2026-06-21-marculus-v1-sp
 ## Règles techniques communes
 
 - **Pas de code sans tests.** Commande de tests : `.claude/test-command`.
+- **Chaque fait cité porte sa preuve** (fichier et ligne, commit, tag, ligne du journal) dans les
+  fiches, briefs, specs et ADR ; le relecteur la recontrôle (bilan n° 1, 2026-10-24).
+- **Avant chaque merge** : `pilotage/pre-fusion.md`.
 - **Formats ouverts, logiciels libres** de préférence (test du successeur).
 - **Jamais de push direct sur `main`.** Tout passe par une PR. La release signée part
   au merge de la PR sur `main` (CI `release.yml`).
