@@ -11,6 +11,12 @@
 
 - **PR ouvertes en même temps, au plus :** 3
 - **Rythme de relecture de Pascal :** _à fixer par Pascal._
+- **Ce qui est lâché (décision de Pascal du 2026-10-24, « rend la main sur tout ce qui est possible ») :**
+  - les PR de pilotage seul (`pilotage/`, sans code ni spec) : fusionnées par l'orchestrateur, CI verte ;
+  - une mission dont le genre a déjà réussi deux fois : « lâcher », fusion par l'orchestrateur si le
+    relecteur dit « prêt » et que la CI est verte ; sinon elle remonte à Pascal. Genres réussis une
+    fois au 2026-10-24 : CI (001), README (002), brief vers une autre application (004, en 3 allers-retours).
+  - jamais lâché : une mission « tenir » (003, 006), un changement de règle métier, de modèle de données ou de dépendance.
 
 ## Le vivier (catalogue, pas une équipe)
 
@@ -33,13 +39,15 @@
 | [002](missions/002-readme-terrain.md) README : utilisateurs de `terrain` | `archiviste` | sonnet | appuyer | oui · oui · oui | 1 |
 | [003](missions/003-spec-a-jour.md) spec à jour du livré | `archiviste` | sonnet | appuyer (plan d'abord) | oui · oui · oui | 1 |
 | [004](missions/004-brief-formats-6-7.md) brief formats CSV 6 et 7 | `archiviste` | sonnet | appuyer (brouillon relu) | oui · oui · oui | 1 (pas de PR) |
+| [005](missions/005-test-theme-terrain-style.md) test d'égalité du thème | `testeur` | sonnet | appuyer | oui · oui · oui | 2 |
+| [006](missions/006-theme-terrain-style.md) thème = jetons `terrain-style` | `dev` | sonnet | tenir (plan d'abord) | oui · à moitié · oui | 2 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
 | Carte | Question qui bloque | Ce qu'il faut |
 |---|---|---|
 | Échelon forêt de `tarifsProposes` | 3 (moyens) | réponse de `nemetonshiny` (§ 4 du brief du 2026-10-23) et un lot `.zip` d'essai avec un niveau `foret` |
-| Jetons `terrain-style` dans `Theme.kt` | 3 (moyens) | `terrain-style` publié |
+| Couleurs en dur hors du thème (19) | 1 (sens) | après l'essai au soleil du 2026-10-30 |
 | Unité en suffixe des champs (rouvrir la PR #3) | 1 (sens) | décision de Pascal |
 | Unité d'un lot d'affouage, repli sans réseau, appareil perdu | 1 (sens) | décisions de Pascal (brief) |
 | Recettes terrain affouage et dictée | — | Pascal sur le terrain, pas un agent |

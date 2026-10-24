@@ -6,7 +6,7 @@
 > colonne ; on change ce numéro chaque fois qu'elle change de colonne.
 > **Une carte qui ne bouge pas est souvent la mauvaise nouvelle à dire tout de suite.**
 
-**Dernier cycle :** 0 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
+**Dernier cycle :** 1 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
 rien lancé. Une carte est immobile quand dernier cycle − N ≥ 2.)_
 
 _Modèle de carte :_
@@ -24,9 +24,6 @@ _Relevé du 2026-10-23 dans les boîtes de briefs (`~/dev/briefs/vers-marculus/`
 travail en attente est arrivé par `~/dev/surculus/pilotage/briefs/vers-marculus/`) et dans la
 spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:mission`._
 
-- Thème : `ColorScheme` clair = jetons de `terrain-style`, avec un test (blanc sur `VertVif`
-  = 5,17:1 < 7:1) · même brief § 2 · **bloqué** : `terrain-style` n'est pas encore publié
-  (brief `surculus/pilotage/briefs/vers-terrain/2026-10-23-terrain-style.md`) · depuis le cycle 0
 - Lire l'échelon **forêt** de `tarifsProposes` (lots Nemeton) : il prime sur la table
   embarquée, tout autre niveau est ignoré · décision de Pascal du 2026-10-23 · réponse à
   nemetonshiny : `~/dev/briefs/vers-nemetonshiny/2026-10-23-marculus-tarifs-proposes-niveau-foret.md`
@@ -37,26 +34,44 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
-- [001](missions/001-ci-tests-data.md) · depuis le cycle 0
-  - Homme : dev (sonnet), appuyer
-  - Mission : faire lancer par la CI les tests JVM de `:data`
-  - Moyens : `.github/workflows/ci.yml`, une PR
-- [002](missions/002-readme-terrain.md) · depuis le cycle 0
-  - Homme : archiviste (sonnet), appuyer
-  - Mission : README : ne nommer comme utilisateurs de `terrain` que les applications qui la déclarent
-  - Moyens : `README.md` + statut en tête du brief Surculus, une PR
 - [003](missions/003-spec-a-jour.md) · depuis le cycle 0
   - Homme : archiviste (sonnet), appuyer, plan d'abord
   - Mission : remettre la spec v1 à jour du livré (v0.63.6)
   - Moyens : `docs/specs/`, preuves par commit ou release, une PR
-- [004](missions/004-brief-formats-6-7.md) · depuis le cycle 0
-  - Homme : archiviste (sonnet), appuyer, brouillon relu
-  - Mission : brief à `nemetonshiny` sur `FormatCsv;6` et `;7`
-  - Moyens : `ExportCsv.kt` et ses tests ; dépôt par l'orchestrateur après accord de Pascal, pas de PR
+  - État (cycle 1) : plan rendu, attend le feu vert de Pascal et l'arbitrage houppier / tige
+
 
 ## Planifié
 
+- [005](missions/005-test-theme-terrain-style.md) · depuis le cycle 1
+  - Homme : testeur (sonnet), appuyer
+  - Mission : test d'égalité des `ColorScheme` clair et sombre avec `terrain-style` v0.6.0
+  - Moyens : JitPack, `~/dev/terrain/terrain-style/`, une PR commune avec 006
+- [006](missions/006-theme-terrain-style.md) · depuis le cycle 1
+  - Homme : dev (sonnet), **tenir**, plan d'abord
+  - Mission : thème = jetons de `terrain-style` (clair et sombre), issue #2 § 2
+  - Moyens : `Theme.kt`, test de 005 ; essai au soleil de Pascal le 2026-10-30
+- Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · après l'essai au soleil du 2026-10-30 · depuis le cycle 1
+
 ## Terminé
+
+- [004](missions/004-brief-formats-6-7.md) · depuis le cycle 1
+  - Homme : archiviste (sonnet), appuyer, brouillon relu
+  - Mission : brief à `nemetonshiny` sur `FormatCsv;6` et `;7`
+  - Moyens : `ExportCsv.kt` et ses tests ; dépôt par l'orchestrateur après accord de Pascal, pas de PR
+  - Livré : déposé dans `~/dev/briefs/vers-nemetonshiny/2026-10-24-marculus-csv-formats-6-7.md` le 2026-10-24
+
+- [002](missions/002-readme-terrain.md) · depuis le cycle 1
+  - Homme : archiviste (sonnet), appuyer
+  - Mission : README : ne nommer comme utilisateurs de `terrain` que les applications qui la déclarent
+  - Moyens : `README.md` + statut en tête du brief Surculus, une PR
+  - Livré : PR #8 fusionnée le 2026-10-24
+
+- [001](missions/001-ci-tests-data.md) · depuis le cycle 1
+  - Homme : dev (sonnet), appuyer
+  - Mission : faire lancer par la CI les tests JVM de `:data`
+  - Moyens : `.github/workflows/ci.yml`, une PR
+  - Livré : PR #7 fusionnée le 2026-10-24
 
 ## Abandonné
 
@@ -77,3 +92,5 @@ l'inscrit avec ce qu'elle nous apprend._
 - bilan du AAAA-MM-JJ · livraison · pour qui · ce qu'elle apporte de plus que la précédente
 - bilan du AAAA-MM-JJ · mauvaise nouvelle : … · pour qui · ce qu'elle nous apprend
 ```
+
+- cycle 1 · contrat des CSV `FormatCsv;6` et `;7` (brief du 2026-10-24) · pour nemetonshiny, consommateur des données · première description de ces formats envoyée ; rien de neuf pour les marteleurs sur le téléphone
