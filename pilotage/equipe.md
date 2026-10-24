@@ -40,7 +40,9 @@
 | [003](missions/003-spec-a-jour.md) spec à jour du livré | `archiviste` | sonnet | appuyer (plan d'abord) | oui · oui · oui | 1 |
 | [004](missions/004-brief-formats-6-7.md) brief formats CSV 6 et 7 | `archiviste` | sonnet | appuyer (brouillon relu) | oui · oui · oui | 1 (pas de PR) |
 | [005](missions/005-test-theme-terrain-style.md) test d'égalité du thème | `testeur` | sonnet | appuyer | oui · oui · oui | 2 |
-| [006](missions/006-theme-terrain-style.md) thème = jetons `terrain-style` | `dev` | sonnet | tenir (plan d'abord) | oui · à moitié · oui | 2 |
+| [006](missions/006-theme-terrain-style.md) thème = jetons `terrain-style` | `dev` | sonnet | tenir (plan d'abord) | oui · à moitié · oui | 2, annulée ; attend v0.6.1 |
+| [007](missions/007-test-choix-theme.md) tests du choix du thème | `testeur` | sonnet | appuyer | oui · oui · oui | 3 |
+| [008](missions/008-choix-theme.md) choix du thème Système / Clair / Sombre | `dev` | sonnet | appuyer | oui · oui · oui | 3 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
