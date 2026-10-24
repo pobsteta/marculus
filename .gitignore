@@ -14,3 +14,6 @@
 *.aux.xml
 # Répertoire de travail du compilateur Kotlin 2.x (sessions, erreurs) — non versionné.
 .kotlin/
+
+# Worktrees des agents de la méthode de l'Impératrice
+.claude/worktrees/

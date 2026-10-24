@@ -16,6 +16,10 @@
   - une mission dont le genre a déjà réussi deux fois : « lâcher », fusion par l'orchestrateur si le
     relecteur dit « prêt » et que la CI est verte ; sinon elle remonte à Pascal. Genres réussis une
     fois au 2026-10-24 : CI (001), README (002), brief vers une autre application (004, en 3 allers-retours).
+  - **lâché aussi (bilan n° 1, validé par Pascal le 2026-10-24)** : les paires `testeur` + `dev`
+    de **correctif sans changement d'écran** (genre réussi deux fois du premier coup : 001, 009-010) ;
+    fusion par l'orchestrateur si relecteur « prêt », CI verte et `pilotage/pre-fusion.md` coché ;
+  - **écran** : toute mission qui change l'écran passe par l'`afficheur` (capture avant la PR) et reste en « appuyer » ;
   - jamais lâché : une mission « tenir » (003, 006), un changement de règle métier, de modèle de données ou de dépendance.
 
 ## Le vivier (catalogue, pas une équipe)
@@ -45,6 +49,10 @@
 | [008](missions/008-choix-theme.md) choix du thème Système / Clair / Sombre | `dev` | sonnet | appuyer | oui · oui · oui | 3 |
 | [009](missions/009-test-numero-hors-schaeffer.md) tests numéro hors Schaeffer | `testeur` | sonnet | appuyer | oui · oui · oui | 3 |
 | [010](missions/010-numero-hors-schaeffer.md) numéro à 0 hors Schaeffer | `dev` | sonnet | appuyer | oui · oui · oui | 3 |
+| [011](missions/011-theme-liste-deroulante.md) thème en liste déroulante | `dev` | sonnet | appuyer | oui · oui · oui | 3 |
+| [012](missions/012-adr-decisions.md) ADR des décisions prises | `archiviste` | sonnet | appuyer | oui · oui · oui | 4 |
+| [013](missions/013-test-migration-theme.md) test de reprise de `theme_sombre` | `testeur` | sonnet | appuyer | oui · oui · à vérifier | 4 |
+| [014](missions/014-docs-a-jour.md) README « Déployer et publier », brief à jour | `archiviste` | sonnet | appuyer | oui · oui · oui | 4 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
