@@ -34,6 +34,15 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
+- [007](missions/007-test-choix-theme.md) · depuis le cycle 2
+  - Homme : testeur (sonnet), appuyer
+  - Mission : tests du choix du thème Système / Clair / Sombre
+  - Moyens : `:core:test`, une PR commune avec 008
+- [008](missions/008-choix-theme.md) · depuis le cycle 2
+  - Homme : dev (sonnet), appuyer
+  - Mission : remplacer la case « Thème sombre » par Système / Clair / Sombre
+  - Moyens : `Reglages.kt`, `ReglagesRepository.kt`, `ParametresScreen.kt`, `MainActivity.kt`
+
 - [003](missions/003-spec-a-jour.md) · depuis le cycle 0
   - Homme : archiviste (sonnet), appuyer, plan d'abord
   - Mission : remettre la spec v1 à jour du livré (v0.63.6)
@@ -43,21 +52,17 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Planifié
 
-- Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · après l'essai au soleil du 2026-10-30 · depuis le cycle 1
-
-## Terminé
-
 - [006](missions/006-theme-terrain-style.md) · depuis le cycle 2
   - Homme : dev (sonnet), **tenir**, plan d'abord
   - Mission : thème = jetons de `terrain-style` (clair et sombre), issue #2 § 2
   - Moyens : `Theme.kt`, test de 005 ; essai au soleil de Pascal le 2026-10-30
-  - Livré : PR #9 fusionnée le 2026-10-24, release v0.64.0
+  - État : livrée en v0.64.0 (#9) puis annulée en v0.64.2 (#12) le 2026-10-24 : le vert a disparu ; attend `terrain-style` v0.6.1 (brief `vers-terrain/2026-10-24-marculus-palette-reste-verte.md`)
 
-- [005](missions/005-test-theme-terrain-style.md) · depuis le cycle 2
-  - Homme : testeur (sonnet), appuyer
-  - Mission : test d'égalité des `ColorScheme` clair et sombre avec `terrain-style` v0.6.0
-  - Moyens : JitPack, `~/dev/terrain/terrain-style/`, une PR commune avec 006
-  - Livré : PR #9 fusionnée le 2026-10-24, release v0.64.0
+- Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · après l'essai au soleil du 2026-10-30 · depuis le cycle 1
+
+## Terminé
+
+
 
 - [004](missions/004-brief-formats-6-7.md) · depuis le cycle 1
   - Homme : archiviste (sonnet), appuyer, brouillon relu
@@ -81,6 +86,12 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 _Avec la raison, en une ligne._
 
+- [005](missions/005-test-theme-terrain-style.md) · depuis le cycle 2
+  - Homme : testeur (sonnet), appuyer
+  - Mission : test d'égalité des `ColorScheme` clair et sombre avec `terrain-style` v0.6.0
+  - Moyens : JitPack, `~/dev/terrain/terrain-style/`, une PR commune avec 006
+  - Raison : test retiré avec le revert de #9 (#12) ; à réécrire avec 006 quand la v0.6.1 sera là
+
 ## Livraisons
 
 _Une ligne par cycle, ajoutée sous la précédente à la fin de chaque `/boucle`, et une
@@ -98,4 +109,5 @@ l'inscrit avec ce qu'elle nous apprend._
 ```
 
 - cycle 1 · contrat des CSV `FormatCsv;6` et `;7` (brief du 2026-10-24) · pour nemetonshiny, consommateur des données · première description de ces formats envoyée ; rien de neuf pour les marteleurs sur le téléphone
-- cycle 2 · Marculus v0.64.0 : thème aux jetons de `terrain-style` (texte 7:1, mêmes couleurs que Surculus et Groma) · pour les marteleurs · première livraison sur le téléphone depuis la méthode ; à juger au soleil le 2026-10-30 (proposée par l’orchestrateur, à confirmer par Pascal)
+- cycle 2 · Marculus v0.64.0 : thème aux jetons de `terrain-style` (texte 7:1, mêmes couleurs que Surculus et Groma) · pour les marteleurs · première livraison sur le téléphone depuis la méthode ; à juger au soleil le 2026-10-30 (proposée par l’orchestrateur)
+- cycle 2 · mauvaise nouvelle : le thème `terrain-style` v0.6.0 efface le vert (vu par Pascal sur le téléphone), annulé en v0.64.2 · pour les marteleurs · un test d'égalité ne voit pas la couleur : le nuancier se montre à Pascal avant de publier, et l'aspect se juge à l'écran avant la fusion
