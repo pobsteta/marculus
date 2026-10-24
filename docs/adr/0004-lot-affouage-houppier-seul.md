@@ -1,8 +1,8 @@
 # ADR 0004 — Lot d'affouage : houppier seul quand l'arbre en a un
 
 - **Date :** 2026-10-24
-- **Statut :** acceptée par Pascal (lignes `cap`, `pilotage/journal.md` l. 68, 73, 78) ; livrée par la PR #17 (6103049)
-- **Proposée par :** archiviste (contradiction relevée entre la spec v1 et `contexte-affouage.md`)
+- **Statut :** **décision acceptée par Pascal** (lignes `cap`, `pilotage/journal.md` l. 68, 73, 78) ; **texte de l'ADR proposé**, à valider par Pascal à la lecture de la PR ; livrée par la PR #17 (6103049)
+- **Proposée par :** question soulevée par l'archiviste (journal l. 37) ; règle posée par Pascal (journal l. 73)
 - **Tranchée par :** Pascal
 
 ## La décision en une phrase
@@ -21,12 +21,12 @@ Alternative écartée : conserver « bois fort tige ». Autres : non écrit.
 
 | Lettre | Question | Réponse (une ligne) | Ce que ça coûte | Prêts à payer ? |
 |---|---|---|---|---|
-| **F** | Plus simple ? | La spec s'aligne sur le code existant (journal l. 100) | Aucun code à changer | Non écrit |
-| **R** | Qui fait quoi ? | Pascal tranche, l'archiviste aligne les documents (journal l. 68, 71) | | |
-| **A** | Imprévu ? | Sans essence cubée, aucun lot ne se ferme (spec §5 bis) | | |
-| **N** | Toutes les idées ? | Non écrit | | |
-| **C** | Coût ? | Non écrit | | |
-| **É** | Réutilisation ? | Non écrit | | |
+| **F** | Est-ce la solution la plus simple qui tienne ? Réparable avec les moyens du bord ? | La spec s'aligne sur le code existant (journal l. 100) | Aucun code à changer | Non écrit |
+| **R** | Qui fait quoi, et chacun a-t-il les moyens de sa part ? | Pascal tranche, l'archiviste aligne les documents (journal l. 68, 71) | | |
+| **A** | Que se passe-t-il si ce qu'on n'a pas prévu arrive ? De qui ou de quoi dépendons-nous ? | Sans essence cubée, aucun lot ne se ferme (spec §5 bis) | | |
+| **N** | Avons-nous écouté toutes les idées, même les plus étranges ? | Non écrit | | |
+| **C** | Que coûte cette décision à l'ensemble ? Y a-t-il une dépense inutile ? | Non écrit | | |
+| **É** | Que réutilisons-nous, et qui pourra réutiliser ce que nous faisons ? | Non écrit | | |
 
 ## Valeurs sacrifiées
 

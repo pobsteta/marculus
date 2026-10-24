@@ -1,8 +1,8 @@
 # ADR 0005 — Thème : choix Système / Clair / Sombre ; jetons `terrain-style` annulés
 
 - **Date :** 2026-10-24
-- **Statut :** acceptée par Pascal pour le choix du thème (v0.64.6, v0.65.0) ; la réadoption de `terrain-style` est **suspendue**, pas refusée
-- **Proposée par :** orchestrateur (missions 007-008) ; annulation décidée par Pascal (journal l. 65-66)
+- **Statut :** **décision acceptée par Pascal** pour le choix du thème (v0.64.6, v0.65.0) ; la réadoption de `terrain-style` est **suspendue**, pas refusée ; **texte de l'ADR proposé**, à valider par Pascal à la lecture de la PR
+- **Proposée par :** non écrit ; annulation décidée par Pascal (journal l. 65)
 - **Tranchée par :** Pascal
 
 ## La décision en une phrase
@@ -23,16 +23,16 @@ Alternatives : garder `terrain-style` v0.6.0 (écarté, journal l. 65) ; autres 
 
 | Lettre | Question | Réponse (une ligne) | Ce que ça coûte | Prêts à payer ? |
 |---|---|---|---|---|
-| **F** | Plus simple ? | Retour aux couleurs v0.63 (revert, journal l. 65) | Pas de palette commune pour l'instant | Oui, par le cap |
-| **R** | Qui fait quoi ? | `terrain` produit la palette, Marculus l'essaie (journal l. 65, 99) | Un brief de plus | Non écrit |
-| **A** | Imprévu ? | Lisibilité au soleil : essai daté 2026-10-30 (journal l. 99) | | |
-| **N** | Toutes les idées ? | Non écrit | | |
-| **C** | Coût ? | Non écrit | | |
-| **É** | Réutilisation ? | Palette commune visée, reportée (journal l. 65) | | |
+| **F** | Est-ce la solution la plus simple qui tienne ? Réparable avec les moyens du bord ? | Retour aux couleurs v0.63 (revert, journal l. 65) | Pas de palette commune pour l'instant | Non écrit |
+| **R** | Qui fait quoi, et chacun a-t-il les moyens de sa part ? | `terrain` produit la palette, Marculus l'essaie (journal l. 65, 99) | Un brief de plus | Non écrit |
+| **A** | Que se passe-t-il si ce qu'on n'a pas prévu arrive ? De qui ou de quoi dépendons-nous ? | Lisibilité au soleil : essai daté 2026-10-30 (journal l. 99) | | |
+| **N** | Avons-nous écouté toutes les idées, même les plus étranges ? | Non écrit | | |
+| **C** | Que coûte cette décision à l'ensemble ? Y a-t-il une dépense inutile ? | Non écrit | | |
+| **É** | Que réutilisons-nous, et qui pourra réutiliser ce que nous faisons ? | Palette commune visée, reportée (journal l. 65) | | |
 
 ## Valeurs sacrifiées
 
-La cohérence visuelle immédiate avec les autres applications qui adopteront `terrain-style` : sacrifiée contre l'identité verte et la lisibilité au soleil (journal l. 63, 65). Raison détaillée au-delà : non écrit.
+La cohérence visuelle immédiate avec les autres applications qui adopteront `terrain-style` : sacrifiée parce que le vert avait disparu (journal l. 63, 65). Autre raison : non écrit.
 
 ## Sources
 

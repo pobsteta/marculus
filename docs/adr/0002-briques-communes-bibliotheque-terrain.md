@@ -1,7 +1,7 @@
 # ADR 0002 — Briques communes dans la bibliothèque `terrain` (JitPack) : on corrige là-bas
 
 - **Date :** 2026-10-17 (premier déplacement, commit 3377464) ; consignée le 2026-10-24
-- **Statut :** acceptée par Pascal (règle en mémoire de l'orchestrateur, « Bibliothèque terrain » ; application dans le dépôt : `README.md` l. 107-116)
+- **Statut :** **décision acceptée par Pascal** (brief validé, `docs/brief.md` l. 85, journal l. 27 ; application dans le dépôt : `README.md` l. 107-116) ; **texte de l'ADR proposé**, à valider par Pascal à la lecture de la PR
 - **Proposée par :** brief Surculus du 2026-10-15 « bibliothèques communes », traité le 2026-10-17 (`pilotage/journal.md` l. 23)
 - **Tranchée par :** Pascal
 
@@ -19,12 +19,12 @@ Alternatives (copie dans chaque application, module local) : non écrit. Le miro
 
 | Lettre | Question | Réponse (une ligne) | Ce que ça coûte | Prêts à payer ? |
 |---|---|---|---|---|
-| **F** | Plus simple ? | Une version par tag, un seul endroit où corriger | Non écrit | Non écrit |
-| **R** | Qui fait quoi ? | Les corrections vont chez `terrain` (brief `vers-terrain/2026-10-24-marculus-palette-reste-verte.md`, journal l. 65) | Un aller-retour entre dépôts | Non écrit |
-| **A** | Dépendances ? | JitPack (429 constaté, miroir Google, mémoire de l'orchestrateur) | Disponibilité d'un service tiers | Non écrit |
-| **N** | Toutes les idées ? | Non écrit | | |
-| **C** | Coût ? | Non écrit | | |
-| **É** | Réutilisation ? | C'est le but : trois applications, un code (`README.md` l. 107-116) | | Non écrit |
+| **F** | Est-ce la solution la plus simple qui tienne ? Réparable avec les moyens du bord ? | Une version par tag, un seul endroit où corriger | Non écrit | Non écrit |
+| **R** | Qui fait quoi, et chacun a-t-il les moyens de sa part ? | Les corrections vont chez `terrain` (brief `vers-terrain/2026-10-24-marculus-palette-reste-verte.md`, journal l. 65) | Un aller-retour entre dépôts | Non écrit |
+| **A** | Que se passe-t-il si ce qu'on n'a pas prévu arrive ? De qui ou de quoi dépendons-nous ? | JitPack (429 constaté, miroir Google, mémoire de l'orchestrateur) | Disponibilité d'un service tiers | Non écrit |
+| **N** | Avons-nous écouté toutes les idées, même les plus étranges ? | Non écrit | | |
+| **C** | Que coûte cette décision à l'ensemble ? Y a-t-il une dépense inutile ? | Non écrit | | |
+| **É** | Que réutilisons-nous, et qui pourra réutiliser ce que nous faisons ? | C'est le but : trois applications, un code (`README.md` l. 107-116) | | Non écrit |
 
 ## Valeurs sacrifiées
 
