@@ -15,6 +15,10 @@
 > **Mise à jour 2026-10-07** : **contexte d'affouage** livré (v0.52.0 → v0.55.1) : lots de volume
 > borné annoncés à chaque tige, bilan par lot, CSV `FormatCsv;5`, fusion qui préserve les
 > réglages du terrain (`2026-10-07-contexte-affouage.md`).
+> **Mise à jour 2026-10-24** : relecture de la spec contre le produit livré (version courante :
+> voir les releases GitHub). Corrigés : fonds de carte (§1), tables de
+> tarifs par SER livrées (§5), schéma Room et SDK cible (§9), reste à faire (§10) ; ajoutés :
+> bibliothèques `terrain-*` (§9), réglage MNH (§6). Aucune règle métier modifiée.
 > Légende d'état : ✅ fait · 🟡 partiel · 🔜 à faire.
 
 ## 1. Périmètre
@@ -25,7 +29,9 @@
   des tiges aux parcelles, **GNSS** ponctuel, **synchro multi-opérateurs**.
   - ✅ Import/affichage GPKG + carte, rattachement point-dans-polygone, aires géodésiques.
   - ✅ GNSS ponctuel (acquisition à la demande, permission, terminologie « GNSS »).
-  - ✅ Fonds de carte **OSM + satellite ESRI** en ligne + **ortho GPKG** hors-ligne (bascule).
+  - ✅ Fonds de carte en ligne **Plan IGN** (défaut), **Ortho IGN**, **OSM**, avec le **cadastre IGN**
+    en couche (Ortho IGN à la place d'ESRI en v0.47.0, `da84eb8` ; Plan IGN par défaut et
+    cadastre en v0.57.0, `c847712`) + **ortho GPKG** hors-ligne (bascule).
   - ✅ Synchro multi-opérateurs **par fichier** (`.marsync`, fusion « dernière écriture gagne »).
   - ✅ GNSS externe **RTK/NTRIP** (type projet Centipede) : transport BT SPP / TCP, client
     NTRIP, service de premier plan, qualité de fix et précision tracées sur la tige —
@@ -126,12 +132,18 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   `2026-10-16-tarifs-ser.md`) : commune du martelage → SER (puces si à cheval) → numéro IFN de
   chaque essence en Schaeffer, repli SER → GRECO → France sous 30 arbres, jamais réécrit après
   saisie manuelle (« Reproposer » pour forcer). `Contexte.communeInsee`, `ser`,
-  `millesimeTarifs` ; base v17 ; CSV format 7. **Code livré, tables en attente de nemeton**
-  (brief `vers-nemeton/2026-10-16-tarifs-schaeffer-ser.md`) : sans elles, la section n'apparaît pas.
+  `millesimeTarifs` ; base v17 ; CSV format 7. **Code et tables livrés** (tables
+  reçues de nemeton, v0.62.0 ; `data/src/main/assets/tarifs-ifn/`, brief
+  `vers-nemeton/2026-10-16-tarifs-schaeffer-ser.md`) ; sans tables, la section n'apparaît pas.
 
 ## 5 bis. Affouage (livré 2026-10-07)
 
-- ✅ Case **Affouage** sur le contexte + **volume maximal d'un lot** (m³, bois fort tige).
+- ✅ Case **Affouage** sur le contexte + **volume maximal d'un lot** (m³).
+  Règle de Pascal (2026-10-24) : « le volume total d'un lot est la somme du volume total de
+  chaque tige si le pourcentage de houppier est à 0, sinon c'est le volume houppier si il y a un
+  pourcentage houppier renseigné ». En EMERGE, le houppier seul compte
+  dès qu’EMERGE couvre l’essence, sinon la tige entière (confirmé par Pascal le 2026-10-24 ;
+  `AffouageLots.volumes`). (Remplace « m³, bois fort tige ».)
   Exige au moins une essence cubée (tarif ≠ `AUCUN`) : sans volume par tige, aucun lot ne se ferme.
 - ✅ **Estimation en stères** du volume maximal (2026-10-16) : champ stères à côté des m³,
   liés dans les deux sens par `Contexte.steresParM3` (réglable, défaut 1,5). Seuls les m³ sont
@@ -175,7 +187,7 @@ Tige (journal)  : uuid, contexteId, essence, classe,
    rattachement spatial. *(écran `CarteScreen`, `GpkgTileModule`)*
 6. ✅ **Paramètres** — anti-veille, plein écran, vibration, son de clic, **annonce vocale**
    (nombre, étiquette, avis limite inf./sup. ; le lot d'affouage est toujours annoncé), boutons de volume, thème sombre, langue,
-   GNSS ponctuel, opérateur, **Export/Import ZIP**, **Export CSV**, **fusion `.marsync`**.
+   GNSS ponctuel, **Estimer la hauteur (MNH)** (voir `couche-houppier-mnh.md`), opérateur, **Export/Import ZIP**, **Export CSV**, **fusion `.marsync`**.
 7. ✅ **Référentiels** — édition des listes Essences / Qualité arbre / Qualité bois.
 8. ✅ **Dictée vocale** *(sur la feuille de martelage)* — push-to-talk (volume bas maintenu ou
    bouton micro), grammaire fermée générée depuis le contexte, annonce TTS de confirmation,
@@ -220,11 +232,13 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   l'axe de classes, référentiels, catégories de grosseur, **cubage (Schaeffer + EMERGE)**,
   **géodésie (aires)**, **rattachement spatial (point-dans-polygone)**, **lots d'affouage**,
   **journal net** → **testée en JVM, TDD**.
-- **Room** (journal + config + synchro ; schéma **v14**, migrations depuis la v12),
+- **Room** (journal + config + synchro ; schéma **v17** (`MarculusDatabase.kt`), migrations depuis la v12),
   **DataStore** (réglages).
 - `:data` : `MartelageRepository`, `ReglagesRepository`, `ReferentielsRepository`,
   `SauvegardeRepository` (export/import/fusion), `GpkgRepository`.
-- **minSdk 26 / targetSdk 35** ; smartphone **et** tablette ; portrait + paysage.
+- **minSdk 26 / targetSdk 36** ; smartphone **et** tablette ; portrait + paysage.
+- Bibliothèques `terrain-*` (NMEA/NTRIP/géodésie, journal, GPKG, carte, voix) : dépôt
+  `github.com/pobsteta/terrain`, via JitPack ; versions dans `gradle/libs.versions.toml`.
 - Modules : `:core` (domaine pur) · `:data` (Room/DataStore/GPKG) · `:app` (Compose UI).
 - ✅ **CI/CD** : couverture de tests (badge), **releases SemVer automatiques**, APK release
   horodaté (`marculus-<version>-<UTC>.apk`), **site GitHub Pages** (accueil + galerie + rapport
@@ -240,11 +254,11 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   de l'attribution déduite du GPKG.
 - 🔜 **Bouton Flic 2** (BLE) comme troisième déclencheur de la dictée — reporté (dépendance
   JitPack écartée) ; `PttController` est prêt à le recevoir.
-- 🔜 **Recette terrain de l'affouage** (annonces, bascule de lot, bilan) et réponse de
-  nemetonshiny au brief `CSV format 4` (lecture du `lot`, règle « clé absente »), puis
-  signaler le **format 5** (houppier, parts par essence), le **format 6** (tarif par essence,
-  stères) et le **format 7** (commune, SER, millésime des tarifs).
-- 🔜 **Tables IFN des tarifs Schaeffer** à recevoir de nemeton puis copier dans
-  `data/src/main/assets/tarifs-ifn/` ; démo en mode avion (spec `2026-10-16-tarifs-ser.md`).
+- 🔜 **Recette terrain de l'affouage** (annonces, bascule de lot, bilan).
+- 🔜 **nemetonshiny, formats 6 et 7** du CSV (tarif par essence et stères ; commune, SER,
+  millésime) : signalés le 2026-10-24 (`vers-nemetonshiny/2026-10-24-marculus-csv-formats-6-7.md`),
+  urgence faible, réponse à recevoir. Les formats 4 et 5 sont lus et traités (voir
+  `~/dev/briefs/traites/INDEX.md`).
+- 🔜 **Démo des tarifs par SER en mode avion** (spec `2026-10-16-tarifs-ser.md`).
 - 🔜 **Recette terrain de la dictée** (7 cas, bruit réel, gants) — cf.
   `2026-08-21-tranche-dictee-vocale.md`.

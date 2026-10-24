@@ -23,6 +23,10 @@ de cubage. Cochée, elle ouvre un champ **« Volume maximal d'un lot (m³) »** 
 1. Les lots démarrent à **1**.
 2. Le volume de chaque tige (`VolumesMartelage.cubage(...).volumeTigeM3 × quantité`, bois fort
    tige) est cumulé dans le lot courant.
+   *(Correction 2026-10-24, décision de Pascal : pour un arbre qui a un houppier, **seul le
+   houppier** compte dans le lot ; un arbre sans houppier compte en entier. C'est le comportement
+   de `AffouageLots.volumes` et de la spec v1 §5 bis ; la formulation « bois fort tige » ci-dessus
+   est conservée pour mémoire, elle ne vaut plus pour un arbre avec houppier.)*
 3. Dès que le cumul est **≥ volume maximal**, le lot est clos : la tige **suivante** ouvre le lot
    suivant (la tige qui fait déborder appartient au lot qu'elle ferme), et le cumul repart de 0.
 4. L'annonce vocale reste celle des Paramètres (« Annonce de l'étiquette » → « Chêne 35 »,
@@ -106,6 +110,10 @@ Visible seulement pour un contexte d'affouage, entre « Statut » et « Par parc
 lot : nombre de tiges et volume bois fort tige (m³), **nets** (`AffouageLots.bilan`, sur
 `JournalNet` : une tige annulée ne compte dans aucun lot), avec « complet » / « en cours », puis
 une ligne Total. Les tiges comptées sans lot sont regroupées en dernier (« Sans lot »).
+*(Note 2026-10-24, suite à la décision de Pascal sur le lot, voir la correction plus haut :
+`AffouageLots.bilan` affiche, par lot, les tiges, le houppier et le volume du lot, ce dernier
+suivant la règle « houppier seul pour un arbre avec houppier ». La formulation « volume bois fort
+tige » ci-dessus est conservée pour mémoire.)*
 
 Bouton **« Exporter le bilan par lot (CSV) »** → `Download/Marculus/<contexte> - lots.csv`
 (`ExportBilanLots`) : en-tête `Contexte`, `ContexteId`, `VolumeMaxLot_m3`, puis
