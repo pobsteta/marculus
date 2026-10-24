@@ -34,6 +34,15 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
+- [009](missions/009-test-numero-hors-schaeffer.md) · depuis le cycle 2
+  - Homme : testeur (sonnet), appuyer
+  - Mission : tests du numéro de tarif à 0 hors Schaeffer (modèle et CSV)
+  - Moyens : `:core:test`, une PR commune avec 010
+- [010](missions/010-numero-hors-schaeffer.md) · depuis le cycle 2
+  - Homme : dev (sonnet), appuyer
+  - Mission : numéro à 0 hors Schaeffer à l'enregistrement, à l'import et à l'export
+  - Moyens : `Modeles.kt`, `ExportCsv.kt`, `CreationContexteScreen.kt`, `SauvegardeRepository.kt`
+
 - [007](missions/007-test-choix-theme.md) · depuis le cycle 2
   - Homme : testeur (sonnet), appuyer
   - Mission : tests du choix du thème Système / Clair / Sombre
