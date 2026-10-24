@@ -9,6 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import fr.marculus.core.model.ConfigRtk
 import fr.marculus.core.model.Reglages
 import fr.marculus.core.model.TransportRtk
+import fr.marculus.core.model.choixThemeDepuis
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -23,7 +24,9 @@ class ReglagesRepository(context: Context) {
         val pleinEcran = booleanPreferencesKey("plein_ecran")
         val vibration = booleanPreferencesKey("vibration")
         val sonClic = booleanPreferencesKey("son_clic")
-        val themeSombre = booleanPreferencesKey("theme_sombre")
+        val theme = stringPreferencesKey("theme")
+        /** Ancienne case « Thème sombre » : lue pour reprendre le réglage, plus écrite. */
+        val themeSombreAncien = booleanPreferencesKey("theme_sombre")
         val capturePosition = booleanPreferencesKey("capture_position")
         val annonceNombre = booleanPreferencesKey("annonce_nombre")
         val annonceEtiquette = booleanPreferencesKey("annonce_etiquette")
@@ -60,7 +63,7 @@ class ReglagesRepository(context: Context) {
             pleinEcran = p[Cles.pleinEcran] ?: false,
             vibration = p[Cles.vibration] ?: false,
             sonClic = p[Cles.sonClic] ?: false,
-            themeSombre = p[Cles.themeSombre] ?: false,
+            theme = choixThemeDepuis(p[Cles.theme], p[Cles.themeSombreAncien]),
             capturePosition = p[Cles.capturePosition] ?: false,
             annonceNombre = p[Cles.annonceNombre] ?: false,
             annonceEtiquette = p[Cles.annonceEtiquette] ?: false,
@@ -100,7 +103,7 @@ class ReglagesRepository(context: Context) {
             p[Cles.pleinEcran] = r.pleinEcran
             p[Cles.vibration] = r.vibration
             p[Cles.sonClic] = r.sonClic
-            p[Cles.themeSombre] = r.themeSombre
+            p[Cles.theme] = r.theme.name
             p[Cles.capturePosition] = r.capturePosition
             p[Cles.annonceNombre] = r.annonceNombre
             p[Cles.annonceEtiquette] = r.annonceEtiquette

@@ -25,13 +25,33 @@ data class ConfigRtk(
     val motDePasse: String = "centipede",
 )
 
+/** Choix du thème : suivre le téléphone, ou forcer le clair ou le sombre. */
+enum class ChoixTheme {
+    SYSTEME, CLAIR, SOMBRE;
+
+    /** Vrai si l'application doit s'afficher en sombre, [systemeSombre] étant l'état du téléphone. */
+    fun estSombre(systemeSombre: Boolean): Boolean = when (this) {
+        SYSTEME -> systemeSombre
+        CLAIR -> false
+        SOMBRE -> true
+    }
+}
+
+/**
+ * Relit le choix de thème enregistré ([nom], nom de l'énumération). Absent ou inconnu : on reprend
+ * l'ancienne case « Thème sombre » ([ancienneCase]) : cochée = SOMBRE, sinon SYSTEME.
+ */
+fun choixThemeDepuis(nom: String?, ancienneCase: Boolean?): ChoixTheme =
+    ChoixTheme.entries.firstOrNull { it.name == nom }
+        ?: if (ancienneCase == true) ChoixTheme.SOMBRE else ChoixTheme.SYSTEME
+
 /** Réglages de l'application (persistés via DataStore). */
 data class Reglages(
     val antiVeille: Boolean = false,
     val pleinEcran: Boolean = false,
     val vibration: Boolean = false,
     val sonClic: Boolean = false,
-    val themeSombre: Boolean = false,
+    val theme: ChoixTheme = ChoixTheme.SYSTEME,
     val capturePosition: Boolean = false,
     /** Lit le nouveau total à voix haute à chaque comptage (synthèse vocale). */
     val annonceNombre: Boolean = false,
