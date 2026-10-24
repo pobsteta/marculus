@@ -227,6 +227,7 @@
     <string name="param_theme_systeme">System</string>
     <string name="param_theme_clair">Light</string>
     <string name="param_theme_sombre">Dark</string>
+    <string name="param_theme_choix_actuel">Current choice</string>
     <string name="param_veille_titre">Keep screen awake</string>
     <string name="param_veille_desc">Keeps the screen on during marking.</string>
     <string name="param_plein_titre">Full screen</string>
