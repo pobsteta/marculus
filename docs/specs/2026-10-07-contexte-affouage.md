@@ -23,6 +23,10 @@ de cubage. Cochée, elle ouvre un champ **« Volume maximal d'un lot (m³) »** 
 1. Les lots démarrent à **1**.
 2. Le volume de chaque tige (`VolumesMartelage.cubage(...).volumeTigeM3 × quantité`, bois fort
    tige) est cumulé dans le lot courant.
+   *(Correction 2026-10-24, décision de Pascal : pour un arbre qui a un houppier, **seul le
+   houppier** compte dans le lot ; un arbre sans houppier compte en entier. C'est le comportement
+   de `AffouageLots.volumes` et de la spec v1 §5 bis ; la formulation « bois fort tige » ci-dessus
+   est conservée pour mémoire, elle ne vaut plus pour un arbre avec houppier.)*
 3. Dès que le cumul est **≥ volume maximal**, le lot est clos : la tige **suivante** ouvre le lot
    suivant (la tige qui fait déborder appartient au lot qu'elle ferme), et le cumul repart de 0.
 4. L'annonce vocale reste celle des Paramètres (« Annonce de l'étiquette » → « Chêne 35 »,
