@@ -34,16 +34,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
-- [015](missions/015-release-apres-tests.md) · depuis le cycle 4
-  - Homme : dev (sonnet), appuyer
-  - Mission : la release attend les tests verts de `main`
-  - Moyens : `release.yml`, `ci.yml`
 
-- [013](missions/013-test-migration-theme.md) · depuis le cycle 4
-  - Homme : testeur (sonnet), appuyer
-  - Mission : test de la reprise de l'ancienne clé `theme_sombre`
-  - Moyens : `data/src/test/`, une PR
-  - État : PR #25, relecture en cours
 
 
 
@@ -61,6 +52,18 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · après l'essai au soleil du 2026-10-30 · depuis le cycle 1
 
 ## Terminé
+
+- [015](missions/015-release-apres-tests.md) · depuis le cycle 4
+  - Homme : dev (sonnet), appuyer
+  - Mission : la release attend les tests verts de `main`
+  - Moyens : `release.yml`, `ci.yml`
+  - Livré : PR #27 fusionnée le 2026-10-24, release v0.65.6 après CI verte
+
+- [013](missions/013-test-migration-theme.md) · depuis le cycle 4
+  - Homme : testeur (sonnet), appuyer
+  - Mission : test de la reprise de l'ancienne clé `theme_sombre`
+  - Moyens : `data/src/test/`, une PR
+  - Livré : PR #25 fusionnée le 2026-10-24
 
 - [014](missions/014-docs-a-jour.md) · depuis le cycle 4
   - Homme : archiviste (sonnet), appuyer
