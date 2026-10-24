@@ -79,3 +79,13 @@ utilisés par `MarculusTheme`.
 
 Au soleil, le texte des boutons se lit sans plisser les yeux ; et les trois applications ont le
 même vert.
+
+## Reformulation du 2026-10-24 (cap de Pascal : la palette commune est celle de Marculus)
+
+La mission devient : **adopter `terrain-style` v0.6.1, dont les jetons sont les couleurs actuelles de
+Marculus**, sans aucun changement visible. Remplace l'objectif « tenir 7:1 ».
+- Moyens : `terrain-style` v0.6.1 publiée (brief `vers-terrain/2026-10-24-marculus-palette-reste-verte.md`,
+  révision du 2026-10-24) ; test d'égalité de la 005 (abandonnée) à réécrire par le `testeur`.
+- Exigence d'écran (liste de pré-fusion, point 4) : **capture avant / après identiques**, montrée à
+  Pascal avant la PR, en clair et en sombre.
+- Temps de la main : appuyer (ce n'est plus un changement d'aspect).

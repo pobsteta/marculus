@@ -41,3 +41,23 @@ La cohérence visuelle immédiate avec les autres applications qui adopteront `t
 ## Question de contrôle
 
 Cette décision tient-elle nos six valeurs, et que sommes-nous prêts à payer pour cela ? Réponse de Pascal : non écrite.
+
+## Révision du 2026-10-24 — la palette commune est celle de Marculus
+
+Décision de Pascal (journal, ligne `cap` du 2026-10-24 « la palette de `terrain-style` est celle de
+Marculus v0.65.0 ») : Marculus, Groma et Surculus utilisent `terrain-style`, dont les jetons
+deviennent les couleurs actuelles de Marculus ; elles s'imposent à Groma et Surculus. La règle 7:1
+tombe comme règle commune (blanc sur `VertVif` = 5,17:1, jugé conforme au soleil par Pascal).
+Marculus réadoptera `terrain-style` (v0.6.1) sans changement visible (mission 006).
+
+| Rôle | Clair | Sombre |
+|---|---|---|
+| `primary` | `VertVif #3E7A40` | `VertVif #3E7A40` |
+| `onPrimary` | blanc `#FFFFFF` | blanc `#FFFFFF` |
+| `primaryContainer` | `VertMarculus #374742` | `VertMarculus #374742` |
+| `onPrimaryContainer` | `Creme #F5EBD8` | `Creme #F5EBD8` |
+| `secondary` | `VertMarculus #374742` | `Creme #F5EBD8` |
+| les 43 autres rôles | valeurs par défaut de `lightColorScheme()` | valeurs par défaut de `darkColorScheme()` |
+
+Source : `app/src/main/kotlin/io/github/pobsteta/marculus/ui/theme/Theme.kt` au tag `v0.65.0` de Marculus
+(l. 10-28), Compose BOM `2026.02.01` (`gradle/libs.versions.toml` l. 5) pour les valeurs par défaut.
