@@ -36,6 +36,17 @@ jobs:
       - name: Tests unitaires + couverture (:core)
         run: ./gradlew :core:test :core:jacocoTestReport --no-daemon
 
+      - name: Tests unitaires (:data, migration Room et réglages du terrain)
+        run: ./gradlew :data:testDebugUnitTest --no-daemon
+
+      - name: Publier les rapports de test de :data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapports-tests-data
+          path: data/build/reports/tests/testDebugUnitTest
+          if-no-files-found: warn
+
       - name: Compiler l'APK debug
         run: ./gradlew :app:assembleDebug --no-daemon
 
