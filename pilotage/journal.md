@@ -80,3 +80,11 @@
 2026-10-24 · Pascal · — · plafond humain confirmé : 3 PR ouvertes au plus
 2026-10-24 · testeur · 009 · tests du numéro à 0 hors Schaeffer (commit 222a792), rouges jusqu'à 010 · écart signalé : a lu l'enum `TarifCubage` (≈ 30 lignes de `Modeles.kt`) pour sa signature, aucune implémentation
 2026-10-24 · dev · 010 · `normalise()` appliqué à l'enregistrement, à l'import et à l'export ; PR #18, CI verte · relecture en cours
+2026-10-24 · Pascal · 011 · demande : « pour le thème dans paramètres, mettre les choix dans une liste déroulante par un check » · lu comme : liste déroulante, choix courant marqué d'une coche ✓ · mission 011 (dev, appuyer, sans testeur : présentation seule)
+2026-10-24 · Pascal · 003 · PR #17 fusionnée (« merge la #17 ») : spec v1 à jour du livré, règle du lot d'affouage (houppier seul, EMERGE compris) · carte 003 terminée
+2026-10-24 · relecteur · 009-010 · PR #18 prête : quatre lieux normalisés, tests de 009 intacts, mutation de l'export → 4 échecs, CI verte · question de sens : un Schaeffer passé par EMERGE perd son numéro à l'édition (la part de houppier, elle, est gardée)
+2026-10-24 · Pascal · 009-010 · PR #18 fusionnée (« merge la #18 », après le verdict du relecteur) · release v0.64.9 installée sur le téléphone (Success)
+2026-10-24 · Claude (orchestrateur) · 009-010 · écart · attendu : vérifier le titre conventionnel avant la fusion (décidé au cycle 3) · vu : titre « Numéro de tarif à 0 hors Schaeffer (missions 009 et 010) » affiché mais fusionné tel quel ; release partie en patch (v0.64.9), ce qui convenait à un correctif · vérifié : `git log` · décision : garder ; renommer la PR (`gh pr edit --title`) avant toute fusion
+2026-10-24 · relecteur · 011 · PR #20 prête : harnais respecté, ≥ 48 dp, coche ✓ accessible, CI verte · mineures : ligne sans bordure (indice visuel à juger sur le téléphone), titre « Thème » non annoncé par TalkBack
+2026-10-24 · Pascal · 010 · question de sens tranchée : un Schaeffer passé par EMERGE perd son numéro au retour en Schaeffer (à ressaisir) · « le comportement me va pour l'exemple du hêtre » · rien à changer
+2026-10-24 · Pascal · 011 · PR #20 fusionnée (« merge la #20 et installe ») · release v0.65.0 installée sur le téléphone
