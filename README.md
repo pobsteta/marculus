@@ -99,9 +99,8 @@ d'événements *append-only* (chaque tige possède un UUID).
 | **`:data`** | Persistance **Room** (journal `tige`, `contexte`, configs) + **DataStore** (réglages), `GpkgRepository`, sauvegarde/synchro JSON. |
 | **`:app`**  | UI **Jetpack Compose / Material 3** : liste, création, feuille, carte (osmdroid), statut, paramètres. |
 
-Pile : Gradle 9.4.1 · AGP 9.2.1 (Kotlin intégré) · Kotlin 2.2.10 · Compose BOM 2026.02.01 ·
-Room 2.8.1 · osmdroid 6.1.20 · NGA geopackage-android 6.7.4 · proj4j · Vosk 0.3.47 ·
-minSdk 26 / compileSdk 36.
+Pile technique (Kotlin, AGP, Compose, Room, osmdroid, Vosk, `terrain`…) : versions dans
+[`gradle/libs.versions.toml`](gradle/libs.versions.toml), seule source ; minSdk 26 / compileSdk 36.
 
 NMEA, NTRIP, géodésie (aires, point dans polygone) et projections viennent de la bibliothèque
 commune [`terrain`](https://github.com/pobsteta/terrain) (`terrain-gnss`, paquets
@@ -117,26 +116,54 @@ build ; à mettre à jour quand l'un des deux l'adopte). Publiée par tag sur Ji
 
 ---
 
-## Construire
+## Déployer et publier
 
-Le JDK « système » peut être un JRE sans `javac` : pointer Gradle sur un JDK 21 complet.
+*Section ajoutée le 2026-10-24 (mission 014). Preuves : `.github/workflows/release.yml`, `.claude/test-command`.*
+
+**Compiler et tester.** Le JRE système n'a pas `javac` : pointer `JAVA_HOME` sur un JDK 21 complet
+(Adoptium 21, par exemple celui que Gradle télécharge dans `~/.gradle/jdks/`).
 
 ```bash
 export JAVA_HOME=/chemin/vers/un/jdk-21
-./gradlew :core:test            # tests du domaine (JVM) + couverture JaCoCo
-./gradlew :app:assembleDebug    # APK debug
-./gradlew :app:assembleRelease  # APK release minifié (R8, signé avec la clé debug)
+./gradlew :app:assembleDebug           # APK debug local
+.claude/test-command                   # tests : :core:test :data:testDebugUnitTest :app:testDebugUnitTest
+./gradlew :app:mergeReleaseResources   # avant de pousser des chaînes (apostrophes)
 ```
 
 Rapport de couverture : `core/build/reports/jacoco/html/index.html`.
+
+**Publier.** Jamais de push direct sur `main` : tout passe par une pull request. Au **merge de la PR**
+sur `main`, `release.yml` calcule la version depuis les commits conventionnels (`feat:` -> mineur,
+`fix:` -> patch, `!` ou `BREAKING CHANGE` -> majeur, sinon patch) et publie l'APK signé sur GitHub
+Releases. Le titre de la PR doit donc être un commit conventionnel (`feat: ...`, `fix: ...`).
+
+**Installer sur un téléphone.** Le téléphone de Pascal tourne sur l'APK **release** signé par la CI.
+Un build debug local ne s'installe pas par-dessus (signature différente, `versionCode` plus bas).
+
+```bash
+gh release download vX.Y.Z -R pobsteta/marculus -p '*.apk'
+adb install -r marculus-vX.Y.Z-*.apk     # -r : mise à jour, données conservées
+```
+
+Sur le téléphone de Pascal : `adb install` et captures d'écran seulement, jamais de taps `adb`
+à l'aveugle.
+
+**Retour arrière.** Pas de désinstallation (elle efface les données) : annuler le commit fautif
+par un *revert* sur une branche, PR, merge ; la CI publie une nouvelle version corrigée, qu'on
+installe comme ci-dessus.
+
+**Clé de signature.** Elle vit dans les secrets de dépôt (voir « Signature des releases »).
+Emplacement de la sauvegarde hors dépôt : **à compléter par Pascal**.
 
 ---
 
 ## Versionnement & releases automatiques
 
-À **chaque push sur `main`**, la CI (GitHub Actions) :
+Au **merge d'une PR sur `main`** (`release.yml` se déclenche sur le push qui en résulte), la CI (GitHub Actions) :
 
-1. lance les **tests** et génère la **couverture** (badge mis à jour) ;
+1. `release.yml` ne lance **ni tests ni couverture** (aucun `needs`, aucun `workflow_run`, une seule
+   commande Gradle : `:app:assembleRelease`, l. 71) : les tests et le badge de couverture sont dans
+   `ci.yml` (job `build-test`, l. 37, 40 et 53) ;
 2. calcule la **prochaine version SemVer** à partir des messages de commit
    ([Conventional Commits](https://www.conventionalcommits.org)) ;
 3. compile l'**APK release** (version injectée) et publie une **release GitHub** avec l'APK.
