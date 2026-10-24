@@ -20,13 +20,15 @@
 - **Problème du produit** : _en une phrase, de la main de Pascal : ce que Marculus résout,
   pour qui._
 - **Problème du cycle** : _choisi par Pascal dans le bac à sable de `pilotage/kanban.md`._
-- **Question du lot : réponse partielle de Pascal le 2026-10-24** (journal, ligne « règle du lot
+- **Question du lot : réponse de Pascal le 2026-10-24** (`pilotage/journal.md` l. 73, « règle du lot
   d'affouage, mot pour mot ») : le volume d'un lot est le volume total des tiges si le pourcentage de
-  houppier est à 0, sinon le volume houppier ; spec v1 mise à jour (PR #17). L'ADR 0004 n'existe pas
+  houppier est à 0, sinon le volume houppier ; spec v1 mise à jour (PR #17). Nuance EMERGE **confirmée
+  par Pascal** (journal l. 78, « oui pour EMERGE ») : houppier seul dès qu'EMERGE couvre l'essence,
+  sinon tige entière. L'ADR 0004 n'existe pas
   encore (`docs/adr/` vide au 2026-10-24) : renvoyer vers lui quand il sera écrit. La question
   ci-dessous reste telle qu'écrite le 2026-10-23 ; restent ouverts les portions sur plusieurs
   parcelles et le coefficient de stères du houppier.
-- **Question ouverte (à trancher par Pascal), état du 2026-10-23** : dans quelle unité la délibération communale
+- **Question ouverte (à trancher par Pascal)** : dans quelle unité la délibération communale
   fixe-t-elle un lot d'affouage (m³ de tige, m³ de houppier, stères) ? Un lot est-il une
   portion répartie sur plusieurs parcelles ? Aujourd'hui, la spec affouage cumule le m³ de bois
   fort tige (`docs/specs/2026-10-07-contexte-affouage.md`, l. 24-25), la spec générale ne
@@ -56,21 +58,23 @@ La description à jour est dans la spec, `docs/specs/2026-06-21-marculus-v1-spec
 recopie pas ici. Version installée : voir [les releases](https://github.com/pobsteta/marculus/releases)
 (la dernière release est la version installée ; ne plus la recopier ici).
 
-*Ligne du 2026-10-24 (remplace, sans l'effacer, la version « v0.63.6 » écrite le 2026-10-23, périmée
-depuis les v0.64.9 à v0.65.1) : les écarts de spec listés le 2026-10-23 sont corrigés (PR #17 ; base
-Room v17 : `docs/specs/2026-06-21-marculus-v1-spec.md` l. 235 ; fonds Plan IGN, Ortho IGN et OSM : l. 32-34).
+*Ligne du 2026-10-24 (remplace, sans l'effacer, la forme écrite le 2026-10-23 « Version installée :
+**v0.63.6** (2026-10-23) », périmée depuis les v0.64.9 à v0.65.1) : les écarts de spec listés le 2026-10-23 sont corrigés (PR #17 ; base
+Room v17 : `docs/specs/2026-06-21-marculus-v1-spec.md` l. 235 ; fonds Plan IGN, Ortho IGN et OSM : l. 32-34 ; tables SER livrées : l. 19-20 et 135-136 de la même spec et
+`pilotage/journal.md` l. 36).
 Ancien texte : « Écarts connus de la spec, à corriger : base Room « v14 » au § 9 contre v17 ; « tables en
 attente » alors qu'elles sont livrées en v0.62.0 ; fonds « OSM + ESRI » alors qu'ils sont IGN depuis
-v0.57.0. » (Le point « tables en attente » n'a pas été revérifié ici.)*
+v0.57.0. » Les trois points sont donc traités.*
 
-**Échanges avec Nemeton** : Marculus écrit `FormatCsv;7`, mais le texte d'aide de `nemetonshiny` dit
-« formats 2 à 5 » (`R/utils_i18n.R`, l. 764).
+**Échanges avec Nemeton** : Marculus écrit `FormatCsv;7`, mais `nemetonshiny` ne lit que les
+formats 2 à 5 (`R/utils_i18n.R`, l. 764) : les formats 6 et 7 ne lui ont pas été signalés.
 
-*Ligne du 2026-10-24 (corrige la phrase « les formats 6 et 7 ne lui ont pas été signalés » du
-2026-10-23) : brief déposé le 2026-10-24 (`~/dev/briefs/vers-nemetonshiny/2026-10-24-marculus-csv-formats-6-7.md` ;
-journal, ligne 2026-10-24 « dépôt ordonné »). Le lecteur R ne refuse que les formats < 2
-(`service_marculus_import.R` l. 324-325, vérifié par le relecteur, journal 2026-10-24) : il est tolérant ;
-seul le texte d'aide est en retard. Urgence jugée faible par Pascal (journal 2026-10-24).*
+*Ligne du 2026-10-24 (corrige, sans l'effacer, la phrase ci-dessus écrite le 2026-10-23) : brief
+déposé le 2026-10-24 (`~/dev/briefs/vers-nemetonshiny/2026-10-24-marculus-csv-formats-6-7.md` ;
+`pilotage/journal.md` l. 57, « dépôt ordonné »). Le lecteur R ne refuse que les formats < 2
+(`service_marculus_import.R` l. 324-325 ; constat du relecteur, journal l. 43) : il est tolérant ; seul
+le texte d'aide (`R/utils_i18n.R` l. 764, « formats 2 à 5 ») est en retard. Urgence jugée faible par
+Pascal (journal l. 72).*
 
 ## Ce qu'il ne fait pas (hors périmètre)
 

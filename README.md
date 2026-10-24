@@ -161,7 +161,9 @@ Emplacement de la sauvegarde hors dépôt : **à compléter par Pascal**.
 
 Au **merge d'une PR sur `main`** (`release.yml` se déclenche sur le push qui en résulte), la CI (GitHub Actions) :
 
-1. lance les **tests** et génère la **couverture** (badge mis à jour) ;
+1. `release.yml` ne lance **ni tests ni couverture** (aucun `needs`, aucun `workflow_run`, une seule
+   commande Gradle : `:app:assembleRelease`, l. 71) : les tests et le badge de couverture sont dans
+   `ci.yml` (job `build-test`, l. 37, 40 et 53) ;
 2. calcule la **prochaine version SemVer** à partir des messages de commit
    ([Conventional Commits](https://www.conventionalcommits.org)) ;
 3. compile l'**APK release** (version injectée) et publie une **release GitHub** avec l'APK.
