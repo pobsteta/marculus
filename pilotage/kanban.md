@@ -46,10 +46,10 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - [006](missions/006-theme-terrain-style.md) · depuis le cycle 2
   - Homme : dev (sonnet), **tenir**, plan d'abord
   - Mission : thème = jetons de `terrain-style` (clair et sombre), issue #2 § 2
-  - Moyens : `Theme.kt`, test de 005 ; essai au soleil de Pascal le 2026-10-30
+  - Moyens : `Theme.kt`, test de 005 ; essai au soleil fait le 2026-10-24 (thèmes actuels conformes), prévu le 2026-10-30 : clos
   - État : livrée en v0.64.0 (#9) puis annulée en v0.64.2 (#12) le 2026-10-24 : le vert a disparu ; attend `terrain-style` v0.6.1 (brief `vers-terrain/2026-10-24-marculus-palette-reste-verte.md`)
 
-- Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · après l'essai au soleil du 2026-10-30 · depuis le cycle 1
+- Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · essai au soleil clos le 2026-10-24 (thèmes actuels conformes) : la carte attend la palette `terrain-style` · depuis le cycle 1
 
 ## Terminé
 

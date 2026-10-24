@@ -25,7 +25,7 @@ Alternatives : garder `terrain-style` v0.6.0 (écarté, journal l. 65) ; autres 
 |---|---|---|---|---|
 | **F** | Est-ce la solution la plus simple qui tienne ? Réparable avec les moyens du bord ? | Retour aux couleurs v0.63 (revert, journal l. 65) | Pas de palette commune pour l'instant | Non écrit |
 | **R** | Qui fait quoi, et chacun a-t-il les moyens de sa part ? | `terrain` produit la palette, Marculus l'essaie (journal l. 65, 99) | Un brief de plus | Non écrit |
-| **A** | Que se passe-t-il si ce qu'on n'a pas prévu arrive ? De qui ou de quoi dépendons-nous ? | Lisibilité au soleil : essai daté 2026-10-30 (journal l. 99) | | |
+| **A** | Que se passe-t-il si ce qu'on n'a pas prévu arrive ? De qui ou de quoi dépendons-nous ? | Lisibilité au soleil : essai daté 2026-10-30 (journal l. 99) ; **fait et clos le 2026-10-24** : thèmes clair et sombre actuels jugés conformes par Pascal (journal l. 91 et ligne du 2026-10-24 « essai au soleil clos ») | | |
 | **N** | Avons-nous écouté toutes les idées, même les plus étranges ? | Non écrit | | |
 | **C** | Que coûte cette décision à l'ensemble ? Y a-t-il une dépense inutile ? | Non écrit | | |
 | **É** | Que réutilisons-nous, et qui pourra réutiliser ce que nous faisons ? | Palette commune visée, reportée (journal l. 65) | | |
