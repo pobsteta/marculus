@@ -337,4 +337,62 @@ class ExportCsvTest {
             Locale.setDefault(defaut)
         }
     }
+
+    // --- Mission 009 : numéro de tarif à 0 hors Schaeffer ---
+
+    @Test
+    fun `un tarif EMERGE par essence est exporte avec le numero 0`() {
+        val ctx = contexte.copy(
+            tarif = TarifCubage.SCHAEFFER_RAPIDE, tarifNumero = 9,
+            tarifsEssence = mapOf("Hêtre" to TarifEssence(TarifCubage.EMERGE, 9)),
+        )
+        val lignes = ExportCsv.contexteCsv(ctx, emptyList()).split("\n")
+        val noms = ctx.essencesNoms.joinToString("|") { e ->
+            if (e == "Hêtre") "Hêtre=EMERGE:0" else "$e=SCHAEFFER_RAPIDE:9"
+        }
+        assertTrue("TarifsEssence;$noms" in lignes, lignes.joinToString("\n"))
+    }
+
+    @Test
+    fun `un tarif AUCUN par essence est exporte avec le numero 0`() {
+        val ctx = contexte.copy(
+            tarif = TarifCubage.SCHAEFFER_RAPIDE, tarifNumero = 9,
+            tarifsEssence = mapOf("Chêne" to TarifEssence(TarifCubage.AUCUN, 5)),
+        )
+        val lignes = ExportCsv.contexteCsv(ctx, emptyList()).split("\n")
+        val ligne = lignes.first { it.startsWith("TarifsEssence;") }
+        assertTrue("Chêne=AUCUN:0" in ligne, ligne)
+        assertTrue("Hêtre=SCHAEFFER_RAPIDE:9" in ligne, ligne)
+    }
+
+    @Test
+    fun `un contexte EMERGE ou AUCUN avec un ancien numero exporte TarifNumero 0`() {
+        for (t in listOf(TarifCubage.EMERGE, TarifCubage.AUCUN)) {
+            val ctx = contexte.copy(tarif = t, tarifNumero = 9)
+            val lignes = ExportCsv.contexteCsv(ctx, emptyList()).split("\n")
+            val i = lignes.indexOf("Tarif;${t.name}")
+            assertTrue(i >= 0, lignes.joinToString("\n"))
+            assertEquals("TarifNumero;0", lignes[i + 1], "tarif $t")
+        }
+    }
+
+    @Test
+    fun `un Schaeffer garde son numero dans TarifNumero`() {
+        val ctx = contexte.copy(tarif = TarifCubage.SCHAEFFER_LENT, tarifNumero = 9)
+        val lignes = ExportCsv.contexteCsv(ctx, emptyList()).split("\n")
+        assertEquals("TarifNumero;9", lignes[lignes.indexOf("Tarif;SCHAEFFER_LENT") + 1])
+    }
+
+    @Test
+    fun `aucun csv n'exporte EMERGE ou AUCUN suivi d'un numero non nul`() {
+        val ctx = contexte.copy(
+            tarif = TarifCubage.EMERGE, tarifNumero = 9,
+            tarifsEssence = mapOf(
+                "Chêne" to TarifEssence(TarifCubage.EMERGE, 12),
+                "Hêtre" to TarifEssence(TarifCubage.AUCUN, 4),
+            ),
+        )
+        val csv = ExportCsv.contexteCsv(ctx, emptyList())
+        assertTrue(Regex("(EMERGE|AUCUN):[1-9]").find(csv) == null, csv)
+    }
 }
