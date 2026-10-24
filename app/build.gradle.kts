@@ -96,4 +96,6 @@ dependencies {
     implementation(libs.vosk.android)
     implementation(variantOf(libs.jna) { artifactType("aar") })
     debugImplementation(libs.compose.ui.tooling)
+    testImplementation(kotlin("test-junit"))
+    testImplementation(libs.terrain.style)
 }
