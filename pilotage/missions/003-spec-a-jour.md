@@ -63,3 +63,27 @@ _Rempli par Pascal seul, avant de lire le travail de l'agent._
 ## Comment saura-t-on que ça marche ?
 
 Le `contradicteur`, relancé sur la spec, ne relève plus d'écart de fait avec le produit livré.
+
+## Décisions de Pascal (2026-10-24)
+
+- **Feu vert sur le plan** rendu par l'archiviste (points 1 à 9, ajouts 7 et 8 compris). Le plan
+  complet est dans `pilotage/journal.md` (ligne du 2026-10-24, archiviste, 003) et ci-dessous.
+- **Lot d'affouage : houppier seul.** Pour un arbre avec houppier, seul le houppier compte dans
+  le lot (comme le code `AffouageLots.volumes` et la spec v1 l. 150-153). Corriger
+  `docs/specs/2026-10-07-contexte-affouage.md` l. 22-23 (« bois fort tige ») par une ligne datée
+  qui renvoie à cette décision, sans effacer l'ancienne formulation.
+
+### Plan validé (rappel)
+
+1. l. 223 : Room v14 → v17 (`MarculusDatabase.kt` l. 53).
+2. l. 129-130 : tables SER « en attente » → ✅ livrées en v0.62.0.
+3. l. 247-248 (§ 10) : retirer « Tables IFN à recevoir ».
+4. l. 28 : fonds en ligne = Plan IGN (défaut), Ortho IGN, OSM, cadastre IGN en couche (v0.57.0) ; ESRI disparu.
+5. En-tête : ligne « Mise à jour 2026-10-24 » qui renvoie aux sections.
+6. l. 227 : targetSdk 36.
+7. § 9 : une ligne de renvoi aux bibliothèques `terrain-*`.
+8. Écran 6 : citer le réglage « Estimer la hauteur (MNH) », renvoi à `couche-houppier-mnh.md`.
+9. l. 244-246 : reformuler sans changer le fond (recette affouage, format 4, formats 6-7 signalés
+   le 2026-10-24 par le brief `vers-nemetonshiny/2026-10-24-marculus-csv-formats-6-7.md`).
+
+Version de référence : renvoyer aux releases GitHub plutôt que recopier un numéro (v0.64.2 au 2026-10-24).
