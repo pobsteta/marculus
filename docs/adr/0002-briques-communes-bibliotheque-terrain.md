@@ -19,7 +19,7 @@ Alternatives (copie dans chaque application, module local) : non écrit. Le miro
 
 | Lettre | Question | Réponse (une ligne) | Ce que ça coûte | Prêts à payer ? |
 |---|---|---|---|---|
-| **F** | Est-ce la solution la plus simple qui tienne ? Réparable avec les moyens du bord ? | Une version par tag, un seul endroit où corriger | Non écrit | Non écrit |
+| **F** | Est-ce la solution la plus simple qui tienne ? Réparable avec les moyens du bord ? | Une version par tag, un seul endroit où corriger : « Publiée par tag sur JitPack… Une correction de ces briques se fait là-bas » (`README.md` l. 116) | Non écrit | Non écrit |
 | **R** | Qui fait quoi, et chacun a-t-il les moyens de sa part ? | Les corrections vont chez `terrain` (brief `vers-terrain/2026-10-24-marculus-palette-reste-verte.md`, journal l. 65) | Un aller-retour entre dépôts | Non écrit |
 | **A** | Que se passe-t-il si ce qu'on n'a pas prévu arrive ? De qui ou de quoi dépendons-nous ? | JitPack (429 constaté, miroir Google, mémoire de l'orchestrateur) | Disponibilité d'un service tiers | Non écrit |
 | **N** | Avons-nous écouté toutes les idées, même les plus étranges ? | Non écrit | | |
@@ -28,7 +28,7 @@ Alternatives (copie dans chaque application, module local) : non écrit. Le miro
 
 ## Valeurs sacrifiées
 
-Corriger vite dans Marculus seul : l'autonomie d'une application est cédée à la cohérence entre applications. Justification chiffrée : non écrit.
+Corriger vite dans Marculus seul : valeur sacrifiée : non écrit.
 
 ## Sources
 

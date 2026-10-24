@@ -1,7 +1,7 @@
 # ADR 0006 — Numéro de tarif à 0 hors Schaeffer, perdu au retour en Schaeffer
 
 - **Date :** 2026-10-24
-- **Statut :** **décision acceptée par Pascal** (journal l. 89) ; **texte de l'ADR proposé**, à valider par Pascal à la lecture de la PR ; livrée par la PR #18 (15bec4c, v0.64.9)
+- **Statut :** **décision acceptée par Pascal** (journal l. 89 ; Pascal décide la mission correctif, journal l. 72) ; **texte de l'ADR proposé**, à valider par Pascal à la lecture de la PR ; livrée par la PR #18 (15bec4c, v0.64.9)
 - **Proposée par :** relecteur (écart sur la mission 004, journal l. 46)
 - **Tranchée par :** Pascal
 
@@ -30,7 +30,7 @@ Alternative : mémoriser l'ancien numéro pour le retour en Schaeffer ; écarté
 
 ## Valeurs sacrifiées
 
-La commodité de retrouver le numéro après un détour par EMERGE : sacrifiée contre la cohérence des données (plus de `EMERGE:9`).
+La commodité de retrouver le numéro après un détour par EMERGE. Raison : non écrit au-delà de l'exemple du hêtre (journal l. 89).
 
 ## Sources
 

@@ -11,7 +11,7 @@ Le volume d'un lot d'affouage est, pour chaque tige, le volume houppier si l'arb
 
 ## Contexte
 
-Ancien : « bois fort tige » (`docs/specs/2026-10-07-contexte-affouage.md`). Nouveau : houppier seul. Pourquoi : c'est ce que fait le code et ce que dit la spec v1 l. 150-153 (journal l. 100).
+Ancien : « bois fort tige » (`docs/specs/2026-10-07-contexte-affouage.md`). Nouveau : houppier seul. Pourquoi : c'est ce que fait le code et ce que dit la spec v1 l. 141-147 (journal l. 100).
 
 Règle de Pascal, mot pour mot : « le volume total d'un lot est la somme du volume total de chaque tige si le pourcentage de houppier est à 0, sinon c'est le volume houppier si il y a un pourcentage houppier renseigné » (journal l. 73). En EMERGE, pas de pourcentage, coefficient propre : houppier seul dès qu'EMERGE couvre l'essence, sinon tige entière (confirmé, journal l. 78 ; `AffouageLots.volumes`). Texte en vigueur : spec v1 §5 bis (l. 141-146).
 
