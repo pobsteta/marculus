@@ -133,7 +133,8 @@ export JAVA_HOME=/chemin/vers/un/jdk-21
 Rapport de couverture : `core/build/reports/jacoco/html/index.html`.
 
 **Publier.** Jamais de push direct sur `main` : tout passe par une pull request. Au **merge de la PR**
-sur `main`, `release.yml` calcule la version depuis les commits conventionnels (`feat:` -> mineur,
+sur `main`, `ci.yml` lance les tests ; **seulement s'ils sont verts**, `release.yml` (déclenché par
+`workflow_run`, mission 015, PR #27) construit et tague le commit testé, calcule la version depuis les commits conventionnels (`feat:` -> mineur,
 `fix:` -> patch, `!` ou `BREAKING CHANGE` -> majeur, sinon patch) et publie l'APK signé sur GitHub
 Releases. Le titre de la PR doit donc être un commit conventionnel (`feat: ...`, `fix: ...`).
 
@@ -152,18 +153,28 @@ Sur le téléphone de Pascal : `adb install` et captures d'écran seulement, jam
 par un *revert* sur une branche, PR, merge ; la CI publie une nouvelle version corrigée, qu'on
 installe comme ci-dessus.
 
-**Clé de signature.** Elle vit dans les secrets de dépôt (voir « Signature des releases »).
-Emplacement de la sauvegarde hors dépôt : **à compléter par Pascal**.
+**Ne pas relancer une CI de `main` déjà verte, ni celle d'un ancien commit** (règle de Pascal du
+2026-10-24) : chaque CI verte de `main` publie une release ; relancée, elle en publie une de plus,
+et sur un ancien commit, une version plus haute qui contient moins de code, que le téléphone
+accepterait comme une mise à jour. Pour republier, faire une PR.
+
+**Clé de signature.** Elle vit dans les secrets de dépôt (voir « Signature des releases ») et dans
+le fichier `marculus-release.keystore` à la racine, ignoré par git (`.gitignore` : `*.keystore`).
+Empreinte SHA-256 du certificat des releases : `7b0f7fd14a6c51eae8dbf44ec14cb35a88cf1a6e053695686aca1cf024fb2efc`
+(relevée sur l'APK v0.65.0, `apksigner verify --print-certs`). **Mots de passe et alias : non
+retrouvés au 2026-10-24** (GitHub ne relit pas ses secrets). Sauvegarde hors de ce poste : **à
+compléter par Pascal**.
 
 ---
 
 ## Versionnement & releases automatiques
 
-Au **merge d'une PR sur `main`** (`release.yml` se déclenche sur le push qui en résulte), la CI (GitHub Actions) :
+Au **merge d'une PR sur `main`**, la CI (GitHub Actions) :
 
-1. `release.yml` ne lance **ni tests ni couverture** (aucun `needs`, aucun `workflow_run`, une seule
-   commande Gradle : `:app:assembleRelease`, l. 71) : les tests et le badge de couverture sont dans
-   `ci.yml` (job `build-test`, l. 37, 40 et 53) ;
+1. lance les tests et le badge de couverture dans `ci.yml` (job `build-test`) ; `release.yml` ne
+   démarre qu'à la **réussite** de ce workflow sur un push vers `main` (`workflow_run`, depuis le
+   2026-10-24, PR #27 ; avant, il partait en parallèle des tests) et construit le commit testé
+   (`head_sha`) ;
 2. calcule la **prochaine version SemVer** à partir des messages de commit
    ([Conventional Commits](https://www.conventionalcommits.org)) ;
 3. compile l'**APK release** (version injectée) et publie une **release GitHub** avec l'APK.
