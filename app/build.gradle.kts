@@ -77,7 +77,6 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":data"))
     implementation(libs.terrain.carte)
-    implementation(libs.terrain.style)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -97,5 +96,4 @@ dependencies {
     implementation(libs.vosk.android)
     implementation(variantOf(libs.jna) { artifactType("aar") })
     debugImplementation(libs.compose.ui.tooling)
-    testImplementation(kotlin("test-junit"))
 }
