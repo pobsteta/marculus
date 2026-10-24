@@ -6,7 +6,7 @@
 que la migration de la base et la fusion des réglages du terrain soient vérifiées à chaque PR,
 pas seulement sur le poste de Pascal.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** faire lancer par la CI les tests JVM de `:data` (migration Room, fusion des réglages du terrain), pour qu'une PR qui les casse échoue en CI. _(reportée par l'orchestrateur, 2026-10-24)_
 
 ## Les trois questions (règle de staffing)
 
