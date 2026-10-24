@@ -16,7 +16,7 @@
 > borné annoncés à chaque tige, bilan par lot, CSV `FormatCsv;5`, fusion qui préserve les
 > réglages du terrain (`2026-10-07-contexte-affouage.md`).
 > **Mise à jour 2026-10-24** : relecture de la spec contre le produit livré (version courante :
-> voir les releases GitHub ; v0.64.2 au 2026-10-24). Corrigés : fonds de carte (§1), tables de
+> voir les releases GitHub). Corrigés : fonds de carte (§1), tables de
 > tarifs par SER livrées (§5), schéma Room et SDK cible (§9), reste à faire (§10) ; ajoutés :
 > bibliothèques `terrain-*` (§9), réglage MNH (§6). Aucune règle métier modifiée.
 > Légende d'état : ✅ fait · 🟡 partiel · 🔜 à faire.
@@ -30,7 +30,8 @@
   - ✅ Import/affichage GPKG + carte, rattachement point-dans-polygone, aires géodésiques.
   - ✅ GNSS ponctuel (acquisition à la demande, permission, terminologie « GNSS »).
   - ✅ Fonds de carte en ligne **Plan IGN** (défaut), **Ortho IGN**, **OSM**, avec le **cadastre IGN**
-    en couche (v0.57.0 ; le fond satellite ESRI a disparu) + **ortho GPKG** hors-ligne (bascule).
+    en couche (Ortho IGN à la place d'ESRI en v0.47.0, `da84eb8` ; Plan IGN par défaut et
+    cadastre en v0.57.0, `c847712`) + **ortho GPKG** hors-ligne (bascule).
   - ✅ Synchro multi-opérateurs **par fichier** (`.marsync`, fusion « dernière écriture gagne »).
   - ✅ GNSS externe **RTK/NTRIP** (type projet Centipede) : transport BT SPP / TCP, client
     NTRIP, service de premier plan, qualité de fix et précision tracées sur la tige —
@@ -248,11 +249,11 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   de l'attribution déduite du GPKG.
 - 🔜 **Bouton Flic 2** (BLE) comme troisième déclencheur de la dictée — reporté (dépendance
   JitPack écartée) ; `PttController` est prêt à le recevoir.
-- 🔜 **Recette terrain de l'affouage** (annonces, bascule de lot, bilan) et réponse de
-  nemetonshiny au brief `CSV format 4` (lecture du `lot`, règle « clé absente »). Les
-  **formats 5, 6 et 7** (houppier et parts par essence ; tarif par essence et stères ; commune,
-  SER, millésime) ont été signalés à nemetonshiny le 2026-10-24
-  (`vers-nemetonshiny/2026-10-24-marculus-csv-formats-6-7.md`) ; sa réponse reste à recevoir.
+- 🔜 **Recette terrain de l'affouage** (annonces, bascule de lot, bilan).
+- 🔜 **nemetonshiny, formats 6 et 7** du CSV (tarif par essence et stères ; commune, SER,
+  millésime) : signalés le 2026-10-24 (`vers-nemetonshiny/2026-10-24-marculus-csv-formats-6-7.md`),
+  urgence faible, réponse à recevoir. Les formats 4 et 5 sont lus et traités (voir
+  `~/dev/briefs/traites/INDEX.md`).
 - 🔜 **Démo des tarifs par SER en mode avion** (spec `2026-10-16-tarifs-ser.md`).
 - 🔜 **Recette terrain de la dictée** (7 cas, bruit réel, gants) — cf.
   `2026-08-21-tranche-dictee-vocale.md`.

@@ -110,6 +110,10 @@ Visible seulement pour un contexte d'affouage, entre « Statut » et « Par parc
 lot : nombre de tiges et volume bois fort tige (m³), **nets** (`AffouageLots.bilan`, sur
 `JournalNet` : une tige annulée ne compte dans aucun lot), avec « complet » / « en cours », puis
 une ligne Total. Les tiges comptées sans lot sont regroupées en dernier (« Sans lot »).
+*(Note 2026-10-24, suite à la décision de Pascal sur le lot, voir la correction plus haut :
+`AffouageLots.bilan` affiche, par lot, les tiges, le houppier et le volume du lot, ce dernier
+suivant la règle « houppier seul pour un arbre avec houppier ». La formulation « volume bois fort
+tige » ci-dessus est conservée pour mémoire.)*
 
 Bouton **« Exporter le bilan par lot (CSV) »** → `Download/Marculus/<contexte> - lots.csv`
 (`ExportBilanLots`) : en-tête `Contexte`, `ContexteId`, `VolumeMaxLot_m3`, puis
