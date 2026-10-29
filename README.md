@@ -230,4 +230,6 @@ la **GNU General Public License version 3** (ou, à votre choix, toute version u
 par la Free Software Foundation. Il est distribué **sans aucune garantie**. Voir [`LICENSE`](LICENSE).
 
 Composants tiers : Vosk et le modèle vosk-model-small-fr-0.22 (Apache 2.0), osmdroid (Apache 2.0),
-GeoPackage NGA (MIT) — licences compatibles avec la GPL-3.0.
+GeoPackage NGA (MIT) — licences compatibles avec la GPL-3.0. La police New Rocker (OFL-1.1, `google/fonts`)
+sert seulement à générer l'icône (`app/icone/generer_icone.py`) : téléchargée par le script, non
+versionnée, absente de l'APK.
