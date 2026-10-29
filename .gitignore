@@ -17,3 +17,7 @@
 
 # Worktrees des agents de la méthode de l'Impératrice
 .claude/worktrees/
+
+# Police de l'icône (OFL-1.1), téléchargée par app/icone/generer_icone.py, non versionnée
+app/icone/*.ttf
+__pycache__/
