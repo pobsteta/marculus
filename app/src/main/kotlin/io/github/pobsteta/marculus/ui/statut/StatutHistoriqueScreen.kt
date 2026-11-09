@@ -62,6 +62,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import fr.marculus.core.AffouageLots
 import fr.nemeton.terrain.geo.AttributionSpatiale
 import fr.marculus.core.Cubage
+import fr.marculus.core.Steres
 import fr.marculus.core.VolumesMartelage
 import fr.marculus.core.export.ExportBilanLots
 import fr.marculus.core.model.ActionTige
@@ -248,18 +249,18 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
             item {
                 Column {
                     Text(
-                        stringResource(R.string.statut_volume_total, String.format(locale, "%.2f", volTige)),
+                        stringResource(R.string.statut_volume_total, volumeTexte(volTige, contexte, locale)),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                     )
                     if (avecHouppier) {
                         Text(
-                            stringResource(R.string.statut_volume_houppier, String.format(locale, "%.2f", volHoup)),
+                            stringResource(R.string.statut_volume_houppier, volumeTexte(volHoup, contexte, locale)),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                         )
                         Text(
-                            stringResource(R.string.statut_volume_aerien, String.format(locale, "%.2f", volTot)),
+                            stringResource(R.string.statut_volume_aerien, volumeTexte(volTot, contexte, locale)),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                         )
@@ -331,6 +332,24 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -
     val locale = LocalConfiguration.current.locales[0]
     val bilan = AffouageLots.bilan(contexte, journal)
     fun m3(v: Double) = String.format(locale, "%.2f", v)
+    val stActif = Steres.actif(contexte)
+    fun st(v: Double) = String.format(locale, "%.2f", Steres.deM3(v, contexte))
+    // Cellule de volume : m³ en haut, stères dessous (portrait : deux lignes plutôt qu'une colonne de plus).
+    @Composable
+    fun Cellule(v: Double, modifier: Modifier, gras: Boolean = false) {
+        val poids = if (gras) FontWeight.Bold else null
+        Column(modifier) {
+            Text(m3(v), fontWeight = poids)
+            if (stActif) {
+                Text(
+                    stringResource(R.string.statut_lots_cellule_st, st(v)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = poids,
+                )
+            }
+        }
+    }
     val detail = bilan.any { it.volumeHouppierM3 > 0.0 }
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -339,7 +358,7 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -
     ) {
         item {
             Text(
-                stringResource(R.string.statut_lots_volume_max, m3(contexte.volumeMaxLotM3)),
+                stringResource(R.string.statut_lots_volume_max, volumeTexte(contexte.volumeMaxLotM3, contexte, locale)),
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
@@ -349,19 +368,19 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -
         }
         item {
             Row(Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.statut_lots_col_lot), Modifier.weight(1.4f), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.statut_lots_col_lot), Modifier.weight(POIDS_LOT), fontWeight = FontWeight.Bold)
                 Text(stringResource(R.string.statut_lots_col_tiges), Modifier.weight(1f), fontWeight = FontWeight.Bold)
                 if (detail) {
-                    Text(stringResource(R.string.statut_lots_col_tige), Modifier.weight(1f), fontWeight = FontWeight.Bold)
-                    Text(stringResource(R.string.statut_lots_col_houppier), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                    Text(stringResource(if (stActif) R.string.statut_lots_col_tige_st else R.string.statut_lots_col_tige), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                    Text(stringResource(if (stActif) R.string.statut_lots_col_houppier_st else R.string.statut_lots_col_houppier), Modifier.weight(POIDS_HOUPPIER), fontWeight = FontWeight.Bold)
                 }
-                Text(stringResource(R.string.statut_lots_col_volume), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                Text(stringResource(if (stActif) R.string.statut_lots_col_volume_st else R.string.statut_lots_col_volume), Modifier.weight(1f), fontWeight = FontWeight.Bold)
             }
             HorizontalDivider()
         }
         items(bilan) { b ->
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1.4f)) {
+                Column(Modifier.weight(POIDS_LOT)) {
                     Text(
                         b.lot?.let { stringResource(R.string.statut_lots_lot, it) } ?: stringResource(R.string.statut_lots_sans_lot),
                         style = MaterialTheme.typography.titleSmall,
@@ -376,22 +395,22 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -
                 }
                 Text(b.nbTiges.toString(), Modifier.weight(1f))
                 if (detail) {
-                    Text(m3(b.volumeTigeM3), Modifier.weight(1f))
-                    Text(m3(b.volumeHouppierM3), Modifier.weight(1f))
+                    Cellule(b.volumeTigeM3, Modifier.weight(1f))
+                    Cellule(b.volumeHouppierM3, Modifier.weight(POIDS_HOUPPIER))
                 }
-                Text(m3(b.volumeM3), Modifier.weight(1f))
+                Cellule(b.volumeM3, Modifier.weight(1f))
             }
         }
         item {
             HorizontalDivider()
             Row(Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                Text(stringResource(R.string.statut_lots_total), Modifier.weight(1.4f), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.statut_lots_total), Modifier.weight(POIDS_LOT), fontWeight = FontWeight.Bold)
                 Text(bilan.sumOf { it.nbTiges }.toString(), Modifier.weight(1f), fontWeight = FontWeight.Bold)
                 if (detail) {
-                    Text(m3(bilan.sumOf { it.volumeTigeM3 }), Modifier.weight(1f), fontWeight = FontWeight.Bold)
-                    Text(m3(bilan.sumOf { it.volumeHouppierM3 }), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                    Cellule(bilan.sumOf { it.volumeTigeM3 }, Modifier.weight(1f), gras = true)
+                    Cellule(bilan.sumOf { it.volumeHouppierM3 }, Modifier.weight(POIDS_HOUPPIER), gras = true)
                 }
-                Text(m3(bilan.sumOf { it.volumeM3 }), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                Cellule(bilan.sumOf { it.volumeM3 }, Modifier.weight(1f), gras = true)
             }
         }
         item {
@@ -491,17 +510,17 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
         items(affiches) { (prop, tigesProp) ->
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 val vP = vols(tigesProp)
-                LigneNiveau(prop, total(tigesProp), surf(tigesProp), if (tarifActif) vP.first else null, 0, MaterialTheme.typography.titleMedium, locale)
-                if (avecHouppier) LigneVolumesEmerge(vP.second, vP.third, 0, locale)
+                LigneNiveau(prop, total(tigesProp), surf(tigesProp), if (tarifActif) vP.first else null, 0, MaterialTheme.typography.titleMedium, locale, contexte)
+                if (avecHouppier) LigneVolumesEmerge(vP.second, vP.third, 0, locale, contexte)
                 if (prop == strHorsParcelle) {
-                    essencesAvecVolume(tigesProp.map { it.first }).forEach { LigneEssenceParc(it, couleurs, 1, locale) }
+                    essencesAvecVolume(tigesProp.map { it.first }).forEach { LigneEssenceParc(it, couleurs, 1, locale, contexte) }
                 } else {
                     tigesProp.groupBy { (_, p) -> p?.foret ?: "—" }
                         .toList().sortedByDescending { (_, l) -> total(l) }
                         .forEach { (foret, tigesForet) ->
                             val vF = vols(tigesForet)
-                            LigneNiveau(foret, total(tigesForet), surf(tigesForet), if (tarifActif) vF.first else null, 1, MaterialTheme.typography.titleSmall, locale)
-                            if (avecHouppier) LigneVolumesEmerge(vF.second, vF.third, 1, locale)
+                            LigneNiveau(foret, total(tigesForet), surf(tigesForet), if (tarifActif) vF.first else null, 1, MaterialTheme.typography.titleSmall, locale, contexte)
+                            if (avecHouppier) LigneVolumesEmerge(vF.second, vF.third, 1, locale, contexte)
                             tigesForet.groupBy { (_, p) -> p }
                                 .toList().sortedByDescending { (_, l) -> total(l) }
                                 .forEach { (pcl, tigesParc) ->
@@ -509,8 +528,8 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
                                         ?: pcl?.let { "$strParcelle ${it.id}" } ?: "—"
                                     val tot = total(tigesParc)
                                     val vPa = vols(tigesParc)
-                                    LigneNiveau(libelle, tot, surf(tigesParc), if (tarifActif) vPa.first else null, 2, MaterialTheme.typography.bodyMedium, locale)
-                                    if (avecHouppier) LigneVolumesEmerge(vPa.second, vPa.third, 2, locale)
+                                    LigneNiveau(libelle, tot, surf(tigesParc), if (tarifActif) vPa.first else null, 2, MaterialTheme.typography.bodyMedium, locale, contexte)
+                                    if (avecHouppier) LigneVolumesEmerge(vPa.second, vPa.third, 2, locale, contexte)
                                     val ha = pcl?.surfaceHa ?: 0.0
                                     if (ha > 0.0) {
                                         val gHa = String.format(locale, "%.1f", surf(tigesParc) / ha)
@@ -538,7 +557,7 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
                                             color = MaterialTheme.colorScheme.outline,
                                         )
                                     }
-                                    essencesAvecVolume(tigesParc.map { it.first }).forEach { LigneEssenceParc(it, couleurs, 3, locale) }
+                                    essencesAvecVolume(tigesParc.map { it.first }).forEach { LigneEssenceParc(it, couleurs, 3, locale, contexte) }
                                 }
                         }
                 }
@@ -619,6 +638,15 @@ private fun csvFoncier(
     return sb.toString()
 }
 
+/**
+ * « 12,34 m³ » ; sous [Steres.actif], « 12,34 m³ (18,51 st) » (stères à 2 décimales, calculés sur le
+ * m³ non arrondi). Décimales dans la langue du téléphone.
+ */
+private fun volumeTexte(m3: Double, contexte: Contexte, locale: java.util.Locale, decimalesM3: Int = 2): String {
+    val base = String.format(locale, "%.${decimalesM3}f m³", m3)
+    return if (Steres.actif(contexte)) base + String.format(locale, " (%.2f st)", Steres.deM3(m3, contexte)) else base
+}
+
 /** Totaux par essence sous une parcelle. */
 private data class StatEssence(val nom: String, val nombre: Int, val surfaceTerriere: Double, val volume: Double?)
 
@@ -632,6 +660,7 @@ private fun LigneNiveau(
     niveau: Int,
     style: TextStyle,
     locale: java.util.Locale,
+    contexte: Contexte,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = (niveau * 12).dp),
@@ -642,16 +671,16 @@ private fun LigneNiveau(
         Text("$total", style = style, fontWeight = FontWeight.Bold)
         Text(String.format(locale, "%.2f m²", surfaceTerriere), style = style, color = MaterialTheme.colorScheme.outline)
         if (volume != null) {
-            Text(String.format(locale, "%.2f m³", volume), style = style, color = MaterialTheme.colorScheme.outline)
+            Text(volumeTexte(volume, contexte, locale), style = style, color = MaterialTheme.colorScheme.outline)
         }
     }
 }
 
 /** Ligne secondaire : volumes houppier et total (EMERGE, ou part de houppier en Schaeffer). */
 @Composable
-private fun LigneVolumesEmerge(houppier: Double, total: Double, niveau: Int, locale: java.util.Locale) {
+private fun LigneVolumesEmerge(houppier: Double, total: Double, niveau: Int, locale: java.util.Locale, contexte: Contexte) {
     Text(
-        stringResource(R.string.statut_houp_total, String.format(locale, "%.2f", houppier), String.format(locale, "%.2f", total)),
+        stringResource(R.string.statut_houp_total, volumeTexte(houppier, contexte, locale), volumeTexte(total, contexte, locale)),
         modifier = Modifier.fillMaxWidth().padding(start = (niveau * 12 + 12).dp),
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.outline,
@@ -660,7 +689,7 @@ private fun LigneVolumesEmerge(houppier: Double, total: Double, niveau: Int, loc
 
 /** Détail par essence (pastille couleur) sous une parcelle : nb de tiges, surface terrière, volume. */
 @Composable
-private fun LigneEssenceParc(stat: StatEssence, couleurs: Map<String, Int>, niveau: Int, locale: java.util.Locale) {
+private fun LigneEssenceParc(stat: StatEssence, couleurs: Map<String, Int>, niveau: Int, locale: java.util.Locale, contexte: Contexte) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(start = (niveau * 12).dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -671,7 +700,7 @@ private fun LigneEssenceParc(stat: StatEssence, couleurs: Map<String, Int>, nive
         Text("${stat.nombre}", style = MaterialTheme.typography.bodySmall)
         Text(String.format(locale, "%.2f m²", stat.surfaceTerriere), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
         if (stat.volume != null) {
-            Text(String.format(locale, "%.2f m³", stat.volume), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
+            Text(volumeTexte(stat.volume, contexte, locale), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
         }
     }
 }
@@ -814,7 +843,7 @@ private fun OngletHistorique(contexte: Contexte, journal: List<Tige>, onEdit: (T
                             tige.parcelle?.takeIf { it.isNotBlank() }?.let { add("⌖ $it") }
                             if (Cubage.aTarif(contexte)) {
                                 val v = Cubage.volumeUnitaireTige(contexte, tige.essence, tige.classe, tige.hauteurTexte) * tige.quantite
-                                if (v > 0.0) add(String.format(locale, "%.3f m³", v))
+                                if (v > 0.0) add(volumeTexte(v, contexte, locale, 3))
                             }
                             tige.position?.let {
                                 add("GNSS " + "%.5f, %.5f".format(java.util.Locale.US, it.latitude, it.longitude))
@@ -831,3 +860,8 @@ private fun OngletHistorique(contexte: Contexte, journal: List<Tige>, onEdit: (T
         }
     }
 }
+
+// Poids des colonnes de « Par lot » : « Houppier » en gras doit tenir sans coupure de mot
+// sur 1080 px (défaut constaté le 2026-11-09) ; la colonne Lot n a besoin que de « En cours ».
+private const val POIDS_LOT = 1.1f
+private const val POIDS_HOUPPIER = 1.35f

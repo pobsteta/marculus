@@ -179,10 +179,10 @@
     <string name="statut_parcelle_rates">%1$s ha · %2$s tiges/ha · %3$s m²/ha · %4$s m³/ha</string>
     <string name="statut_surface_terriere_total">Surface terrière : %1$s m²</string>
     <string name="statut_export_csv">CSV foncier</string>
-    <string name="statut_volume_total">Volume bois fort tige : %1$s m³</string>
-    <string name="statut_houp_total">houppier %1$s m³ · total %2$s m³</string>
-    <string name="statut_volume_houppier">Volume houppier : %1$s m³</string>
-    <string name="statut_volume_aerien">Volume total aérien : %1$s m³</string>
+    <string name="statut_volume_total">Volume bois fort tige : %1$s</string>
+    <string name="statut_houp_total">houppier %1$s · total %2$s</string>
+    <string name="statut_volume_houppier">Volume houppier : %1$s</string>
+    <string name="statut_volume_aerien">Volume total aérien : %1$s</string>
     <string name="statut_volume_parcelle">%1$s m³ · %2$s m³/ha</string>
 
     <!-- Carte -->
@@ -482,13 +482,17 @@
     <string name="liste_export_aide">Tiges à comptabiliser : chaque annulation disparaît avec la tige qu\'elle annule. Les totaux et les volumes sont les mêmes dans les deux cas.</string>
     <string name="liste_export_confirmer">Exporter</string>
     <string name="statut_onglet_lots">Par lot</string>
-    <string name="statut_lots_volume_max">Volume maximal d\'un lot : %1$s m³</string>
+    <string name="statut_lots_volume_max">Volume maximal d\'un lot : %1$s</string>
     <string name="statut_lots_aucun">Aucune tige dans un lot pour l\'instant.</string>
     <string name="statut_lots_col_lot">Lot</string>
     <string name="statut_lots_col_tiges">Tiges</string>
     <string name="statut_lots_col_volume">Lot (m³)</string>
     <string name="statut_lots_col_tige">Tige (m³)</string>
     <string name="statut_lots_col_houppier">Houppier (m³)</string>
+    <string name="statut_lots_col_volume_st">Lot\nm³ / st</string>
+    <string name="statut_lots_col_tige_st">Tige\nm³ / st</string>
+    <string name="statut_lots_col_houppier_st">Houppier\nm³ / st</string>
+    <string name="statut_lots_cellule_st">%1$s st</string>
     <string name="statut_lots_lot">Lot %1$d</string>
     <string name="statut_lots_sans_lot">Sans lot</string>
     <string name="statut_lots_complet">complet</string>

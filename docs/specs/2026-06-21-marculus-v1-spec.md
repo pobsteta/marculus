@@ -167,6 +167,12 @@ Tige (journal)  : uuid, contexteId, essence, classe,
     contexte d'affouage, `affouageLotTotalM3` (net) et `affouageLotM3` par tige.
   - Onglet « Par lot » et CSV du bilan : colonnes tige, houppier et volume du lot ; CSV
     d'échange en **format 5** (§7).
+- ✅ **Stères dans Statut / historique et CSV du bilan par lot** (mission 017, 2026-11-09) : si
+  `Steres.actif` (affouage, maximum > 0, coefficient > 0 ; `core/src/main/kotlin/fr/marculus/core/Steres.kt`
+  l. 11-12), les volumes des quatre onglets s'affichent « 12,34 m³ (18,51 st) » (stères à 2 décimales,
+  sur le m³ non arrondi, `Steres.deM3`, même fichier l. 15). Le CSV du bilan ajoute `SteresParM3`,
+  `VolumeMaxLot_st`, `VolumeTige_st`, `VolumeHouppier_st`, `VolumeLot_st`. Rien de nouveau en base,
+  `.marsync` ni CSV d'échange.
 
 ## 6. Écrans
 
