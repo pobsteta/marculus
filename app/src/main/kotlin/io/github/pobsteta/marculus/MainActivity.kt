@@ -3,39 +3,41 @@ package io.github.pobsteta.marculus
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.provider.OpenableColumns
-import android.widget.Toast
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.lifecycleScope
-import io.github.pobsteta.marculus.data.ReceptionMarsync
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import android.os.Build
 import android.os.Bundle
+import android.provider.OpenableColumns
 import android.view.KeyEvent
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import fr.marculus.core.model.Reglages
+import io.github.pobsteta.marculus.data.FichierMarsync
+import io.github.pobsteta.marculus.data.ReceptionMarsync
 import io.github.pobsteta.marculus.ui.AppRoot
 import io.github.pobsteta.marculus.ui.ToucheVolume
 import io.github.pobsteta.marculus.ui.theme.MarculusTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
     // Applique la langue choisie avant la création des vues (locale du contexte de base).
@@ -122,7 +124,11 @@ class MainActivity : ComponentActivity() {
 
     /** Lit le fichier de l'Intent (VIEW ou SEND), le met en attente de confirmation, et consomme l'Intent. */
     private fun recevoirMarsync(intent: Intent?) {
+        // Relance depuis les applis récentes : l'Intent d'origine est rejoué, on l'ignore.
+        if (intent == null || (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) return
         val uri = uriDe(intent) ?: return
+        // Seul content:// est accepté : un file:// serait lu avec les droits de Marculus (fichiers privés compris).
+        if (uri.scheme != "content") return
         // Consommé : ni rotation ni retour dans l'appli ne le rejouent.
         intent?.data = null
         intent?.removeExtra(Intent.EXTRA_STREAM)
@@ -130,13 +136,18 @@ class MainActivity : ComponentActivity() {
         val reception = (application as MarculusApplication).receptionMarsync
         lifecycleScope.launch {
             val (nom, texte) = withContext(Dispatchers.IO) {
+                var taille: Long? = null
                 val n = runCatching {
-                    contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
-                        if (it.moveToFirst()) it.getString(0) else null
+                    contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)?.use {
+                        if (it.moveToFirst()) {
+                            if (!it.isNull(1)) taille = it.getLong(1)
+                            it.getString(0)
+                        } else null
                     }
                 }.getOrNull() ?: uri.lastPathSegment
-                val t = runCatching {
-                    contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                // Refus avant lecture au-delà du plafond ; la lecture elle-même est bornée.
+                val t = if (!FichierMarsync.taillePermise(taille)) null else runCatching {
+                    contentResolver.openInputStream(uri)?.use { FichierMarsync.lireBorne(it) }
                 }.getOrNull()
                 n to t
             }
@@ -151,7 +162,7 @@ class MainActivity : ComponentActivity() {
     @Suppress("DEPRECATION")
     private fun uriDe(intent: Intent?): Uri? = when (intent?.action) {
         Intent.ACTION_VIEW -> intent.data
-        Intent.ACTION_SEND -> if (android.os.Build.VERSION.SDK_INT >= 33) {
+        Intent.ACTION_SEND -> if (Build.VERSION.SDK_INT >= 33) {
             intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
         } else {
             intent.getParcelableExtra(Intent.EXTRA_STREAM)
