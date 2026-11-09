@@ -6,7 +6,7 @@
 > colonne ; on change ce numéro chaque fois qu'elle change de colonne.
 > **Une carte qui ne bouge pas est souvent la mauvaise nouvelle à dire tout de suite.**
 
-**Dernier cycle :** 4 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
+**Dernier cycle :** 5 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
 rien lancé. Une carte est immobile quand dernier cycle − N ≥ 2.)_
 
 _Modèle de carte :_
@@ -31,8 +31,9 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Recettes terrain : affouage, dictée (7 cas, bruit, gants) · spec § 10 · depuis le cycle 0
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
-- [016](missions/016-ouvrir-avec-marculus.md) « Ouvrir avec Marculus » : fusionner un `.marsync` reçu d'un appui, sans passer par Paramètres · question de Pascal du 2026-11-09 · VIEW + SEND, confirmation avant fusion (Pascal, 2026-11-09) · fiche prête, attend la porte n° 2 · depuis le cycle 4
-- [017](missions/017-steres-statut-historique.md) stères (2 décimales) à côté des m³ dans les 4 onglets de Statut / historique et au CSV du bilan par lot, pour un affouage à maximum renseigné · décisions de Pascal du 2026-11-09 · fiche prête, attend la porte n° 2 · depuis le cycle 4
+- Onglet « Historique » coupé en « Historiqu / e » sur le téléphone de Pascal (pas sur l'émulateur), vu sur la v0.67.0 · journal du 2026-11-09 · depuis le cycle 5
+- « Par parcelle » compte 23 tiges et 13,47 m³ contre 22 et 13,39 m³ dans Statut et Par lot (annulation non retirée ?), contexte « Affouage » du téléphone, v0.67.0 · justesse des chiffres, prioritaire · cause non vérifiée · depuis le cycle 5
+- Carte de la liste des contextes : « N tiges » = lignes du journal (COUNT(*), `data/.../db/Daos.kt` l. 42), alors que Statut, la feuille et la boîte de la 016 comptent le net (`TotauxMartelage`) · relecteur de la 016, P1 · à trancher par Pascal · depuis le cycle 5
 
 ## Validé
 
@@ -53,6 +54,18 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · essai au soleil clos le 2026-10-24 (thèmes actuels conformes) : la carte attend la palette `terrain-style` · depuis le cycle 1
 
 ## Terminé
+
+- [017](missions/017-steres-statut-historique.md) · depuis le cycle 5
+  - Homme : testeur puis afficheur (sonnet), appuyer
+  - Mission : stères « m³ (st) » à 2 décimales dans les 4 onglets de Statut / historique et au CSV du bilan par lot (affouage à maximum renseigné) ; en-tête « Houppier » sans coupure
+  - Moyens : `Steres.kt`, `StatutHistoriqueScreen.kt`, `ExportBilanLots.kt`, émulateur
+  - Livré : PR #35 fusionnée le 2026-11-09 (0130bd6), v0.67.0, vérifiée sur le téléphone de Pascal
+
+- [016](missions/016-ouvrir-avec-marculus.md) · depuis le cycle 5
+  - Homme : testeur, dev, afficheur (sonnet), appuyer
+  - Mission : « Ouvrir avec » / « Partager » → Marculus fusionne un `.marsync` après une confirmation qui dit quoi (contexte, tiges nettes, opérateur) ; une seule instance (`singleTask`)
+  - Moyens : manifeste, `MainActivity`, `FichierMarsync`, `ReceptionMarsync`, émulateur
+  - Livré : PR #36 fusionnée le 2026-11-09 (dbad43c), v0.68.0 ; essai A → B sur téléphones à faire par Pascal
 
 - [015](missions/015-release-apres-tests.md) · depuis le cycle 4
   - Homme : dev (sonnet), appuyer
@@ -165,3 +178,4 @@ l'inscrit avec ce qu'elle nous apprend._
 - cycle 3 · Marculus v0.64.6 : choix du thème Système / Clair / Sombre · pour les marteleurs · le thème clair au soleil même sur un téléphone en sombre (proposée par l’orchestrateur)
 - cycle 3 · Marculus v0.64.9 et v0.65.0 : CSV sans faux numéro de tarif (`EMERGE:0`), thème en liste déroulante · pour nemetonshiny et les marteleurs · données justes en aval ; v0.65.0 jugée « parfaite » au soleil par Pascal
 - bilan du 2026-10-24 · Marculus v0.65.0 lisible au soleil (clair et sombre vérifiés par Pascal), unité du lot lisible en portrait, thème en deux appuis ; contrat des formats 6-7 et CSV justes · pour les marteleurs et nemetonshiny · premier bilan : pas de livraison de bilan antérieure
+- cycle 5 · Marculus v0.68.0 : « Ouvrir avec » / « Partager » → fusion d'un `.marsync` d'un appui, après confirmation (contexte, tiges nettes, opérateur) ; stères « m³ (st) » dans Statut / historique et le CSV du bilan par lot · pour les marteleurs d'affouage et les équipes à plusieurs opérateurs · première livraison qui change le travail à plusieurs sur le terrain (le cycle 3 changeait l'aspect) ; retenue par Pascal
