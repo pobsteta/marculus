@@ -54,6 +54,8 @@
 | [013](missions/013-test-migration-theme.md) test de reprise de `theme_sombre` | `testeur` | sonnet | appuyer | oui · oui · à vérifier | 4 |
 | [014](missions/014-docs-a-jour.md) README « Déployer et publier », brief à jour | `archiviste` | sonnet | appuyer | oui · oui · oui | 4 |
 | [015](missions/015-release-apres-tests.md) la release attend les tests | `dev` | sonnet | appuyer | oui · oui · oui | 4 |
+| [016](missions/016-ouvrir-avec-marculus.md) « Ouvrir avec Marculus » | `testeur`, `dev`, `afficheur` | sonnet | appuyer | oui · oui · oui | 5 (3 allers-retours + correctif décidé par Pascal) |
+| [017](missions/017-steres-statut-historique.md) stères dans Statut / historique | `testeur`, `afficheur` | sonnet | appuyer | oui · oui · oui | 5 (3 allers-retours) |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
