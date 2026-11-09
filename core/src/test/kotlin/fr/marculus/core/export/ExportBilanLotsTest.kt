@@ -17,7 +17,8 @@ class ExportBilanLotsTest {
     private val ctx = Contexte(
         id = "c1", nom = "Affouage 2026", mode = ModeMesure.DIAMETRE, axe = AxeClasses(20, 80, 5),
         essences = listOf(EssenceColonne("Chêne", 0, 0)), tarif = TarifCubage.SCHAEFFER_RAPIDE, tarifNumero = 8,
-        affouage = true, volumeMaxLotM3 = 2.0,
+        // Coefficient nul : pas de stères (mission 017) ; ce test garde la mise en page en m³ seuls.
+        affouage = true, volumeMaxLotM3 = 2.0, steresParM3 = 0.0,
     )
     private val v40 = Cubage.volume(TarifCubage.SCHAEFFER_RAPIDE, 8, 42.5)
 

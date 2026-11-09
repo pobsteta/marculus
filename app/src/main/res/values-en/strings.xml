@@ -177,10 +177,10 @@
     <string name="statut_parcelle_rates">%1$s ha · %2$s stems/ha · %3$s m²/ha · %4$s m³/ha</string>
     <string name="statut_surface_terriere_total">Basal area: %1$s m²</string>
     <string name="statut_export_csv">Land CSV</string>
-    <string name="statut_volume_total">Merchantable stem volume: %1$s m³</string>
-    <string name="statut_houp_total">crown %1$s m³ · total %2$s m³</string>
-    <string name="statut_volume_houppier">Crown volume: %1$s m³</string>
-    <string name="statut_volume_aerien">Total aboveground volume: %1$s m³</string>
+    <string name="statut_volume_total">Merchantable stem volume: %1$s</string>
+    <string name="statut_houp_total">crown %1$s · total %2$s</string>
+    <string name="statut_volume_houppier">Crown volume: %1$s</string>
+    <string name="statut_volume_aerien">Total aboveground volume: %1$s</string>
     <string name="statut_volume_parcelle">%1$s m³ · %2$s m³/ha</string>
 
     <!-- Map -->
@@ -476,13 +476,17 @@
     <string name="liste_export_aide">Stems to count: each cancellation is removed together with the stem it cancels. Totals and volumes are the same either way.</string>
     <string name="liste_export_confirmer">Export</string>
     <string name="statut_onglet_lots">By lot</string>
-    <string name="statut_lots_volume_max">Maximum lot volume: %1$s m³</string>
+    <string name="statut_lots_volume_max">Maximum lot volume: %1$s</string>
     <string name="statut_lots_aucun">No stem in a lot yet.</string>
     <string name="statut_lots_col_lot">Lot</string>
     <string name="statut_lots_col_tiges">Stems</string>
     <string name="statut_lots_col_volume">Lot (m³)</string>
     <string name="statut_lots_col_tige">Stem (m³)</string>
     <string name="statut_lots_col_houppier">Crown (m³)</string>
+    <string name="statut_lots_col_volume_st">Lot\nm³ / st</string>
+    <string name="statut_lots_col_tige_st">Stem\nm³ / st</string>
+    <string name="statut_lots_col_houppier_st">Crown\nm³ / st</string>
+    <string name="statut_lots_cellule_st">%1$s st</string>
     <string name="statut_lots_lot">Lot %1$d</string>
     <string name="statut_lots_sans_lot">No lot</string>
     <string name="statut_lots_complet">complete</string>
