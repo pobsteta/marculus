@@ -25,8 +25,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import java.util.UUID
 
-/** Un contexte accompagné de son nombre d'événements (pour l'affichage et le verrouillage). */
-data class ResumeContexte(val contexte: Contexte, val nbEvenements: Int) {
+/**
+ * Un contexte accompagné de son compte d'événements (logique : verrouillage, Kanban) et de son
+ * nombre net de tiges [nbTiges] (affichage : PLUS moins ANNULATION, pondéré par `quantite`).
+ */
+data class ResumeContexte(val contexte: Contexte, val nbEvenements: Int, val nbTiges: Int) {
     /** Verrouillé (lecture seule) : il contient des tiges et n'a pas encore été exporté. */
     val verrouille: Boolean get() = nbEvenements > 0 && !contexte.exporte
 }
@@ -47,8 +50,8 @@ class MartelageRepository(
     /** Contextes + nombre d'événements (combine la liste et les comptes de tiges). */
     fun resumes(): Flow<List<ResumeContexte>> =
         contexteDao.observerTous().combine(tigeDao.observerComptes()) { contextes, comptes ->
-            val parId = comptes.associate { it.contexteId to it.n }
-            contextes.map { ResumeContexte(it.versDomaine(), parId[it.id] ?: 0) }
+            val parId = comptes.associateBy { it.contexteId }
+            contextes.map { ResumeContexte(it.versDomaine(), parId[it.id]?.n ?: 0, parId[it.id]?.net ?: 0) }
         }
 
     suspend fun contexte(id: String): Contexte? = contexteDao.parId(id)?.versDomaine()

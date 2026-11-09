@@ -39,7 +39,13 @@ interface TigeDao {
     @Query("SELECT * FROM tige WHERE contexteId = :contexteId")
     suspend fun listeParContexte(contexteId: String): List<TigeEntity>
 
-    @Query("SELECT contexteId, COUNT(*) AS n FROM tige GROUP BY contexteId")
+    // n = lignes du journal (logique : verrouillage, Kanban) ; net = PLUS moins ANNULATION pondéré
+    // par quantite (même règle que TotauxMartelage.delta()).
+    @Query(
+        "SELECT contexteId, COUNT(*) AS n, " +
+            "SUM(CASE action WHEN 'PLUS' THEN quantite ELSE -quantite END) AS net " +
+            "FROM tige GROUP BY contexteId",
+    )
     fun observerComptes(): Flow<List<CompteContexte>>
 
     /** Dernière tige PLUS d'une cellule (pour l'annotation hauteur/qualité a posteriori). */
@@ -102,7 +108,7 @@ interface TigeDao {
 }
 
 /** Projection : nombre d'événements (tiges) par contexte. */
-data class CompteContexte(val contexteId: String, val n: Int)
+data class CompteContexte(val contexteId: String, val n: Int, val net: Int)
 
 @Dao
 interface CompteurConfigDao {

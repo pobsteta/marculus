@@ -463,7 +463,7 @@ fun ListeContextesScreen(
                     Text(stringResource(R.string.liste_detail_classes, c.axe.min, c.axe.max, c.axe.pas))
                     Text(stringResource(R.string.liste_detail_increment, c.increment))
                     Text(stringResource(R.string.liste_detail_essences, c.essencesNoms.joinToString(", ")))
-                    Text(stringResource(R.string.liste_detail_tiges, cible.nbEvenements))
+                    Text(stringResource(R.string.liste_detail_tiges, cible.nbTiges))
                     Text(stringResource(R.string.liste_detail_exporte, stringResource(if (c.exporte) R.string.liste_oui else R.string.liste_non)))
                     c.commentaire?.takeIf { it.isNotBlank() }?.let { Text(stringResource(R.string.liste_detail_commentaire, it)) }
                     if (cible.verrouille) {
@@ -520,9 +520,9 @@ fun ListeContextesScreen(
                             Text(m.libelle())
                         }
                     }
-                    if (cible.nbEvenements > 0) {
+                    if (cible.nbTiges != 0) {
                         Text(
-                            stringResource(R.string.liste_mode_aide, cible.nbEvenements),
+                            stringResource(R.string.liste_mode_aide, cible.nbTiges),
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(top = 8.dp),
                         )
@@ -652,7 +652,7 @@ private fun KanbanCarte(
                 Text("📅 ${formatDateListe(d)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Text(
-                stringResource(R.string.liste_detail_tiges, resume.nbEvenements),
+                stringResource(R.string.liste_detail_tiges, resume.nbTiges),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -705,7 +705,7 @@ private fun CarteContexte(
                         contexte.axe.max,
                         contexte.axe.pas,
                         contexte.essences.size,
-                        resume.nbEvenements,
+                        resume.nbTiges,
                     ) + (if (resume.verrouille) stringResource(R.string.liste_carte_resume_verrouille) else "") +
                         if (contexte.dejaExporte) stringResource(R.string.liste_carte_resume_martele) else "",
                     style = MaterialTheme.typography.bodyMedium,
