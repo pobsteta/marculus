@@ -8,7 +8,7 @@ package io.github.pobsteta.marculus.data
 class ReceptionMarsync(private val sauvegarde: SauvegardeRepository) {
     data class Proposition(val nom: String?, val contenu: String) {
         /** Ce que contient le fichier, lu dans [contenu]. */
-        val resume: FichierMarsync.Resume? get() = FichierMarsync.resume(contenu)
+        val resume: FichierMarsync.Resume? = FichierMarsync.resume(contenu)
     }
 
     @Volatile

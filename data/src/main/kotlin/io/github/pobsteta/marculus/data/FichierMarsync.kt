@@ -1,5 +1,8 @@
 package io.github.pobsteta.marculus.data
 
+import fr.marculus.core.TotauxMartelage
+import fr.marculus.core.model.ActionTige
+import fr.marculus.core.model.Tige
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import org.json.JSONArray
@@ -21,8 +24,10 @@ object FichierMarsync {
 
     /**
      * Ce que contient un `.marsync`, lu dans le contenu (clés `contextes[].nom|operateur` et `tiges[]`,
-     * voir `SauvegardeRepository.exporterContexteJson`). [nbTiges] compte les éléments de `tiges`,
-     * annulations comprises (une annulation est une ligne du journal). Fonction pure de [contenu] ;
+     * voir `SauvegardeRepository.exporterContexteJson`). [nbTiges] est le **net**, comme Statut et la
+     * liste des contextes : somme des `quantite` des PLUS moins celle des ANNULATION (règle de
+     * [TotauxMartelage], pas de seconde règle), tous contextes confondus ; `quantite` absente = 1 ; un uuid
+     * répété ne compte qu'une fois (la fusion l'écrase) ; une action inconnue est ignorée. Fonction pure de [contenu] ;
      * null si le contenu n'est pas un `.marsync` reconnu.
      */
     data class Resume(
@@ -33,6 +38,18 @@ object FichierMarsync {
         /** Opérateurs distincts (contextes puis tiges), sans doublon ni vide. */
         val operateurs: List<String>,
     )
+
+    private fun netTiges(tiges: List<Any?>): Int {
+        val vus = mutableSetOf<String>()
+        val journal = tiges.mapNotNull { o ->
+            val j = o as? JSONObject ?: return@mapNotNull null
+            val action = ActionTige.entries.firstOrNull { it.name == j.optString("action") } ?: return@mapNotNull null
+            val uuid = j.optString("uuid", "")
+            if (uuid.isNotEmpty() && !vus.add(uuid)) return@mapNotNull null
+            Tige(uuid, "", "", 0, action, 0L, quantite = j.optInt("quantite", 1))
+        }
+        return TotauxMartelage(journal).totalContexte()
+    }
 
     fun resume(contenu: String): Resume? {
         val racine = runCatching { JSONObject(contenu) }.getOrNull() ?: return null
@@ -46,7 +63,7 @@ object FichierMarsync {
         return Resume(
             nbContextes = ctx.size,
             noms = ctx.mapNotNull { texte(it, "nom") },
-            nbTiges = tg.size,
+            nbTiges = netTiges(tg),
             operateurs = (ctx.mapNotNull { texte(it, "operateur") } + tg.mapNotNull { texte(it, "operateur") }).distinct(),
         )
     }
