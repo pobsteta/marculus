@@ -639,12 +639,12 @@ private fun csvFoncier(
 }
 
 /**
- * « 12,34 m³ » ; sous [Steres.actif], « 12,34 m³ · 18,51 st » (stères à 2 décimales, calculés sur le
+ * « 12,34 m³ » ; sous [Steres.actif], « 12,34 m³ (18,51 st) » (stères à 2 décimales, calculés sur le
  * m³ non arrondi). Décimales dans la langue du téléphone.
  */
 private fun volumeTexte(m3: Double, contexte: Contexte, locale: java.util.Locale, decimalesM3: Int = 2): String {
     val base = String.format(locale, "%.${decimalesM3}f m³", m3)
-    return if (Steres.actif(contexte)) base + " · " + String.format(locale, "%.2f st", Steres.deM3(m3, contexte)) else base
+    return if (Steres.actif(contexte)) base + String.format(locale, " (%.2f st)", Steres.deM3(m3, contexte)) else base
 }
 
 /** Totaux par essence sous une parcelle. */
