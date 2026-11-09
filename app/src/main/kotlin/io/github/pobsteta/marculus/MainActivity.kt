@@ -1,6 +1,21 @@
 package io.github.pobsteta.marculus
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.provider.OpenableColumns
+import android.widget.Toast
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.lifecycleScope
+import io.github.pobsteta.marculus.data.ReceptionMarsync
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.WindowManager
@@ -37,6 +52,9 @@ class MainActivity : ComponentActivity() {
         val gpkgRepo = (application as MarculusApplication).gpkg
         val lotRepo = (application as MarculusApplication).lot
         val tarifsIfnRepo = (application as MarculusApplication).tarifsIfn
+        val reception = (application as MarculusApplication).receptionMarsync
+        // Un Intent déjà traité (recréation de l'activité) ne se rejoue pas.
+        if (savedInstanceState == null) recevoirMarsync(intent)
         setContent {
             val reglages by reglagesRepo.reglages.collectAsStateWithLifecycle(Reglages())
 
@@ -63,9 +81,82 @@ class MainActivity : ComponentActivity() {
             MarculusTheme(darkTheme = reglages.theme.estSombre(isSystemInDarkTheme())) {
                 Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     AppRoot(repository, reglagesRepo, reglages, referentielsRepo, sauvegardeRepo, gpkgRepo, lotRepo, tarifsIfnRepo)
+                    proposition?.let { p ->
+                        val nom = p.nom ?: stringResource(R.string.marsync_nom_inconnu)
+                        AlertDialog(
+                            onDismissRequest = { reception.annuler(); proposition = null },
+                            title = { Text(stringResource(R.string.marsync_confirmer_titre, nom)) },
+                            text = { Text(stringResource(R.string.marsync_confirmer_texte)) },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    proposition = null
+                                    lifecycleScope.launch {
+                                        val ok = reception.confirmer()
+                                        toast(if (ok) R.string.sync_msg_fusion else R.string.param_msg_illisible)
+                                    }
+                                }) { Text(stringResource(R.string.marsync_fusionner)) }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { reception.annuler(); proposition = null }) {
+                                    Text(stringResource(R.string.liste_dialog_annuler))
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }
+    }
+
+    /** Proposition de fusion affichée dans la boîte de confirmation. */
+    private var proposition by mutableStateOf<ReceptionMarsync.Proposition?>(null)
+
+    // L'appli est déjà ouverte : « Ouvrir avec » arrive ici.
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        recevoirMarsync(intent)
+    }
+
+    private fun toast(res: Int) = Toast.makeText(this, res, Toast.LENGTH_LONG).show()
+
+    /** Lit le fichier de l'Intent (VIEW ou SEND), le met en attente de confirmation, et consomme l'Intent. */
+    private fun recevoirMarsync(intent: Intent?) {
+        val uri = uriDe(intent) ?: return
+        // Consommé : ni rotation ni retour dans l'appli ne le rejouent.
+        intent?.data = null
+        intent?.removeExtra(Intent.EXTRA_STREAM)
+        intent?.action = null
+        val reception = (application as MarculusApplication).receptionMarsync
+        lifecycleScope.launch {
+            val (nom, texte) = withContext(Dispatchers.IO) {
+                val n = runCatching {
+                    contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use {
+                        if (it.moveToFirst()) it.getString(0) else null
+                    }
+                }.getOrNull() ?: uri.lastPathSegment
+                val t = runCatching {
+                    contentResolver.openInputStream(uri)?.bufferedReader()?.use { it.readText() }
+                }.getOrNull()
+                n to t
+            }
+            if (texte != null && reception.recevoir(nom, texte)) {
+                proposition = reception.enAttente
+            } else {
+                toast(R.string.param_msg_illisible)
+            }
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun uriDe(intent: Intent?): Uri? = when (intent?.action) {
+        Intent.ACTION_VIEW -> intent.data
+        Intent.ACTION_SEND -> if (android.os.Build.VERSION.SDK_INT >= 33) {
+            intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+        } else {
+            intent.getParcelableExtra(Intent.EXTRA_STREAM)
+        }
+        else -> null
     }
 
     /** Une session push-to-talk est ouverte par l'appui long en cours sur le volume bas. */

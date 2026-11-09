@@ -292,7 +292,7 @@
     <string name="param_voix_aucune">No voice available (install voice data in Android settings).</string>
     <string name="param_fermer">Close</string>
     <string name="sync_section">Sync (multi-operator)</string>
-    <string name="sync_desc">Merges marking from several operators (union by UUID, last-write-wins). Share a context from the list (⋮ → Share) via Bluetooth / Nearby Share, then merge the received .marsync file here.</string>
+    <string name="sync_desc">Merges marking from several operators (union by UUID, last-write-wins). Share a context from the list (⋮ → Share) via Bluetooth / Nearby Share; on the other device, open the received .marsync file with Marculus (or merge it here).</string>
     <string name="sync_operateur">Operator name</string>
     <string name="sync_operateur_desc">Default identity (device): %1$s… — enter a name to override it.</string>
     <string name="sync_partager">Share (.marsync)</string>
@@ -305,6 +305,10 @@
     <string name="lot_msg_sans_marsync">This ZIP holds no .marsync file: it is not a batch of sites. Nothing was imported.</string>
     <string name="lot_msg_marsync_multiple">This ZIP holds several .marsync files: there is no telling which one is authoritative. Nothing was imported.</string>
     <string name="lot_msg_entree_refusee">Archive refused: entry \"%1$s\" is not a plain file name. Nothing was imported.</string>
+    <string name="marsync_confirmer_titre">Merge %1$s?</string>
+    <string name="marsync_confirmer_texte">The file\'s contexts and stems are added to those on this device. Nothing is deleted.</string>
+    <string name="marsync_fusionner">Merge</string>
+    <string name="marsync_nom_inconnu">this file</string>
     <string name="sync_msg_fusion">Sync merged.</string>
     <string name="sync_partage_titre">Share the sync</string>
 

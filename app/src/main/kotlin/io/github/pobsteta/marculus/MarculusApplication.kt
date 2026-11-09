@@ -25,6 +25,7 @@ class MarculusApplication : Application() {
     val reglages get() = data.reglages
     val referentiels get() = data.referentiels
     val sauvegarde get() = data.sauvegarde
+    val receptionMarsync by lazy { io.github.pobsteta.marculus.data.ReceptionMarsync(data.sauvegarde) }
     val gpkg get() = data.gpkg
     val lot get() = data.lot
     val tarifsIfn get() = data.tarifsIfn
