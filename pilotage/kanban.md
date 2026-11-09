@@ -31,7 +31,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Recettes terrain : affouage, dictée (7 cas, bruit, gants) · spec § 10 · depuis le cycle 0
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
-- Onglet « Historique » coupé en « Historiqu / e » sur le téléphone de Pascal (pas sur l'émulateur), vu sur la v0.67.0 · journal du 2026-11-09 · depuis le cycle 5
+- [020](missions/020-onglets-statut-sans-coupure.md) onglets de Statut / historique sans mot coupé (« Historiqu / e » sur le téléphone, 450 dpi ≈ 384 dp) · demande de Pascal du 2026-11-09 · fiche prête (afficheur seul, appuyer), attend la porte n° 2 · depuis le cycle 5
 - [019](missions/019-parcelle-tiges-nettes.md) « Par parcelle » et le CSV foncier retirent les tiges annulées (filtre `PLUS` seul, `StatutHistoriqueScreen.kt` l. 430 et l. 586) · cause vérifiée par l'orchestrateur le 2026-11-09 · fiche prête (testeur puis dev, appuyer), attend la porte n° 2 · depuis le cycle 5
 - [018](missions/018-liste-tiges-nettes.md) la liste des contextes compte les tiges nettes, comme Statut (aujourd'hui COUNT(*) du journal, `Daos.kt` l. 42) · « oui pour aligner la liste » (Pascal, 2026-11-09) · fiche prête (testeur puis dev, appuyer), attend la porte n° 2 · depuis le cycle 5
 
