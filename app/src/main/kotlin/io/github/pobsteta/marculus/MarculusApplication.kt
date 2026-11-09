@@ -3,6 +3,7 @@ package io.github.pobsteta.marculus
 import android.app.Application
 import android.content.Context
 import io.github.pobsteta.marculus.data.MarculusData
+import io.github.pobsteta.marculus.data.ReceptionMarsync
 import org.osmdroid.config.Configuration
 import java.io.File
 
@@ -25,6 +26,7 @@ class MarculusApplication : Application() {
     val reglages get() = data.reglages
     val referentiels get() = data.referentiels
     val sauvegarde get() = data.sauvegarde
+    val receptionMarsync by lazy { ReceptionMarsync(data.sauvegarde) }
     val gpkg get() = data.gpkg
     val lot get() = data.lot
     val tarifsIfn get() = data.tarifsIfn
