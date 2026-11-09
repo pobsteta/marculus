@@ -368,11 +368,11 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -
         }
         item {
             Row(Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.statut_lots_col_lot), Modifier.weight(1.4f), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.statut_lots_col_lot), Modifier.weight(POIDS_LOT), fontWeight = FontWeight.Bold)
                 Text(stringResource(R.string.statut_lots_col_tiges), Modifier.weight(1f), fontWeight = FontWeight.Bold)
                 if (detail) {
                     Text(stringResource(if (stActif) R.string.statut_lots_col_tige_st else R.string.statut_lots_col_tige), Modifier.weight(1f), fontWeight = FontWeight.Bold)
-                    Text(stringResource(if (stActif) R.string.statut_lots_col_houppier_st else R.string.statut_lots_col_houppier), Modifier.weight(1f), fontWeight = FontWeight.Bold)
+                    Text(stringResource(if (stActif) R.string.statut_lots_col_houppier_st else R.string.statut_lots_col_houppier), Modifier.weight(POIDS_HOUPPIER), fontWeight = FontWeight.Bold)
                 }
                 Text(stringResource(if (stActif) R.string.statut_lots_col_volume_st else R.string.statut_lots_col_volume), Modifier.weight(1f), fontWeight = FontWeight.Bold)
             }
@@ -380,7 +380,7 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -
         }
         items(bilan) { b ->
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1.4f)) {
+                Column(Modifier.weight(POIDS_LOT)) {
                     Text(
                         b.lot?.let { stringResource(R.string.statut_lots_lot, it) } ?: stringResource(R.string.statut_lots_sans_lot),
                         style = MaterialTheme.typography.titleSmall,
@@ -396,7 +396,7 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -
                 Text(b.nbTiges.toString(), Modifier.weight(1f))
                 if (detail) {
                     Cellule(b.volumeTigeM3, Modifier.weight(1f))
-                    Cellule(b.volumeHouppierM3, Modifier.weight(1f))
+                    Cellule(b.volumeHouppierM3, Modifier.weight(POIDS_HOUPPIER))
                 }
                 Cellule(b.volumeM3, Modifier.weight(1f))
             }
@@ -404,11 +404,11 @@ private fun OngletLots(contexte: Contexte, journal: List<Tige>, onExporter: () -
         item {
             HorizontalDivider()
             Row(Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                Text(stringResource(R.string.statut_lots_total), Modifier.weight(1.4f), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.statut_lots_total), Modifier.weight(POIDS_LOT), fontWeight = FontWeight.Bold)
                 Text(bilan.sumOf { it.nbTiges }.toString(), Modifier.weight(1f), fontWeight = FontWeight.Bold)
                 if (detail) {
                     Cellule(bilan.sumOf { it.volumeTigeM3 }, Modifier.weight(1f), gras = true)
-                    Cellule(bilan.sumOf { it.volumeHouppierM3 }, Modifier.weight(1f), gras = true)
+                    Cellule(bilan.sumOf { it.volumeHouppierM3 }, Modifier.weight(POIDS_HOUPPIER), gras = true)
                 }
                 Cellule(bilan.sumOf { it.volumeM3 }, Modifier.weight(1f), gras = true)
             }
@@ -860,3 +860,8 @@ private fun OngletHistorique(contexte: Contexte, journal: List<Tige>, onEdit: (T
         }
     }
 }
+
+// Poids des colonnes de « Par lot » : « Houppier » en gras doit tenir sans coupure de mot
+// sur 1080 px (défaut constaté le 2026-11-09) ; la colonne Lot n a besoin que de « En cours ».
+private const val POIDS_LOT = 1.1f
+private const val POIDS_HOUPPIER = 1.35f
