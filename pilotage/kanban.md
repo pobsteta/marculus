@@ -31,6 +31,8 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Recettes terrain : affouage, dictée (7 cas, bruit, gants) · spec § 10 · depuis le cycle 0
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
+- [016](missions/016-ouvrir-avec-marculus.md) « Ouvrir avec Marculus » : fusionner un `.marsync` reçu d'un appui, sans passer par Paramètres · question de Pascal du 2026-11-09 · VIEW + SEND, confirmation avant fusion (Pascal, 2026-11-09) · fiche prête, attend la porte n° 2 · depuis le cycle 4
+- [017](missions/017-steres-statut-historique.md) stères (2 décimales) à côté des m³ dans les 4 onglets de Statut / historique et au CSV du bilan par lot, pour un affouage à maximum renseigné · décisions de Pascal du 2026-11-09 · fiche prête, attend la porte n° 2 · depuis le cycle 4
 
 ## Validé
 
