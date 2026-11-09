@@ -6,7 +6,10 @@ package io.github.pobsteta.marculus.data
  * [confirmer] vident l'attente : un Intent n'est consommé qu'une fois.
  */
 class ReceptionMarsync(private val sauvegarde: SauvegardeRepository) {
-    data class Proposition(val nom: String?, val contenu: String)
+    data class Proposition(val nom: String?, val contenu: String) {
+        /** Ce que contient le fichier, lu dans [contenu]. */
+        val resume: FichierMarsync.Resume? get() = FichierMarsync.resume(contenu)
+    }
 
     @Volatile
     var enAttente: Proposition? = null

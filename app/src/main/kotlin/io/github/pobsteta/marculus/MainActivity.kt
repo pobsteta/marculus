@@ -13,6 +13,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -23,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -84,11 +86,37 @@ class MainActivity : ComponentActivity() {
                 Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                     AppRoot(repository, reglagesRepo, reglages, referentielsRepo, sauvegardeRepo, gpkgRepo, lotRepo, tarifsIfnRepo)
                     proposition?.let { p ->
-                        val nom = p.nom ?: stringResource(R.string.marsync_nom_inconnu)
+                        val resume = p.resume
+                        val titre = when {
+                            resume != null && resume.noms.size == 1 && resume.nbContextes == 1 ->
+                                stringResource(R.string.marsync_confirmer_titre, resume.noms[0])
+                            resume != null && resume.nbContextes > 1 ->
+                                stringResource(R.string.marsync_confirmer_titre_contextes, resume.nbContextes)
+                            else -> stringResource(R.string.marsync_confirmer_titre_fichier)
+                        }
+                        val detail = resume?.let {
+                            val tiges = pluralStringResource(R.plurals.marsync_tiges, it.nbTiges, it.nbTiges)
+                            if (it.operateurs.isEmpty()) {
+                                tiges
+                            } else {
+                                tiges + " · " + stringResource(R.string.marsync_de_operateur, it.operateurs.joinToString(", "))
+                            }
+                        }
                         AlertDialog(
                             onDismissRequest = { reception.annuler(); proposition = null },
-                            title = { Text(stringResource(R.string.marsync_confirmer_titre, nom)) },
-                            text = { Text(stringResource(R.string.marsync_confirmer_texte)) },
+                            title = { Text(titre) },
+                            text = {
+                                Column {
+                                    if (detail != null) Text(detail, style = MaterialTheme.typography.titleSmall)
+                                    if (resume != null && resume.nbContextes > 1 && resume.noms.isNotEmpty()) {
+                                        Text(resume.noms.joinToString(", "))
+                                    }
+                                    Text(stringResource(R.string.marsync_confirmer_texte))
+                                    p.nom?.let {
+                                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                }
+                            },
                             confirmButton = {
                                 TextButton(onClick = {
                                     proposition = null

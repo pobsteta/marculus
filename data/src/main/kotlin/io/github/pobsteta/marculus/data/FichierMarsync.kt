@@ -20,6 +20,38 @@ object FichierMarsync {
     }
 
     /**
+     * Ce que contient un `.marsync`, lu dans le contenu (clés `contextes[].nom|operateur` et `tiges[]`,
+     * voir `SauvegardeRepository.exporterContexteJson`). [nbTiges] compte les éléments de `tiges`,
+     * annulations comprises (une annulation est une ligne du journal). Fonction pure de [contenu] ;
+     * null si le contenu n'est pas un `.marsync` reconnu.
+     */
+    data class Resume(
+        val nbContextes: Int,
+        /** Noms des contextes, sans les noms absents ou vides, dans l'ordre du fichier. */
+        val noms: List<String>,
+        val nbTiges: Int,
+        /** Opérateurs distincts (contextes puis tiges), sans doublon ni vide. */
+        val operateurs: List<String>,
+    )
+
+    fun resume(contenu: String): Resume? {
+        val racine = runCatching { JSONObject(contenu) }.getOrNull() ?: return null
+        val contextes = racine.opt("contextes") as? JSONArray
+        val tiges = racine.opt("tiges") as? JSONArray
+        if (contextes == null && tiges == null) return null
+        fun texte(o: Any?, cle: String): String? =
+            (o as? JSONObject)?.optString(cle, "")?.trim()?.takeIf { it.isNotEmpty() }
+        val ctx = contextes?.let { a -> List(a.length()) { a.opt(it) } }.orEmpty()
+        val tg = tiges?.let { a -> List(a.length()) { a.opt(it) } }.orEmpty()
+        return Resume(
+            nbContextes = ctx.size,
+            noms = ctx.mapNotNull { texte(it, "nom") },
+            nbTiges = tg.size,
+            operateurs = (ctx.mapNotNull { texte(it, "operateur") } + tg.mapNotNull { texte(it, "operateur") }).distinct(),
+        )
+    }
+
+    /**
      * Plafond de taille d'un fichier reçu : 50 Mo. Un `.marsync` de contexte pèse quelques Mo au plus ;
      * Marculus s'offre pour tout `application/octet-stream` (ZIP, APK...), qu'il ne doit pas lire en entier.
      */

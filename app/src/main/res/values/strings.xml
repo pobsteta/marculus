@@ -307,10 +307,16 @@
     <string name="lot_msg_sans_marsync">Ce ZIP ne contient aucun fichier .marsync : ce n\'est pas un lot de chantiers. Rien n\'a été importé.</string>
     <string name="lot_msg_marsync_multiple">Ce ZIP contient plusieurs fichiers .marsync : impossible de savoir lequel fait foi. Rien n\'a été importé.</string>
     <string name="lot_msg_entree_refusee">Archive refusée : l\'entrée « %1$s » n\'est pas un simple nom de fichier. Rien n\'a été importé.</string>
-    <string name="marsync_confirmer_titre">Fusionner %1$s ?</string>
+    <string name="marsync_confirmer_titre">Fusionner « %1$s » ?</string>
+    <string name="marsync_confirmer_titre_contextes">Fusionner %1$d contextes ?</string>
+    <string name="marsync_confirmer_titre_fichier">Fusionner ce fichier ?</string>
+    <plurals name="marsync_tiges">
+        <item quantity="one">%1$d tige</item>
+        <item quantity="other">%1$d tiges</item>
+    </plurals>
+    <string name="marsync_de_operateur">de %1$s</string>
     <string name="marsync_confirmer_texte">Les contextes et tiges du fichier s\'ajoutent à ceux de l\'appareil. Rien n\'est supprimé.</string>
     <string name="marsync_fusionner">Fusionner</string>
-    <string name="marsync_nom_inconnu">ce fichier</string>
     <string name="sync_msg_fusion">Synchronisation fusionnée.</string>
     <string name="sync_partage_titre">Partager la synchronisation</string>
 

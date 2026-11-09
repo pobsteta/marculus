@@ -305,10 +305,16 @@
     <string name="lot_msg_sans_marsync">This ZIP holds no .marsync file: it is not a batch of sites. Nothing was imported.</string>
     <string name="lot_msg_marsync_multiple">This ZIP holds several .marsync files: there is no telling which one is authoritative. Nothing was imported.</string>
     <string name="lot_msg_entree_refusee">Archive refused: entry \"%1$s\" is not a plain file name. Nothing was imported.</string>
-    <string name="marsync_confirmer_titre">Merge %1$s?</string>
+    <string name="marsync_confirmer_titre">Merge “%1$s”?</string>
+    <string name="marsync_confirmer_titre_contextes">Merge %1$d contexts?</string>
+    <string name="marsync_confirmer_titre_fichier">Merge this file?</string>
+    <plurals name="marsync_tiges">
+        <item quantity="one">%1$d stem</item>
+        <item quantity="other">%1$d stems</item>
+    </plurals>
+    <string name="marsync_de_operateur">from %1$s</string>
     <string name="marsync_confirmer_texte">The file\'s contexts and stems are added to those on this device. Nothing is deleted.</string>
     <string name="marsync_fusionner">Merge</string>
-    <string name="marsync_nom_inconnu">this file</string>
     <string name="sync_msg_fusion">Sync merged.</string>
     <string name="sync_partage_titre">Share the sync</string>
 
