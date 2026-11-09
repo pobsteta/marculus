@@ -33,7 +33,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 - Onglet « Historique » coupé en « Historiqu / e » sur le téléphone de Pascal (pas sur l'émulateur), vu sur la v0.67.0 · journal du 2026-11-09 · depuis le cycle 5
 - « Par parcelle » compte 23 tiges et 13,47 m³ contre 22 et 13,39 m³ dans Statut et Par lot (annulation non retirée ?), contexte « Affouage » du téléphone, v0.67.0 · justesse des chiffres, prioritaire · cause non vérifiée · depuis le cycle 5
-- Carte de la liste des contextes : « N tiges » = lignes du journal (COUNT(*), `data/.../db/Daos.kt` l. 42), alors que Statut, la feuille et la boîte de la 016 comptent le net (`TotauxMartelage`) · relecteur de la 016, P1 · à trancher par Pascal · depuis le cycle 5
+- [018](missions/018-liste-tiges-nettes.md) la liste des contextes compte les tiges nettes, comme Statut (aujourd'hui COUNT(*) du journal, `Daos.kt` l. 42) · « oui pour aligner la liste » (Pascal, 2026-11-09) · fiche prête (testeur puis dev, appuyer), attend la porte n° 2 · depuis le cycle 5
 
 ## Validé
 
