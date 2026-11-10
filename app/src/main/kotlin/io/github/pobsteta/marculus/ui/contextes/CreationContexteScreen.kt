@@ -180,7 +180,7 @@ fun CreationContexteScreen(
     val derniersProposes = remember { mutableStateMapOf<String, String>() }
     // Même règle pour la part de houppier (EMERGE sur les arbres IFN), proposée en Schaeffer seulement.
     val dernieresParts = remember { mutableStateMapOf<String, String>() }
-    fun proposition(e: String) = ser?.let { s -> ifn?.proposer(s, e, tarifDe(e)) }
+    fun proposition(e: String) = ser?.let { s -> ifn?.proposerPour(s, e, selection, tarifDe(e)) }
     fun appliquerPropositions(essences: Collection<String> = selection, forcer: Boolean = false) {
         fun suivre(champs: MutableMap<String, String>, derniers: MutableMap<String, String>, e: String, p: String?) {
             if (p == null) return
@@ -191,10 +191,17 @@ fun CreationContexteScreen(
         essences.filter { it in selection }.forEach { e ->
             suivre(numerosTarif, derniersProposes, e, proposition(e)?.numero?.toString())
             if (tarifDe(e).estSchaeffer) {
-                val part = ser?.let { s -> ifn?.proposerPartHouppier(s, e) }?.let { formatPourcent(it.pourcent) }
+                val part = ser?.let { s -> ifn?.proposerPartHouppierPour(s, e, selection) }?.let { formatPourcent(it.pourcent) }
                 suivre(partsHouppier, dernieresParts, e, part)
             }
         }
+    }
+    // Point unique de modification de la sélection : le total d'arbres et le CV des « Autres » en dépendent,
+    // donc toute modification (case, ajout, retrait) repropose ensuite toutes les essences cochées
+    // (un champ retouché à la main n'est pas réécrit).
+    fun modifierSelection(modification: MutableList<String>.() -> Unit) {
+        selection.modification()
+        appliquerPropositions()
     }
     fun choisirCommune(insee: String?) {
         communeInsee = insee
@@ -369,7 +376,7 @@ fun CreationContexteScreen(
                     numero = numerosTarif[essence] ?: "",
                     part = partsHouppier[essence] ?: "",
                     source = if (essence in selection && tarifDe(essence).estSchaeffer) {
-                        sourceProposition(ifn, ser, essence, tarifDe(essence))
+                        sourceProposition(ifn, ser, essence, selection, tarifDe(essence))
                     } else {
                         null
                     },
@@ -377,12 +384,7 @@ fun CreationContexteScreen(
                     lot = if (affouage) partsLot[essence] ?: PartsLot() else null,
                     onLot = { partsLot[essence] = it },
                     onToggle = {
-                        if (essence in selection) {
-                            selection.remove(essence)
-                        } else {
-                            selection.add(essence)
-                            appliquerPropositions(listOf(essence))
-                        }
+                        modifierSelection { if (essence in this) remove(essence) else add(essence) }
                     },
                     onPickFond = { picker = essence to true },
                     onPickTexte = { picker = essence to false },
@@ -520,7 +522,7 @@ fun CreationContexteScreen(
                                 val millesime = if (ser != null && ser == contexteExistant?.ser) {
                                     contexteExistant?.millesimeTarifs
                                 } else {
-                                    ser?.let { s -> essences.firstNotNullOfOrNull { ifn?.proposer(s, it.nom, tarifDe(it.nom)) }?.millesime }
+                                    ser?.let { s -> essences.firstNotNullOfOrNull { ifn?.proposerPour(s, it.nom, selection, tarifDe(it.nom)) }?.millesime }
                                 }
                                 val coef = coefForme.replace(',', '.').toDoubleOrNull()?.takeIf { it > 0.0 } ?: 0.5
                                 // Décoché, le volume saisi est conservé : recocher retrouve la borne.
@@ -583,11 +585,12 @@ fun CreationContexteScreen(
                     // La nouvelle essence reprend le tarif de la première essence cubée, à ajuster.
                     selection.firstOrNull { tarifDe(it) != TarifCubage.AUCUN }?.let { modele ->
                         tarifs[nouvelle] = tarifDe(modele)
-                        numerosTarif[modele]?.let { numerosTarif[nouvelle] = it }
+                        // Copie « suiveuse » : une proposition IFN, si elle existe, la remplace.
+                        numerosTarif[modele]?.let { numerosTarif[nouvelle] = it; derniersProposes[nouvelle] = it }
                     }
                     essencesDisponibles.add(nouvelle)
                     essencesEnTete.add(nouvelle)
-                    selection.add(nouvelle)
+                    modifierSelection { add(nouvelle) }
                 }
                 ajoutOuvert = false
             },
@@ -989,9 +992,9 @@ private fun SectionCommune(
 
 /** « SER C20 — 1 240 arbres, CV 12 % », repli indiqué, et le type au plus faible CV s'il diffère. */
 @Composable
-private fun sourceProposition(ifn: TarifsIfn?, ser: String?, essence: String, tarif: TarifCubage): String? {
+private fun sourceProposition(ifn: TarifsIfn?, ser: String?, essence: String, contexte: Collection<String>, tarif: TarifCubage): String? {
     if (ifn == null || ser == null) return null
-    val p = ifn.proposer(ser, essence, tarif) ?: return stringResource(R.string.creation_source_aucune)
+    val p = ifn.proposerPour(ser, essence, contexte, tarif) ?: return stringResource(R.string.creation_source_aucune)
     val locale = LocalConfiguration.current.locales[0]
     val arbres = String.format(locale, "%,d", p.nArbres)
     val cv = String.format(locale, "%.0f", p.cv)
@@ -1000,9 +1003,9 @@ private fun sourceProposition(ifn: TarifsIfn?, ser: String?, essence: String, ta
         TarifsIfn.Niveau.GRECO -> stringResource(R.string.creation_source_greco, p.code, arbres, cv)
         TarifsIfn.Niveau.FRANCE -> stringResource(R.string.creation_source_france, arbres, cv)
     }
-    val conseille = ifn.typeConseille(ser, essence)?.takeIf { it != tarif }
+    val conseille = ifn.typeConseillePour(ser, essence, contexte)?.takeIf { it != tarif }
         ?.let { stringResource(R.string.creation_type_conseille, it.libelleLong()) }
-    val houppier = ifn.proposerPartHouppier(ser, essence)?.let { pp ->
+    val houppier = ifn.proposerPartHouppierPour(ser, essence, contexte)?.let { pp ->
         val niveau = when (pp.niveau) {
             TarifsIfn.Niveau.SER -> stringResource(R.string.creation_niveau_ser, pp.code)
             TarifsIfn.Niveau.GRECO -> stringResource(R.string.creation_niveau_greco, pp.code)

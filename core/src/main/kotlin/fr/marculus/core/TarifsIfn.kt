@@ -16,6 +16,8 @@ import kotlin.math.roundToInt
  */
 class TarifsIfn private constructor(
     private val lignes: Map<Cle, LigneTarif>,
+    /** Lignes brutes par (niveau, code), pour les regroupements « Autres » (mission 030). */
+    private val brutes: Map<Pair<Niveau, String>, List<LigneBrute>>,
     private val communesParInsee: Map<String, List<SerPart>>,
     private val communes: List<Commune>,
     private val sers: Map<String, Ser>,
@@ -71,6 +73,37 @@ class TarifsIfn private constructor(
      */
     data class PropositionPart(val pourcent: Double, val niveau: Niveau, val code: String, val nArbres: Int)
 
+    /** Ligne IFN telle que lue (libellé normalisé, ESPAR), numéro > 0 seulement. */
+    private data class LigneBrute(
+        val espar: String,
+        val libelle: String,
+        val type: TypeIfn,
+        val ligne: LigneTarif,
+    )
+
+    /** Regroupement d'essences du contexte, sans code IFN propre (mission 030). */
+    enum class Regroupement(private val libelle: String) {
+        AUTRES_FEUILLUS("autres feuillus"),
+        AUTRES_RESINEUX("autres resineux"),
+        ;
+
+        /**
+         * Feuillu si les deux premiers caractères de l'ESPAR sont < 50, résineux si >= 50
+         * (IGN, donnée ESSPRE ; l'if et les genévriers sont résineux : décision de Pascal 2026-11-10).
+         */
+        internal fun contient(espar: String): Boolean {
+            val ess = espar.take(2).toIntOrNull() ?: return false
+            return (ess < 50) == (this == AUTRES_FEUILLUS)
+        }
+
+        companion object {
+            fun de(essence: String): Regroupement? {
+                val n = normaliser(essence)
+                return entries.firstOrNull { it.libelle == n }
+            }
+        }
+    }
+
     private data class LigneTarif(
         val numero: Double,
         val nArbres: Int,
@@ -111,7 +144,7 @@ class TarifsIfn private constructor(
     /**
      * Proposition pour [essence] dans la SER [ser] au tarif [tarif] : la ligne SER si elle compte au
      * moins [SEUIL_ARBRES] arbres, sinon celle de sa GRECO, sinon celle de la France, sinon null.
-     * Null aussi pour un tarif sans numéro (AUCUN, EMERGE) ou une essence sans code ONF.
+     * Null aussi pour un tarif sans numéro (AUCUN, EMERGE) ou une essence sans code ONF. Les lignes au numéro <= 0 sont écartées au chargement (mission 030).
      */
     fun proposer(ser: String, essence: String, tarif: TarifCubage): PropositionTarif? {
         val type = TypeIfn.de(tarif) ?: return null
@@ -153,6 +186,88 @@ class TarifsIfn private constructor(
     }
 
     /**
+     * Lignes d'un regroupement à un niveau : feuillus ou résineux hors essences du contexte. Un nom
+     * du contexte exclut les espèces IFN dont le libellé commence par ce nom (mot entier), sauf
+     * « Charme » qui n'exclut pas « Charme houblon » (décision de Pascal 2026-11-10).
+     */
+    private fun lignesAutres(
+        niveau: Niveau, code: String, regroupement: Regroupement, essencesDuContexte: Collection<String>,
+    ): List<LigneBrute> {
+        val noms = essencesDuContexte.map { normaliser(it) }.filter { it.isNotEmpty() }
+        return brutes[niveau to code].orEmpty().filter { b ->
+            regroupement.contient(b.espar) && noms.none { n ->
+                (b.libelle == n || b.libelle.startsWith("$n ")) && !(n == "charme" && b.libelle == "charme houblon")
+            }
+        }
+    }
+
+    private fun niveaux(ser: String): List<Pair<Niveau, String>> {
+        val greco = sers[ser]?.greco ?: ser.take(1)
+        return listOf(Niveau.SER to ser, Niveau.GRECO to greco, Niveau.FRANCE to CODE_FRANCE)
+    }
+
+    /**
+     * Proposition pour « Autres feuillus » / « Autres résineux » : moyenne des numéros pondérée par
+     * le nombre d'arbres des lignes du regroupement au [tarif] dans [ser], hors [essencesDuContexte] ;
+     * cascade SER → GRECO → France, seuil [SEUIL_ARBRES] sur le total retenu. Null sinon, ou pour un
+     * tarif sans numéro.
+     */
+    fun proposerAutres(
+        ser: String, regroupement: Regroupement, essencesDuContexte: Collection<String>, tarif: TarifCubage,
+    ): PropositionTarif? {
+        val type = TypeIfn.de(tarif) ?: return null
+        return niveaux(ser).firstNotNullOfOrNull { (niveau, c) ->
+            val l = lignesAutres(niveau, c, regroupement, essencesDuContexte).filter { it.type == type }.map { it.ligne }
+            val total = l.sumOf { it.nArbres }
+            if (total < SEUIL_ARBRES) return@firstNotNullOfOrNull null
+            val brut = l.sumOf { it.numero * it.nArbres } / total
+            val cvs = l.filter { !it.cv.isNaN() }
+            val poidsCv = cvs.sumOf { it.nArbres }
+            PropositionTarif(
+                numero = brut.roundToInt().coerceIn(NUMERO_MIN, NUMERO_MAX),
+                numeroBrut = brut,
+                niveau = niveau,
+                code = c,
+                nArbres = total,
+                cv = if (poidsCv > 0) cvs.sumOf { it.cv * it.nArbres } / poidsCv else Double.NaN,
+                millesime = l.map { it.millesime }.filter { it.isNotBlank() }.distinct().sorted().joinToString(", "),
+            )
+        }
+    }
+
+    /**
+     * Part de houppier de « Autres feuillus » / « Autres résineux » : moyenne pondérée par les arbres,
+     * mêmes règles que [proposerAutres], sur les lignes à part renseignée (les quatre types d'une
+     * même espèce ne se cumulent pas : on retient le plus fourni).
+     */
+    fun proposerPartHouppierAutres(
+        ser: String, regroupement: Regroupement, essencesDuContexte: Collection<String>,
+    ): PropositionPart? =
+        niveaux(ser).firstNotNullOfOrNull { (niveau, c) ->
+            val l = lignesAutres(niveau, c, regroupement, essencesDuContexte)
+                .filter { it.ligne.partHouppier != null }
+                .groupBy { it.espar to it.libelle }
+                .map { (_, g) -> g.maxBy { it.ligne.nArbres }.ligne }
+            val total = l.sumOf { it.nArbres }
+            if (total < SEUIL_ARBRES) return@firstNotNullOfOrNull null
+            PropositionPart(l.sumOf { it.partHouppier!! * it.nArbres } / total, niveau, c, total)
+        }
+
+    /** [proposerAutres] pour un regroupement, [proposer] sinon : ce que l'écran de création appelle. */
+    fun proposerPour(ser: String, essence: String, essencesDuContexte: Collection<String>, tarif: TarifCubage): PropositionTarif? =
+        Regroupement.de(essence)?.let { proposerAutres(ser, it, essencesDuContexte, tarif) } ?: proposer(ser, essence, tarif)
+
+    /** [proposerPartHouppierAutres] pour un regroupement, [proposerPartHouppier] sinon. */
+    fun proposerPartHouppierPour(ser: String, essence: String, essencesDuContexte: Collection<String>): PropositionPart? =
+        Regroupement.de(essence)?.let { proposerPartHouppierAutres(ser, it, essencesDuContexte) } ?: proposerPartHouppier(ser, essence)
+
+    /** [typeConseille] étendu aux regroupements. */
+    fun typeConseillePour(ser: String, essence: String, essencesDuContexte: Collection<String>): TarifCubage? =
+        TypeIfn.entries
+            .mapNotNull { t -> proposerPour(ser, essence, essencesDuContexte, t.tarif)?.let { t.tarif to it.cv } }
+            .minByOrNull { it.second }?.first
+
+    /**
      * Type de Schaeffer au plus faible CV pour [essence] dans [ser] (chaque type avec son propre
      * repli), ou null si aucun n'a de proposition. Indicatif : rien n'est imposé.
      */
@@ -179,16 +294,25 @@ class TarifsIfn private constructor(
          */
         fun charger(tarifsCsv: String, communesCsv: String, serCsv: String): TarifsIfn {
             val lignes = mutableMapOf<Cle, LigneTarif>()
+            val brutes = mutableMapOf<Pair<Niveau, String>, MutableMap<Triple<String, String, TypeIfn>, LigneBrute>>()
             val codes = mutableMapOf<String, String?>() // ~180 libellés pour ~15 000 lignes
             lire(tarifsCsv).forEach { r ->
                 val niveau = runCatching { Niveau.valueOf(r["niveau"].orEmpty()) }.getOrNull() ?: return@forEach
                 val type = runCatching { TypeIfn.valueOf(r["type"].orEmpty()) }.getOrNull() ?: return@forEach
                 val libelle = r["essence_libelle"].orEmpty()
-                val code = codes.getOrPut(libelle) { Cubage.codeEssence(libelle) } ?: return@forEach
-                val numero = r["numero"]?.toDoubleOrNull()?.takeIf { it.isFinite() } ?: return@forEach
+                // Mission 030 : un numéro <= 0 n'est pas un tarif, la ligne est écartée partout.
+                val numero = r["numero"]?.toDoubleOrNull()?.takeIf { it.isFinite() && it > 0.0 } ?: return@forEach
                 val n = r["n_arbres"]?.toIntOrNull() ?: return@forEach
                 val part = r["part_houppier"]?.toDoubleOrNull()?.takeIf { it.isFinite() && it in 0.0..100.0 }
                 val l = LigneTarif(numero, n, r["cv"]?.toDoubleOrNull() ?: Double.NaN, r["millesime"].orEmpty(), part)
+                val espar = r["espar"].orEmpty()
+                if (libelle.isNotBlank() && espar.isNotBlank()) {
+                    val lib = normaliser(libelle)
+                    val b = brutes.getOrPut(niveau to r["code"].orEmpty()) { mutableMapOf() }
+                    val kb = Triple(espar, lib, type)
+                    if ((b[kb]?.ligne?.nArbres ?: -1) < n) b[kb] = LigneBrute(espar, lib, type, l)
+                }
+                val code = codes.getOrPut(libelle) { Cubage.codeEssence(libelle) } ?: return@forEach
                 val cle = Cle(niveau, r["code"].orEmpty(), code, type)
                 if ((lignes[cle]?.nArbres ?: -1) < n) lignes[cle] = l
             }
@@ -207,6 +331,7 @@ class TarifsIfn private constructor(
             }.toMap()
             return TarifsIfn(
                 lignes,
+                brutes.mapValues { (_, m) -> m.values.toList() },
                 parts.mapValues { (_, l) -> l.sortedByDescending { it.part } },
                 communes.values.toList(),
                 sers,
