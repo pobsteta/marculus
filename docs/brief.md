@@ -79,7 +79,7 @@ déposé le 2026-10-24 (`~/dev/briefs/vers-nemetonshiny/2026-10-24-marculus-csv-
 le texte d'aide (`R/utils_i18n.R` l. 764, « formats 2 à 5 ») est en retard. Urgence jugée faible par
 Pascal (journal l. 72).*
 
-*Ligne du 2026-11-10 : le format courant et son historique sont dans la spec v1 § 8 ; le brief du
+*Ligne du 2026-11-10 : le format courant et son historique sont dans la spec v1 § 7 ; le brief du
 format suivant est `~/dev/briefs/vers-nemetonshiny/2026-11-10-marculus-csv-format-8-lot-par-essence.md`.*
 
 ## Ce qu'il ne fait pas (hors périmètre)

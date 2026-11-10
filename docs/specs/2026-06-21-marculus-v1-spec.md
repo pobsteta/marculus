@@ -16,7 +16,7 @@
 > borné annoncés à chaque tige, bilan par lot, CSV `FormatCsv;5`, fusion qui préserve les
 > réglages du terrain (`2026-10-07-contexte-affouage.md`).
 > *Ligne du 2026-11-10 (corrige, sans l'effacer, la mention « `FormatCsv;5` » ci-dessus, vraie le
-> 2026-10-07) : le format d'échange courant et son historique sont au § 8 (« Export CSV »).*
+> 2026-10-07) : le format d'échange courant et son historique sont au § 7 (« Export CSV »).*
 > **Mise à jour 2026-10-24** : relecture de la spec contre le produit livré (version courante :
 > voir les releases GitHub). Corrigés : fonds de carte (§1), tables de
 > tarifs par SER livrées (§5), schéma Room et SDK cible (§9), reste à faire (§10) ; ajoutés :
@@ -237,7 +237,7 @@ Tige (journal)  : uuid, contexteId, essence, classe,
     égales au net par test (`JournalNetTest.kt` l. 58). Décision : ADR 0007.
 - **Bouton Hauteur / Qualité arbre** : annote la **dernière tige** ajoutée de la cellule
   (saisie hauteur en texte libre / sélection mono-choix de la qualité arbre).
-- **Export CSV** (`FormatCsv;7`) : feuille (totaux par essence × classe) **+** journal des
+- **Export CSV** (`FormatCsv;7` ; 2026-11-10 : format courant 8, voir ci-dessous) : feuille (totaux par essence × classe) **+** journal des
   tiges (+ volumes cubés selon le tarif du contexte, + colonne `Lot`). Format 5 : houppier —
   en-tête `VolumeHouppierTotalM3`, `PartHouppier` (`essence=part|…`), `AffouageLotTotalM3`
   (avant `Journal`) ; colonne `AffouageLotM3` en fin de journal (vide hors affouage), 22
