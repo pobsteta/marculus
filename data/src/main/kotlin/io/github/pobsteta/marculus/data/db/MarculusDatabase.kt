@@ -48,9 +48,19 @@ val MIGRATION_16_17 = object : Migration(16, 17) {
     }
 }
 
+/**
+ * v18 : parties comptées au lot d'affouage par essence (mission 026). Aucune donnée réécrite : la
+ * colonne vide se lit « tige et houppier cochés », le défaut voulu pour les contextes existants.
+ */
+val MIGRATION_17_18 = object : Migration(17, 18) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE contexte ADD COLUMN partsLot TEXT NOT NULL DEFAULT ''")
+    }
+}
+
 @Database(
     entities = [ContexteEntity::class, TigeEntity::class, CompteurConfigEntity::class],
-    version = 17,
+    version = 18,
     exportSchema = true,
 )
 abstract class MarculusDatabase : RoomDatabase() {
@@ -68,7 +78,7 @@ abstract class MarculusDatabase : RoomDatabase() {
             )
                 // Les données de terrain sont réelles depuis la v13 : chaque changement de schéma
                 // porte sa migration. Le repli destructif ne reste que pour les versions de dev.
-                .addMigrations(MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17)
+                .addMigrations(MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
                 .fallbackToDestructiveMigration(dropAllTables = true)
                 .build()
     }

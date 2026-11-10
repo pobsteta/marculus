@@ -6,6 +6,7 @@ import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.EtatKanban
 import fr.marculus.core.model.ModeMesure
+import fr.marculus.core.model.PartsLot
 import fr.nemeton.terrain.geo.Position
 import fr.nemeton.terrain.gnss.QualiteFix
 import fr.marculus.core.model.TarifCubage
@@ -44,6 +45,32 @@ internal fun decodePartsHouppier(s: String): Map<String, Double> =
             p.getOrNull(1)?.toDoubleOrNull()?.takeIf { p.size == 2 && it.isFinite() }?.let { p[0] to it }
         }.toMap()
     }
+
+/** Toutes les entrées reçues, même « les deux cochées » : la table relue est la table écrite. */
+internal fun encodePartsLot(parts: Map<String, PartsLot>): String =
+    parts.entries.joinToString(RS) { "${it.key}$US${bit(it.value.tige)}$US${bit(it.value.houppier)}" }
+
+/** Un enregistrement mal formé est ignoré : son essence retombe au défaut (les deux cochées). */
+internal fun decodePartsLot(s: String): Map<String, PartsLot> =
+    if (s.isEmpty()) {
+        emptyMap()
+    } else {
+        s.split(RS).mapNotNull { rec ->
+            val p = rec.split(US)
+            if (p.size != 3 || p[0].isEmpty()) return@mapNotNull null
+            val tige = bool(p[1]) ?: return@mapNotNull null
+            val houppier = bool(p[2]) ?: return@mapNotNull null
+            p[0] to PartsLot(tige, houppier)
+        }.toMap()
+    }
+
+private fun bit(b: Boolean) = if (b) "1" else "0"
+
+private fun bool(s: String): Boolean? = when (s) {
+    "1" -> true
+    "0" -> false
+    else -> null
+}
 
 internal fun encodeTarifsEssence(tarifs: Map<String, TarifEssence>): String =
     tarifs.entries.joinToString(RS) { "${it.key}$US${it.value.tarif.name}$US${it.value.numero}" }
@@ -85,6 +112,7 @@ internal fun ContexteEntity.versDomaine() = Contexte(
     communeInsee = communeInsee,
     ser = ser,
     millesimeTarifs = millesimeTarifs,
+    partsLot = decodePartsLot(partsLot),
 )
 
 internal fun TigeEntity.versDomaine() = Tige(

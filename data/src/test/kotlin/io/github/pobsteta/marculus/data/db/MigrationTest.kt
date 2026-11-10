@@ -46,13 +46,13 @@ class MigrationTest {
     }
 
     @Test
-    fun `la base s ouvre en v17 avec toutes les migrations declarees`() {
+    fun `la base s ouvre en v18 avec toutes les migrations declarees`() {
         helper.createDatabase(BASE, 16).close()
         val db = androidx.room.Room.databaseBuilder(
             ApplicationProvider.getApplicationContext(), MarculusDatabase::class.java, BASE,
-        ).addMigrations(MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17)
+        ).addMigrations(MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18)
             .allowMainThreadQueries().build()
-        db.openHelper.writableDatabase.version.let { assertEquals(17, it) }
+        db.openHelper.writableDatabase.version.let { assertEquals(18, it) }
         db.close()
     }
 
