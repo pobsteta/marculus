@@ -10,3 +10,5 @@ Une ligne par ADR. La décision est acceptée par Pascal ; le texte de chaque AD
 | [0004](0004-lot-affouage-houppier-seul.md) | Lot d'affouage : houppier seul quand l'arbre en a un | décision acceptée, livrée ; texte proposé |
 | [0005](0005-theme-systeme-clair-sombre.md) | Thème Système / Clair / Sombre ; `terrain-style` suspendu | décision acceptée, réadoption suspendue ; texte proposé |
 | [0006](0006-numero-tarif-zero-hors-schaeffer.md) | Numéro de tarif à 0 hors Schaeffer | décision acceptée, livrée ; texte proposé |
+| [0007](0007-regle-annulation-unique-journalnet.md) | Une seule règle d'annulation, dans `JournalNet` | décision acceptée, livrée ; texte proposé |
+| [0008](0008-release-conditionnelle.md) | Pas de release quand seuls pilotage, docs, `*.md` ou badge changent | décision acceptée, livrée ; texte proposé |

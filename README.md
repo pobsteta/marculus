@@ -81,6 +81,9 @@ d'événements *append-only* (chaque tige possède un UUID).
 - Liste triée par **date de martelage décroissante**.
 
 ### Synchronisation multi-opérateurs
+- **Ouvrir avec Marculus** : un `.marsync` reçu (Bluetooth, gestionnaire de fichiers, courriel)
+  s'ouvre directement dans Marculus, avec une boîte de confirmation avant la fusion (mission 016,
+  PR #36). Comportement détaillé : spec § 5, `docs/specs/2026-06-21-marculus-v1-spec.md`.
 - Partage **par contexte** d'un fichier `<contexte>-<opérateur>-<horodatage>.marsync`
   (Android share / Quick Share). Identité opérateur = UUID de l'appareil (ou nom saisi).
 - Fusion par **union sur l'UUID** des tiges, idempotente ; conflit résolu en
@@ -153,6 +156,13 @@ Sur le téléphone de Pascal : `adb install` et captures d'écran seulement, jam
 par un *revert* sur une branche, PR, merge ; la CI publie une nouvelle version corrigée, qu'on
 installe comme ci-dessus.
 
+**Pas de release quand l'application ne change pas** (mission 023, PR #51, f440e2c ; décision :
+`docs/adr/0008-release-conditionnelle.md`). Après des tests verts, `release.yml` appelle
+`.github/scripts/release-necessaire.sh`, qui compare le commit au dernier tag `v*` atteignable.
+Si seuls `pilotage/`, `docs/`, des fichiers `*.md` ou `.github/badges/` ont changé : « pas de
+release », aucun tag. Tout autre fichier compte ; dans le doute, on publie. Le script est testé
+par `.github/scripts/test-release-necessaire.sh`, lancé par `ci.yml`.
+
 **Ne pas relancer une CI de `main` déjà verte, ni celle d'un ancien commit** (règle de Pascal du
 2026-10-24) : chaque CI verte de `main` publie une release ; relancée, elle en publie une de plus,
 et sur un ancien commit, une version plus haute qui contient moins de code, que le téléphone
@@ -170,6 +180,8 @@ compléter par Pascal**.
 ## Versionnement & releases automatiques
 
 Au **merge d'une PR sur `main`**, la CI (GitHub Actions) :
+(la règle « pas de release quand seuls pilotage, docs, `*.md` ou badge changent » est dite une fois, dans « Déployer et publier » ci-dessus)
+
 
 1. lance les tests et le badge de couverture dans `ci.yml` (job `build-test`) ; `release.yml` ne
    démarre qu'à la **réussite** de ce workflow sur un push vers `main` (`workflow_run`, depuis le
@@ -212,6 +224,9 @@ le sauvegarder hors dépôt.
 
 ## Site & documentation
 
+- **Version et releases** : [page Releases](https://github.com/pobsteta/marculus/releases)
+  (la source ; pas de numéro recopié ici). **Avancement** : [`pilotage/kanban.md`](pilotage/kanban.md).
+  **Thème `terrain-style`** : réadoption suspendue jusqu'à la v0.6.1 (ADR 0005, mission 006).
 - **Site GitHub Pages** : <https://pobsteta.github.io/marculus/> — page d'accueil + lien APK +
   **rapport de couverture HTML** (`/coverage/`), republié à chaque push par `pages.yml`.
 - Spécification v1 : [`docs/specs/2026-06-21-marculus-v1-spec.md`](docs/specs/2026-06-21-marculus-v1-spec.md).

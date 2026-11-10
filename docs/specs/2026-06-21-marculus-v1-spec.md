@@ -173,6 +173,41 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   sur le m³ non arrondi, `Steres.deM3`, même fichier l. 15). Le CSV du bilan ajoute `SteresParM3`,
   `VolumeMaxLot_st`, `VolumeTige_st`, `VolumeHouppier_st`, `VolumeLot_st`. Rien de nouveau en base,
   `.marsync` ni CSV d'échange.
+- ✅ **Règle d'annulation unique** (mission 022, PR #49, 76bd939) : une annulation retire la dernière
+  tige de sa case (journal trié par horodatage puis UUID, pile par case, paquet partiel gardé avec
+  sa quantité restante, annulation sans tige à retirer gardée) ; cette règle n'existe que dans
+  `JournalNet` (`core/src/main/kotlin/fr/marculus/core/JournalNet.kt` l. 18-40), d'où partent Statut, Par lot, Par
+  parcelle, les volumes et les CSV ; décision : ADR 0007. Le § 7 y renvoie.
+- ✅ **Décomptes au net partout** (mission 018, PR #42, 07a2245 ; mission 019, PR #43, 53e446c) :
+  la carte de la liste des contextes affiche le nombre **net** de tiges (`ResumeContexte.nbTiges`,
+  même nombre que Statut, `FichierMarsync.kt` l. 27) ; le verrouillage et l'état Kanban restent
+  sur le nombre d'événements du journal (journal du 2026-11-09, 018). « Par parcelle » et le CSV
+  foncier partent de `JournalNet.tiges` (`ParParcelle.kt`) : une annulation sans tige à retirer
+  compte en négatif dans « sans position » et n'apparaît pas au CSV foncier (décision de Pascal,
+  journal du 2026-11-09, 019).
+- ✅ **Ligne « sans position » avec volumes** (mission 021, PR #46, a800bb8) : volume, houppier,
+  total et stères sur la ligne ; affichée dès qu'il y a une tige sans position ou une annulation
+  orpheline (`Repartition.aLigneSansPosition`, `core`, testée ; décision de Pascal, journal du
+  2026-11-10, « Je valide les 4 »). Parcelles + sans position = Statut (31,80 / 7,16 / 38,96 m³
+  relevés sur émulateur, journal du 2026-11-10, afficheur 021).
+- ✅ **Onglets lisibles** (mission 020, PR #44, 02fc671) : marge de 4 dp ; si un mot ne tient pas,
+  le texte est réduit par pas de 1 sp jusqu'à 9 sp (`LibelleOnglet.kt`, `coupeUnMot`) ; libellés
+  inchangés.
+- ✅ **Recevoir un `.marsync` : « Ouvrir avec » / « Partager »** (mission 016, PR #36, dbad43c).
+  - Voies d'entrée : `ACTION_VIEW` (notification Bluetooth, gestionnaire de fichiers) et
+    `ACTION_SEND` (courriel, messagerie), types `application/octet-stream`, `application/json` et
+    `text/plain` (`app/src/main/AndroidManifest.xml` l. 51-64 ; lecture dans `MainActivity.kt`
+    l. 192-193). Prix accepté par Pascal : Marculus apparaît dans « Ouvrir avec » de tout fichier
+    binaire (journal du 2026-11-09, 016).
+  - Une boîte « Fusionner ? » annonce le ou les contextes, le nombre **net** de tiges et
+    l'opérateur ; **Annuler n'écrit rien**. Le bouton Paramètres → « Fusionner » est inchangé.
+  - Le contenu décide : un fichier illisible est refusé, un JSON valide sous un autre nom est
+    accepté ; plafond de 50 Mo (`FichierMarsync.kt` l. 72) ; seul le schéma `content` est
+    accepté ; la relance depuis l'historique des applications récentes est ignorée.
+  - Une seule fonction de fusion : `SauvegardeRepository.fusionnerJson` (§ 8). `MainActivity` en
+    `launchMode="singleTask"` (manifeste l. 40) : Retour quitte Marculus.
+  - Non vérifié sur téléphone au 2026-11-10 : l'essai A -> B est à Pascal (journal du 2026-11-09,
+    v0.68.0).
 
 ## 6. Écrans
 
@@ -211,8 +246,8 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   en-tête `VolumeHouppierTotalM3`, `PartHouppier` (`essence=part|…`), `AffouageLotTotalM3`
   (avant `Journal`) ; colonne `AffouageLotM3` en fin de journal (vide hors affouage), 22
   colonnes. `VolumeHouppierM3` est rempli en Schaeffer via la part de houppier. À l'export, choix entre
-  **journal complet** et **tiges à comptabiliser** (`Journal;NET` : chaque annulation disparaît
-  avec la tige qu'elle retire ; totaux identiques). Format 6 : `TarifsEssence`
+  **journal complet** et **tiges à comptabiliser** (`Journal;NET` : règle d'annulation unique de `JournalNet`, voir § 5 et ADR 0007 ;
+  totaux identiques). Format 6 : `TarifsEssence`
   (`essence=TARIF:numéro|…`) et `SteresParM3` après `AffouageLotTotalM3` ; `Tarif` /
   `TarifNumero` restent le tarif par défaut. Format 7 : `CommuneInsee`, `Ser`, `MillesimeTarifs`
   après `SteresParM3`.
