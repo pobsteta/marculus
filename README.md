@@ -83,7 +83,7 @@ d'événements *append-only* (chaque tige possède un UUID).
 ### Synchronisation multi-opérateurs
 - **Ouvrir avec Marculus** : un `.marsync` reçu (Bluetooth, gestionnaire de fichiers, courriel)
   s'ouvre directement dans Marculus, avec une boîte de confirmation avant la fusion (mission 016,
-  PR #36). Comportement détaillé : spec § 5, `docs/specs/2026-06-21-marculus-v1-spec.md`.
+  PR #36). Comportement détaillé : spec § 8, `docs/specs/2026-06-21-marculus-v1-spec.md`.
 - Partage **par contexte** d'un fichier `<contexte>-<opérateur>-<horodatage>.marsync`
   (Android share / Quick Share). Identité opérateur = UUID de l'appareil (ou nom saisi).
 - Fusion par **union sur l'UUID** des tiges, idempotente ; conflit résolu en
@@ -139,7 +139,7 @@ Rapport de couverture : `core/build/reports/jacoco/html/index.html`.
 sur `main`, `ci.yml` lance les tests ; **seulement s'ils sont verts**, `release.yml` (déclenché par
 `workflow_run`, mission 015, PR #27) construit et tague le commit testé, calcule la version depuis les commits conventionnels (`feat:` -> mineur,
 `fix:` -> patch, `!` ou `BREAKING CHANGE` -> majeur, sinon patch) et publie l'APK signé sur GitHub
-Releases. Le titre de la PR doit donc être un commit conventionnel (`feat: ...`, `fix: ...`).
+Releases, sauf si l'application n'a pas changé (règle ci-dessous). Le titre de la PR doit donc être un commit conventionnel (`feat: ...`, `fix: ...`).
 
 **Installer sur un téléphone.** Le téléphone de Pascal tourne sur l'APK **release** signé par la CI.
 Un build debug local ne s'installe pas par-dessus (signature différente, `versionCode` plus bas).
@@ -163,10 +163,8 @@ Si seuls `pilotage/`, `docs/`, des fichiers `*.md` ou `.github/badges/` ont chan
 release », aucun tag. Tout autre fichier compte ; dans le doute, on publie. Le script est testé
 par `.github/scripts/test-release-necessaire.sh`, lancé par `ci.yml`.
 
-**Ne pas relancer une CI de `main` déjà verte, ni celle d'un ancien commit** (règle de Pascal du
-2026-10-24) : chaque CI verte de `main` publie une release ; relancée, elle en publie une de plus,
-et sur un ancien commit, une version plus haute qui contient moins de code, que le téléphone
-accepterait comme une mise à jour. Pour republier, faire une PR.
+**Relancer une CI de `main` est sans risque** : la release ne part que si l'application a changé
+depuis le dernier tag `v*` (`.github/scripts/release-necessaire.sh`) ; sinon, aucune version de plus.
 
 **Clé de signature.** Elle vit dans les secrets de dépôt (voir « Signature des releases ») et dans
 le fichier `marculus-release.keystore` à la racine, ignoré par git (`.gitignore` : `*.keystore`).
@@ -180,8 +178,6 @@ compléter par Pascal**.
 ## Versionnement & releases automatiques
 
 Au **merge d'une PR sur `main`**, la CI (GitHub Actions) :
-(la règle « pas de release quand seuls pilotage, docs, `*.md` ou badge changent » est dite une fois, dans « Déployer et publier » ci-dessus)
-
 
 1. lance les tests et le badge de couverture dans `ci.yml` (job `build-test`) ; `release.yml` ne
    démarre qu'à la **réussite** de ce workflow sur un push vers `main` (`workflow_run`, depuis le
@@ -190,6 +186,9 @@ Au **merge d'une PR sur `main`**, la CI (GitHub Actions) :
 2. calcule la **prochaine version SemVer** à partir des messages de commit
    ([Conventional Commits](https://www.conventionalcommits.org)) ;
 3. compile l'**APK release** (version injectée) et publie une **release GitHub** avec l'APK.
+
+La règle « pas de release quand seuls pilotage, docs, `*.md` ou badge changent » est dite une fois,
+dans « Déployer et publier » ci-dessus.
 
 Le type de bump dépend du commit :
 
@@ -226,7 +225,6 @@ le sauvegarder hors dépôt.
 
 - **Version et releases** : [page Releases](https://github.com/pobsteta/marculus/releases)
   (la source ; pas de numéro recopié ici). **Avancement** : [`pilotage/kanban.md`](pilotage/kanban.md).
-  **Thème `terrain-style`** : réadoption suspendue jusqu'à la v0.6.1 (ADR 0005, mission 006).
 - **Site GitHub Pages** : <https://pobsteta.github.io/marculus/> — page d'accueil + lien APK +
   **rapport de couverture HTML** (`/coverage/`), republié à chaque push par `pages.yml`.
 - Spécification v1 : [`docs/specs/2026-06-21-marculus-v1-spec.md`](docs/specs/2026-06-21-marculus-v1-spec.md).
