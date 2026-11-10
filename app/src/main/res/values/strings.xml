@@ -52,8 +52,8 @@
         <item quantity="one">%1$d tige</item>
         <item quantity="other">%1$d tiges</item>
     </plurals>
-    <string name="liste_carte_resume_verrouille"> · 🔒</string>
-    <string name="liste_carte_resume_martele"> · ✓ martelé</string>
+    <string name="liste_carte_resume_verrouille">" · 🔒"</string>
+    <string name="liste_carte_resume_martele">" · ✓ martelé"</string>
     <string name="liste_filtre_marteles">Martelés (%1$d)</string>
     <string name="liste_afficher_a_marteler">Afficher les contextes à marteler (%1$d)</string>
     <string name="liste_aucun_martele">Aucun contexte martelé.</string>

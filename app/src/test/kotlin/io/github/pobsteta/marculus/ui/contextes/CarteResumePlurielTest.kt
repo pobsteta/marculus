@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 
 /** Mission 033 : « 1 tige », « 1 essence » au singulier sur la carte de la liste (le français : 0 et 1). */
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [35])
 class CarteResumePlurielTest {
     private fun ressources(langue: String) = ApplicationProvider.getApplicationContext<Context>().let {
         val conf = Configuration(it.resources.configuration).apply { setLocale(Locale.forLanguageTag(langue)) }
@@ -41,5 +41,31 @@ class CarteResumePlurielTest {
         assertEquals("2 stems", tiges("en", 2))
         assertEquals("1 species", essences("en", 1))
         assertEquals("2 species", essences("en", 2))
+    }
+
+    /** La phrase complète comme la carte la compose : un retour à %5$d / %6$d ferait planter ici. */
+    private fun phrase(langue: String, essences: Int, tiges: Int, verrouille: Boolean, martele: Boolean): String {
+        val r = ressources(langue)
+        return r.getString(
+            R.string.liste_carte_resume, "Diam", 20, 60, 5,
+            r.getQuantityString(R.plurals.liste_carte_essences, essences, essences),
+            r.getQuantityString(R.plurals.liste_carte_tiges, tiges, tiges),
+        ) + (if (verrouille) r.getString(R.string.liste_carte_resume_verrouille) else "") +
+            (if (martele) r.getString(R.string.liste_carte_resume_martele) else "")
+    }
+
+    @Test fun `phrase complete francais`() {
+        assertEquals("Diam · classes 20–60 (pas 5) · 1 essence · 1 tige", phrase("fr", 1, 1, false, false))
+        assertEquals("Diam · classes 20–60 (pas 5) · 2 essences · 0 tige", phrase("fr", 2, 0, false, false))
+        assertEquals("Diam · classes 20–60 (pas 5) · 2 essences · 2 tiges · 🔒", phrase("fr", 2, 2, true, false))
+        assertEquals("Diam · classes 20–60 (pas 5) · 1 essence · 1 tige · ✓ martelé", phrase("fr", 1, 1, false, true))
+        assertEquals("Diam · classes 20–60 (pas 5) · 1 essence · 2 tiges · 🔒 · ✓ martelé", phrase("fr", 1, 2, true, true))
+    }
+
+    @Test fun `phrase complete anglais`() {
+        assertEquals("Diam · classes 20–60 (step 5) · 1 species · 1 stem", phrase("en", 1, 1, false, false))
+        assertEquals("Diam · classes 20–60 (step 5) · 2 species · 2 stems · 🔒", phrase("en", 2, 2, true, false))
+        assertEquals("Diam · classes 20–60 (step 5) · 1 species · 0 stems · ✓ marked", phrase("en", 1, 0, false, true))
+        assertEquals("Diam · classes 20–60 (step 5) · 2 species · 1 stem · 🔒 · ✓ marked", phrase("en", 2, 1, true, true))
     }
 }
