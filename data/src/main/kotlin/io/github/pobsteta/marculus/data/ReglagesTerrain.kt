@@ -18,6 +18,7 @@ internal object ReglagesTerrain {
     val CLES_CONTEXTE = setOf(
         "affouage", "volumeMaxLotM3", "partHouppier", "tarif", "tarifNumero", "coefficientForme",
         "cheminGpkg", "tarifsEssence", "steresParM3", "communeInsee", "ser", "millesimeTarifs",
+        "partsLot",
     )
 
     /** Clé JSON d'une tige conservée quand le fichier ne la porte pas (lot figé au martelage). */
@@ -39,6 +40,7 @@ internal object ReglagesTerrain {
             communeInsee = if (absent("communeInsee")) local.communeInsee else entrant.communeInsee,
             ser = if (absent("ser")) local.ser else entrant.ser,
             millesimeTarifs = if (absent("millesimeTarifs")) local.millesimeTarifs else entrant.millesimeTarifs,
+            partsLot = if (absent("partsLot")) local.partsLot else entrant.partsLot,
         )
     }
 
