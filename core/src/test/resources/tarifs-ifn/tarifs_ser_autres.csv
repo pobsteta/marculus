@@ -214,3 +214,18 @@ SER;L11;53CO;Pin laricio de Corse;SCHL;8.0;20;30.0;IFN test;
 SER;L11;52;Pin sylvestre;SCHL;7.0;10;30.0;IFN test;
 SER;L11;64;Douglas;SCHL;9.0;10;30.0;IFN test;
 SER;L11;51;Pin maritime;SCHL;4.0;20;30.0;IFN test;
+SER;V10;03;Chêne sessile;SCHR;8.0;40;35;IFN test;20.0
+SER;V10;03;Chêne sessile;SCHI;8.0;40;25;IFN test;20.0
+SER;V10;03;Chêne sessile;SCHL;8.0;40;15;IFN test;20.0
+SER;V10;11;Charme;SCHR;4;20;40;IFN test;12.0
+SER;V10;24;Tremble;SCHR;8;10;20;IFN test;18.0
+SER;V10;11;Charme;SCHI;6;20;50;IFN test;12.0
+SER;V10;24;Tremble;SCHI;10;10;50;IFN test;18.0
+SER;V10;11;Charme;SCHL;6;20;10;IFN test;12.0
+SER;V10;24;Tremble;SCHL;10;10;30;IFN test;18.0
+SER;V10;52;Pin sylvestre;SCHR;7.0;20;10;IFN test;10.0
+SER;V10;64;Douglas;SCHR;9.0;10;10;IFN test;20.0
+SER;V10;52;Pin sylvestre;SCHI;5.0;20;60;IFN test;10.0
+SER;V10;64;Douglas;SCHI;8.0;10;60;IFN test;20.0
+SER;V10;52;Pin sylvestre;SCHL;5.0;20;40;IFN test;10.0
+SER;V10;64;Douglas;SCHL;8.0;10;40;IFN test;20.0

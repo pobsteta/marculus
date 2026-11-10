@@ -164,7 +164,14 @@ class TarifsIfnAutresTest {
         val tl = TarifCubage.SCHAEFFER_TRES_LENT
         assertNull(ifn.proposerAutres("Z99", AUTRES_RESINEUX, contexte, tl)) // Pin sylvestre FR : 20 arbres
         assertNull(ifn.proposerAutres("Z99", AUTRES_FEUILLUS, contexte, tl))
-        assertNull(ifn.proposerAutres("Y01", AUTRES_FEUILLUS, contexte, tl))
+    }
+
+    /** SER inconnue Y01 : aucune ligne au type demandé (SCHI) ni en SER, ni en GRECO Y, ni en France (la France n'a que du SCHL et du SCHTL) → null, pour les deux regroupements. */
+    @Test
+    fun `aucune proposition pour une SER inconnue sans ligne au type demande a aucun niveau`() {
+        val i = TarifCubage.SCHAEFFER_INTERMEDIAIRE
+        assertNull(ifn.proposerAutres("Y01", AUTRES_FEUILLUS, contexte, i))
+        assertNull(ifn.proposerAutres("Y01", AUTRES_RESINEUX, contexte, i))
     }
 
     /** Comme `proposer` : pas de numéro pour EMERGE ni pour AUCUN. */
@@ -315,7 +322,8 @@ class TarifsIfnAutresTest {
             assertEquals(7.0, attendu.numeroBrut, 1e-9, nom)
             assertEquals(50, attendu.nArbres, nom)
             assertEquals(Niveau.SER, attendu.niveau, nom)
-            assertTrue(autre == null || (autre.niveau == Niveau.FRANCE && autre.nArbres != 50), "$nom ne doit pas être dans l'autre regroupement au niveau SER")
+            assertTrue(autre == null || autre.niveau == Niveau.FRANCE, "$nom ne doit pas être dans l'autre regroupement au niveau SER")
+            assertTrue(autre?.nArbres != 50, "$nom : la ligne ${c.ser} ne doit pas servir à l'autre regroupement")
         }
     }
 
@@ -561,5 +569,85 @@ class TarifsIfnAutresTest {
                 assertTrue(vu.numeroBrut >= 0.0, "$ser / $essence : brut ${vu.numeroBrut} (négatif écarté)")
             }
         }
+    }
+
+    // --- Fonctions appelées par l'écran de création : proposerPour, proposerPartHouppierPour, typeConseillePour --
+    // SER V10 (table de test), contexte `contexte` (Chêne sessile, Hêtre, Sapin pectiné, Épicéa commun listés à part).
+    // Chêne sessile 8,0/40 : CV 35 (SCHR), 25 (SCHI), 15 (SCHL), part 20 %, aucune ligne SCHTL.
+    // Autres feuillus = Charme + Tremble (20 + 10 arbres) ; CV pondéré : SCHR (40*20+20*10)/30 = 33,33 ; SCHI 50 ; SCHL (10*20+30*10)/30 = 16,67.
+    //   SCHL : numéros 6 et 10 → (120+100)/30 = 7,333 → 7 ; SCHR : 4 et 8 → 160/30 = 5,333 → 5 ; part (12*20+18*10)/30 = 14,0.
+    // Autres résineux = Pin sylvestre + Douglas (20 + 10 arbres) ; CV SCHR 10, SCHL 40, SCHI 60.
+    //   SCHL : 5 et 8 → (100+80)/30 = 6,0 ; SCHR : 7 et 9 → 230/30 = 7,667 → 8 ; part (10*20+20*10)/30 = 13,333.
+
+    @Test
+    fun `proposerPour - Autres feuillus donne proposerAutres, pas le tarif d une essence`() {
+        val p = assertNotNull(ifn.proposerPour("V10", "Autres feuillus", contexte, lent))
+        assertEquals(ifn.proposerAutres("V10", AUTRES_FEUILLUS, contexte, lent), p)
+        assertEquals(30, p.nArbres)
+        assertEquals(220.0 / 30, p.numeroBrut, 1e-9)
+        assertEquals(7, p.numero)
+        assertEquals(Niveau.SER, p.niveau)
+        assertEquals("V10", p.code)
+        // sans le regroupement, « Autres feuillus » n'a pas de code ONF : proposer rend null
+        assertNull(ifn.proposer("V10", "Autres feuillus", lent))
+    }
+
+    @Test
+    fun `proposerPour - Autres resineux donne proposerAutres`() {
+        val p = assertNotNull(ifn.proposerPour("V10", "Autres résineux", contexte, lent))
+        assertEquals(ifn.proposerAutres("V10", AUTRES_RESINEUX, contexte, lent), p)
+        assertEquals(30, p.nArbres)
+        assertEquals(6.0, p.numeroBrut, 1e-9)
+        assertEquals(6, p.numero)
+        val r = assertNotNull(ifn.proposerPour("V10", "autres resineux", contexte, TarifCubage.SCHAEFFER_RAPIDE))
+        assertEquals(230.0 / 30, r.numeroBrut, 1e-9)
+        assertEquals(8, r.numero)
+    }
+
+    @Test
+    fun `proposerPour - essence ordinaire donne proposer, le contexte est sans effet`() {
+        val p = assertNotNull(ifn.proposerPour("V10", "Chêne sessile", contexte, lent))
+        assertEquals(ifn.proposer("V10", "Chêne sessile", lent), p)
+        assertEquals(8.0, p.numeroBrut, 1e-9)
+        assertEquals(8, p.numero)
+        assertEquals(40, p.nArbres)
+        assertEquals(p, ifn.proposerPour("V10", "Chêne sessile", emptyList(), lent))
+        assertNull(ifn.proposerPour("V10", "Chêne sessile", contexte, TarifCubage.SCHAEFFER_TRES_LENT))
+    }
+
+    @Test
+    fun `proposerPartHouppierPour - regroupements donnent proposerPartHouppierAutres`() {
+        val f = assertNotNull(ifn.proposerPartHouppierPour("V10", "Autres feuillus", contexte))
+        assertEquals(ifn.proposerPartHouppierAutres("V10", AUTRES_FEUILLUS, contexte), f)
+        assertEquals(14.0, f.pourcent, 1e-9)
+        assertEquals(30, f.nArbres)
+        val r = assertNotNull(ifn.proposerPartHouppierPour("V10", "Autres résineux", contexte))
+        assertEquals(ifn.proposerPartHouppierAutres("V10", AUTRES_RESINEUX, contexte), r)
+        assertEquals(400.0 / 30, r.pourcent, 1e-9)
+        assertEquals(30, r.nArbres)
+    }
+
+    @Test
+    fun `proposerPartHouppierPour - essence ordinaire donne proposerPartHouppier`() {
+        val p = assertNotNull(ifn.proposerPartHouppierPour("V10", "Chêne sessile", contexte))
+        assertEquals(ifn.proposerPartHouppier("V10", "Chêne sessile"), p)
+        assertEquals(20.0, p.pourcent, 1e-9)
+        assertEquals(40, p.nArbres)
+    }
+
+    @Test
+    fun `typeConseillePour - regroupements donnent le type au plus faible CV du regroupement`() {
+        // feuillus : SCHL (16,67) < SCHR (33,33) < SCHI (50) ; résineux : SCHR (10) < SCHL (40) < SCHI (60)
+        assertEquals(TarifCubage.SCHAEFFER_LENT, ifn.typeConseillePour("V10", "Autres feuillus", contexte))
+        assertEquals(TarifCubage.SCHAEFFER_RAPIDE, ifn.typeConseillePour("V10", "Autres résineux", contexte))
+        // « Autres feuillus » n'est pas une essence : typeConseille seul ne propose rien
+        assertNull(ifn.typeConseille("V10", "Autres feuillus"))
+    }
+
+    @Test
+    fun `typeConseillePour - essence ordinaire donne typeConseille`() {
+        // Chêne sessile : SCHL (15) < SCHI (25) < SCHR (35)
+        assertEquals(TarifCubage.SCHAEFFER_LENT, ifn.typeConseillePour("V10", "Chêne sessile", contexte))
+        assertEquals(ifn.typeConseille("V10", "Chêne sessile"), ifn.typeConseillePour("V10", "Chêne sessile", contexte))
     }
 }
