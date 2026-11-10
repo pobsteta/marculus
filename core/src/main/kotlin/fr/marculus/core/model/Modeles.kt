@@ -47,6 +47,13 @@ data class AxeClasses(val min: Int, val max: Int, val pas: Int) {
         generateSequence(min) { it + pas }.takeWhile { it <= max }.toList()
 }
 
+/**
+ * Parties d'un arbre comptées dans son lot d'affouage, pour une essence : la tige et/ou le houppier
+ * (mission 026, décision de Pascal du 2026-11-10). Défaut : les deux. Les deux décochées sont
+ * permises : l'essence compte 0 m³ au lot, ses tiges restent comptées en nombre.
+ */
+data class PartsLot(val tige: Boolean = true, val houppier: Boolean = true)
+
 /** Une colonne de la feuille : une essence avec ses couleurs de cellule (ARGB). */
 data class EssenceColonne(
     val nom: String,
@@ -103,7 +110,10 @@ data class Contexte(
     val dejaExporte: Boolean = false,
     /** Martelage d'affouage : chaque tige est rangée dans un lot de volume borné. */
     val affouage: Boolean = false,
-    /** Volume (m³ comptés au lot, voir `AffouageLots.volumes`) au-delà duquel un lot d'affouage est clos. */
+    /**
+     * Volume (m³ comptés au lot : parties cochées de [partsLot], voir `AffouageLots.volumes`) au-delà
+     * duquel un lot d'affouage est clos.
+     */
     val volumeMaxLotM3: Double = 0.0,
     /**
      * Tarifs sans houppier (Schaeffer, bois fort tige) : part du volume bois fort **total**, par
@@ -113,6 +123,11 @@ data class Contexte(
     val partHouppier: Map<String, Double> = emptyMap(),
     /** Tarif propre à chaque essence ; une essence absente prend [tarif] / [tarifNumero]. */
     val tarifsEssence: Map<String, TarifEssence> = emptyMap(),
+    /**
+     * Affouage : parties comptées au lot, par essence ([PartsLot]). Une essence absente compte la
+     * tige et le houppier ([partsLotDe]). Sans effet hors affouage.
+     */
+    val partsLot: Map<String, PartsLot> = emptyMap(),
     /** Conversion d'affichage du volume maximal d'un lot : stères pour 1 m³. */
     val steresParM3: Double = STERES_PAR_M3_DEFAUT,
     /** Commune du martelage (code INSEE), qui donne la SER des tarifs IFN ; null si non renseignée. */
@@ -123,6 +138,9 @@ data class Contexte(
     val millesimeTarifs: String? = null,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
+
+    /** Parties comptées au lot pour [essence] : celles réglées, sinon tige et houppier. */
+    fun partsLotDe(essence: String): PartsLot = partsLot[essence] ?: PartsLot()
 
     companion object {
         /** Bûches de 1 m : environ 1,5 stère pour 1 m³ de bois plein. */

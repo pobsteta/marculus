@@ -69,7 +69,8 @@ class ExportBilanLotsSteresTest {
         val c = ctx.copy(partHouppier = mapOf("Chêne" to 0.5))
         val l = ExportBilanLots.csv(c, listOf(plus("a", 1, 1)), Locale.FRANCE).trimEnd().split("\n")
         assertEquals(
-            "1;1;${m3(v40)};${m3(v40)};${m3(v40)};${st(v40, 1.5)};${st(v40, 1.5)};${st(v40, 1.5)};EN_COURS",
+            // Mission 026 : le lot compte tige + houppier = 2·v40.
+            "1;1;${m3(v40)};${m3(v40)};${m3(2 * v40)};${st(v40, 1.5)};${st(v40, 1.5)};${st(2 * v40, 1.5)};EN_COURS",
             l[7],
         )
     }
