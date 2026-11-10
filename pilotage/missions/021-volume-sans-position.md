@@ -33,7 +33,7 @@ donne que le nombre. Décision de Pascal du 2026-11-10 : « Je pars sur (c) » (
   `Cubage.aTarif(contexte)` est faux (comme `essencesAvecVolume`, l. 442-459).
 - **Somme juste :** volumes des parcelles + volume « sans position » = volumes de Statut
   (`VolumesMartelage.totaux`), y compris avec une annulation orpheline.
-- **Proposé par l'orchestrateur, à confirmer par Pascal :** la ligne s'affiche dès qu'il y a une
+- **Décidé par Pascal le 2026-11-10 (« Je valide les 4 ») :** la ligne s'affiche dès qu'il y a une
   tige sans position ou une annulation orpheline (aujourd'hui : seulement si le nombre net
   est > 0) ; à nombre net ≤ 0, elle garde le nombre tel quel.
 - **Libellé :** le texte du nombre ne change pas sans l'accord de Pascal ; le volume va sur une

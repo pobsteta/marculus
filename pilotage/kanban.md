@@ -34,6 +34,11 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
+- [022](missions/022-une-regle-annulation.md) · depuis le cycle 6
+  - Homme : testeur puis dev (sonnet), appuyer
+  - Mission : `VolumesMartelage.totaux` part de `JournalNet.tiges`, une seule règle d'annulation, aucun résultat changé
+  - Moyens : `:core`, tests existants inchangés ; part de main après la fusion de la #43
+
 - [021](missions/021-volume-sans-position.md) · depuis le cycle 6
   - Homme : afficheur (sonnet), appuyer
   - Mission : volume des tiges sans position sur la ligne « sans position » de Par parcelle
