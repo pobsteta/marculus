@@ -7,7 +7,10 @@ d'espèce IFN `29AF` et `68CE` de la table embarquée et si leurs tarifs sont ut
 décider si « Autres feuillus » et « Autres résineux » peuvent recevoir une proposition de tarif
 IFN comme les autres essences. Décision de Pascal du 2026-11-10 (« lance l'acquéreur pour la 1 »).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir._
+**Redite par l'agent :** Établir, sources à l'appui, ce que désignent les codes IFN `29AF` et `68CE` de la table embarquée et si
+leurs tarifs sont utilisables, pour éclairer la décision de Pascal : relier ou non « Autres feuillus » → `29AF` et
+« Autres résineux » → `68CE` (ou passer à un calcul de proposition, option 2), sans trancher. Résultat dans
+`docs/sources/2026-11-10-ifn-29AF-68CE.md` (reprise 1/3 faite le 2026-11-10).
 
 ## Ce qui existe (preuves, à 25b6314)
 
