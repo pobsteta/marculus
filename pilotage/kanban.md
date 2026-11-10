@@ -38,16 +38,6 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
-- [026](missions/026-lot-tige-houppier-par-essence.md) · depuis le cycle 7
-  - Homme : testeur (sonnet) puis dev (opus), tenir
-  - Mission : le lot d'affouage compte les parties cochées (tige, houppier) de chaque essence ; défaut les deux cochées
-  - Moyens : `:core`, `:data` (migration 17 → 18), `.marsync`, CSV format 8 ; plan du dev validé par Pascal
-
-- [027](missions/027-cases-tige-houppier-ecran.md) · depuis le cycle 7
-  - Homme : afficheur (sonnet), appuyer
-  - Mission : les deux cases par essence à l'écran du contexte quand « Affouage » est coché
-  - Moyens : `CreationContexteScreen.kt`, captures avant relecture ; après la 026
-
 - [030](missions/030-tarif-ifn-autres-feuillus-resineux.md) · depuis le cycle 7
   - Homme : testeur puis dev (sonnet), appuyer
   - Mission : proposition IFN pour « Autres feuillus » / « Autres résineux » = moyenne pondérée des feuillus / résineux de la SER hors essences du contexte ; lignes négatives écartées
@@ -58,11 +48,6 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
   - Mission : que valent les codes IFN `29AF` et `68CE`, pour une proposition de tarif aux « Autres feuillus » et « Autres résineux »
   - Moyens : `tarifs_ser.csv`, spec des tarifs SER, sources IGN ; note dans `docs/sources/`
 
-- [028](missions/028-doc-lot-par-essence.md) · depuis le cycle 7
-  - Homme : archiviste (sonnet), appuyer, plan d'abord
-  - Mission : la règle écrite une fois (spec affouage, ADR 0009, format 8), brief à nemetonshiny
-  - Moyens : `docs/`, `~/dev/briefs/vers-nemetonshiny/` ; après 026 et 027
-
 ## Planifié
 
 
@@ -71,6 +56,24 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · essai au soleil clos le 2026-10-24 (thèmes actuels conformes) : la carte attend la palette `terrain-style` · depuis le cycle 1
 
 ## Terminé
+
+- [028](missions/028-doc-lot-par-essence.md) · depuis le cycle 8
+  - Homme : archiviste (sonnet), appuyer, plan d'abord
+  - Mission : la règle écrite une fois (spec affouage, ADR 0009, format 8), brief à nemetonshiny
+  - Moyens : `docs/`, `~/dev/briefs/vers-nemetonshiny/` ; après 026 et 027
+  - Livré : PR de la branche docs/028-lot-par-essence, ADR 0009, brief à nemetonshiny
+
+- [027](missions/027-cases-tige-houppier-ecran.md) · depuis le cycle 8
+  - Homme : afficheur (sonnet), appuyer
+  - Mission : les deux cases par essence à l'écran du contexte quand « Affouage » est coché
+  - Moyens : `CreationContexteScreen.kt`, captures avant relecture ; après la 026
+  - Livré : PR #60 fusionnée le 2026-11-10 (85030ff), avec la 026
+
+- [026](missions/026-lot-tige-houppier-par-essence.md) · depuis le cycle 8
+  - Homme : testeur (sonnet) puis dev (opus), tenir
+  - Mission : le lot d'affouage compte les parties cochées (tige, houppier) de chaque essence ; défaut les deux cochées
+  - Moyens : `:core`, `:data` (migration 17 → 18), `.marsync`, CSV format 8 ; plan du dev validé par Pascal
+  - Livré : PR #58 fusionnée le 2026-11-10 (07b5870), fusion autorisée par Pascal
 
 - [025](missions/025-egalite-des-totaux.md) · depuis le cycle 7
   - Homme : testeur (sonnet), lâcher
