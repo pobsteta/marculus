@@ -158,13 +158,13 @@ class TarifsIfnAutresTest {
         assertEquals(8, r.numero)
     }
 
-    /** Rien nulle part : France à 20 arbres (< 30), aucun feuillu au type très lent, SER sans aucune ligne. */
+    /** Rien nulle part : France à 20 arbres (< 30), aucun feuillu au type très lent, y compris pour une SER inconnue (la cascade va jusqu'à la France, qui n'a aucune ligne de ce type). */
     @Test
     fun `aucune proposition quand aucun niveau n atteint 30 arbres`() {
         val tl = TarifCubage.SCHAEFFER_TRES_LENT
         assertNull(ifn.proposerAutres("Z99", AUTRES_RESINEUX, contexte, tl)) // Pin sylvestre FR : 20 arbres
         assertNull(ifn.proposerAutres("Z99", AUTRES_FEUILLUS, contexte, tl))
-        assertNull(ifn.proposerAutres("Y01", AUTRES_FEUILLUS, contexte, lent))
+        assertNull(ifn.proposerAutres("Y01", AUTRES_FEUILLUS, contexte, tl))
     }
 
     /** Comme `proposer` : pas de numéro pour EMERGE ni pour AUCUN. */
@@ -300,7 +300,7 @@ class TarifsIfnAutresTest {
         Cas("T26", "Genévrier oxycèdre", "69JO", false), Cas("T27", "Genévrier thurifère", "69", false),
     )
 
-    /** Chaque SER Txx n'a qu'une ligne (50 arbres, numéro 7,0) : elle est reprise par un seul des deux regroupements. */
+    /** Chaque SER Txx n'a qu'une ligne (50 arbres, numéro 7,0) : au niveau SER, un seul regroupement la reprend ; l'autre ne reçoit qu'un repli France (jamais la ligne Txx). */
     @Test
     fun `partage feuillu resineux selon le code ESS des deux premiers caracteres de l ESPAR`() {
         assertEquals(27, partage.size)
@@ -314,7 +314,8 @@ class TarifsIfnAutresTest {
             assertNotNull(attendu, "$nom devrait être ${if (c.feuillu) "feuillu" else "résineux"}")
             assertEquals(7.0, attendu.numeroBrut, 1e-9, nom)
             assertEquals(50, attendu.nArbres, nom)
-            assertNull(autre, "$nom ne doit pas être dans l'autre regroupement")
+            assertEquals(Niveau.SER, attendu.niveau, nom)
+            assertTrue(autre == null || (autre.niveau == Niveau.FRANCE && autre.nArbres != 50), "$nom ne doit pas être dans l'autre regroupement au niveau SER")
         }
     }
 
