@@ -10,7 +10,7 @@ version (`.github/workflows/release.yml` l. 5-25) : sur les 10 dernières, 5 ne 
 `.github/badges/jacoco.svg`) — relevé par `git diff --name-only <tag précédent> <tag>` le
 2026-11-10. Décision de Pascal du 2026-11-10 : « oui fais les 2 ».
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** ne créer tag, release et APK que si un fichier hors `pilotage/**`, `docs/**`, `*.md`, `.github/badges/**` a changé entre le dernier tag `v*` et le commit testé, pour que chaque version installée apporte du neuf.
 
 ## Ce qui existe (preuves)
 

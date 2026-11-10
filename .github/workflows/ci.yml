@@ -17,6 +17,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Tester la décision de release (mission 023)
+        run: .github/scripts/test-release-necessaire.sh
 
       - name: Configurer JDK 21
         uses: actions/setup-java@v4
