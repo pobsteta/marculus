@@ -100,6 +100,9 @@ fun CreationContexteScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val edition = contexteExistant != null
+    // Même langue que la ligne de source : celle de la configuration, pas Locale.getDefault()
+    // (Android peut la remettre à la langue du système au premier changement de configuration).
+    val locale = LocalConfiguration.current.locales[0]
 
     var nom by remember { mutableStateOf(contexteExistant?.nom ?: "") }
     var commentaire by remember { mutableStateOf(contexteExistant?.commentaire ?: "") }
@@ -112,22 +115,22 @@ fun CreationContexteScreen(
     var dateMartelage by remember { mutableStateOf(contexteExistant?.dateMartelage) }
     var affouage by remember { mutableStateOf(contexteExistant?.affouage ?: false) }
     var volumeMaxLot by remember {
-        mutableStateOf(contexteExistant?.volumeMaxLotM3?.takeIf { it > 0.0 }?.let { formatDecimal(it, 3) } ?: "")
+        mutableStateOf(contexteExistant?.volumeMaxLotM3?.takeIf { it > 0.0 }?.let { formatDecimal(it, 3, locale) } ?: "")
     }
     var steresParM3 by remember {
-        mutableStateOf(formatDecimal(contexteExistant?.steresParM3 ?: Contexte.STERES_PAR_M3_DEFAUT))
+        mutableStateOf(formatDecimal(contexteExistant?.steresParM3 ?: Contexte.STERES_PAR_M3_DEFAUT, locale = locale))
     }
     fun coefSteres(): Double? = lireDecimal(steresParM3)?.takeIf { it > 0.0 && it.isFinite() }
     // Estimation en stères du volume maximal : tenue à jour avec les m³, dans les deux sens.
     var volumeMaxLotSteres by remember {
         mutableStateOf(
-            lireDecimal(volumeMaxLot)?.let { m3 -> coefSteres()?.let { formatDecimal(m3 * it) } } ?: "",
+            lireDecimal(volumeMaxLot)?.let { m3 -> coefSteres()?.let { formatDecimal(m3 * it, locale = locale) } } ?: "",
         )
     }
     // Part de houppier (Schaeffer) saisie en %, par essence ; vide = 0 %.
     val partsHouppier = remember {
         mutableStateMapOf<String, String>().apply {
-            contexteExistant?.partHouppier?.forEach { (e, p) -> put(e, formatPourcent(p * 100.0)) }
+            contexteExistant?.partHouppier?.forEach { (e, p) -> put(e, formatPourcent(p * 100.0, locale)) }
         }
     }
     // Parties comptées au lot par essence (affouage) : absente = tige et houppier cochés.
@@ -191,7 +194,7 @@ fun CreationContexteScreen(
         essences.filter { it in selection }.forEach { e ->
             suivre(numerosTarif, derniersProposes, e, proposition(e)?.numero?.toString())
             if (tarifDe(e).estSchaeffer) {
-                val part = ser?.let { s -> ifn?.proposerPartHouppierPour(s, e, selection) }?.let { formatPourcent(it.pourcent) }
+                val part = ser?.let { s -> ifn?.proposerPartHouppierPour(s, e, selection) }?.let { formatPourcent(it.pourcent, locale) }
                 suivre(partsHouppier, dernieresParts, e, part)
             }
         }
@@ -428,7 +431,7 @@ fun CreationContexteScreen(
                             volumeMaxLot = decimal(saisie)
                             val m3 = nombre(volumeMaxLot)
                             val coef = coefSteres()
-                            volumeMaxLotSteres = if (m3 != null && coef != null) formatDecimal(m3 * coef) else ""
+                            volumeMaxLotSteres = if (m3 != null && coef != null) formatDecimal(m3 * coef, locale = locale) else ""
                         },
                         Modifier.weight(1f),
                     )
@@ -438,7 +441,7 @@ fun CreationContexteScreen(
                             volumeMaxLotSteres = decimal(saisie)
                             val st = nombre(volumeMaxLotSteres)
                             val coef = coefSteres()
-                            if (coef != null) volumeMaxLot = st?.let { formatDecimal(it / coef, 3) } ?: ""
+                            if (coef != null) volumeMaxLot = st?.let { formatDecimal(it / coef, 3, locale) } ?: ""
                         },
                         Modifier.weight(1f),
                     )
@@ -448,7 +451,7 @@ fun CreationContexteScreen(
                             steresParM3 = decimal(saisie)
                             val m3 = nombre(volumeMaxLot)
                             val coef = coefSteres()
-                            if (m3 != null && coef != null) volumeMaxLotSteres = formatDecimal(m3 * coef)
+                            if (m3 != null && coef != null) volumeMaxLotSteres = formatDecimal(m3 * coef, locale = locale)
                         },
                         Modifier.weight(0.8f),
                     )

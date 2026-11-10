@@ -16,6 +16,18 @@ class FormatNombreTest {
         assertEquals("30", formatPourcent(30.0, Locale.ENGLISH))
     }
 
+    @Test fun `la langue passee gagne sur la locale par defaut`() {
+        val avant = Locale.getDefault()
+        try {
+            Locale.setDefault(Locale.ENGLISH)
+            assertEquals("7,41", formatPourcent(7.41, Locale.FRANCE))
+            Locale.setDefault(Locale.FRANCE)
+            assertEquals("7.41", formatPourcent(7.41, Locale.ENGLISH))
+        } finally {
+            Locale.setDefault(avant)
+        }
+    }
+
     @Test fun `saisie virgule ou point lue pareil`() {
         assertEquals(7.41, lireDecimal("7,41"))
         assertEquals(7.41, lireDecimal("7.41"))
