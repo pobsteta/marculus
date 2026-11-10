@@ -750,13 +750,16 @@ private fun LigneEssence(
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            // 4 dp entre les éléments : à 360 dp, le nom d'essence garde la place de « feuillus ».
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Checkbox(checked = coche, onCheckedChange = { onToggle() })
             Text(nom, modifier = Modifier.weight(1f))
             if (coche && lot != null) {
-                CaseLot("T", stringResource(R.string.creation_cd_lot_tige), lot.tige) { onLot(lot.copy(tige = it)) }
-                CaseLot("H", stringResource(R.string.creation_cd_lot_houppier), lot.houppier) { onLot(lot.copy(houppier = it)) }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CaseLot("T", stringResource(R.string.creation_cd_lot_tige), lot.tige) { onLot(lot.copy(tige = it)) }
+                    CaseLot("H", stringResource(R.string.creation_cd_lot_houppier), lot.houppier) { onLot(lot.copy(houppier = it)) }
+                }
             }
             if (coche && surUneLigne) Reglages()
             Echantillon(couleur = fond, onClick = onPickFond)
