@@ -33,6 +33,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - [006](missions/006-theme-terrain-style.md) · **suspendue** jusqu'à `terrain-style` v0.6.1 (ADR 0005 ; décision de Pascal du 2026-11-10, journal) : adopter la palette `terrain-style` = couleurs actuelles, sans changement visible · depuis le cycle 7
 - Release seulement si le commit est encore la tête de `main`, et pas pour une PR de tests seuls : relancer la CI d'un ancien commit resté sans tag publierait une version plus haute contenant moins de code (README, consigne de relance ; ADR 0008, réserve A) ; la #55 (tests seuls) a publié v0.70.5, même APK que v0.70.4 · décision de Pascal du 2026-11-10 : fiche au prochain `/mission` (genre CI, lâché) · depuis le cycle 7
 - Carte de la liste : « 1 tiges » / « 1 stems » au singulier (`liste_carte_resume` sans pluriel ; vu à l'essai A → B du 2026-11-10, journal) · depuis le cycle 7
+- Écran du contexte : les propositions IFN ne se calculent qu'au choix de la commune ou par « Reproposer » ; changer le tarif après la commune laisse les champs vides (vu par le dev de la 030, 2026-11-10) · depuis le cycle 7
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
