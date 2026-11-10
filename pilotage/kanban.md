@@ -34,10 +34,6 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
-- [023](missions/023-release-sans-pilotage.md) · depuis le cycle 6
-  - Homme : dev (sonnet), lâcher
-  - Mission : pas de release quand rien de l'APK n'a changé depuis la dernière (comparer au dernier tag)
-  - Moyens : `release.yml`, script de décision testé, historique des tags
 
 
 
@@ -61,6 +57,12 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · essai au soleil clos le 2026-10-24 (thèmes actuels conformes) : la carte attend la palette `terrain-style` · depuis le cycle 1
 
 ## Terminé
+
+- [023](missions/023-release-sans-pilotage.md) · depuis le cycle 6
+  - Homme : dev (sonnet), lâcher
+  - Mission : pas de release quand rien de l'APK n'a changé depuis la dernière (comparer au dernier tag)
+  - Moyens : `release.yml`, script de décision testé, historique des tags
+  - Livré : PR #51 fusionnée le 2026-11-10 (f440e2c) par l'orchestrateur (genre lâché), v0.70.4
 
 - [022](missions/022-une-regle-annulation.md) · depuis le cycle 6
   - Homme : testeur puis dev (sonnet), appuyer
