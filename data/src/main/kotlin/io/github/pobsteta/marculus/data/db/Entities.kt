@@ -52,6 +52,12 @@ data class ContexteEntity(
     val communeInsee: String? = null,
     val ser: String? = null,
     val millesimeTarifs: String? = null,
+    /**
+     * Affouage : parties comptées au lot par essence, encodé nom US tige(1/0) US houppier(1/0),
+     * séparés par RS ; vide ou essence absente = tige et houppier (mission 026).
+     */
+    @ColumnInfo(defaultValue = "")
+    val partsLot: String = "",
 )
 
 @Entity(

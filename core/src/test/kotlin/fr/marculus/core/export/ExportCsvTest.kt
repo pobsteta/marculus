@@ -7,6 +7,7 @@ import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.EtatKanban
 import fr.marculus.core.model.ModeMesure
+import fr.marculus.core.model.PartsLot
 import fr.nemeton.terrain.geo.Position
 import fr.nemeton.terrain.gnss.QualiteFix
 import fr.marculus.core.model.TarifCubage
@@ -110,7 +111,7 @@ class ExportCsvTest {
         assertEquals(
             listOf(
                 "Contexte;Parcelle 12",
-                "FormatCsv;7",
+                "FormatCsv;8",
                 "ContexteId;act_20260923155141_xyz123",
                 "Statut;REALISEE",
                 "DateMartelage;2027-10-15",
@@ -143,6 +144,17 @@ class ExportCsvTest {
         assertTrue("TarifsEssence;$noms" in lignes, lignes.joinToString("\n"))
         assertTrue("SteresParM3;1.4" in lignes)
         assertTrue(lignes.indexOf("SteresParM3;1.4") < lignes.indexOf("Journal;COMPLET"))
+    }
+
+    @Test
+    fun `format 8 - un reglage d'essence hors contexte est liste apres les essences, trie`() {
+        val ctx = contexte.copy(
+            partsLot = mapOf("Zzz" to PartsLot(tige = false, houppier = true), "Aaa" to PartsLot(tige = true, houppier = false)),
+        )
+        val lignes = ExportCsv.contexteCsv(ctx, emptyList()).split("\n")
+        val attendu = ctx.essencesNoms.joinToString("|") { "$it=tige:1,houppier:1" } +
+            "|Aaa=tige:1,houppier:0|Zzz=tige:0,houppier:1"
+        assertTrue("PartsLot;$attendu" in lignes, lignes.joinToString("\n"))
     }
 
     @Test
@@ -257,13 +269,14 @@ class ExportCsvTest {
         assertTrue("PartHouppier;Chêne=0.3" in lignes)
         // Schaeffer : le houppier vient de la part de l'essence (Chêne seulement).
         assertTrue("VolumeHouppierTotalM3;${"%.4f".format(Locale.ROOT, h)}" in lignes)
-        assertTrue("AffouageLotTotalM3;${"%.4f".format(Locale.ROOT, h + vTige)}" in lignes)
+        // Mission 026 : par défaut tige et houppier comptent (Chêne T + H, Hêtre T).
+        assertTrue("AffouageLotTotalM3;${"%.4f".format(Locale.ROOT, h + 2 * vTige)}" in lignes)
         val j = lignesJournal(csv)
         assertEquals(22, j[0].size)
         assertEquals(vTige, j[0][15].toDouble(), 1e-6) // VolumeTigeM3
         assertEquals(h, j[0][16].toDouble(), 1e-6) // VolumeHouppierM3
         assertEquals(vTige + h, j[0][17].toDouble(), 1e-6) // VolumeTotalM3
-        assertEquals(h, j[0][21].toDouble(), 1e-6) // AffouageLotM3 : le houppier seul
+        assertEquals(vTige + h, j[0][21].toDouble(), 1e-6) // AffouageLotM3 : tige + houppier (mission 026)
         assertEquals(0.0, j[1][16].toDouble(), 1e-6)
         assertEquals(vTige, j[1][21].toDouble(), 1e-6) // Hêtre sans part : l'arbre entier
     }

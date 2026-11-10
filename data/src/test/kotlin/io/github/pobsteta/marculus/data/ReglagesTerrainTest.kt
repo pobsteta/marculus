@@ -1,5 +1,6 @@
 package io.github.pobsteta.marculus.data
 
+import fr.marculus.core.model.PartsLot
 import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.TarifEssence
 import io.github.pobsteta.marculus.data.db.ContexteEntity
@@ -107,5 +108,15 @@ class ReglagesTerrainTest {
         val efface = ReglagesTerrain.completer(contexte(modifie = 2), avec, setOf("communeInsee", "ser", "millesimeTarifs"))
         assertEquals(null, efface.communeInsee)
         assertEquals(null, efface.ser)
+    }
+
+    @Test
+    fun `parties comptees au lot - absentes du fichier gardees, presentes l emportent meme vides`() {
+        val avec = local.copy(partsLot = encodePartsLot(mapOf("Chêne" to PartsLot(tige = false, houppier = true))))
+        val garde = ReglagesTerrain.completer(contexte(modifie = 2), avec, setOf("id", "nom", "modifie"))
+        assertEquals(avec.partsLot, garde.partsLot)
+        val remis = ReglagesTerrain.completer(contexte(modifie = 2), avec, setOf("partsLot"))
+        assertEquals("", remis.partsLot)
+        assertEquals(true, "partsLot" in ReglagesTerrain.CLES_CONTEXTE)
     }
 }

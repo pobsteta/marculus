@@ -2,7 +2,6 @@ package fr.marculus.core
 
 import fr.marculus.core.model.ActionTige
 import fr.marculus.core.model.Contexte
-import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.Tige
 
 /**
@@ -18,29 +17,21 @@ object AffouageLots {
 
     /**
      * Volumes **unitaires** d'une tige pour l'affouage : tige, houppier, et [lotM3], ce qui compte
-     * dans le lot. Une tige sans houppier compte en entier ; avec un houppier, seul lui compte
-     * (la tige est vendue à part).
+     * dans le lot : la somme des parties cochées de son essence ([Contexte.partsLotDe]).
      */
     data class VolumesAffouage(val tigeM3: Double, val houppierM3: Double, val lotM3: Double)
 
     /**
-     * Tige et houppier sont ceux du cubage ([Cubage.volumesUnitaire]). L'arbre a un houppier quand
-     * son essence en a un **coefficient** : couverte par EMERGE, ou part de houppier > 0 en
-     * Schaeffer. Une essence EMERGE non couverte (repli coefficient de forme) compte en entier.
+     * Tige et houppier sont ceux du cubage ([Cubage.volumesUnitaire]). Le lot compte la tige si elle
+     * est cochée, plus le houppier s'il est coché (mission 026, décision de Pascal du 2026-11-10 ;
+     * remplace « houppier seul s'il y en a un », 2026-10-24). Un houppier non calculable (part 0 en
+     * Schaeffer, essence non couverte par EMERGE, tarif Aucun) vaut 0 : le cocher n'ajoute rien.
      */
     fun volumes(contexte: Contexte, tige: Tige): VolumesAffouage {
         val c = VolumesMartelage.cubage(contexte, tige)
-        val aHouppier = when (Cubage.tarifDe(contexte, tige.essence).tarif) {
-            TarifCubage.EMERGE -> c.cubage == VolumesMartelage.Methode.EMERGE
-            TarifCubage.SCHAEFFER_RAPIDE, TarifCubage.SCHAEFFER_INTERMEDIAIRE,
-            TarifCubage.SCHAEFFER_LENT, TarifCubage.SCHAEFFER_TRES_LENT -> Cubage.partHouppier(contexte, tige.essence) > 0.0
-            TarifCubage.AUCUN -> false
-        }
-        return VolumesAffouage(
-            c.volumeTigeM3,
-            c.volumeHouppierM3,
-            if (aHouppier) c.volumeHouppierM3 else c.volumeTigeM3,
-        )
+        val parts = contexte.partsLotDe(tige.essence)
+        val lot = (if (parts.tige) c.volumeTigeM3 else 0.0) + (if (parts.houppier) c.volumeHouppierM3 else 0.0)
+        return VolumesAffouage(c.volumeTigeM3, c.volumeHouppierM3, lot)
     }
 
     /**

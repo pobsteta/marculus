@@ -55,6 +55,7 @@ class ExportBilanLotsTest {
         val c = ctx.copy(partHouppier = mapOf("Chêne" to 0.5), volumeMaxLotM3 = 100.0)
         val lignes = ExportBilanLots.csv(c, listOf(plus("a", 1, 1)), Locale.FRANCE).trimEnd().split("\n")
         fun fr(v: Double) = String.format(Locale.FRANCE, "%.3f", v)
-        assertEquals("1;1;${fr(v40)};${fr(v40)};${fr(v40)};EN_COURS", lignes[5])
+        // Part 0,5 : houppier = tige = v40 ; le lot compte les deux (mission 026).
+        assertEquals("1;1;${fr(v40)};${fr(v40)};${fr(2 * v40)};EN_COURS", lignes[5])
     }
 }

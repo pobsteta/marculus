@@ -5,6 +5,7 @@ import fr.marculus.core.model.AxeClasses
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.ModeMesure
+import fr.marculus.core.model.PartsLot
 import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.Tige
 import kotlin.test.Test
@@ -139,12 +140,13 @@ class AffouageLotsTest {
     }
 
     @Test
-    fun `Schaeffer avec 30 pourcent de houppier - seul le houppier compte`() {
+    fun `Schaeffer avec 30 pourcent de houppier - par defaut tige et houppier comptent`() {
         val ctx = contexte(5.0).copy(partHouppier = mapOf("Chêne" to 0.3))
         val v = AffouageLots.volumes(ctx, plus("a", 1, 1))
         // Le tarif donne la tige, 70 % du total : total = v40 / 0,7, houppier = 30 % du total.
         assertEquals(v40 * 0.3 / 0.7, v.houppierM3, eps)
-        assertEquals(v.houppierM3, v.lotM3, eps)
+        // Mission 026 : les deux cases cochées par défaut (avant : houppier seul).
+        assertEquals(v.tigeM3 + v.houppierM3, v.lotM3, eps)
         assertEquals(0.3, v.houppierM3 / (v.tigeM3 + v.houppierM3), eps)
     }
 
@@ -155,17 +157,18 @@ class AffouageLotsTest {
     }
 
     @Test
-    fun `la part de houppier cumule les lots sur le houppier`() {
+    fun `la part de houppier cumule les lots sur tige et houppier`() {
         val ctx = contexte(1.0).copy(partHouppier = mapOf("Chêne" to 0.3))
         val h = v40 * 0.3 / 0.7
         val e = AffouageLots.etat(ctx, listOf(plus("a", 1, 1)))
-        assertEquals(h, e.cumulM3, eps)
-        assertEquals(1, AffouageLots.prochainLot(ctx, listOf(plus("a", 1, 1))))
+        // Mission 026 : tige + houppier ≈ 1,99 m³ (avant : houppier seul ≈ 0,60), la borne 1 est dépassée.
+        assertEquals(v40 + h, e.cumulM3, eps)
+        assertEquals(2, AffouageLots.prochainLot(ctx, listOf(plus("a", 1, 1))))
         assertEquals(true, AffouageLots.fermeLot(ctx, listOf(plus("a", 1, 1)), plus("b", 2, 1)))
         val b = AffouageLots.bilan(ctx, listOf(plus("a", 1, 1), plus("b", 2, 1)))
         assertEquals(2 * v40, b[0].volumeTigeM3, eps)
         assertEquals(2 * h, b[0].volumeHouppierM3, eps)
-        assertEquals(2 * h, b[0].volumeM3, eps)
+        assertEquals(2 * (v40 + h), b[0].volumeM3, eps)
     }
 
     @Test
@@ -177,14 +180,15 @@ class AffouageLotsTest {
     }
 
     @Test
-    fun `EMERGE - le houppier du modele compte, la part saisie est ignoree`() {
+    fun `EMERGE - tige et houppier du modele comptent, la part saisie est ignoree`() {
         val ctx = contexte(5.0, TarifCubage.EMERGE).copy(partHouppier = mapOf("Chêne" to 0.3))
         val t = plus("a", 1, 1).copy(hauteurTexte = "25")
         val c = VolumesMartelage.cubage(ctx, t)
         val v = AffouageLots.volumes(ctx, t)
         assertEquals(c.volumeTigeM3, v.tigeM3, eps)
         assertEquals(c.volumeHouppierM3, v.houppierM3, eps)
-        assertEquals(c.volumeHouppierM3, v.lotM3, eps)
+        // Mission 026 : les deux cases cochées par défaut (avant : houppier seul).
+        assertEquals(c.volumeTigeM3 + c.volumeHouppierM3, v.lotM3, eps)
         assert(v.houppierM3 > 0.0)
     }
 
@@ -196,5 +200,31 @@ class AffouageLotsTest {
         assertEquals(0.0, v.houppierM3, eps)
         assertEquals(v.tigeM3, v.lotM3, eps)
         assert(v.lotM3 > 0.0)
+    }
+
+    @Test
+    fun `tarif Aucun - les deux cases cochees, 0 m3, aucun lot ne se ferme`() {
+        val ctx = contexte(1.0, TarifCubage.AUCUN).copy(partsLot = mapOf("Chêne" to PartsLot(tige = true, houppier = true)))
+        assertEquals(0.0, AffouageLots.volumes(ctx, plus("a", 1, 1)).lotM3, eps)
+        assertEquals(1, AffouageLots.prochainLot(ctx, listOf(plus("a", 1, 1), plus("b", 2, 1))))
+    }
+
+    @Test
+    fun `EMERGE - essence non couverte, houppier seul coche, 0 m3`() {
+        val ctx = contexte(5.0, TarifCubage.EMERGE).copy(
+            essences = listOf(EssenceColonne("Zzz inconnue", 0, 0)),
+            partsLot = mapOf("Zzz inconnue" to PartsLot(tige = false, houppier = true)),
+        )
+        val t = Tige("a", "c1", "Zzz inconnue", 40, ActionTige.PLUS, horodatage = 1, hauteurTexte = "25", lot = 1)
+        val v = AffouageLots.volumes(ctx, t)
+        assert(v.tigeM3 > 0.0)
+        assertEquals(0.0, v.lotM3, eps)
+    }
+
+    @Test
+    fun `partsLotDe - reglage de l'essence, sinon les deux cochees`() {
+        val ctx = contexte(5.0).copy(partsLot = mapOf("Chêne" to PartsLot(tige = false, houppier = false)))
+        assertEquals(PartsLot(false, false), ctx.partsLotDe("Chêne"))
+        assertEquals(PartsLot(true, true), ctx.partsLotDe("Hêtre"))
     }
 }

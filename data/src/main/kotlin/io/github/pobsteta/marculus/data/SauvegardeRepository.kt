@@ -12,6 +12,7 @@ import fr.marculus.core.LotMartelage
 import kotlinx.coroutines.flow.first
 import fr.marculus.core.VolumesMartelage
 import fr.marculus.core.model.Contexte
+import fr.marculus.core.model.PartsLot
 import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.TarifEssence
 import org.json.JSONArray
@@ -181,6 +182,15 @@ class SauvegardeRepository(
         )
         put("steresParM3", steresParM3)
         putOpt("communeInsee", communeInsee); putOpt("ser", ser); putOpt("millesimeTarifs", millesimeTarifs)
+        // Mission 026 : entrées telles que stockées ; une essence absente compte tige et houppier.
+        put(
+            "partsLot",
+            JSONObject().apply {
+                decodePartsLot(partsLot).forEach { (e, p) ->
+                    put(e, JSONObject().apply { put("tige", p.tige); put("houppier", p.houppier) })
+                }
+            },
+        )
         volumes?.let {
             put("volumeTigeTotalM3", it.volumeTigeM3); put("volumeTotalM3", it.volumeTotalM3)
             put("volumeHouppierTotalM3", it.volumeHouppierM3)
@@ -234,6 +244,16 @@ class SauvegardeRepository(
         communeInsee = texteOuNull("communeInsee"),
         ser = texteOuNull("ser"),
         millesimeTarifs = texteOuNull("millesimeTarifs"),
+        // Absente (fichier d'avant la mission 026) : vide, soit « les deux cochées » pour un contexte
+        // inconnu ; un contexte connu garde ses cases ([ReglagesTerrain]).
+        partsLot = encodePartsLot(
+            optJSONObject("partsLot")?.let { o ->
+                o.keys().asSequence().mapNotNull { e ->
+                    val p = o.optJSONObject(e) ?: return@mapNotNull null
+                    e to PartsLot(p.optBoolean("tige", true), p.optBoolean("houppier", true))
+                }.toMap()
+            }.orEmpty(),
+        ),
     )
 
     /** [cubage] : valeurs unitaires (une tige) calculées à l'export ; ignorées à la relecture. */
