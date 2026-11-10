@@ -10,7 +10,7 @@ mais l'écran ne donne que des m³ (`StatutHistoriqueScreen.kt` l. 228-260, 645,
 `core/src/main/kotlin/fr/marculus/core/model/Modeles.kt` l. 117, défaut 1,5 l. 129).
 Demande et décisions de Pascal du 2026-11-09.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-10 d'après le journal (2026-11-09, lignes 017), l'archiviste n'ayant pas rédigé de redite à l'époque._ Afficher les volumes de Statut / historique en m³ et en stères pour un affouage à maximum de lot renseigné, dans les quatre onglets, et ajouter les stères au CSV du bilan par lot ; forme finale « 12,34 m³ (18,51 st) », deux décimales. Livrée par la PR #35 (0130bd6, v0.67.0) après trois allers-retours. Redite de l'agent d'origine : non retrouvée.
 
 ## Décisions de Pascal (2026-11-09)
 

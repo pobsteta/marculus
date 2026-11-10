@@ -13,7 +13,7 @@ parcelle » annonce 23 tiges et 13,47 m³ quand Statut et Par lot annoncent 22 e
 (journal du 2026-11-09). Demande de Pascal du 2026-11-09 : « oui, écris la fiche du décompte
 Par parcelle ».
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-10 d'après le journal (2026-11-09 et 2026-11-10, lignes 019), l'archiviste n'ayant pas rédigé de redite à l'époque._ Faire compter à « Par parcelle » et au CSV foncier les tiges nettes, en retirant les annulations avec la règle de Statut (réutilisation de `JournalNet.tiges`, décision de l'orchestrateur du 2026-11-09). Livrée par la PR #43 (53e446c) après deux allers-retours (volume d'une annulation orpheline retiré de « sans position », décision de Pascal « Oui au 3 »). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves)
 

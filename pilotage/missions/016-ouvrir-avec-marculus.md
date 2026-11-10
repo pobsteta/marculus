@@ -11,7 +11,7 @@ voie de réception est donc Paramètres → « Fusionner », qui ouvre un sélec
 et l. 305). Le marteleur qui reçoit doit savoir où chercher, puis retrouver le bon fichier au
 milieu de tous les autres (question de Pascal du 2026-11-09).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-10 d'après le journal (2026-11-09, lignes 016), l'archiviste n'ayant pas rédigé de redite à l'époque._ Rendre possible la fusion d'un `.marsync` reçu en l'ouvrant dans Marculus (« Ouvrir avec » et « Partager »), avec une boîte de confirmation avant fusion, sans passer par Paramètres → Fusionner. Livrée par la PR #36 (dbad43c) après quatre allers-retours du dev (le quatrième, au-delà du critère d'arrêt, sur décision de Pascal : boîte au net). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves)
 

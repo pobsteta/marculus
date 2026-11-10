@@ -11,7 +11,7 @@ comprises et `quantite` ignorée. Le même contexte affiche donc deux nombres di
 l'écran : vu par le relecteur de la 016 (journal du 2026-11-09, P1). Décision de Pascal du
 2026-11-09 : « oui pour aligner la liste ».
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-10 d'après le journal (2026-11-09 et 2026-11-10, lignes 018), l'archiviste n'ayant pas rédigé de redite à l'époque._ Faire afficher par la liste des contextes le nombre net de tiges, le même que Statut, en gardant le nombre d'événements pour le verrouillage et l'état Kanban. Livrée par la PR #42 (07a2245) après deux allers-retours (aide du changement de mode revenue à `nbEvenements > 0`). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves)
 

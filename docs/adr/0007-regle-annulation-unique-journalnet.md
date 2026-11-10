@@ -13,7 +13,7 @@ La règle « une annulation retire la dernière tige de sa case » n'est écrite
 
 La règle existait en trois copies : `VolumesMartelage.kt` l. 84-102 et `JournalNet.kt` l. 18-40 (relecture de la 019, journal du 2026-11-10), puis `AffouageLots.etat` (`AffouageLots.kt` l. 91-104, trouvée par le dev de la 022). Une correction dans l'une aurait laissé les autres : Statut aurait divergé de Par lot, Par parcelle et des CSV (fiche 022). Deux nombres différents pour un même contexte avaient déjà été vus aux missions 018 et 019.
 
-Résultat : `VolumesMartelage.totaux` (0 ; PR #49, d381c40, +5/−21) puis `AffouageLots.etat` (0109aa8, +7/−26) partent de `JournalNet.tiges`. `grep removeLast|ArrayDeque` dans `core/src/main` ne trouve plus que `JournalNet.kt` (journal du 2026-11-10, dev 022). La règle elle-même est décrite dans la spec § 5.
+Résultat : `VolumesMartelage.totaux` (PR #49, d381c40, +5/−21) puis `AffouageLots.etat` (0109aa8, +7/−26) partent de `JournalNet.tiges`. `grep removeLast|ArrayDeque` dans `core/src/main` ne trouve plus que `JournalNet.kt` (journal du 2026-11-10, dev 022). La règle elle-même est décrite dans la spec § 5.
 
 Comportement gardé tel quel, signalé à Pascal par le testeur : le lot courant ne redescend pas quand on annule la seule tige d'un lot (lot 2, cumul 0).
 
