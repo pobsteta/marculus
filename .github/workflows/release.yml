@@ -30,10 +30,24 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
+      # Mission 023 : pas de tag, de release ni d'APK si rien de l'application n'a changé depuis
+      # le dernier tag v* (comparaison au tag, pas au commit précédent). Règle : .github/scripts/.
+      - name: Décider si une release est nécessaire
+        id: decision
+        run: |
+          RES=$(.github/scripts/release-necessaire.sh "${{ github.event.workflow_run.head_sha }}")
+          echo "$RES"
+          case "$RES" in
+            "pas de release"*) echo "necessaire=false" >> "$GITHUB_OUTPUT" ;;
+            *) echo "necessaire=true" >> "$GITHUB_OUTPUT" ;;
+          esac
+          echo "### Release : $RES" >> "$GITHUB_STEP_SUMMARY"
+
       # Calcule la prochaine version SemVer d'après les commits (conventional commits) :
       #   feat: → mineur · fix: → patch · BREAKING CHANGE / ! → majeur · sinon → patch.
       - name: Calculer la version
         id: tag
+        if: steps.decision.outputs.necessaire == 'true'
         uses: mathieudutour/github-tag-action@v6.2
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
