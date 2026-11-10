@@ -30,10 +30,14 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
   (§ 4 : combien d'essences atteignent la forêt ?) · depuis le cycle 0
 - Recettes terrain : affouage, dictée (7 cas, bruit, gants) · spec § 10 · depuis le cycle 0
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
-- [021](missions/021-volume-sans-position.md) « Par parcelle » donne le volume des tiges sans position (calcul prêt : `ParParcelle.volumesSansPosition`, c924db7, non appelé) · décision de Pascal du 2026-11-10, option (c) · fiche prête (afficheur seul, appuyer), attend la porte n° 2 et la fusion de la #43 · depuis le cycle 6
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
+
+- [021](missions/021-volume-sans-position.md) · depuis le cycle 6
+  - Homme : afficheur (sonnet), appuyer
+  - Mission : volume des tiges sans position sur la ligne « sans position » de Par parcelle
+  - Moyens : `ParParcelle.volumesSansPosition` (c924db7) ; part de main après la fusion de la #43
 
 
 
