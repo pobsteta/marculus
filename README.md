@@ -174,10 +174,10 @@ a800bb8. Dernier commit de `main`, ou commit déjà tagué : rien de plus que ce
 
 **Mise à jour du 2026-11-10 (mission 031) : la consigne ci-dessus ne s'applique plus.**
 `release-necessaire.sh` répond désormais « pas de release : commit dépassé par <tête> » quand le
-commit n'est plus la tête de `main` (lue par `git ls-remote origin main`) : relancer la CI d'un
+commit n'est plus la tête de `main` (lue par `git ls-remote origin refs/heads/main`) : relancer la CI d'un
 ancien commit ne publie plus rien. Les fichiers de test (`**/src/test/**`, `**/src/androidTest/**`,
 `.github/scripts/test-*.sh`) ne comptent plus : une PR de tests seuls ne publie pas d'APK identique.
-Tête illisible : on publie (dans le doute). Le calcul de version et la signature sont inchangés.
+Le commit de badge `[skip ci]` poussé par la CI après un commit de code ne le « dépasse » pas : seule la présence de fichiers qui comptent entre le commit et la tête le fait. Tête illisible : on publie (dans le doute). Le calcul de version et la signature sont inchangés.
 
 **Clé de signature.** Elle vit dans les secrets de dépôt (voir « Signature des releases ») et dans
 le fichier `marculus-release.keystore` à la racine, ignoré par git (`.gitignore` : `*.keystore`).

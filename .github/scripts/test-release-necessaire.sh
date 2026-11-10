@@ -32,7 +32,7 @@ verifie "commit inconnu" "release:" "$("$S" deadbeef)"
 # mission 031 : tête de main et fichiers de test
 CODE2=$(git rev-parse HEAD)
 verifie "commit = tête de main" "release:" "$("$S" HEAD "" "$CODE2")"
-ecrit pilotage/k.md x; commit pilotage3
+ecrit app/B.kt 2; commit code3
 verifie "commit dépassé par la tête" "pas de release: commit dépassé par $(printf '%s' "$(git rev-parse HEAD)" | cut -c1-7)" "$("$S" "$CODE2" "" "$(git rev-parse HEAD)")"
 verifie "tête inconnue localement (SHA brut)" "pas de release: commit dépassé par 1234567" "$("$S" HEAD "" 1234567890abcdef1234567890abcdef12345678)"
 verifie "tête illisible : on publie" "release:" "$("$S" HEAD)"
@@ -45,6 +45,17 @@ verifie "tests + code" "release:" "$("$S" HEAD "" "$(git rev-parse HEAD)")"
 git tag v0.4.0
 ecrit app/src/test/Q.kt x; ecrit .github/scripts/release-necessaire.sh x; commit "test + script de release"
 verifie "le script de release lui-même compte" "release:" "$("$S" HEAD "" "$(git rev-parse HEAD)")"
+
+# mission 031 (reprise) : la CI pousse un commit de badge [skip ci] sur main après le commit de code
+git tag v0.5.0; ecrit app/src/main/D.kt 1; commit "code D"; CODED=$(git rev-parse HEAD)
+ecrit .github/badges/jacoco.svg y; commit "docs: mise à jour du badge de couverture [skip ci]"; BADGE=$(git rev-parse HEAD)
+verifie "code puis badge [skip ci] : release" "release:" "$("$S" "$CODED" "" "$BADGE")"
+ecrit pilotage/m.md x; ecrit docs/n.md x; commit "pilotage + docs"; PILOT=$(git rev-parse HEAD)
+verifie "code puis badge puis pilotage : release" "release:" "$("$S" "$CODED" "" "$PILOT")"
+ecrit app/src/test/RTest.kt x; commit "tests"; TESTS=$(git rev-parse HEAD)
+verifie "code puis tests : release" "release:" "$("$S" "$CODED" "" "$TESTS")"
+ecrit app/src/main/E.kt 1; commit "code E"; CODEE=$(git rev-parse HEAD)
+verifie "code puis badge puis code : dépassé" "pas de release: commit dépassé par $(printf '%s' "$CODEE" | cut -c1-7)" "$("$S" "$CODED" "" "$CODEE")"
 
 # historique réel des tags
 cd "$REPO" || exit 1
@@ -71,5 +82,10 @@ rejoue "#55 tests seuls" 7f66180 v0.70.4 7f66180 "pas de release:"
 # 026 seule (v0.71.0) publiée alors que la 027 allait être fusionnée : dépassée par la tête
 rejoue "026 seule avant la 027" 07b5870 v0.70.5 85030ff "pas de release: commit dépassé par 85030ff"
 rejoue "027 = tête, code changé" 85030ff 07b5870 85030ff "release:"
+# mission 031 (reprise) : commits de badge [skip ci] enfants directs d'un tag, rejoués (release attendue)
+rejoue "v0.73.0 (609910f) + badge 4107e3b" 609910f v0.72.0 4107e3b "release:"
+rejoue "v0.70.2 (76bd939) + badge 4bc69f1" 76bd939 v0.70.1 4bc69f1 "release:"
+rejoue "v0.69.0 (53e446c) + badge 17cac75" 53e446c v0.68.4 17cac75 "release:"
+rejoue "v0.67.0 (0130bd6) + badge b5134ac" 0130bd6 v0.66.3 b5134ac "release:"
 
 if [ "$ECHECS" -eq 0 ]; then echo "Tous les tests passent."; else echo "$ECHECS échec(s)."; exit 1; fi

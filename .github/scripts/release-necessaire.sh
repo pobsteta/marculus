@@ -1,11 +1,11 @@
 #!/bin/sh
 # Mission 023 : faut-il publier une release ?
 # Usage : release-necessaire.sh [COMMIT [TAG_DE_BASE [TETE_DE_MAIN]]]
-#   défauts : HEAD, dernier tag v* atteignable, tête de origin/main lue par « git ls-remote origin main ».
+#   défauts : HEAD, dernier tag v* atteignable, tête de origin/main lue par « git ls-remote origin refs/heads/main ».
 # Sortie standard : une ligne « release: <raison> » ou « pas de release: <raison> ». Code 0 dans les deux cas.
 # Ne comptent pas : pilotage/**, docs/**, *.md, .github/badges/**, et (mission 031) les fichiers de test :
 # **/src/test/**, **/src/androidTest/**, .github/scripts/test-*.sh. Tout le reste compte ; en cas de doute, release.
-# Mission 031 : pas de release si le commit n'est plus la tête de main (une CI relancée sur un ancien commit
+# Mission 031 : pas de release si la tête de main a dépassé le commit par du code (hors badge [skip ci], pilotage, docs, tests) (une CI relancée sur un ancien commit
 # ne doit pas publier une version plus haute contenant moins de code). Tête illisible : on publie.
 HEAD_REF="${1:-HEAD}"
 BASE="${2:-}"
@@ -18,11 +18,23 @@ COMMIT=$(git rev-parse "$HEAD_REF^{commit}")
 if [ -z "$TETE" ]; then
   TETE=$(git ls-remote origin refs/heads/main 2>/dev/null | cut -f1 | head -n 1)
 fi
+# fichiers qui comptent : tout sauf pilotage, docs, *.md, badge, tests
+filtre() { grep -v -e '^$' -e '^pilotage/' -e '^docs/' -e '\.md$' -e '^\.github/badges/' \
+  -e '/src/test/' -e '/src/androidTest/' -e '^\.github/scripts/test-.*\.sh$'; }
 if [ -n "$TETE" ]; then
   # tête inconnue localement (poussée après le checkout) : on garde le SHA brut, il diffère du commit
   TETE=$(git rev-parse --verify -q "$TETE^{commit}" 2>/dev/null || printf '%s' "$TETE")
   if [ "$TETE" != "$COMMIT" ]; then
-    echo "pas de release: commit dépassé par $(printf '%s' "$TETE" | cut -c1-7)"; exit 0
+    if ! git rev-parse --verify -q "$TETE^{commit}" >/dev/null; then
+      echo "pas de release: commit dépassé par $(printf '%s' "$TETE" | cut -c1-7) (tête inconnue localement)"; exit 0
+    fi
+    # Mission 031 (reprise) : la CI pousse elle-même un commit de badge [skip ci] sur main ; la tête n'est
+    # « dépassante » que si COMMIT..TETE contient des fichiers qui comptent. Comparaison impossible : on publie.
+    if DEPASSE=$(git diff --name-only --no-renames "$COMMIT" "$TETE" 2>/dev/null); then
+      if [ -n "$(printf '%s\n' "$DEPASSE" | filtre)" ]; then
+        echo "pas de release: commit dépassé par $(printf '%s' "$TETE" | cut -c1-7)"; exit 0
+      fi
+    fi
   fi
 fi
 if [ -z "$BASE" ]; then
@@ -35,8 +47,7 @@ if ! CHANGED=$(git diff --name-only --no-renames "$BASE" "$HEAD_REF" 2>/dev/null
   echo "release: comparaison avec $BASE impossible (dans le doute, on publie)"; exit 0
 fi
 
-COMPTE=$(printf '%s\n' "$CHANGED" | grep -v -e '^$' -e '^pilotage/' -e '^docs/' -e '\.md$' -e '^\.github/badges/' \
-  -e '/src/test/' -e '/src/androidTest/' -e '^\.github/scripts/test-.*\.sh$')
+COMPTE=$(printf '%s\n' "$CHANGED" | filtre)
 if [ -n "$COMPTE" ]; then
   PREMIER=$(printf '%s\n' "$COMPTE" | head -n 1)
   N=$(printf '%s\n' "$COMPTE" | wc -l | tr -d ' ')
