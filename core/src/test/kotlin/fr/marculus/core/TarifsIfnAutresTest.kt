@@ -16,7 +16,7 @@ import kotlin.test.assertTrue
  * pondérée par le nombre d'arbres des feuillus / résineux de la SER hors essences du contexte).
  * Tests d'acceptation écrits d'après la fiche, sans lire l'implémentation ; valeurs calculées à la
  * main (détail en commentaire de chaque test). Table : `tarifs-ifn/tarifs_ser_autres.csv`
- * (SER C20, C51, B70 de ser.csv ; D30, D31, E10, F10, F11, P10, P12, T01..T25, Z99 absentes de ser.csv :
+ * (SER C20, C51, B70 de ser.csv ; D30, D31, E10, F10, F11, P10, P12, T01..T27, G10, G11, H11, H12, J10, K10, Q10..Q13, Z99 absentes de ser.csv :
  * la GRECO est alors la 1re lettre du code, comme le fait déjà `proposer`).
  *
  * API attendue (signatures proposées au dev) :
@@ -273,15 +273,15 @@ class TarifsIfnAutresTest {
         assertEquals(400.0 / 30, p.pourcent, 1e-9)
     }
 
-    // --- Partage feuillu / résineux (règle 5), table T01..T23 : une ligne de 50 arbres par essence --
+    // --- Partage feuillu / résineux (règle 5), table T01..T27 : une ligne de 50 arbres par essence --
 
     private data class Cas(val ser: String, val essence: String, val espar: String, val feuillu: Boolean)
 
     /**
      * Source : IGN, `documentation_2.txt`, donnée ESSPRE (lue le 2026-11-10 : 70 lignes) ; le code ESS = les deux premiers
      * caractères du code ESPAR (vérifié : les 185 ESPAR du fichier ont un ESSPRE) ; ESS 01..49 = feuillus
-     * (43 codes), ESS 51..77 = conifères (27 codes). Les deux cas ambigus de la table (T24 If 67, T25 Genévrier 69JC)
-     * ne sont pas testés : question à Pascal.
+     * (43 codes), ESS 51..77 = conifères (27 codes). Décision de Pascal (2026-11-10) : tout ESS >= 50 est « Autres résineux »,
+     * donc l'If (67) et les genévriers (69, 69JC, 69JO) en font partie (T24..T27).
      */
     private val partage = listOf(
         Cas("T01", "Chêne sessile", "03", true), Cas("T02", "Hêtre", "09", true),
@@ -296,12 +296,14 @@ class TarifsIfnAutresTest {
         Cas("T18", "Mélèze d'Europe", "63", false), Cas("T19", "Douglas", "64", false),
         Cas("T20", "Cèdre de l'Atlas", "65", false), Cas("T21", "Cyprès de Provence", "66", false),
         Cas("T22", "Cyprès de Lawson", "68CL", false), Cas("T23", "Sapin de Nordmann", "71", false),
+        Cas("T24", "If", "67", false), Cas("T25", "Genévrier commun", "69JC", false),
+        Cas("T26", "Genévrier oxycèdre", "69JO", false), Cas("T27", "Genévrier thurifère", "69", false),
     )
 
     /** Chaque SER Txx n'a qu'une ligne (50 arbres, numéro 7,0) : elle est reprise par un seul des deux regroupements. */
     @Test
     fun `partage feuillu resineux selon le code ESS des deux premiers caracteres de l ESPAR`() {
-        assertEquals(23, partage.size)
+        assertEquals(27, partage.size)
         for (c in partage) {
             assertNotNull(ifn.proposer(c.ser, c.essence, lent), "ligne ${c.ser} ${c.essence} non chargee")
             val f = ifn.proposerAutres(c.ser, AUTRES_FEUILLUS, emptyList(), lent)
@@ -324,6 +326,167 @@ class TarifsIfnAutresTest {
         assertEquals(AUTRES_RESINEUX, TarifsIfn.Regroupement.de("autres resineux"))
         for (e in listOf("Chêne", "Hêtre", "Sapin", "Épicéa", "Pin sylvestre", "")) {
             assertNull(TarifsIfn.Regroupement.de(e), e)
+        }
+    }
+
+
+    // --- Décisions de Pascal du 2026-11-10 (réponses aux questions du testeur) --------------------
+    //
+    // Genre : un nom GÉNÉRIQUE au contexte (un seul mot, égal au premier mot du libellé IFN d'une ou plusieurs
+    // espèces, accents, casse et ponctuation ignorés ; cas ambigus non testés : « Charme houblon », « Pin laricio », « Cerisier »)
+    // exclut TOUTES les espèces IFN de ce genre ; un nom d'espèce (plusieurs mots, ex. « Chêne sessile ») n'exclut que
+    // cette espèce. Fondement : dans la table embarquée, les libellés IFN de 23 genres ont plusieurs espèces et le
+    // premier mot de chacun nomme le genre (Chêne 9 espèces, Pin 15, Sapin 7, Érable 6, Frêne 3…).
+
+    /**
+     * SER G10, lent, feuillus : Chêne sessile 8/100, Chêne pédonculé 9/50, Chêne rouge 4/40 ; Charme 6/20, Tremble 10/10,
+     * Robinier 3/10. Contexte « Chêne » : les trois chênes sortent ; reste (120+100+30)/40 = 6,25 → 6, 40 arbres.
+     */
+    @Test
+    fun `genre au contexte - Chene generique exclut tous les chenes`() {
+        val p = assertNotNull(ifn.proposerAutres("G10", AUTRES_FEUILLUS, listOf("Chêne"), lent))
+        assertEquals(40, p.nArbres)
+        assertEquals(6.25, p.numeroBrut, 1e-9)
+        assertEquals(6, p.numero)
+        // accents et casse sans effet
+        assertEquals(40, assertNotNull(ifn.proposerAutres("G10", AUTRES_FEUILLUS, listOf("chene"), lent)).nArbres)
+    }
+
+    /** Même SER, contexte « Chêne sessile » : seule l'espèce sort ; restent pédonculé 9/50, rouge 4/40 + 40 arbres : (450+160+250)/130 = 6,6153… → 7. */
+    @Test
+    fun `espece au contexte - Chene sessile n exclut que le chene sessile`() {
+        val p = assertNotNull(ifn.proposerAutres("G10", AUTRES_FEUILLUS, listOf("Chêne sessile"), lent))
+        assertEquals(130, p.nArbres)
+        assertEquals(860.0 / 130, p.numeroBrut, 1e-9)
+        assertEquals(7, p.numero)
+    }
+
+    /**
+     * SER G10, lent, résineux : Sapin pectiné 12/400, Sapin de Nordmann 10/100, Pin sylvestre 7/12, Pin maritime 5/60,
+     * Douglas 9/20, Cyprès de Lawson 14/8.
+     * « Sapin » : les deux sapins sortent ; (84+300+180+112)/100 = 6,76 → 7.
+     * « Sapin pectiné » : Nordmann reste ; (1000+84+300+180+112)/200 = 1676/200 = 8,38 → 8.
+     */
+    @Test
+    fun `genre au contexte - Sapin generique exclut tous les sapins, Sapin pectine un seul`() {
+        val g = assertNotNull(ifn.proposerAutres("G10", AUTRES_RESINEUX, listOf("Sapin"), lent))
+        assertEquals(100, g.nArbres)
+        assertEquals(6.76, g.numeroBrut, 1e-9)
+        assertEquals(7, g.numero)
+        val e = assertNotNull(ifn.proposerAutres("G10", AUTRES_RESINEUX, listOf("Sapin pectiné"), lent))
+        assertEquals(200, e.nArbres)
+        assertEquals(8.38, e.numeroBrut, 1e-9)
+        assertEquals(8, e.numero)
+    }
+
+    /**
+     * Même SER, « Pin » : Pin sylvestre et Pin maritime sortent ; Sapin pectiné 12/400, Nordmann 10/100, Douglas 9/20,
+     * Lawson 14/8 : (4800+1000+180+112)/528 = 6092/528 = 11,5378… → 12.
+     * « Pin sylvestre » : Pin maritime reste ; (4800+1000+180+112+300)/588 = 6392/588 = 10,8707… → 11.
+     */
+    @Test
+    fun `genre au contexte - Pin generique exclut tous les pins, Pin sylvestre un seul`() {
+        val g = assertNotNull(ifn.proposerAutres("G10", AUTRES_RESINEUX, listOf("Pin"), lent))
+        assertEquals(528, g.nArbres)
+        assertEquals(6092.0 / 528, g.numeroBrut, 1e-9)
+        assertEquals(12, g.numero)
+        val e = assertNotNull(ifn.proposerAutres("G10", AUTRES_RESINEUX, listOf("Pin sylvestre"), lent))
+        assertEquals(588, e.nArbres)
+        assertEquals(6392.0 / 588, e.numeroBrut, 1e-9)
+        assertEquals(11, e.numero)
+    }
+
+    /**
+     * SER G11, lent : Érable sycomore 5/30, Érable champêtre 9/20, Frêne commun 6/40, Frêne à fleur 8/10, Charme 6/20, Tremble 10/10.
+     * « Érable » + « Frêne » : reste Charme, Tremble = 30 arbres, 220/30 = 7,333… → 7 (SER, seuil exact).
+     * « Érable » seul : Frêne 6/40 + 8/10, Charme, Tremble = 80 arbres, 540/80 = 6,75 → 7.
+     */
+    @Test
+    fun `genre au contexte - Erable et Frene generiques`() {
+        val deux = assertNotNull(ifn.proposerAutres("G11", AUTRES_FEUILLUS, listOf("Érable", "Frêne"), lent))
+        assertEquals(Niveau.SER, deux.niveau)
+        assertEquals(30, deux.nArbres)
+        assertEquals(220.0 / 30, deux.numeroBrut, 1e-9)
+        assertEquals(7, deux.numero)
+        val un = assertNotNull(ifn.proposerAutres("G11", AUTRES_FEUILLUS, listOf("Érable"), lent))
+        assertEquals(80, un.nArbres)
+        assertEquals(6.75, un.numeroBrut, 1e-9)
+        assertEquals(7, un.numero)
+    }
+
+    // --- Zéro écarté comme les négatifs (≤ 0), partout ---------------------------------------------
+
+    /** Orme champêtre, J10, lent : SER 0,0 sur 500 arbres écarté → GRECO J : 6,0 sur 40 arbres, numéro 6. */
+    @Test
+    fun `proposition par essence - numero zero ecarte, niveau suivant retenu`() {
+        val p = assertNotNull(ifn.proposer("J10", "Orme champêtre", lent))
+        assertEquals(Niveau.GRECO, p.niveau)
+        assertEquals("J", p.code)
+        assertEquals(40, p.nArbres)
+        assertEquals(6.0, p.numeroBrut, 1e-9)
+        assertEquals(6, p.numero)
+    }
+
+    /** Orme champêtre, K10 : seule ligne = 0,0 (500 arbres) → écartée → null (et non numéro 1). */
+    @Test
+    fun `proposition par essence - seule ligne a zero, rien n est propose`() {
+        assertNull(ifn.proposer("K10", "Orme champêtre", lent))
+    }
+
+    /** H11 : Charme 6/20, Tremble 8/15 ; Robinier 0,0/400 écarté. (120+120)/35 = 6,857… → 7, 35 arbres (pas 435). */
+    @Test
+    fun `moyenne - ligne a zero ecartee du calcul`() {
+        val p = assertNotNull(ifn.proposerAutres("H11", AUTRES_FEUILLUS, emptyList(), lent))
+        assertEquals(Niveau.SER, p.niveau)
+        assertEquals(35, p.nArbres)
+        assertEquals(240.0 / 35, p.numeroBrut, 1e-9)
+    }
+
+    /** H12 : Charme 6/20 + Robinier 0,0/400. Le zéro ne compte pas pour le seuil : 20 < 30 → GRECO H : Charme 5/40 → 5,0 sur 40 arbres. */
+    @Test
+    fun `ligne a zero ne compte pas pour le seuil - repli sur la GRECO`() {
+        val p = assertNotNull(ifn.proposerAutres("H12", AUTRES_FEUILLUS, emptyList(), lent))
+        assertEquals(Niveau.GRECO, p.niveau)
+        assertEquals("H", p.code)
+        assertEquals(40, p.nArbres)
+        assertEquals(5.0, p.numeroBrut, 1e-9)
+    }
+
+    // --- Part de houppier : ligne sans part écartée, ligne au numéro <= 0 écartée -----------------
+
+    /**
+     * Q10 (4 types) : Charme 12/20, Tremble 18/10, Robinier 15/10 ; Orme champêtre sans part, 500 arbres, écarté (ni total
+     * ni moyenne). 570/40 = 14,25 %, 40 arbres (sinon 540 arbres).
+     */
+    @Test
+    fun `part de houppier - ligne sans part ecartee`() {
+        val p = assertNotNull(ifn.proposerPartHouppierAutres("Q10", AUTRES_FEUILLUS, emptyList()))
+        assertEquals(Niveau.SER, p.niveau)
+        assertEquals(40, p.nArbres)
+        assertEquals(14.25, p.pourcent, 1e-9)
+    }
+
+    /** Q13 : Charme 12/20 + Orme sans part/500 : 20 retenus < 30 → GRECO Q : (200+200)/30 = 13,333… %, 30 arbres. */
+    @Test
+    fun `part de houppier - ligne sans part ne compte pas pour le seuil`() {
+        val p = assertNotNull(ifn.proposerPartHouppierAutres("Q13", AUTRES_FEUILLUS, emptyList()))
+        assertEquals(Niveau.GRECO, p.niveau)
+        assertEquals("Q", p.code)
+        assertEquals(30, p.nArbres)
+        assertEquals(400.0 / 30, p.pourcent, 1e-9)
+    }
+
+    /**
+     * Q11 : Charme 12/20, Tremble 18/10 ; Robinier part 50 % mais numéro −3,0 (les quatre types), 400 arbres : écarté.
+     * (240+180)/30 = 14,0 %, 30 arbres → SER. Q12 : même chose avec numéro 0,0 : 14,0 %, 30 arbres.
+     */
+    @Test
+    fun `part de houppier - ligne au numero negatif ou nul ecartee`() {
+        for (ser in listOf("Q11", "Q12")) {
+            val p = assertNotNull(ifn.proposerPartHouppierAutres(ser, AUTRES_FEUILLUS, emptyList()), ser)
+            assertEquals(Niveau.SER, p.niveau, ser)
+            assertEquals(30, p.nArbres, ser)
+            assertEquals(14.0, p.pourcent, 1e-9, ser)
         }
     }
 

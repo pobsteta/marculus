@@ -117,3 +117,88 @@ SER;T22;68CL;Cyprès de Lawson;SCHL;7.0;50;30.0;IFN test;
 SER;T23;71;Sapin de Nordmann;SCHL;7.0;50;30.0;IFN test;
 SER;T24;67;If;SCHL;7.0;50;30.0;IFN test;
 SER;T25;69JC;Genévrier commun;SCHL;7.0;50;30.0;IFN test;
+SER;T26;69JO;Genévrier oxycèdre;SCHL;7.0;50;30.0;IFN test;
+SER;T27;69;Genévrier thurifère;SCHL;7.0;50;30.0;IFN test;
+SER;G10;03;Chêne sessile;SCHL;8.0;100;30.0;IFN test;
+SER;G10;02;Chêne pédonculé;SCHL;9.0;50;30.0;IFN test;
+SER;G10;04;Chêne rouge;SCHL;4.0;40;30.0;IFN test;
+SER;G10;11;Charme;SCHL;6.0;20;30.0;IFN test;
+SER;G10;24;Tremble;SCHL;10.0;10;30.0;IFN test;
+SER;G10;14;Robinier faux acacia;SCHL;3.0;10;30.0;IFN test;
+SER;G10;61;Sapin pectiné;SCHL;12.0;400;30.0;IFN test;
+SER;G10;71;Sapin de Nordmann;SCHL;10.0;100;30.0;IFN test;
+SER;G10;52;Pin sylvestre;SCHL;7.0;12;30.0;IFN test;
+SER;G10;51;Pin maritime;SCHL;5.0;60;30.0;IFN test;
+SER;G10;64;Douglas;SCHL;9.0;20;30.0;IFN test;
+SER;G10;68CL;Cyprès de Lawson;SCHL;14.0;8;30.0;IFN test;
+SER;G11;15S;Érable sycomore;SCHL;5.0;30;30.0;IFN test;
+SER;G11;21C;Érable champêtre;SCHL;9.0;20;30.0;IFN test;
+SER;G11;17C;Frêne commun;SCHL;6.0;40;30.0;IFN test;
+SER;G11;17F;Frêne à fleur;SCHL;8.0;10;30.0;IFN test;
+SER;G11;11;Charme;SCHL;6.0;20;30.0;IFN test;
+SER;G11;24;Tremble;SCHL;10.0;10;30.0;IFN test;
+SER;J10;18C;Orme champêtre;SCHL;0.0;500;30.0;IFN test;
+GRECO;J;18C;Orme champêtre;SCHL;6.0;40;30.0;IFN test;
+SER;K10;18C;Orme champêtre;SCHL;0.0;500;30.0;IFN test;
+SER;H11;11;Charme;SCHL;6.0;20;30.0;IFN test;
+SER;H11;24;Tremble;SCHL;8.0;15;30.0;IFN test;
+SER;H11;14;Robinier faux acacia;SCHL;0.0;400;30.0;IFN test;
+SER;H12;11;Charme;SCHL;6.0;20;30.0;IFN test;
+SER;H12;14;Robinier faux acacia;SCHL;0.0;400;30.0;IFN test;
+GRECO;H;11;Charme;SCHL;5.0;40;30.0;IFN test;
+SER;Q10;11;Charme;SCHR;5.0;20;30.0;IFN test;12.0
+SER;Q10;11;Charme;SCHI;5.0;20;30.0;IFN test;12.0
+SER;Q10;11;Charme;SCHL;5.0;20;30.0;IFN test;12.0
+SER;Q10;11;Charme;SCHTL;5.0;20;30.0;IFN test;12.0
+SER;Q10;24;Tremble;SCHR;5.0;10;30.0;IFN test;18.0
+SER;Q10;24;Tremble;SCHI;5.0;10;30.0;IFN test;18.0
+SER;Q10;24;Tremble;SCHL;5.0;10;30.0;IFN test;18.0
+SER;Q10;24;Tremble;SCHTL;5.0;10;30.0;IFN test;18.0
+SER;Q10;14;Robinier faux acacia;SCHR;5.0;10;30.0;IFN test;15.0
+SER;Q10;14;Robinier faux acacia;SCHI;5.0;10;30.0;IFN test;15.0
+SER;Q10;14;Robinier faux acacia;SCHL;5.0;10;30.0;IFN test;15.0
+SER;Q10;14;Robinier faux acacia;SCHTL;5.0;10;30.0;IFN test;15.0
+SER;Q10;18C;Orme champêtre;SCHR;5.0;500;30.0;IFN test;
+SER;Q10;18C;Orme champêtre;SCHI;5.0;500;30.0;IFN test;
+SER;Q10;18C;Orme champêtre;SCHL;5.0;500;30.0;IFN test;
+SER;Q10;18C;Orme champêtre;SCHTL;5.0;500;30.0;IFN test;
+SER;Q11;11;Charme;SCHR;5.0;20;30.0;IFN test;12.0
+SER;Q11;11;Charme;SCHI;5.0;20;30.0;IFN test;12.0
+SER;Q11;11;Charme;SCHL;5.0;20;30.0;IFN test;12.0
+SER;Q11;11;Charme;SCHTL;5.0;20;30.0;IFN test;12.0
+SER;Q12;11;Charme;SCHR;5.0;20;30.0;IFN test;12.0
+SER;Q12;11;Charme;SCHI;5.0;20;30.0;IFN test;12.0
+SER;Q12;11;Charme;SCHL;5.0;20;30.0;IFN test;12.0
+SER;Q12;11;Charme;SCHTL;5.0;20;30.0;IFN test;12.0
+SER;Q11;24;Tremble;SCHR;5.0;10;30.0;IFN test;18.0
+SER;Q11;24;Tremble;SCHI;5.0;10;30.0;IFN test;18.0
+SER;Q11;24;Tremble;SCHL;5.0;10;30.0;IFN test;18.0
+SER;Q11;24;Tremble;SCHTL;5.0;10;30.0;IFN test;18.0
+SER;Q12;24;Tremble;SCHR;5.0;10;30.0;IFN test;18.0
+SER;Q12;24;Tremble;SCHI;5.0;10;30.0;IFN test;18.0
+SER;Q12;24;Tremble;SCHL;5.0;10;30.0;IFN test;18.0
+SER;Q12;24;Tremble;SCHTL;5.0;10;30.0;IFN test;18.0
+SER;Q11;14;Robinier faux acacia;SCHR;-3.0;400;30.0;IFN test;50.0
+SER;Q11;14;Robinier faux acacia;SCHI;-3.0;400;30.0;IFN test;50.0
+SER;Q11;14;Robinier faux acacia;SCHL;-3.0;400;30.0;IFN test;50.0
+SER;Q11;14;Robinier faux acacia;SCHTL;-3.0;400;30.0;IFN test;50.0
+SER;Q12;14;Robinier faux acacia;SCHR;0.0;400;30.0;IFN test;50.0
+SER;Q12;14;Robinier faux acacia;SCHI;0.0;400;30.0;IFN test;50.0
+SER;Q12;14;Robinier faux acacia;SCHL;0.0;400;30.0;IFN test;50.0
+SER;Q12;14;Robinier faux acacia;SCHTL;0.0;400;30.0;IFN test;50.0
+SER;Q13;11;Charme;SCHR;5.0;20;30.0;IFN test;12.0
+SER;Q13;11;Charme;SCHI;5.0;20;30.0;IFN test;12.0
+SER;Q13;11;Charme;SCHL;5.0;20;30.0;IFN test;12.0
+SER;Q13;11;Charme;SCHTL;5.0;20;30.0;IFN test;12.0
+SER;Q13;18C;Orme champêtre;SCHR;5.0;500;30.0;IFN test;
+SER;Q13;18C;Orme champêtre;SCHI;5.0;500;30.0;IFN test;
+SER;Q13;18C;Orme champêtre;SCHL;5.0;500;30.0;IFN test;
+SER;Q13;18C;Orme champêtre;SCHTL;5.0;500;30.0;IFN test;
+GRECO;Q;11;Charme;SCHR;5.0;20;30.0;IFN test;10.0
+GRECO;Q;11;Charme;SCHI;5.0;20;30.0;IFN test;10.0
+GRECO;Q;11;Charme;SCHL;5.0;20;30.0;IFN test;10.0
+GRECO;Q;11;Charme;SCHTL;5.0;20;30.0;IFN test;10.0
+GRECO;Q;24;Tremble;SCHR;5.0;10;30.0;IFN test;20.0
+GRECO;Q;24;Tremble;SCHI;5.0;10;30.0;IFN test;20.0
+GRECO;Q;24;Tremble;SCHL;5.0;10;30.0;IFN test;20.0
+GRECO;Q;24;Tremble;SCHTL;5.0;10;30.0;IFN test;20.0
