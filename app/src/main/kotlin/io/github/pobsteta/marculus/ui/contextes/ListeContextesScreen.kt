@@ -520,7 +520,7 @@ fun ListeContextesScreen(
                             Text(m.libelle())
                         }
                     }
-                    if (cible.nbTiges != 0) {
+                    if (cible.nbEvenements > 0) {
                         Text(
                             stringResource(R.string.liste_mode_aide, cible.nbTiges),
                             style = MaterialTheme.typography.bodySmall,
