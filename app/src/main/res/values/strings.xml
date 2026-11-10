@@ -43,9 +43,17 @@
     <string name="liste_detail_exporte">Exporté : %1$s</string>
     <string name="liste_detail_commentaire">Commentaire : %1$s</string>
     <string name="liste_detail_verrouille">Verrouillé : lecture seule tant que le contexte n\'est pas exporté.</string>
-    <string name="liste_carte_resume">%1$s · classes %2$d–%3$d (pas %4$d) · %5$d essences · %6$d tiges</string>
-    <string name="liste_carte_resume_verrouille"> · 🔒</string>
-    <string name="liste_carte_resume_martele"> · ✓ martelé</string>
+    <string name="liste_carte_resume">%1$s · classes %2$d–%3$d (pas %4$d) · %5$s · %6$s</string>
+    <plurals name="liste_carte_essences">
+        <item quantity="one">%1$d essence</item>
+        <item quantity="other">%1$d essences</item>
+    </plurals>
+    <plurals name="liste_carte_tiges">
+        <item quantity="one">%1$d tige</item>
+        <item quantity="other">%1$d tiges</item>
+    </plurals>
+    <string name="liste_carte_resume_verrouille">" · 🔒"</string>
+    <string name="liste_carte_resume_martele">" · ✓ martelé"</string>
     <string name="liste_filtre_marteles">Martelés (%1$d)</string>
     <string name="liste_afficher_a_marteler">Afficher les contextes à marteler (%1$d)</string>
     <string name="liste_aucun_martele">Aucun contexte martelé.</string>
