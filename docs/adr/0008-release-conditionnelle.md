@@ -36,6 +36,10 @@ Non écrit.
 
 - `pilotage/journal.md` du 2026-11-10 (relevé des releases, dev 023, relecteur 023, essai en vrai) ; PR #51 (f440e2c).
 
+## Ajout daté du 2026-11-10 (mission 031, décision de Pascal du même jour)
+
+Le risque nommé dans la ligne **A** est corrigé par la CI : pas de release si le commit n'est plus la tête de `origin/main` (« pas de release : commit dépassé par <tête> ») ; la consigne de relance du `README.md` est caduque (renvoi daté). Ne comptent plus non plus `**/src/test/**`, `**/src/androidTest/**` et `.github/scripts/test-*.sh` (la #55, tests seuls, avait publié v0.70.5 = même APK que v0.70.4). Dans le doute (tête illisible), on publie. Historique rejoué dans `test-release-necessaire.sh` : 07a2245 et a800bb8 dépassés, #55 sans release, 026 seule (07b5870) dépassée par 85030ff.
+
 ## Question de contrôle
 
 Cette décision tient-elle nos six valeurs, et que sommes-nous prêts à payer pour cela ? Réponse de Pascal : non écrite.

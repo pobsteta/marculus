@@ -172,6 +172,13 @@ prend `versionCode` = numéro d'exécution (l. 99). Un tel commit existe quand l
 une fusion suivante (`cancel-in-progress`, `ci.yml` l. 13) : c'est arrivé à 07a2245, 02fc671 et
 a800bb8. Dernier commit de `main`, ou commit déjà tagué : rien de plus que ce qui est publié.
 
+**Mise à jour du 2026-11-10 (mission 031) : la consigne ci-dessus ne s'applique plus.**
+`release-necessaire.sh` répond désormais « pas de release : commit dépassé par <tête> » quand le
+commit n'est plus la tête de `main` (lue par `git ls-remote origin main`) : relancer la CI d'un
+ancien commit ne publie plus rien. Les fichiers de test (`**/src/test/**`, `**/src/androidTest/**`,
+`.github/scripts/test-*.sh`) ne comptent plus : une PR de tests seuls ne publie pas d'APK identique.
+Tête illisible : on publie (dans le doute). Le calcul de version et la signature sont inchangés.
+
 **Clé de signature.** Elle vit dans les secrets de dépôt (voir « Signature des releases ») et dans
 le fichier `marculus-release.keystore` à la racine, ignoré par git (`.gitignore` : `*.keystore`).
 Empreinte SHA-256 du certificat des releases : `7b0f7fd14a6c51eae8dbf44ec14cb35a88cf1a6e053695686aca1cf024fb2efc`
