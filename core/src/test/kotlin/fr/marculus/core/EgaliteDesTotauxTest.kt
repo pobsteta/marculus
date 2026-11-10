@@ -26,7 +26,10 @@ import kotlin.test.assertTrue
  *  1. l'annulation orpheline (sans tige à retirer) n'apparaît pas au CSV foncier : décision de
  *     Pascal du 2026-11-09, `pilotage/journal.md` l. 166 (« n'apparaît pas au CSV foncier ») ;
  *  2. le lot courant d'affouage ne redescend pas quand une tige de ce lot est annulée
- *     (`AffouageLots.etat`, mission 022 ; doc de `AffouageLots.etat`).
+ *     (`AffouageLots.etat`, mission 022 ; doc de `AffouageLots.etat`) ;
+ *  3. l'annulation orpheline n'a pas de lot connu : Par lot (`AffouageLots.bilan`) et le CSV du
+ *     bilan par lot ne portent que des tiges et l'ignorent, alors que Statut et Par parcelle la
+ *     comptent en négatif : décision de Pascal du 2026-11-10, `pilotage/journal.md`.
  */
 class EgaliteDesTotauxTest {
 
@@ -145,7 +148,7 @@ class EgaliteDesTotauxTest {
     )
     private val parcelleFonciereDe: (Tige) -> ParcelleFonciere? = { fonciere[parcelleDe(it)] }
 
-    /** Volumes (tige, houppier, total) d'un ensemble de tiges, signés (annulation orpheline < 0). */
+    /** Volumes (tige, houppier, total) d'un ensemble de tiges (les quantités ne sont pas signées). */
     private data class Vol(val tige: Double, val houppier: Double, val total: Double) {
         operator fun plus(o: Vol) = Vol(tige + o.tige, houppier + o.houppier, total + o.total)
         operator fun minus(o: Vol) = Vol(tige - o.tige, houppier - o.houppier, total - o.total)
@@ -267,9 +270,9 @@ class EgaliteDesTotauxTest {
         }
 
     @Test
-    fun `Par lot - avec annulation orpheline, Statut egale Par lot moins les orphelines`() {
-        // Écart à trancher par Pascal si ce n'est pas voulu : Par lot ne porte que des PLUS, il ne
-        // voit donc pas l'orpheline que Statut et Par parcelle comptent en négatif.
+    fun `Par lot - exception decidee, l'annulation orpheline n'y figure pas (Statut egale Par lot moins les orphelines)`() {
+        // Source : décision de Pascal du 2026-11-10, pilotage/journal.md (3e exception). Une orpheline
+        // n'a pas de lot connu : Par lot ne porte que des tiges, Statut la compte en négatif (3 - 4 = -1).
         val cas = CAS.single { it.nom == "annulations orphelines" }
         val b = AffouageLots.bilan(affouage, cas.journal)
         assertEquals(cas.net, b.sumOf { it.nbTiges } - cas.orphelines)
