@@ -13,7 +13,7 @@ Après des tests verts, la CI ne publie une release que si un fichier de l'appli
 
 Relevé au journal du 2026-11-10 : 5 releases sur 10 sans changement de l'application (v0.68.1 à v0.68.4, v0.70.1), plus v0.69.1 (badge seul) (v0.68.1 à v0.68.3 : même APK que v0.68.0, journal du 2026-11-10). La CI de `main` annule ses runs en cours, d'où la comparaison au dernier tag plutôt qu'au commit précédent.
 
-Règle : `.github/scripts/release-necessaire.sh` ; ne comptent pas `pilotage/**`, `docs/**`, `*.md`, `.github/badges/**`. Dite une fois dans `README.md` (« Déployer et publier »). Appelée par `release.yml` l. 38 ; testée par `test-release-necessaire.sh` (18 tests lancés par `ci.yml` l. 24). Historique rejoué : 6 « pas de release », 4 « release », conformes à la fiche (journal du 2026-11-10, dev 023). Essai en vrai : la fusion de la 023 crée v0.70.4 (workflows changés) ; les PR de pilotage #52 et #53 ne créent aucune version.
+Règle : `.github/scripts/release-necessaire.sh` ; ne comptent pas `pilotage/**`, `docs/**`, `*.md`, `.github/badges/**`. Dite une fois dans `README.md` (« Déployer et publier »). Appelée par `release.yml` l. 38 ; testée par `test-release-necessaire.sh` (18 tests lancés par `ci.yml` l. 24 ; **ajout du 2026-11-10, mission 031 reprise : le script compte désormais 38 « ok »**). Historique rejoué : 6 « pas de release », 4 « release », conformes à la fiche (journal du 2026-11-10, dev 023). Essai en vrai : la fusion de la 023 crée v0.70.4 (workflows changés) ; les PR de pilotage #52 et #53 ne créent aucune version.
 
 Alternative : ne rien changer et laisser 5 releases sur 10 vides ; écartée, sans autre raison écrite que ce relevé.
 
@@ -35,6 +35,10 @@ Non écrit.
 ## Sources
 
 - `pilotage/journal.md` du 2026-11-10 (relevé des releases, dev 023, relecteur 023, essai en vrai) ; PR #51 (f440e2c).
+
+## Ajout daté du 2026-11-10 (mission 031, décision de Pascal du même jour)
+
+Le risque nommé dans la ligne **A** est corrigé par la CI : pas de release si le commit n'est plus la tête de `origin/main` (« pas de release : commit dépassé par <tête> ») ; la consigne de relance du `README.md` est caduque (renvoi daté). Ne comptent plus non plus `**/src/test/**`, `**/src/androidTest/**` et `.github/scripts/test-*.sh` (la #55, tests seuls, avait publié v0.70.5 = même APK que v0.70.4). Dans le doute (tête illisible), on publie. Historique rejoué dans `test-release-necessaire.sh` : 07a2245 et a800bb8 dépassés, #55 sans release, 026 seule (07b5870) dépassée par 85030ff.
 
 ## Question de contrôle
 

@@ -30,7 +30,7 @@ jobs:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
 
-      # Mission 023 : pas de tag, de release ni d'APK si rien de l'application n'a changé depuis
+      # Missions 023 et 031 : pas de tag, de release ni d'APK si le commit n'est plus la tête de main, ou si rien de l'application (tests exclus) n'a changé depuis
       # le dernier tag v* (comparaison au tag, pas au commit précédent). Règle : .github/scripts/.
       - name: Décider si une release est nécessaire
         id: decision
