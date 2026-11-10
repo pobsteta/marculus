@@ -6,7 +6,7 @@
 > colonne ; on change ce numéro chaque fois qu'elle change de colonne.
 > **Une carte qui ne bouge pas est souvent la mauvaise nouvelle à dire tout de suite.**
 
-**Dernier cycle :** 5 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
+**Dernier cycle :** 6 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
 rien lancé. Une carte est immobile quand dernier cycle − N ≥ 2.)_
 
 _Modèle de carte :_
@@ -218,3 +218,4 @@ l'inscrit avec ce qu'elle nous apprend._
 - cycle 3 · Marculus v0.64.9 et v0.65.0 : CSV sans faux numéro de tarif (`EMERGE:0`), thème en liste déroulante · pour nemetonshiny et les marteleurs · données justes en aval ; v0.65.0 jugée « parfaite » au soleil par Pascal
 - bilan du 2026-10-24 · Marculus v0.65.0 lisible au soleil (clair et sombre vérifiés par Pascal), unité du lot lisible en portrait, thème en deux appuis ; contrat des formats 6-7 et CSV justes · pour les marteleurs et nemetonshiny · premier bilan : pas de livraison de bilan antérieure
 - cycle 5 · Marculus v0.68.0 : « Ouvrir avec » / « Partager » → fusion d'un `.marsync` d'un appui, après confirmation (contexte, tiges nettes, opérateur) ; stères « m³ (st) » dans Statut / historique et le CSV du bilan par lot · pour les marteleurs d'affouage et les équipes à plusieurs opérateurs · première livraison qui change le travail à plusieurs sur le terrain (le cycle 3 changeait l'aspect) ; retenue par Pascal
+- cycle 6 · Marculus v0.70.0 (et v0.70.2, sans changement visible) : mêmes nombres de tiges et mêmes volumes sur la liste des contextes, Statut, Par lot, Par parcelle et le CSV foncier malgré les annulations ; onglets lisibles sur le téléphone ; volume des tiges sans position · pour les marteleurs, d'affouage surtout · premiers chiffres cohérents d'un écran à l'autre (le cycle 5 changeait le travail à plusieurs) ; une seule règle d'annulation dans le code ; plus de version sans changement de l'application (023) ; retenue par Pascal (« clos le cycle 6 »)
