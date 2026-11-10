@@ -163,8 +163,14 @@ Si seuls `pilotage/`, `docs/`, des fichiers `*.md` ou `.github/badges/` ont chan
 release », aucun tag. Tout autre fichier compte ; dans le doute, on publie. Le script est testé
 par `.github/scripts/test-release-necessaire.sh`, lancé par `ci.yml`.
 
-**Relancer une CI de `main` est sans risque** : la release ne part que si l'application a changé
-depuis le dernier tag `v*` (`.github/scripts/release-necessaire.sh`) ; sinon, aucune version de plus.
+**Relancer la CI du dernier commit de `main`, ou d'un commit déjà tagué, est sans risque ; ne pas
+relancer celle d'un commit plus ancien resté sans tag : elle publierait une version plus haute
+contenant moins de code** (décision de Pascal, 2026-11-10). Raison : `release-necessaire.sh` compare
+au dernier tag `v*` atteignable depuis le commit (l. 13) ; un ancien commit dont le code a changé
+répond « release » ; `release.yml` calcule la version depuis le dernier tag du dépôt (l. 48-57) et
+prend `versionCode` = numéro d'exécution (l. 99). Un tel commit existe quand la CI a été annulée par
+une fusion suivante (`cancel-in-progress`, `ci.yml` l. 13) : c'est arrivé à 07a2245, 02fc671 et
+a800bb8. Dernier commit de `main`, ou commit déjà tagué : rien de plus que ce qui est publié.
 
 **Clé de signature.** Elle vit dans les secrets de dépôt (voir « Signature des releases ») et dans
 le fichier `marculus-release.keystore` à la racine, ignoré par git (`.gitignore` : `*.keystore`).

@@ -40,3 +40,14 @@ Le temps réel entre marteleurs d'une même coupe : accepté tant qu'aucun cycle
 ## Question de contrôle
 
 Cette décision tient-elle nos six valeurs, et que sommes-nous prêts à payer pour cela ? Réponse de Pascal : non écrite.
+
+## Correction du 2026-11-10 (ajout, l'ADR n'est pas réécrit)
+
+Les renvois par numéros de ligne de la spec (« §8, l. 214-225 », « spec l. 46, 226, 252 », « spec l. 252 », « l. 35, 46-48, 214-226, 252 ») étaient déjà faux avant la mission 024 et ne sont plus à suivre. Les renvois justes, par section de `docs/specs/2026-06-21-marculus-v1-spec.md` :
+
+- fusion par fichier, union par UUID, « dernière écriture gagne », transaction atomique : spec § 8, « Fusion par fichier » (l. 247-248 au 2026-11-10) ;
+- synchro temps réel / réseau « à faire », hors périmètre actuel : spec § 1 (l. 46), § 8 (l. 271) et § 10 « Reste à faire » (l. 297) ;
+- sacrifice du temps réel : spec § 8 (l. 271) et § 10 (l. 297) ;
+- synchro par fichier livrée : spec § 1 (l. 35).
+
+Le sens de l'ADR ne change pas.

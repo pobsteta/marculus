@@ -225,7 +225,7 @@ Tige (journal)  : uuid, contexteId, essence, classe,
     avec sa quantité restante ; annulation sans tige à retirer gardée). La pile d'annulation n'existe que
     dans `JournalNet` (`core/src/main/kotlin/fr/marculus/core/JournalNet.kt` l. 18-40) : les volumes, les lots
     d'affouage, « Par parcelle » et le CSV « tiges à comptabiliser » en partent. Les comptes (Statut,
-    `TotauxMartelage`, `MartelageRepository.kt` l. 261 et 390 ; liste des contextes, SQL de `Daos.kt` l. 42-46 ;
+    `TotauxMartelage`, `MartelageRepository.kt` l. 261 (utilisé par `StatutHistoriqueScreen.kt` l. 102) ; liste des contextes, SQL de `Daos.kt` l. 42-46 ;
     boîte « Ouvrir avec », `FichierMarsync.kt` l. 29 et 51) sont des sommes signées PLUS − ANNULATION,
     égales au net par test (`JournalNetTest.kt` l. 58). Décision : ADR 0007.
 - **Bouton Hauteur / Qualité arbre** : annote la **dernière tige** ajoutée de la cellule

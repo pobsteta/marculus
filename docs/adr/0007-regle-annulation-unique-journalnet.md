@@ -7,7 +7,7 @@
 
 ## La décision en une phrase
 
-La règle « une annulation retire la dernière tige de sa case » n'est écrite qu'une fois, dans `JournalNet.tiges` ; tout calcul au net (volumes, lots, Par parcelle, CSV) en part. Les comptes (Statut, liste des contextes, boîte « Ouvrir avec ») ne partent pas de `JournalNet` : ce sont des sommes signées (`TotauxMartelage`, `FichierMarsync.kt` l. 29 et 51 ; `MartelageRepository.kt` l. 261 et 390), égales au net par test (`JournalNetTest.kt` l. 58).
+La règle « une annulation retire la dernière tige de sa case » n'est écrite qu'une fois, dans `JournalNet.tiges` ; tout calcul au net (volumes, lots, Par parcelle, CSV) en part. Les comptes (Statut, liste des contextes, boîte « Ouvrir avec ») ne partent pas de `JournalNet` : ce sont des sommes signées (`TotauxMartelage`, `FichierMarsync.kt` l. 29 et 51 ; `MartelageRepository.kt` l. 261, utilisé par `StatutHistoriqueScreen.kt` l. 102), égales au net par test (`JournalNetTest.kt` l. 58).
 
 ## Contexte
 

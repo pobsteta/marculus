@@ -23,7 +23,7 @@ Alternative : ne rien changer et laisser 5 releases sur 10 vides ; écartée, sa
 |---|---|---|---|---|
 | **F** | La plus simple qui tienne ? | Un script shell, une liste d'exclusions, repli « on publie » | Un `.md` embarqué un jour dans les assets ne déclencherait pas de release (question du relecteur à Pascal) | Non écrit |
 | **R** | Qui fait quoi ? | Dev 023 (7955374), relecteur (prêt) | | |
-| **A** | Et si l'imprévu arrive ? | Comparaison impossible, commit introuvable, aucun tag : on publie. Réserve du relecteur : une CI d'un commit antérieur finissant après la fusion n'aurait pas le script (improbable, `cancel-in-progress`) | | |
+| **A** | Et si l'imprévu arrive ? | Comparaison impossible, commit introuvable, aucun tag : on publie. Réserve du relecteur : une CI d'un commit antérieur finissant après la fusion n'aurait pas le script (improbable, `cancel-in-progress`). **Risque nommé (décision de Pascal, 2026-11-10)** : relancer la CI d'un ancien commit resté sans tag (annulée par une fusion suivante, `ci.yml` l. 13 ; arrivé à 07a2245, 02fc671, a800bb8) dont le code a changé répond « release » (`release-necessaire.sh` l. 13) ; `release.yml` (l. 57 ; l. 99 `versionCode` = numéro d'exécution) publierait une version plus haute contenant moins de code. Consigne dans `README.md` : ne relancer que le dernier commit de `main` ou un commit déjà tagué | | |
 | **N** | Idées étranges écoutées ? | Non écrit | | |
 | **C** | Coût pour l'ensemble ? | Non écrit | | |
 | **É** | Que réutilisons-nous ? | `git describe` et `git diff` ; troisième réussite du genre CI (001, 015, 023) | | |
