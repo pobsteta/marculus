@@ -377,12 +377,10 @@ fun CreationContexteScreen(
                     lot = if (affouage) partsLot[essence] ?: PartsLot() else null,
                     onLot = { partsLot[essence] = it },
                     onToggle = {
-                        if (essence in selection) {
-                            selection.remove(essence)
-                        } else {
-                            selection.add(essence)
-                            appliquerPropositions(listOf(essence))
-                        }
+                        if (essence in selection) selection.remove(essence) else selection.add(essence)
+                        // Le total d'arbres et le CV des « Autres » dépendent des essences cochées :
+                        // on repropose toutes les essences cochées (un champ retouché n'est pas réécrit).
+                        appliquerPropositions()
                     },
                     onPickFond = { picker = essence to true },
                     onPickTexte = { picker = essence to false },
