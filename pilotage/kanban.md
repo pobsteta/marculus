@@ -38,15 +38,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
-- [030](missions/030-tarif-ifn-autres-feuillus-resineux.md) · depuis le cycle 7
-  - Homme : testeur puis dev (sonnet), appuyer
-  - Mission : proposition IFN pour « Autres feuillus » / « Autres résineux » = moyenne pondérée des feuillus / résineux de la SER hors essences du contexte ; lignes négatives écartées
-  - Moyens : `TarifsIfn`, table embarquée, note 029
-
-- [029](missions/029-ifn-autres-feuillus-resineux.md) · depuis le cycle 7
-  - Homme : acquéreur (sonnet), appuyer
-  - Mission : que valent les codes IFN `29AF` et `68CE`, pour une proposition de tarif aux « Autres feuillus » et « Autres résineux »
-  - Moyens : `tarifs_ser.csv`, spec des tarifs SER, sources IGN ; note dans `docs/sources/`
+_(vide depuis le cycle 8)_
 
 ## Planifié
 
@@ -57,11 +49,23 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Terminé
 
+- [030](missions/030-tarif-ifn-autres-feuillus-resineux.md) · depuis le cycle 8
+  - Homme : testeur puis dev (sonnet), appuyer
+  - Mission : proposition IFN pour « Autres feuillus » / « Autres résineux » = moyenne pondérée des feuillus / résineux de la SER hors essences du contexte ; lignes négatives écartées
+  - Moyens : `TarifsIfn`, table embarquée, note 029
+  - Livré : PR #62 fusionnée le 2026-11-10 (609910f), v0.73.0, vu sur le téléphone par Pascal
+
+- [029](missions/029-ifn-autres-feuillus-resineux.md) · depuis le cycle 8
+  - Homme : acquéreur (sonnet), appuyer
+  - Mission : que valent les codes IFN `29AF` et `68CE`, pour une proposition de tarif aux « Autres feuillus » et « Autres résineux »
+  - Moyens : `tarifs_ser.csv`, spec des tarifs SER, sources IGN ; note dans `docs/sources/`
+  - Livré : PR #57 (1cd8a7f), note `docs/sources/2026-11-10-ifn-29AF-68CE.md` ; décision de Pascal : pas de lien, mission 030
+
 - [028](missions/028-doc-lot-par-essence.md) · depuis le cycle 8
   - Homme : archiviste (sonnet), appuyer, plan d'abord
   - Mission : la règle écrite une fois (spec affouage, ADR 0009, format 8), brief à nemetonshiny
   - Moyens : `docs/`, `~/dev/briefs/vers-nemetonshiny/` ; après 026 et 027
-  - Livré : PR de la branche docs/028-lot-par-essence, ADR 0009, brief à nemetonshiny
+  - Livré : PR #61 fusionnée le 2026-11-10 (0904b94), ADR 0009, brief à nemetonshiny
 
 - [027](missions/027-cases-tige-houppier-ecran.md) · depuis le cycle 8
   - Homme : afficheur (sonnet), appuyer
@@ -73,7 +77,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
   - Homme : testeur (sonnet) puis dev (opus), tenir
   - Mission : le lot d'affouage compte les parties cochées (tige, houppier) de chaque essence ; défaut les deux cochées
   - Moyens : `:core`, `:data` (migration 17 → 18), `.marsync`, CSV format 8 ; plan du dev validé par Pascal
-  - Livré : PR #58 fusionnée le 2026-11-10 (07b5870), fusion autorisée par Pascal
+  - Livré : PR #58 fusionnée le 2026-11-10 (07b5870), v0.72.0 avec la 027, vu sur le téléphone par Pascal
 
 - [025](missions/025-egalite-des-totaux.md) · depuis le cycle 7
   - Homme : testeur (sonnet), lâcher
