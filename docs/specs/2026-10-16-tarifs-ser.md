@@ -92,3 +92,7 @@ Livré en v0.62.0, affichage vérifié sur le téléphone le 16 octobre 2026.
 
 - Option GNSS (SER depuis la position, `AttributionSpatiale`) : seulement si un contour simplifié
   des SER est fourni.
+
+## Ajout du 2026-11-10 (mission 030)
+
+« Autres feuillus » et « Autres résineux » ont une proposition calculée (moyenne pondérée, hors essences du contexte) et les lignes au numéro ≤ 0 sont écartées au chargement, ce qui complète les règles « Essence ↔ ligne IFN » et « Repli » ci-dessus : règle écrite une seule fois dans [ADR 0010](../adr/0010-proposition-ifn-autres-feuillus-resineux.md) (PR #62, 609910f).

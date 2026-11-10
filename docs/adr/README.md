@@ -13,3 +13,4 @@ Une ligne par ADR. La décision est acceptée par Pascal ; le texte de chaque AD
 | [0007](0007-regle-annulation-unique-journalnet.md) | Une seule règle d'annulation, dans `JournalNet` | décision acceptée, livrée ; texte proposé |
 | [0008](0008-release-conditionnelle.md) | Pas de release quand seuls pilotage, docs, `*.md` ou badge changent | décision acceptée, livrée ; texte proposé |
 | [0009](0009-lot-par-essence-parties-cochees.md) | Lot d'affouage : les parties cochées (tige, houppier) de chaque essence ; remplace 0004 | décision acceptée, livrée ; texte proposé |
+| [0010](0010-proposition-ifn-autres-feuillus-resineux.md) | Proposition IFN calculée (moyenne pondérée) pour « Autres feuillus » / « Autres résineux » ; lignes au numéro ≤ 0 écartées | décision acceptée, livrée ; texte proposé |
