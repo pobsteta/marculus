@@ -3,6 +3,7 @@ package io.github.pobsteta.marculus.ui.statut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,6 +42,8 @@ internal fun LibelleOnglet(texte: String) {
     Box(Modifier.heightIn(min = 48.dp).padding(horizontal = 4.dp), contentAlignment = Alignment.Center) {
         Text(
             text = texte,
+            // Le style des onglets Material (titleSmall, Medium) que `Tab(text=)` appliquait ; la taille réduite passe par-dessus.
+            style = MaterialTheme.typography.titleSmall,
             fontSize = taille.sp,
             textAlign = TextAlign.Center,
             maxLines = 2,
