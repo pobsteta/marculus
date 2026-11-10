@@ -37,7 +37,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - [022](missions/022-une-regle-annulation.md) · depuis le cycle 6
   - Homme : testeur puis dev (sonnet), appuyer
   - Mission : `VolumesMartelage.totaux` part de `JournalNet.tiges`, une seule règle d'annulation, aucun résultat changé
-  - Moyens : `:core` ; tests 2d94c5b (16, verts), dev d381c40 (`VolumesMartelage` sur `JournalNet`) ; 3e copie trouvée dans `AffouageLots.etat`, à Pascal
+  - Moyens : `:core` ; tests 2d94c5b (16, verts), dev d381c40 (`VolumesMartelage` sur `JournalNet`) ; extension à `AffouageLots.etat` (tests d6d4f75, dev 0109aa8) ; relecteur prêt
 
 
 

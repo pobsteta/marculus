@@ -12,6 +12,11 @@ lot, Par parcelle et des CSV. Décision de Pascal du 2026-11-10 : « Je valide l
 
 **Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
 
+**Extension (décision de Pascal du 2026-11-10, « (a) ») :** la troisième copie, trouvée par le
+dev dans `AffouageLots.etat` (`core/src/main/kotlin/fr/marculus/core/AffouageLots.kt` l. 91-104 à
+53e446c), entre dans la mission. Le lot courant reste le plus grand lot porté par une tige `PLUS`
+du journal, annulée ou non (il ne redescend pas) ; seul le cumul part de `JournalNet.tiges`.
+
 ## Ce qui existe (preuves)
 
 - **Copie 1 :** `VolumesMartelage.totaux` trie par `horodatage` puis `uuid`, tient une pile par
@@ -56,8 +61,8 @@ _Rempli par Pascal seul, avant de lire le travail de l'agent._
 
 ## Harnais
 
-- **Peut :** modifier `VolumesMartelage.kt` (et `JournalNet.kt` si besoin d'exposer ce qui
-  manque), dans sa branche, partie de `main` après la fusion de la #43.
+- **Peut :** modifier `VolumesMartelage.kt`, `AffouageLots.kt` (extension du 2026-11-10) et
+  `JournalNet.kt` si besoin d'exposer ce qui manque, dans sa branche, partie de `main` après la fusion de la #43.
 - **Ne doit pas :** modifier un test existant ; toucher à `app`, à `data`, à `main`.
 
 ## Tests
