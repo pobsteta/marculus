@@ -270,3 +270,24 @@
 2026-11-10 · archiviste · 030 · brief à nemetonshiny écrit (hors dépôt, ~/dev/briefs/vers-nemetonshiny/2026-11-10-marculus-tarifs-ifn-numeros-negatifs.md, contre origin/main 6354b50) : décomptes refaits (≤ 0 : 1 590 dont 295 à ≥ 30 arbres ; < 0 : 1 525 dont 276, égaux à la 029 ; zéro : 65 ; libellé vide : 44 dont 24 ≤ 0) ; deux familles (29AF/68CE à 3-6 arbres ; d'autres à des milliers d'arbres, ex. Chêne vert France SCHTL −0,3 sur 4 545) ; questions posées (origine, filtrage ou marquage à la source, libellé de 29AF/68CE) · lève l'écart l. 268
 2026-11-10 · Pascal · cycle 8 · /mission : cartes choisies dans le bac à sable (problème du cycle) : release tête de main seule, propositions IFN au changement de tarif, pluriel et virgule décimale ; échelon forêt Nemeton laissé au bac à sable · fait : fiches 031 (dev, lâcher), 032 (testeur puis dev, appuyer), 033 et 034 (afficheur, appuyer) proposées · rappel : « problème du produit » toujours vide dans docs/brief.md
 2026-11-10 · Pascal · 031-034 · équipe validée (« Je valide ») · fait : kanban (Validé ; cartes retirées du bac à sable), equipe.md
+2026-11-10 · dev · 031 · codée (64ed5f0) : pas de release pour un commit dépassé ni pour des tests seuls ; 31 vérifications
+2026-11-10 · relecteur · 031 (64ed5f0) · à reprendre : bloquant, le commit du badge [skip ci] poussé par la CI devient la tête de main avant Release, donc « dépassé » pour toute fusion de code (rejoué : v0.73.0, v0.70.5, v0.70.2, v0.69.0, v0.67.0 ne seraient pas sorties)
+2026-11-10 · dev · 031 · reprise 1/3 (9f8c1f6) : « dépassé » seulement si des fichiers qui comptent ont changé entre le commit et la tête ; 38 vérifications
+2026-11-10 · relecteur · 031 (9f8c1f6) · 2e tour, prêt : rejeux réels (609910f/4107e3b, 53e446c/17cac75 → release ; 07b5870/85030ff → dépassé) ; réserve : relance d'un ancien commit suivi de pilotage seul = version en double possible (même code)
+2026-11-10 · Claude (orchestrateur) · 031 · écart · attendu : CI lancée à l'ouverture de la PR #67 et au push de sa fusion sur main · vu : aucun run déclenché (ni pull_request, ni push de fe01907) ; fermer/rouvrir sans effet ; un commit vide a déclenché la CI de la PR ; la CI de main n'a tourné qu'avec la fusion suivante (b7aafc8) · vérifié : gh run list · décision : garder ; vérifier le run après chaque push
+2026-11-10 · Claude (orchestrateur) · 031 · PR #67 fusionnée (fe01907) : genre lâché, relecteur prêt, CI verte
+2026-11-10 · testeur · 032 · défaut non reproduit à l'émulateur (Dijon C51 : aucun → lent, lent → rapide, EMERGE → lent, Autres feuillus, essence ajoutée ; champ retouché conservé) ; captures-032
+2026-11-10 · Pascal · 032 · « Clore, non reproduit » · fait : mission close sans code
+2026-11-10 · afficheur · 033 · « 1 tige », « 1 essence » au singulier (e3f626e) ; Robolectric en testImplementation dans :app (mêmes alias que :data)
+2026-11-10 · relecteur · 033 (e3f626e) · prêt ; trou : la mutation `%6$d` dans `liste_carte_resume` reste verte (l'appli planterait) ; « · 🔒 » collé (antérieur)
+2026-11-10 · Pascal · 033 · « Ajouter le test, puis fusionner » ; « Oui, dans la 033 » pour le séparateur collé
+2026-11-10 · afficheur · 033 · reprise 1/3 (8007175) : test de la phrase complète FR/EN, séparateurs protégés, sdk 35 ; captures 033b
+2026-11-10 · relecteur · 033 (8007175) · 2e tour, prêt : mutations `%6$d` et séparateur sans guillemets → rouge
+2026-11-10 · Claude (orchestrateur) · 033 · PR #68 fusionnée (b7aafc8) → v0.73.1 (avec la 031) : première fusion de code sous la règle 031, version publiée malgré le badge
+2026-11-10 · afficheur · 034 · virgule décimale (209fc43) : `FormatNombre.kt`, champs part, stères, volume max ; captures 034
+2026-11-10 · relecteur · 034 (209fc43) · prêt ; réserve : `Locale.getDefault()` et non la langue de l'écran (risque après changement de configuration si la langue est forcée)
+2026-11-10 · Pascal · 034 · « Oui, puis fusionner » (langue de l'écran) ; décimales 2 contre 1 et coefficient de forme « 0.5 » au bac à sable
+2026-11-11 · afficheur · 034 · reprise 1/3 (eb57b11) : `LocalConfiguration.current.locales[0]` passé aux 8 appels ; test « la langue passée gagne »
+2026-11-11 · relecteur · 034 (eb57b11) · 2e tour, prêt : mutation « langue ignorée » → 2/5 rouges ; réserve : la capture de rotation ne prouve pas un recalcul après rotation
+2026-11-11 · Claude (orchestrateur) · 034 · PR #69 fusionnée (ad3103d) → v0.73.2 ; téléphone non branché, pas installée
+2026-11-11 · Pascal · cycle 8 · livraison retenue (« D'accord ») : v0.72.0 → v0.73.2, lot par parties cochées, proposition IFN des Autres, singulier et virgule, plus de version fantôme · fait : dernier cycle 8, 031/033/034 au Terminé, 032 à l'Abandonné, 3 cartes au bac à sable, ligne de Livraisons du cycle 8

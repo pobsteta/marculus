@@ -6,7 +6,7 @@
 > colonne ; on change ce numéro chaque fois qu'elle change de colonne.
 > **Une carte qui ne bouge pas est souvent la mauvaise nouvelle à dire tout de suite.**
 
-**Dernier cycle :** 7 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
+**Dernier cycle :** 8 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
 rien lancé. Une carte est immobile quand dernier cycle − N ≥ 2.)_
 
 _Modèle de carte :_
@@ -31,29 +31,14 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Recettes terrain : affouage, dictée (7 cas, bruit, gants) · spec § 10 · depuis le cycle 0
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
 - [006](missions/006-theme-terrain-style.md) · **suspendue** jusqu'à `terrain-style` v0.6.1 (ADR 0005 ; décision de Pascal du 2026-11-10, journal) : adopter la palette `terrain-style` = couleurs actuelles, sans changement visible · depuis le cycle 7
+- Champ « % houpp. » à 2 décimales, ligne de source à 1 (« 7,41 » / « 7,4 % ») ; coefficient de forme encore « 0.5 » en français · décision de Pascal du 2026-11-10 : au bac à sable · depuis le cycle 8
+- Release en double possible si l'on relance la CI d'un ancien commit suivi de pilotage seul (même code, jamais moins ; relecteur de la 031) · depuis le cycle 8
+- GitHub Actions n'a pas déclenché la CI de la PR #67 ni du push fe01907 (2026-11-10) : à surveiller · depuis le cycle 8
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
 
-- [031](missions/031-release-tete-de-main.md) · depuis le cycle 8
-  - Homme : dev (sonnet), lâcher
-  - Mission : pas de version si le commit n'est plus la tête de `main`, ni pour des tests seuls
-  - Moyens : `release-necessaire.sh` et ses tests, `release.yml`
-
-- [032](missions/032-proposition-au-changement-de-tarif.md) · depuis le cycle 8
-  - Homme : testeur puis dev (sonnet), appuyer
-  - Mission : choisir ou changer le tarif après la commune propose le numéro IFN (défaut à reproduire d'abord)
-  - Moyens : `CreationContexteScreen.kt`, émulateur (seul agent d'écran)
-
-- [033](missions/033-tige-au-singulier.md) · depuis le cycle 8
-  - Homme : afficheur (sonnet), appuyer
-  - Mission : « 1 tige », « 1 essence » au singulier sur la carte de la liste
-  - Moyens : `plurals` FR/EN, captures avant relecture
-
-- [034](missions/034-virgule-decimale.md) · depuis le cycle 8
-  - Homme : afficheur (sonnet), appuyer
-  - Mission : virgule décimale dans « % houpp. » en français
-  - Moyens : formatage et lecture du champ, captures avant relecture
+_(vide depuis le cycle 8)_
 
 ## Planifié
 
@@ -63,6 +48,24 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · essai au soleil clos le 2026-10-24 (thèmes actuels conformes) : la carte attend la palette `terrain-style` · depuis le cycle 1
 
 ## Terminé
+
+- [034](missions/034-virgule-decimale.md) · depuis le cycle 8
+  - Homme : afficheur (sonnet), appuyer
+  - Mission : virgule décimale dans « % houpp. » en français
+  - Moyens : formatage et lecture du champ, captures avant relecture
+  - Livré : PR #69 fusionnée (ad3103d), v0.73.2
+
+- [033](missions/033-tige-au-singulier.md) · depuis le cycle 8
+  - Homme : afficheur (sonnet), appuyer
+  - Mission : « 1 tige », « 1 essence » au singulier sur la carte de la liste
+  - Moyens : `plurals` FR/EN, captures avant relecture
+  - Livré : PR #68 fusionnée (b7aafc8), v0.73.1
+
+- [031](missions/031-release-tete-de-main.md) · depuis le cycle 8
+  - Homme : dev (sonnet), lâcher
+  - Mission : pas de version si le commit n'est plus la tête de `main`, ni pour des tests seuls
+  - Moyens : `release-necessaire.sh` et ses tests, `release.yml`
+  - Livré : PR #67 fusionnée (fe01907), lâchée ; publiée avec la 033 en v0.73.1
 
 - [030](missions/030-tarif-ifn-autres-feuillus-resineux.md) · depuis le cycle 8
   - Homme : testeur puis dev (sonnet), appuyer
@@ -235,6 +238,12 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Abandonné
 
+- [032](missions/032-proposition-au-changement-de-tarif.md) · depuis le cycle 8
+  - Homme : testeur puis dev (sonnet), appuyer
+  - Mission : choisir ou changer le tarif après la commune propose le numéro IFN (défaut à reproduire d'abord)
+  - Moyens : `CreationContexteScreen.kt`, émulateur (seul agent d'écran)
+  - Close le 2026-11-10 : défaut non reproduit à l'émulateur, décision de Pascal (« Clore, non reproduit »)
+
 _Avec la raison, en une ligne._
 
 - [005](missions/005-test-theme-terrain-style.md) · depuis le cycle 2
@@ -269,3 +278,4 @@ l'inscrit avec ce qu'elle nous apprend._
 - cycle 6 · Marculus v0.70.0 (et v0.70.2, sans changement visible) : mêmes nombres de tiges et mêmes volumes sur la liste des contextes, Statut, Par lot, Par parcelle et le CSV foncier malgré les annulations ; onglets lisibles sur le téléphone ; volume des tiges sans position · pour les marteleurs, d'affouage surtout · premiers chiffres cohérents d'un écran à l'autre (le cycle 5 changeait le travail à plusieurs) ; une seule règle d'annulation dans le code ; plus de version sans changement de l'application (023) ; retenue par Pascal (« clos le cycle 6 »)
 - bilan du 2026-11-10 · Marculus v0.70.4 : fusion d'un `.marsync` d'un appui après confirmation, stères dans Statut / historique, mêmes nombres de tiges et mêmes volumes sur tous les écrans et CSV malgré les annulations · pour les marteleurs d'affouage et les équipes à plusieurs opérateurs · le bilan n° 1 changeait l'aspect (lisible au soleil), celui-ci change le travail à plusieurs et la confiance dans les chiffres ; retenue par Pascal (« je valide »)
 - cycle 7 · mauvaise nouvelle : rien de neuf en main pour un bénéficiaire du brief ; v0.70.5 est le même APK que v0.70.4 · pour les marteleurs d'affouage et les propriétaires · la CI tient maintenant l'égalité des totaux livrée au cycle 6 (025) et un successeur peut reprendre la doc (024), mais deux cycles de consolidation d'affilée sont la limite : le cycle 8 sort une carte du bac à sable vers le terrain, à partir de la phrase du problème du produit dans `docs/brief.md` ; lecture acceptée par Pascal (« j'accepte »)
+- cycle 8 · Marculus v0.72.0 → v0.73.2 : le lot d'affouage compte les parties cochées T et H de chaque essence ; proposition IFN pour Autres feuillus et Autres résineux ; « 1 tige » au singulier et virgule décimale ; plus de version fantôme (tests seuls, commit dépassé) · pour les marteleurs d'affouage et les communes · le cycle 7 n'avait rien livré en main ; celui-ci rend le partage du lot réglable par la commune et propose un tarif pour toutes les essences ; retenue par Pascal (« D'accord »)
