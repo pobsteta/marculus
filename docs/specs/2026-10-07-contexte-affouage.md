@@ -27,6 +27,12 @@ de cubage. Cochée, elle ouvre un champ **« Volume maximal d'un lot (m³) »** 
    houppier** compte dans le lot ; un arbre sans houppier compte en entier. C'est le comportement
    de `AffouageLots.volumes` et de la spec v1 §5 bis ; la formulation « bois fort tige » ci-dessus
    est conservée pour mémoire, elle ne vaut plus pour un arbre avec houppier.)*
+   *(Correction 2026-11-10, décision de Pascal, `pilotage/journal.md` l. 220 : la règle « houppier
+   seul pour un arbre avec houppier » ci-dessus est **remplacée** : le lot compte les parties
+   cochées (tige, houppier) de chaque essence, les deux cochées par défaut. Règle écrite une seule
+   fois dans l'ADR 0009 (`docs/adr/0009-lot-par-essence-parties-cochees.md`) ; code
+   `AffouageLots.volumes` (`core/src/main/kotlin/fr/marculus/core/AffouageLots.kt` l. 30-35),
+   missions 026 et 027. Cette note de 2026-10-24 est conservée pour mémoire.)*
 3. Dès que le cumul est **≥ volume maximal**, le lot est clos : la tige **suivante** ouvre le lot
    suivant (la tige qui fait déborder appartient au lot qu'elle ferme), et le cumul repart de 0.
 4. L'annonce vocale reste celle des Paramètres (« Annonce de l'étiquette » → « Chêne 35 »,
@@ -112,6 +118,8 @@ une ligne Total. Les tiges comptées sans lot sont regroupées en dernier (« Sa
 `AffouageLots.bilan` affiche, par lot, les tiges, le houppier et le volume du lot, ce dernier
 suivant la règle « houppier seul pour un arbre avec houppier ». La formulation « volume bois fort
 tige » ci-dessus est conservée pour mémoire.)*
+*(Note 2026-11-10 : « suivant la règle houppier seul » est remplacé par les parties cochées de
+chaque essence, voir l'ADR 0009 ; `AffouageLots.bilan` n'a pas changé de forme.)*
 
 Bouton **« Exporter le bilan par lot (CSV) »** → `Download/Marculus/<contexte> - lots.csv`
 (`ExportBilanLots`) : en-tête `Contexte`, `ContexteId`, `VolumeMaxLot_m3`, puis

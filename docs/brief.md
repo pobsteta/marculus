@@ -28,6 +28,9 @@
   encore (`docs/adr/` vide au 2026-10-24) : renvoyer vers lui quand il sera écrit. La question
   ci-dessous reste telle qu'écrite le 2026-10-23 ; restent ouverts les portions sur plusieurs
   parcelles et le coefficient de stères du houppier.
+  *Ligne du 2026-11-10 (corrige, sans l'effacer, la règle « houppier seul » ci-dessus) : remplacée
+  par « le lot compte les parties cochées (tige, houppier) de chaque essence » (journal l. 220) ;
+  ADR 0009, `docs/adr/0009-lot-par-essence-parties-cochees.md`. L'ADR 0004 est remplacé.*
 - **Question ouverte (à trancher par Pascal)** : dans quelle unité la délibération communale
   fixe-t-elle un lot d'affouage (m³ de tige, m³ de houppier, stères) ? Un lot est-il une
   portion répartie sur plusieurs parcelles ? Aujourd'hui, la spec affouage cumule le m³ de bois
@@ -75,6 +78,9 @@ déposé le 2026-10-24 (`~/dev/briefs/vers-nemetonshiny/2026-10-24-marculus-csv-
 (`service_marculus_import.R` l. 324-325 ; constat du relecteur, journal l. 43) : il est tolérant ; seul
 le texte d'aide (`R/utils_i18n.R` l. 764, « formats 2 à 5 ») est en retard. Urgence jugée faible par
 Pascal (journal l. 72).*
+
+*Ligne du 2026-11-10 : le format courant et son historique sont dans la spec v1 § 8 ; le brief du
+format suivant est `~/dev/briefs/vers-nemetonshiny/2026-11-10-marculus-csv-format-8-lot-par-essence.md`.*
 
 ## Ce qu'il ne fait pas (hors périmètre)
 

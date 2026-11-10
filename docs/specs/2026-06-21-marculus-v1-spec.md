@@ -15,6 +15,8 @@
 > **Mise à jour 2026-10-07** : **contexte d'affouage** livré (v0.52.0 → v0.55.1) : lots de volume
 > borné annoncés à chaque tige, bilan par lot, CSV `FormatCsv;5`, fusion qui préserve les
 > réglages du terrain (`2026-10-07-contexte-affouage.md`).
+> *Ligne du 2026-11-10 (corrige, sans l'effacer, la mention « `FormatCsv;5` » ci-dessus, vraie le
+> 2026-10-07) : le format d'échange courant et son historique sont au § 8 (« Export CSV »).*
 > **Mise à jour 2026-10-24** : relecture de la spec contre le produit livré (version courante :
 > voir les releases GitHub). Corrigés : fonds de carte (§1), tables de
 > tarifs par SER livrées (§5), schéma Room et SDK cible (§9), reste à faire (§10) ; ajoutés :
@@ -144,6 +146,11 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   pourcentage houppier renseigné ». En EMERGE, le houppier seul compte
   dès qu’EMERGE couvre l’essence, sinon la tige entière (confirmé par Pascal le 2026-10-24 ;
   `AffouageLots.volumes`). (Remplace « m³, bois fort tige ».)
+  *(Correction 2026-11-10, décision de Pascal, `pilotage/journal.md` l. 220 : la règle ci-dessus
+  « houppier seul » et celle de « Tige / houppier » plus bas sont **remplacées** par « le lot
+  compte les parties cochées (tige, houppier) de chaque essence, les deux cochées par défaut » ;
+  une seule source : ADR 0009, `docs/adr/0009-lot-par-essence-parties-cochees.md`. Texte
+  d'origine conservé pour mémoire.)*
   Exige au moins une essence cubée (tarif ≠ `AUCUN`) : sans volume par tige, aucun lot ne se ferme.
 - ✅ **Estimation en stères** du volume maximal (2026-10-16) : champ stères à côté des m³,
   liés dans les deux sens par `Contexte.steresParM3` (réglable, défaut 1,5). Seuls les m³ sont
@@ -240,6 +247,16 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   (`essence=TARIF:numéro|…`) et `SteresParM3` après `AffouageLotTotalM3` ; `Tarif` /
   `TarifNumero` restent le tarif par défaut. Format 7 : `CommuneInsee`, `Ser`, `MillesimeTarifs`
   après `SteresParM3`.
+  **Format 8 (mission 026, 2026-11-10)** : ligne `PartsLot` après `MillesimeTarifs`
+  (`essence=tige:1,houppier:1|…`, toutes les essences du contexte, 1 = cochée ;
+  `ExportCsv.kt` l. 48-51 et 169-172, test `ExportCsvPartsLotTest.kt` l. 54 et 66). Aucune colonne
+  nouvelle. Le **sens** de `AffouageLotTotalM3` et de la colonne `AffouageLotM3` change sans
+  changement de nom : parties cochées (jusqu'au format 7 : houppier seul si l'essence en avait un).
+  `.marsync` : clé `partsLot` (objet `{"Chêne": {"tige": true, "houppier": false}}`) ; les essences
+  réglées seulement, une essence absente compte tige et houppier ; clé absente = cases locales
+  gardées pour un contexte connu (`ReglagesTerrain.kt` l. 21 et 43 ; `SauvegardeRepository.kt`
+  l. 185-193 et 247-256). Base v18 (`MarculusDatabase.kt` l. 57). Règle : ADR 0009 ; brief à
+  `nemetonshiny` : `~/dev/briefs/vers-nemetonshiny/2026-11-10-marculus-csv-format-8-lot-par-essence.md`.
 
 ## 8. Synchro multi-opérateurs (v2, partiel)
 
