@@ -79,6 +79,10 @@
 | [028](missions/028-doc-lot-par-essence.md) règle du lot écrite une fois, ADR 0009, brief à nemetonshiny | `archiviste` | sonnet | appuyer, plan d'abord | oui · oui · après 026 et 027 | 8 |
 | [029](missions/029-ifn-autres-feuillus-resineux.md) codes IFN `29AF` et `68CE` : sens et tarifs utilisables ? | `acquereur` | sonnet | appuyer | oui · oui · oui | 8 |
 | [030](missions/030-tarif-ifn-autres-feuillus-resineux.md) proposition IFN calculée pour Autres feuillus / Autres résineux | `testeur` puis `dev` | sonnet | appuyer | oui · oui · oui (testeur d'abord) | 8 |
+| [031](missions/031-release-tete-de-main.md) pas de version hors tête de main ni pour des tests seuls | `dev` | sonnet | lâcher | oui · oui · oui | 9 |
+| [032](missions/032-proposition-au-changement-de-tarif.md) proposition IFN au changement de tarif | `testeur` puis `dev` | sonnet | appuyer | oui · non (à reproduire) · oui | 9 |
+| [033](missions/033-tige-au-singulier.md) « 1 tige » au singulier sur la carte de la liste | `afficheur` | sonnet | appuyer | oui · oui · oui | 9 |
+| [034](missions/034-virgule-decimale.md) virgule décimale dans « % houpp. » | `afficheur` | sonnet | appuyer | oui · oui · oui | 9 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 

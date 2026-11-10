@@ -31,14 +31,29 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Recettes terrain : affouage, dictée (7 cas, bruit, gants) · spec § 10 · depuis le cycle 0
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
 - [006](missions/006-theme-terrain-style.md) · **suspendue** jusqu'à `terrain-style` v0.6.1 (ADR 0005 ; décision de Pascal du 2026-11-10, journal) : adopter la palette `terrain-style` = couleurs actuelles, sans changement visible · depuis le cycle 7
-- Release seulement si le commit est encore la tête de `main`, et pas pour une PR de tests seuls : relancer la CI d'un ancien commit resté sans tag publierait une version plus haute contenant moins de code (README, consigne de relance ; ADR 0008, réserve A) ; la #55 (tests seuls) a publié v0.70.5, même APK que v0.70.4 · décision de Pascal du 2026-11-10 : fiche au prochain `/mission` (genre CI, lâché) · depuis le cycle 7
-- Carte de la liste : « 1 tiges » / « 1 stems » au singulier (`liste_carte_resume` sans pluriel ; vu à l'essai A → B du 2026-11-10, journal) · depuis le cycle 7
-- Écran du contexte : les propositions IFN ne se calculent qu'au choix de la commune ou par « Reproposer » ; changer le tarif après la commune laisse les champs vides (vu par le dev de la 030, 2026-11-10) · depuis le cycle 7
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
 
-_(vide depuis le cycle 8)_
+- [031](missions/031-release-tete-de-main.md) · depuis le cycle 8
+  - Homme : dev (sonnet), lâcher
+  - Mission : pas de version si le commit n'est plus la tête de `main`, ni pour des tests seuls
+  - Moyens : `release-necessaire.sh` et ses tests, `release.yml`
+
+- [032](missions/032-proposition-au-changement-de-tarif.md) · depuis le cycle 8
+  - Homme : testeur puis dev (sonnet), appuyer
+  - Mission : choisir ou changer le tarif après la commune propose le numéro IFN (défaut à reproduire d'abord)
+  - Moyens : `CreationContexteScreen.kt`, émulateur (seul agent d'écran)
+
+- [033](missions/033-tige-au-singulier.md) · depuis le cycle 8
+  - Homme : afficheur (sonnet), appuyer
+  - Mission : « 1 tige », « 1 essence » au singulier sur la carte de la liste
+  - Moyens : `plurals` FR/EN, captures avant relecture
+
+- [034](missions/034-virgule-decimale.md) · depuis le cycle 8
+  - Homme : afficheur (sonnet), appuyer
+  - Mission : virgule décimale dans « % houpp. » en français
+  - Moyens : formatage et lecture du champ, captures avant relecture
 
 ## Planifié
 
