@@ -1,7 +1,6 @@
 package fr.marculus.core
 
 import fr.marculus.core.model.ActionTige
-import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.Tige
@@ -66,7 +65,7 @@ object VolumesMartelage {
         return CubageTige(v.tige, v.houppier, v.total, g, methode)
     }
 
-    /** Totaux nets du journal : chaque annulation retire les dernières tiges de sa case (voir en-tête). */
+    /** Totaux nets du journal, à partir de [JournalNet.tiges] (voir en-tête). */
     fun totaux(contexte: Contexte, journal: List<Tige>): Totaux {
         var vTige = 0.0
         var vHoup = 0.0
@@ -80,26 +79,11 @@ object VolumesMartelage {
             g += c.surfaceTerriereM2 * n
             if (c.nonCubee) nonCubees += n
         }
-        // Pile, par case, des tiges comptées et pas encore annulées : [cubage, quantité restante].
-        val piles = mutableMapOf<CompteurCle, ArrayDeque<Pair<CubageTige, Int>>>()
-        journal.sortedWith(compareBy<Tige> { it.horodatage }.thenBy { it.uuid }).forEach { t ->
-            val pile = piles.getOrPut(CompteurCle(t.essence, t.classe)) { ArrayDeque() }
+        // Une seule règle d'annulation : JournalNet. Une tige PLUS compte ; une annulation
+        // restante (orpheline) retire le cubage de sa propre saisie.
+        JournalNet.tiges(journal).forEach { t ->
             val c = cubage(contexte, t)
-            if (t.action == ActionTige.PLUS) {
-                ajouter(c, t.quantite)
-                pile.addLast(c to t.quantite)
-            } else {
-                var reste = t.quantite
-                while (reste > 0 && pile.isNotEmpty()) {
-                    val (annulee, n) = pile.removeLast()
-                    val retirees = minOf(n, reste)
-                    ajouter(annulee, -retirees)
-                    if (n > retirees) pile.addLast(annulee to n - retirees)
-                    reste -= retirees
-                }
-                // Rien à retirer dans la case : l'annulation vaut sa propre saisie.
-                if (reste > 0) ajouter(c, -reste)
-            }
+            ajouter(c, if (t.action == ActionTige.PLUS) t.quantite else -t.quantite)
         }
         return Totaux(vTige, vHoup, vTot, g, nonCubees.coerceAtLeast(0))
     }

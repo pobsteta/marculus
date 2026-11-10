@@ -1,7 +1,6 @@
 package fr.marculus.core
 
 import fr.marculus.core.model.ActionTige
-import fr.marculus.core.model.CompteurCle
 import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.TarifCubage
 import fr.marculus.core.model.Tige
@@ -85,33 +84,15 @@ object AffouageLots {
     data class Etat(val lot: Int, val cumulM3: Double)
 
     /**
-     * Lot courant : le plus grand lot porté par une tige comptée (1 si aucun) et le volume de ses
-     * tiges encore vivantes. Les annulations retirent, comme dans [VolumesMartelage], les
-     * dernières tiges de leur case — un − juste après la tige qui a fermé un lot le rouvre.
+     * Lot courant : le plus grand lot porté par une tige PLUS du journal, annulée ou non (1 si
+     * aucune) — il ne redescend jamais — et le volume des tiges **nettes** ([JournalNet]) qui
+     * portent ce lot : une seule règle d'annulation.
      */
     fun etat(contexte: Contexte, journal: List<Tige>): Etat {
-        // Pile, par case, des tiges comptées et pas encore annulées : [tige, quantité restante].
-        val piles = mutableMapOf<CompteurCle, ArrayDeque<Pair<Tige, Int>>>()
-        var lot = 1
-        journal.sortedWith(compareBy<Tige> { it.horodatage }.thenBy { it.uuid }).forEach { t ->
-            val pile = piles.getOrPut(CompteurCle(t.essence, t.classe)) { ArrayDeque() }
-            if (t.action == ActionTige.PLUS) {
-                t.lot?.let { lot = maxOf(lot, it) }
-                pile.addLast(t to t.quantite)
-            } else {
-                var reste = t.quantite
-                while (reste > 0 && pile.isNotEmpty()) {
-                    val (annulee, n) = pile.removeLast()
-                    val retirees = minOf(n, reste)
-                    if (n > retirees) pile.addLast(annulee to n - retirees)
-                    reste -= retirees
-                }
-            }
-        }
-        val cumul = piles.values.sumOf { pile ->
-            pile.filter { (t, _) -> t.lot == lot }
-                .sumOf { (t, n) -> volumes(contexte, t).lotM3 * n }
-        }
+        val lot = journal.filter { it.action == ActionTige.PLUS }.mapNotNull { it.lot }.maxOrNull()?.coerceAtLeast(1) ?: 1
+        val cumul = JournalNet.tiges(journal)
+            .filter { it.action == ActionTige.PLUS && it.lot == lot }
+            .sumOf { volumes(contexte, it).lotM3 * it.quantite }
         return Etat(lot, cumul)
     }
 
