@@ -9,5 +9,7 @@
    journal. Un rapport vide ou tronqué = écart au journal, relecture sur pièces.
 3. **Relecteur « prêt »** sur la tête de la PR, et **CI verte** (`gh pr checks`).
 4. **Changement visible ?** Capture ou nuancier montré à Pascal **avant** le merge, ou vérification
-   sur le téléphone annoncée et faite après l'installation.
+   sur le téléphone annoncée et faite après l'installation. **Bilan n° 2 (2026-11-10)** : pour une
+   mission d'écran, les captures (clair et sombre, FR et EN, 384 et 360 dp) sont jointes au rapport
+   de l'`afficheur` **avant** la relecture ; sans elles, pas de relecture.
 5. **Dépendances** : une seule version par bibliothèque ; le `testeur` n'a pas lu le code qu'il teste.

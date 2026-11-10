@@ -34,6 +34,16 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
+- [024](missions/024-archivage-016-023.md) · depuis le cycle 6
+  - Homme : archiviste (sonnet), appuyer, plan d'abord
+  - Mission : spec et README à jour du livré 016-023 avec preuves, ADR 0007 (règle d'annulation unique) et 0008 (release conditionnelle), Redite vides, état de la 006
+  - Moyens : `docs/specs/`, `README.md`, `docs/adr/`, journal ; une PR que Pascal valide
+
+- [025](missions/025-egalite-des-totaux.md) · depuis le cycle 6
+  - Homme : testeur (sonnet), lâcher
+  - Mission : un test qui échoue si deux écrans ou CSV donnent des totaux différents pour un même journal
+  - Moyens : `:core`, `:data` (résumé de la liste), journaux d'essai avec annulations
+
 
 
 
@@ -219,3 +229,4 @@ l'inscrit avec ce qu'elle nous apprend._
 - bilan du 2026-10-24 · Marculus v0.65.0 lisible au soleil (clair et sombre vérifiés par Pascal), unité du lot lisible en portrait, thème en deux appuis ; contrat des formats 6-7 et CSV justes · pour les marteleurs et nemetonshiny · premier bilan : pas de livraison de bilan antérieure
 - cycle 5 · Marculus v0.68.0 : « Ouvrir avec » / « Partager » → fusion d'un `.marsync` d'un appui, après confirmation (contexte, tiges nettes, opérateur) ; stères « m³ (st) » dans Statut / historique et le CSV du bilan par lot · pour les marteleurs d'affouage et les équipes à plusieurs opérateurs · première livraison qui change le travail à plusieurs sur le terrain (le cycle 3 changeait l'aspect) ; retenue par Pascal
 - cycle 6 · Marculus v0.70.0 (et v0.70.2, sans changement visible) : mêmes nombres de tiges et mêmes volumes sur la liste des contextes, Statut, Par lot, Par parcelle et le CSV foncier malgré les annulations ; onglets lisibles sur le téléphone ; volume des tiges sans position · pour les marteleurs, d'affouage surtout · premiers chiffres cohérents d'un écran à l'autre (le cycle 5 changeait le travail à plusieurs) ; une seule règle d'annulation dans le code ; plus de version sans changement de l'application (023) ; retenue par Pascal (« clos le cycle 6 »)
+- bilan du 2026-11-10 · Marculus v0.70.4 : fusion d'un `.marsync` d'un appui après confirmation, stères dans Statut / historique, mêmes nombres de tiges et mêmes volumes sur tous les écrans et CSV malgré les annulations · pour les marteleurs d'affouage et les équipes à plusieurs opérateurs · le bilan n° 1 changeait l'aspect (lisible au soleil), celui-ci change le travail à plusieurs et la confiance dans les chiffres ; retenue par Pascal (« je valide »)
