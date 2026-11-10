@@ -44,6 +44,12 @@ object ParParcelle {
             return VolumesMartelage.Totaux(vt, vh, vtot, g, nc)
         }
 
+        /**
+         * Mission 021 : la ligne « sans position » s'affiche dès qu'il y a une tige sans position ou
+         * une annulation orpheline, même si le nombre net est nul ou négatif.
+         */
+        val aLigneSansPosition: Boolean get() = tigesSansPosition.isNotEmpty() || annulationsOrphelines.isNotEmpty()
+
         fun nombre(parcelle: String?): Int = parcelles[parcelle]?.sumOf { it.quantite } ?: 0
 
         /** Toutes lignes comprises : parcelles, hors parcelle, sans position. */

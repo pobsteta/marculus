@@ -41,4 +41,16 @@ class ParParcelleVolumesOrphelineTest {
         val sansOrpheline = VolumesMartelage.cubage(ctx, j[1]).volumeTotalM3
         assertEquals(true, sans.volumeTotalM3 < sansOrpheline - 1e-9)
     }
+
+    @Test
+    fun `ligne sans position - seulement avec tige sans position ou annulation orpheline`() {
+        val avecPos = Tige("a", "c1", "Chêne", 30, ActionTige.PLUS, horodatage = 1, position = Position(45.0, 5.0))
+        assertEquals(false, ParParcelle.repartir(listOf(avecPos)) { "A" }.aLigneSansPosition)
+        val sans = Tige("d", "c1", "Chêne", 35, ActionTige.PLUS, horodatage = 2)
+        assertEquals(true, ParParcelle.repartir(listOf(avecPos, sans)) { "A" }.aLigneSansPosition)
+        val orpheline = Tige("x", "c1", "Hêtre", 40, ActionTige.ANNULATION, horodatage = 3)
+        val r = ParParcelle.repartir(listOf(avecPos, orpheline)) { "A" }
+        assertEquals(true, r.aLigneSansPosition)
+        assertEquals(-1, r.sansPosition)
+    }
 }

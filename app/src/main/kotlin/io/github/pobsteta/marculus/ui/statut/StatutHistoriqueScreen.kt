@@ -572,13 +572,24 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
                 HorizontalDivider(Modifier.padding(top = 4.dp))
             }
         }
-        if (sansPosition > 0) {
+        if (repartition.aLigneSansPosition) {
             item {
-                Text(
-                    stringResource(R.string.statut_tiges_sans_position_gnss, sansPosition),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.outline,
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        stringResource(R.string.statut_tiges_sans_position_gnss, sansPosition),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.outline,
+                    )
+                    if (tarifActif) {
+                        val vs = repartition.volumesSansPosition(contexte)
+                        Text(
+                            volumeTexte(vs.volumeTigeM3, contexte, locale),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                        if (avecHouppier) LigneVolumesEmerge(vs.volumeHouppierM3, vs.volumeTotalM3, 0, locale, contexte)
+                    }
+                }
             }
         }
     }
