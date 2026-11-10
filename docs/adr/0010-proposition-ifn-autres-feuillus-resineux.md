@@ -19,7 +19,7 @@ Les autres documents renvoient ici. Le code est `core/src/main/kotlin/fr/marculu
 
 **Feuillu ou résineux.** Deux premiers caractères du code ESPAR : < 50 feuillu, ≥ 50 résineux (`Regroupement.contient`, l. 94-97). L'if et les genévriers sont des « Autres résineux », comme chez l'IGN (journal l. 233 ; le testeur a lu `documentation_2.txt` en entier, l. 241).
 
-**Lignes retenues (`lignesAutres`, l. 193-202).** Les lignes du regroupement au niveau considéré, **hors essences du contexte** : un nom du contexte exclut les espèces IFN dont le libellé normalisé est ce nom ou commence par ce nom suivi d'une espace (mot entier). Exemples décidés : « Chêne » exclut tous les chênes, « Pin laricio » les deux laricios, « Cerisier » ses quatre libellés ; « Chêne sessile » n'exclut que le chêne sessile ; seule exception, « Charme » n'exclut pas « Charme houblon » (journal l. 229 et 233 ; tests `TarifsIfnAutresTest.kt` l. 356-475).
+**Lignes retenues (`lignesAutres`, l. 193-202).** Les lignes du regroupement au niveau considéré, **hors essences du contexte** : un nom du contexte exclut les espèces IFN dont le libellé normalisé est ce nom ou commence par ce nom suivi d'une espace (mot entier). Exemples décidés : « Chêne » exclut tous les chênes, « Pin laricio » les deux laricios, « Cerisier » ses quatre libellés ; « Chêne sessile » n'exclut que le chêne sessile ; seule exception, « Charme » n'exclut pas « Charme houblon » (journal l. 229 et 233 ; tests `TarifsIfnAutresTest.kt` l. 356-474).
 
 **Calcul du numéro (`proposerAutres`, l. 215-236).**
 
@@ -57,13 +57,13 @@ Limite connue : la logique de l'écran n'a pas de test automatique, seules les f
 
 ## Alternatives
 
-Relier à `29AF` / `68CE` : écartée par Pascal (journal l. 228), ces codes étant des résidus exotiques. Moyenne non pondérée, ou seuil par ligne : non écrit dans le journal ; la fiche (`pilotage/missions/030-tarif-ifn-autres-feuillus-resineux.md`) en dit le détail.
+Relier à `29AF` / `68CE` : écartée par Pascal (journal l. 228), ces codes étant des résidus exotiques. Autres alternatives : non écrit.
 
 ## Le crible FRANCE
 
 | Lettre | Question | Réponse (une ligne) | Ce que ça coûte | Prêts à payer ? |
 |---|---|---|---|---|
-| **F** | La plus simple qui tienne ? | Une moyenne pondérée au lieu d'un code ; même cascade et même seuil que les essences ordinaires | Une table de lignes brutes gardée en mémoire (`brutes`) | Oui (journal l. 229) |
+| **F** | La plus simple qui tienne ? | Une moyenne pondérée au lieu d'un code ; même cascade et même seuil que les essences ordinaires | Une table de lignes brutes gardée en mémoire (`brutes`) | Non écrit |
 | **R** | Qui fait quoi ? | Testeur (37 puis 45 tests), dev (PR #62, 609910f), afficheur (captures), relecteur (prêt au 2e tour) | | |
 | **A** | Et si l'imprévu arrive ? | Aucune ligne au seuil : pas de proposition, saisie manuelle ; mutations « ≤ 0 », Charme, préfixe, regroupement ignoré détectées (journal l. 246, 260) | Logique d'écran non testée automatiquement | Non écrit |
 | **N** | Idées étranges écoutées ? | Non écrit | | |
