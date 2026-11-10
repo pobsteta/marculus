@@ -21,6 +21,16 @@
     fusion par l'orchestrateur si relecteur « prêt », CI verte et `pilotage/pre-fusion.md` coché ;
   - **écran** : toute mission qui change l'écran passe par l'`afficheur` (capture avant la PR) et reste en « appuyer » ;
   - jamais lâché : une mission « tenir » (003, 006), un changement de règle métier, de modèle de données ou de dépendance.
+  - **bilan n° 2 (validé par Pascal le 2026-11-10, « je valide »)** :
+    - genre **CI** : réussi trois fois (001, 015, 023) → reste lâché ; genre **testeur + dev sans écran**
+      confirmé par la 022 ;
+    - les **PR de pilotage** sont fusionnées par l'orchestrateur grâce à la règle de permission
+      `Bash(gh pr merge *)` (`.claude/settings.local.json`, posée à la demande de Pascal le 2026-11-10) ;
+      la commande est lancée seule, une commande enchaînée reste refusée par le mode auto ;
+    - **afficheur** : reste « appuyer » ; ses captures (clair et sombre, FR et EN, 384 et 360 dp) sont
+      jointes à son rapport **avant** la relecture (`pilotage/pre-fusion.md`, point 4) ;
+    - **fiche qui touche un nombre de tiges ou un volume** : l'orchestrateur y tranche « net ou lignes
+      du journal ? » (avec `JournalNet`, ADR 0007 à écrire) avant de confier le testeur.
 
 ## Le vivier (catalogue, pas une équipe)
 
@@ -56,6 +66,14 @@
 | [015](missions/015-release-apres-tests.md) la release attend les tests | `dev` | sonnet | appuyer | oui · oui · oui | 4 |
 | [016](missions/016-ouvrir-avec-marculus.md) « Ouvrir avec Marculus » | `testeur`, `dev`, `afficheur` | sonnet | appuyer | oui · oui · oui | 5 (3 allers-retours + correctif décidé par Pascal) |
 | [017](missions/017-steres-statut-historique.md) stères dans Statut / historique | `testeur`, `afficheur` | sonnet | appuyer | oui · oui · oui | 5 (3 allers-retours) |
+| [018](missions/018-liste-tiges-nettes.md) liste des contextes au net | `testeur`, `dev` | sonnet | appuyer | oui · oui · oui | 6 (1 aller-retour) |
+| [019](missions/019-parcelle-tiges-nettes.md) Par parcelle et CSV foncier nets | `testeur`, `dev` | sonnet | appuyer | oui · oui · oui | 6 (1 aller-retour) |
+| [020](missions/020-onglets-statut-sans-coupure.md) onglets sans mot coupé | `afficheur` | sonnet | appuyer | oui · à moitié · oui | 6 (1 aller-retour) |
+| [021](missions/021-volume-sans-position.md) volume des tiges sans position | `afficheur` | sonnet | appuyer | oui · oui · oui | 6 |
+| [022](missions/022-une-regle-annulation.md) une seule règle d'annulation | `testeur`, `dev` | sonnet | appuyer (genre lâché) | oui · oui · oui | 6 (étendue à `AffouageLots.etat`) |
+| [023](missions/023-release-sans-pilotage.md) pas de release sans changement de l'application | `dev` | sonnet | lâcher | oui · oui · oui | 6 |
+| [024](missions/024-archivage-016-023.md) spec, README et ADR à jour du livré 016-023 | `archiviste` | sonnet | appuyer (plan d'abord) | oui · oui · oui | 7 |
+| [025](missions/025-egalite-des-totaux.md) test d'égalité des totaux entre écrans et CSV | `testeur` | sonnet | lâcher | oui · oui · oui | 7 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
