@@ -99,10 +99,8 @@ du fichier n'ont jamais été touchés par une fusion (seule la restauration de 
 ## Export CSV « tiges à comptabiliser »
 
 À l'export CSV (liste des contextes), une question : **journal complet** ou **uniquement les
-tiges à comptabiliser**. En net (`JournalNet`, règle d'annulation décrite une seule fois : ADR
-0007 et `core/src/main/kotlin/fr/marculus/core/JournalNet.kt`) ; un paquet (quantité > 1) annulé en
-partie reste avec sa quantité restante ; une annulation sans tige à retirer est gardée. L'en-tête
-porte `Journal;NET` ou `Journal;COMPLET` ; totaux et volumes d'en-tête sont identiques.
+tiges à comptabiliser**. En net : la règle d'annulation est décrite une seule fois (spec v1 § 7 ;
+ADR 0007). L'en-tête porte `Journal;NET` ou `Journal;COMPLET` ; totaux et volumes d'en-tête sont identiques.
 
 ## Onglet « Par lot » (Statut / historique)
 

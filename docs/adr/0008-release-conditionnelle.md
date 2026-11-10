@@ -2,7 +2,7 @@
 
 - **Date :** 2026-11-10
 - **Statut :** **décision acceptée par Pascal** (« oui fais les 2 », journal du 2026-11-10) ; **texte de l'ADR proposé**, à valider par Pascal à la lecture de la PR ; livrée par la PR #51 (f440e2c)
-- **Proposée par :** non écrit ; écart relevé au cycle 6 (journal du 2026-11-10, 2026-11-10 « oui fais les 2 »)
+- **Proposée par :** non écrit (le journal ne dit pas qui l'a proposée) ; écart relevé au cycle 6 (journal du 2026-11-10)
 - **Tranchée par :** Pascal
 
 ## La décision en une phrase
