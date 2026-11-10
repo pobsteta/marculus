@@ -7,6 +7,7 @@ import fr.marculus.core.model.Contexte
 import fr.marculus.core.model.EssenceColonne
 import fr.marculus.core.model.EtatKanban
 import fr.marculus.core.model.ModeMesure
+import fr.marculus.core.model.PartsLot
 import fr.nemeton.terrain.geo.Position
 import fr.nemeton.terrain.gnss.QualiteFix
 import fr.marculus.core.model.TarifCubage
@@ -110,7 +111,7 @@ class ExportCsvTest {
         assertEquals(
             listOf(
                 "Contexte;Parcelle 12",
-                "FormatCsv;7",
+                "FormatCsv;8",
                 "ContexteId;act_20260923155141_xyz123",
                 "Statut;REALISEE",
                 "DateMartelage;2027-10-15",
@@ -143,6 +144,17 @@ class ExportCsvTest {
         assertTrue("TarifsEssence;$noms" in lignes, lignes.joinToString("\n"))
         assertTrue("SteresParM3;1.4" in lignes)
         assertTrue(lignes.indexOf("SteresParM3;1.4") < lignes.indexOf("Journal;COMPLET"))
+    }
+
+    @Test
+    fun `format 8 - un reglage d'essence hors contexte est liste apres les essences, trie`() {
+        val ctx = contexte.copy(
+            partsLot = mapOf("Zzz" to PartsLot(tige = false, houppier = true), "Aaa" to PartsLot(tige = true, houppier = false)),
+        )
+        val lignes = ExportCsv.contexteCsv(ctx, emptyList()).split("\n")
+        val attendu = ctx.essencesNoms.joinToString("|") { "$it=tige:1,houppier:1" } +
+            "|Aaa=tige:1,houppier:0|Zzz=tige:0,houppier:1"
+        assertTrue("PartsLot;$attendu" in lignes, lignes.joinToString("\n"))
     }
 
     @Test

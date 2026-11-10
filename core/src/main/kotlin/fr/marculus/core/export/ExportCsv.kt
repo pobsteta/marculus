@@ -43,12 +43,18 @@ import java.util.Locale
  * **Format 7** (`FormatCsv;7`) : tarifs IFN par sylvoécorégion — en en-tête, après `SteresParM3` :
  * `CommuneInsee`, `Ser` et `MillesimeTarifs` (vides si non renseignés). Le journal ne change pas :
  * le numéro de l'essence de chaque tige est déjà dans `Cubage`.
+ *
+ * **Format 8** (`FormatCsv;8`) : parties comptées au lot d'affouage (mission 026) — en en-tête,
+ * après `MillesimeTarifs` : `PartsLot` (`essence=tige:1,houppier:0`, séparées par `|`, toutes les
+ * essences du contexte ; 1 = cochée). `AffouageLotTotalM3` et la colonne `AffouageLotM3` gardent
+ * leur place mais comptent désormais les parties cochées (tige et houppier par défaut) ; jusqu'au
+ * format 7, le houppier seul quand l'essence en avait un.
  */
 object ExportCsv {
     private const val SEP = ";"
 
     /** Version du format, lue par Nemeton : son absence désigne le format 1, non réimportable. */
-    const val FORMAT = 7
+    const val FORMAT = 8
 
     fun contexteCsv(contexte: Contexte, journal: List<Tige>, net: Boolean = false): String {
         val sb = StringBuilder()
@@ -85,6 +91,8 @@ object ExportCsv {
         sb.appendLine("CommuneInsee${SEP}${champ(contexte.communeInsee.orEmpty())}")
         sb.appendLine("Ser${SEP}${champ(contexte.ser.orEmpty())}")
         sb.appendLine("MillesimeTarifs${SEP}${champ(contexte.millesimeTarifs.orEmpty())}")
+        // Format 8 : parties comptées au lot d'affouage, par essence.
+        sb.appendLine("PartsLot${SEP}${champ(partsLot(contexte))}")
         sb.appendLine("Journal${SEP}${if (net) "NET" else "COMPLET"}")
         contexte.commentaire?.let { sb.appendLine("Commentaire${SEP}${champ(it)}") }
         sb.appendLine()
@@ -153,6 +161,16 @@ object ExportCsv {
     private fun tarifsEssence(contexte: Contexte): String =
         (contexte.essencesNoms + contexte.tarifsEssence.keys.sorted()).distinct()
             .joinToString("|") { e -> Cubage.tarifDe(contexte, e).normalise().let { "$e=${it.tarif.name}:${it.numero}" } }
+
+    /**
+     * Parties comptées au lot, toutes les essences du contexte puis les réglages hors contexte triés :
+     * `Chêne=tige:1,houppier:1|Hêtre=tige:0,houppier:1`.
+     */
+    private fun partsLot(contexte: Contexte): String =
+        (contexte.essencesNoms + contexte.partsLot.keys.sorted()).distinct()
+            .joinToString("|") { e ->
+                contexte.partsLotDe(e).let { "$e=tige:${if (it.tige) 1 else 0},houppier:${if (it.houppier) 1 else 0}" }
+            }
 
     /** Parts de houppier non nulles, dans l'ordre des essences du contexte : `Chêne=0.3|Hêtre=0.25`. */
     private fun partsHouppier(contexte: Contexte): String {
