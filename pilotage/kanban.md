@@ -37,12 +37,8 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - [022](missions/022-une-regle-annulation.md) · depuis le cycle 6
   - Homme : testeur puis dev (sonnet), appuyer
   - Mission : `VolumesMartelage.totaux` part de `JournalNet.tiges`, une seule règle d'annulation, aucun résultat changé
-  - Moyens : `:core`, tests existants inchangés ; part de main après la fusion de la #43
+  - Moyens : `:core` ; tests 2d94c5b (16, verts), dev d381c40 (`VolumesMartelage` sur `JournalNet`) ; 3e copie trouvée dans `AffouageLots.etat`, à Pascal
 
-- [021](missions/021-volume-sans-position.md) · depuis le cycle 6
-  - Homme : afficheur (sonnet), appuyer
-  - Mission : volume des tiges sans position sur la ligne « sans position » de Par parcelle
-  - Moyens : `ParParcelle.volumesSansPosition` (c924db7) ; part de main après la fusion de la #43
 
 
 
@@ -55,10 +51,6 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 
 
-- [020](missions/020-onglets-statut-sans-coupure.md) · depuis le cycle 6
-  - Homme : afficheur (sonnet), appuyer
-  - Mission : onglets de Statut / historique sans mot coupé (360 dp, police 1,0 et 1,3)
-  - Moyens : rangée d'onglets de `StatutHistoriqueScreen.kt`, émulateur à 450 dpi
 
 - [006](missions/006-theme-terrain-style.md) · depuis le cycle 4
   - Homme : testeur puis dev (sonnet), appuyer
@@ -68,6 +60,18 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · essai au soleil clos le 2026-10-24 (thèmes actuels conformes) : la carte attend la palette `terrain-style` · depuis le cycle 1
 
 ## Terminé
+
+- [021](missions/021-volume-sans-position.md) · depuis le cycle 6
+  - Homme : afficheur (sonnet), appuyer
+  - Mission : volume des tiges sans position sur la ligne « sans position » de Par parcelle
+  - Moyens : `ParParcelle.volumesSansPosition` (c924db7) ; part de main après la fusion de la #43
+  - Livré : PR #46 fusionnée le 2026-11-10 (a800bb8)
+
+- [020](missions/020-onglets-statut-sans-coupure.md) · depuis le cycle 6
+  - Homme : afficheur (sonnet), appuyer
+  - Mission : onglets de Statut / historique sans mot coupé (360 dp, police 1,0 et 1,3)
+  - Moyens : rangée d'onglets de `StatutHistoriqueScreen.kt`, émulateur à 450 dpi
+  - Livré : PR #44 fusionnée le 2026-11-10 (02fc671)
 
 - [019](missions/019-parcelle-tiges-nettes.md) · depuis le cycle 6
   - Homme : testeur puis dev (sonnet), appuyer
