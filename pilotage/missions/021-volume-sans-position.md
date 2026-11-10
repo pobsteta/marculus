@@ -8,7 +8,7 @@ marteleur retrouve dans « Par parcelle » tout le volume que donne Statut. Aujo
 donne que le nombre. Décision de Pascal du 2026-11-10 : « Je pars sur (c) » (journal du
 2026-11-10, option (c) après le constat sur c924db7).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** sur la ligne « sans position GNSS » de « Par parcelle », ajouter le volume net des tiges non rattachées (`volumesSansPosition`), même forme que les parcelles, pour que parcelles + sans position = Statut ; la ligne apparaît dès qu'il y a une tige sans position ou une annulation orpheline.
 
 ## Ce qui existe (preuves)
 
