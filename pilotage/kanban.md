@@ -6,7 +6,7 @@
 > colonne ; on change ce numéro chaque fois qu'elle change de colonne.
 > **Une carte qui ne bouge pas est souvent la mauvaise nouvelle à dire tout de suite.**
 
-**Dernier cycle :** 6 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
+**Dernier cycle :** 7 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
 rien lancé. Une carte est immobile quand dernier cycle − N ≥ 2.)_
 
 _Modèle de carte :_
@@ -30,43 +30,34 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
   (§ 4 : combien d'essences atteignent la forêt ?) · depuis le cycle 0
 - Recettes terrain : affouage, dictée (7 cas, bruit, gants) · spec § 10 · depuis le cycle 0
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
+- [006](missions/006-theme-terrain-style.md) · **suspendue** jusqu'à `terrain-style` v0.6.1 (ADR 0005 ; décision de Pascal du 2026-11-10, journal) : adopter la palette `terrain-style` = couleurs actuelles, sans changement visible · depuis le cycle 7
+- Release seulement si le commit est encore la tête de `main`, et pas pour une PR de tests seuls : relancer la CI d'un ancien commit resté sans tag publierait une version plus haute contenant moins de code (README, consigne de relance ; ADR 0008, réserve A) ; la #55 (tests seuls) a publié v0.70.5, même APK que v0.70.4 · décision de Pascal du 2026-11-10 : fiche au prochain `/mission` (genre CI, lâché) · depuis le cycle 7
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
 
-- [024](missions/024-archivage-016-023.md) · depuis le cycle 6
-  - Homme : archiviste (sonnet), appuyer, plan d'abord
-  - Mission : spec et README à jour du livré 016-023 avec preuves, ADR 0007 (règle d'annulation unique) et 0008 (release conditionnelle), Redite vides, état de la 006
-  - Moyens : `docs/specs/`, `README.md`, `docs/adr/`, journal ; une PR que Pascal valide
-
-- [025](missions/025-egalite-des-totaux.md) · depuis le cycle 6
-  - Homme : testeur (sonnet), lâcher
-  - Mission : un test qui échoue si deux écrans ou CSV donnent des totaux différents pour un même journal
-  - Moyens : `:core`, `:data` (résumé de la liste), journaux d'essai avec annulations
-
-
-
-
-
-
-
-
-
-
+_(vide depuis le cycle 7)_
 
 ## Planifié
 
 
 
 
-- [006](missions/006-theme-terrain-style.md) · depuis le cycle 4
-  - Homme : testeur puis dev (sonnet), appuyer
-  - Mission : adopter `terrain-style` v0.6.1 = couleurs actuelles de Marculus, sans changement visible (cap du 2026-10-24)
-  - Moyens : attend `terrain-style` v0.6.1 (brief `vers-terrain`, révision du 2026-10-24) ; capture avant / après
-
 - Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · essai au soleil clos le 2026-10-24 (thèmes actuels conformes) : la carte attend la palette `terrain-style` · depuis le cycle 1
 
 ## Terminé
+
+- [025](missions/025-egalite-des-totaux.md) · depuis le cycle 7
+  - Homme : testeur (sonnet), lâcher
+  - Mission : un test qui échoue si deux écrans ou CSV donnent des totaux différents pour un même journal
+  - Moyens : 18 tests (15 `:core`, 3 `:data`), 8 journaux, 3 contextes ; 3 exceptions décidées (la 3e, l'orpheline hors Par lot, par Pascal le 2026-11-10) ; relecteur prêt (4 règles divergentes réintroduites → rouge)
+  - Livré : PR #55 fusionnée le 2026-11-10 (7f66180) par l'orchestrateur (genre lâché), v0.70.5 (même APK que v0.70.4)
+
+- [024](missions/024-archivage-016-023.md) · depuis le cycle 7
+  - Homme : archiviste (sonnet), appuyer, plan d'abord
+  - Mission : spec et README à jour du livré 016-023 avec preuves, ADR 0007 et 0008, Redite vides, état de la 006
+  - Moyens : spec v1 § 6, § 7, § 8, spec affouage, README, ADR 0001/0007/0008, 5 Redite ; 3 tours de relecture (prêt sur a1d6082)
+  - Livré : PR #56, fusionnée par Pascal
 
 - [023](missions/023-release-sans-pilotage.md) · depuis le cycle 6
   - Homme : dev (sonnet), lâcher
@@ -230,3 +221,4 @@ l'inscrit avec ce qu'elle nous apprend._
 - cycle 5 · Marculus v0.68.0 : « Ouvrir avec » / « Partager » → fusion d'un `.marsync` d'un appui, après confirmation (contexte, tiges nettes, opérateur) ; stères « m³ (st) » dans Statut / historique et le CSV du bilan par lot · pour les marteleurs d'affouage et les équipes à plusieurs opérateurs · première livraison qui change le travail à plusieurs sur le terrain (le cycle 3 changeait l'aspect) ; retenue par Pascal
 - cycle 6 · Marculus v0.70.0 (et v0.70.2, sans changement visible) : mêmes nombres de tiges et mêmes volumes sur la liste des contextes, Statut, Par lot, Par parcelle et le CSV foncier malgré les annulations ; onglets lisibles sur le téléphone ; volume des tiges sans position · pour les marteleurs, d'affouage surtout · premiers chiffres cohérents d'un écran à l'autre (le cycle 5 changeait le travail à plusieurs) ; une seule règle d'annulation dans le code ; plus de version sans changement de l'application (023) ; retenue par Pascal (« clos le cycle 6 »)
 - bilan du 2026-11-10 · Marculus v0.70.4 : fusion d'un `.marsync` d'un appui après confirmation, stères dans Statut / historique, mêmes nombres de tiges et mêmes volumes sur tous les écrans et CSV malgré les annulations · pour les marteleurs d'affouage et les équipes à plusieurs opérateurs · le bilan n° 1 changeait l'aspect (lisible au soleil), celui-ci change le travail à plusieurs et la confiance dans les chiffres ; retenue par Pascal (« je valide »)
+- cycle 7 · mauvaise nouvelle : rien de neuf en main pour un bénéficiaire du brief ; v0.70.5 est le même APK que v0.70.4 · pour les marteleurs d'affouage et les propriétaires · la CI tient maintenant l'égalité des totaux livrée au cycle 6 (025) et un successeur peut reprendre la doc (024), mais deux cycles de consolidation d'affilée sont la limite : le cycle 8 sort une carte du bac à sable vers le terrain, à partir de la phrase du problème du produit dans `docs/brief.md` ; lecture acceptée par Pascal (« j'accepte »)
