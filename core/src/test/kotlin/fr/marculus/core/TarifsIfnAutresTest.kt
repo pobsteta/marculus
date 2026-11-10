@@ -332,11 +332,12 @@ class TarifsIfnAutresTest {
 
     // --- Décisions de Pascal du 2026-11-10 (réponses aux questions du testeur) --------------------
     //
-    // Genre : un nom GÉNÉRIQUE au contexte (un seul mot, égal au premier mot du libellé IFN d'une ou plusieurs
-    // espèces, accents, casse et ponctuation ignorés ; cas ambigus non testés : « Charme houblon », « Pin laricio », « Cerisier »)
-    // exclut TOUTES les espèces IFN de ce genre ; un nom d'espèce (plusieurs mots, ex. « Chêne sessile ») n'exclut que
-    // cette espèce. Fondement : dans la table embarquée, les libellés IFN de 23 genres ont plusieurs espèces et le
-    // premier mot de chacun nomme le genre (Chêne 9 espèces, Pin 15, Sapin 7, Érable 6, Frêne 3…).
+    // Règle (Pascal, 2026-11-10) : un nom au contexte, d'un mot ou de plusieurs, exclut TOUTES les espèces IFN dont le
+    // libellé commence par ce nom, coupé sur mot entier, accents, casse et ponctuation ignorés (« Chêne » : les 9 chênes ;
+    // « Chêne sessile » : lui seul ; « Pin laricio » : Calabre et Corse ; « Cerisier » : ses 4 libellés). Une seule
+    // exception nommée : « Charme » n'exclut PAS « Charme houblon » (genre Ostrya).
+    // Fondement : dans la table embarquée, 23 genres ont plusieurs espèces et leur premier mot les nomme (Chêne 9
+    // espèces, Pin 15, Sapin 7, Érable 6, Frêne 3…).
 
     /**
      * SER G10, lent, feuillus : Chêne sessile 8/100, Chêne pédonculé 9/50, Chêne rouge 4/40 ; Charme 6/20, Tremble 10/10,
@@ -412,6 +413,51 @@ class TarifsIfnAutresTest {
         assertEquals(80, un.nArbres)
         assertEquals(6.75, un.numeroBrut, 1e-9)
         assertEquals(7, un.numero)
+    }
+
+    /**
+     * SER L11, lent : Pin laricio de Calabre 5/20, Pin laricio de Corse 8/20, Pin sylvestre 7/10, Douglas 9/10, Pin maritime 4/20.
+     * « Pin laricio » : les deux laricios sortent ; (70+90+80)/40 = 6,0, 40 arbres.
+     * « Pin laricio de Corse » : Calabre reste ; (100+70+90+80)/60 = 340/60 = 5,6667 → 6, 60 arbres.
+     * « Pin lari » (mot coupé) : aucune exclusion, coupe sur mot entier ; (100+160+70+90+80)/80 = 6,25, 80 arbres.
+     */
+    @Test
+    fun `prefixe - Pin laricio exclut les deux laricios, pas un mot coupe`() {
+        val tous = assertNotNull(ifn.proposerAutres("L11", AUTRES_RESINEUX, listOf("Pin laricio"), lent))
+        assertEquals(40, tous.nArbres)
+        assertEquals(6.0, tous.numeroBrut, 1e-9)
+        val corse = assertNotNull(ifn.proposerAutres("L11", AUTRES_RESINEUX, listOf("Pin laricio de Corse"), lent))
+        assertEquals(60, corse.nArbres)
+        assertEquals(340.0 / 60, corse.numeroBrut, 1e-9)
+        assertEquals(6, corse.numero)
+        val coupe = assertNotNull(ifn.proposerAutres("L11", AUTRES_RESINEUX, listOf("Pin lari"), lent))
+        assertEquals(80, coupe.nArbres)
+        assertEquals(6.25, coupe.numeroBrut, 1e-9)
+    }
+
+    /**
+     * SER L10, lent : Cerisier 5/10, à grappes 7/10, tardif 9/10, de Sainte Lucie 3/10 ; Charme 6/20, Charme houblon 8/30, Tremble 10/10.
+     * « Cerisier » : les quatre sortent ; (120+240+100)/60 = 460/60 = 7,6667 → 8, 60 arbres.
+     */
+    @Test
+    fun `prefixe - Cerisier exclut ses quatre libelles`() {
+        val p = assertNotNull(ifn.proposerAutres("L10", AUTRES_FEUILLUS, listOf("Cerisier"), lent))
+        assertEquals(60, p.nArbres)
+        assertEquals(460.0 / 60, p.numeroBrut, 1e-9)
+        assertEquals(8, p.numero)
+    }
+
+    /**
+     * Même SER, « Charme » : exception nommée, Charme houblon reste dans « Autres feuillus ». Charme sort ;
+     * restent les quatre cerisiers (240 pour 40 arbres), Charme houblon 8/30 (240), Tremble 10/10 (100) :
+     * 580/80 = 7,25 → 7, 80 arbres.
+     */
+    @Test
+    fun `exception - Charme n exclut pas le Charme houblon`() {
+        val p = assertNotNull(ifn.proposerAutres("L10", AUTRES_FEUILLUS, listOf("Charme"), lent))
+        assertEquals(80, p.nArbres)
+        assertEquals(7.25, p.numeroBrut, 1e-9)
+        assertEquals(7, p.numero)
     }
 
     // --- Zéro écarté comme les négatifs (≤ 0), partout ---------------------------------------------
