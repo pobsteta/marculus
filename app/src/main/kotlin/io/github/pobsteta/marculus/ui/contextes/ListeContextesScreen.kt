@@ -71,6 +71,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -704,8 +705,8 @@ private fun CarteContexte(
                         contexte.axe.min,
                         contexte.axe.max,
                         contexte.axe.pas,
-                        contexte.essences.size,
-                        resume.nbTiges,
+                        pluralStringResource(R.plurals.liste_carte_essences, contexte.essences.size, contexte.essences.size),
+                        pluralStringResource(R.plurals.liste_carte_tiges, resume.nbTiges, resume.nbTiges),
                     ) + (if (resume.verrouille) stringResource(R.string.liste_carte_resume_verrouille) else "") +
                         if (contexte.dejaExporte) stringResource(R.string.liste_carte_resume_martele) else "",
                     style = MaterialTheme.typography.bodyMedium,

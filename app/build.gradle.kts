@@ -61,6 +61,8 @@ android {
         }
     }
 
+    testOptions.unitTests.isIncludeAndroidResources = true
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -75,6 +77,8 @@ kotlin {
 
 dependencies {
     testImplementation(kotlin("test-junit"))
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
     implementation(project(":core"))
     implementation(project(":data"))
     implementation(libs.terrain.carte)
