@@ -10,7 +10,7 @@ d'affouage) : capture `tel-0670/2-par-lot.png`, v0.67.0, journal du 2026-11-09. 
 (1080 × 2400), le mot tient, mais « Par parcelle » passe déjà sur deux lignes. Demande de Pascal
 du 2026-11-09 : « écris aussi la fiche pour l'onglet Historique coupé ».
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** Faire que les quatre ou trois onglets de Statut / historique se lisent d'un coup d'œil sans qu'un mot soit coupé au milieu (« Historique » d'un seul tenant), jusqu'à 360 dp et police 1,3, sans changer les libellés ni cacher un onglet derrière un défilement. (`afficheur`, 2026-11-10)
 
 ## Ce qui existe (preuves)
 

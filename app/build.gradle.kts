@@ -74,6 +74,7 @@ kotlin {
 }
 
 dependencies {
+    testImplementation(kotlin("test-junit"))
     implementation(project(":core"))
     implementation(project(":data"))
     implementation(libs.terrain.carte)
