@@ -39,3 +39,8 @@ Le bois fort de la tige entière pour les arbres à houppier : non compté dans 
 ## Question de contrôle
 
 Cette décision tient-elle nos six valeurs, et que sommes-nous prêts à payer pour cela ? Réponse de Pascal : non écrite.
+
+---
+
+*Ligne du 2026-11-10 (ajout daté, rien n'est effacé ci-dessus) : cette décision est **remplacée**
+par l'[ADR 0009](0009-lot-par-essence-parties-cochees.md) (décision de Pascal, journal l. 220).*

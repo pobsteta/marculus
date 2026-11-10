@@ -7,7 +7,7 @@ chaque essence » dans la spec affouage (en remplaçant la règle du 2026-10-24 
 un ADR 0009, le format CSV 8 dans la spec v1, et un brief `vers-nemetonshiny`, pour que le
 successeur et le consommateur des données lisent la même règle que le code des 026 et 027.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir._
+**Redite par l'agent :** J'écris une seule fois la règle « le lot compte les parties cochées (tige, houppier) de chaque essence » (ADR 0009, ajouts datés dans les specs, format CSV 8) et je prépare le brief à nemetonshiny, pour que le successeur et le consommateur lisent la même règle que le code des 026 et 027 (agent archiviste, 2026-11-10, plan validé par Pascal).
 
 ## Les trois questions
 
