@@ -166,7 +166,7 @@ fun StatutHistoriqueScreen(
             val ongletActif = onglet.takeIf { id -> onglets.any { it.first == id } } ?: ONGLET_STATUT
             TabRow(selectedTabIndex = onglets.indexOfFirst { it.first == ongletActif }) {
                 onglets.forEach { (id, libelle) ->
-                    Tab(selected = ongletActif == id, onClick = { onglet = id }, text = { Text(stringResource(libelle)) })
+                    Tab(selected = ongletActif == id, onClick = { onglet = id }) { LibelleOnglet(stringResource(libelle)) }
                 }
             }
             when (ongletActif) {
