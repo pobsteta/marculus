@@ -32,6 +32,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
 - [006](missions/006-theme-terrain-style.md) · **suspendue** jusqu'à `terrain-style` v0.6.1 (ADR 0005 ; décision de Pascal du 2026-11-10, journal) : adopter la palette `terrain-style` = couleurs actuelles, sans changement visible · depuis le cycle 7
 - Release seulement si le commit est encore la tête de `main`, et pas pour une PR de tests seuls : relancer la CI d'un ancien commit resté sans tag publierait une version plus haute contenant moins de code (README, consigne de relance ; ADR 0008, réserve A) ; la #55 (tests seuls) a publié v0.70.5, même APK que v0.70.4 · décision de Pascal du 2026-11-10 : fiche au prochain `/mission` (genre CI, lâché) · depuis le cycle 7
+- Carte de la liste : « 1 tiges » / « 1 stems » au singulier (`liste_carte_resume` sans pluriel ; vu à l'essai A → B du 2026-11-10, journal) · depuis le cycle 7
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
@@ -105,7 +106,7 @@ _(vide depuis le cycle 7)_
   - Homme : testeur, dev, afficheur (sonnet), appuyer
   - Mission : « Ouvrir avec » / « Partager » → Marculus fusionne un `.marsync` après une confirmation qui dit quoi (contexte, tiges nettes, opérateur) ; une seule instance (`singleTask`)
   - Moyens : manifeste, `MainActivity`, `FichierMarsync`, `ReceptionMarsync`, émulateur
-  - Livré : PR #36 fusionnée le 2026-11-09 (dbad43c), v0.68.0 ; essai A → B sur téléphones à faire par Pascal
+  - Livré : PR #36 fusionnée le 2026-11-09 (dbad43c), v0.68.0 ; essai A → B fait le 2026-11-10 (téléphone → émulateur, v0.70.5), confirmé par Pascal
 
 - [015](missions/015-release-apres-tests.md) · depuis le cycle 4
   - Homme : dev (sonnet), appuyer
