@@ -196,6 +196,13 @@ fun CreationContexteScreen(
             }
         }
     }
+    // Point unique de modification de la sélection : le total d'arbres et le CV des « Autres » en dépendent,
+    // donc toute modification (case, ajout, retrait) repropose ensuite toutes les essences cochées
+    // (un champ retouché à la main n'est pas réécrit).
+    fun modifierSelection(modification: MutableList<String>.() -> Unit) {
+        selection.modification()
+        appliquerPropositions()
+    }
     fun choisirCommune(insee: String?) {
         communeInsee = insee
         val sers = insee?.let { ifn?.serDeCommune(it) }.orEmpty()
@@ -377,10 +384,7 @@ fun CreationContexteScreen(
                     lot = if (affouage) partsLot[essence] ?: PartsLot() else null,
                     onLot = { partsLot[essence] = it },
                     onToggle = {
-                        if (essence in selection) selection.remove(essence) else selection.add(essence)
-                        // Le total d'arbres et le CV des « Autres » dépendent des essences cochées :
-                        // on repropose toutes les essences cochées (un champ retouché n'est pas réécrit).
-                        appliquerPropositions()
+                        modifierSelection { if (essence in this) remove(essence) else add(essence) }
                     },
                     onPickFond = { picker = essence to true },
                     onPickTexte = { picker = essence to false },
@@ -581,11 +585,12 @@ fun CreationContexteScreen(
                     // La nouvelle essence reprend le tarif de la première essence cubée, à ajuster.
                     selection.firstOrNull { tarifDe(it) != TarifCubage.AUCUN }?.let { modele ->
                         tarifs[nouvelle] = tarifDe(modele)
-                        numerosTarif[modele]?.let { numerosTarif[nouvelle] = it }
+                        // Copie « suiveuse » : une proposition IFN, si elle existe, la remplace.
+                        numerosTarif[modele]?.let { numerosTarif[nouvelle] = it; derniersProposes[nouvelle] = it }
                     }
                     essencesDisponibles.add(nouvelle)
                     essencesEnTete.add(nouvelle)
-                    selection.add(nouvelle)
+                    modifierSelection { add(nouvelle) }
                 }
                 ajoutOuvert = false
             },
