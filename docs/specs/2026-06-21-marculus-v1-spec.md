@@ -173,47 +173,16 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   sur le m³ non arrondi, `Steres.deM3`, même fichier l. 15). Le CSV du bilan ajoute `SteresParM3`,
   `VolumeMaxLot_st`, `VolumeTige_st`, `VolumeHouppier_st`, `VolumeLot_st`. Rien de nouveau en base,
   `.marsync` ni CSV d'échange.
-- ✅ **Règle d'annulation unique** (mission 022, PR #49, 76bd939) : une annulation retire la dernière
-  tige de sa case (journal trié par horodatage puis UUID, pile par case, paquet partiel gardé avec
-  sa quantité restante, annulation sans tige à retirer gardée) ; cette règle n'existe que dans
-  `JournalNet` (`core/src/main/kotlin/fr/marculus/core/JournalNet.kt` l. 18-40), d'où partent Statut, Par lot, Par
-  parcelle, les volumes et les CSV ; décision : ADR 0007. Le § 7 y renvoie.
-- ✅ **Décomptes au net partout** (mission 018, PR #42, 07a2245 ; mission 019, PR #43, 53e446c) :
-  la carte de la liste des contextes affiche le nombre **net** de tiges (`ResumeContexte.nbTiges`,
-  même nombre que Statut, `FichierMarsync.kt` l. 27) ; le verrouillage et l'état Kanban restent
-  sur le nombre d'événements du journal (journal du 2026-11-09, 018). « Par parcelle » et le CSV
-  foncier partent de `JournalNet.tiges` (`ParParcelle.kt`) : une annulation sans tige à retirer
-  compte en négatif dans « sans position » et n'apparaît pas au CSV foncier (décision de Pascal,
-  journal du 2026-11-09, 019).
-- ✅ **Ligne « sans position » avec volumes** (mission 021, PR #46, a800bb8) : volume, houppier,
-  total et stères sur la ligne ; affichée dès qu'il y a une tige sans position ou une annulation
-  orpheline (`Repartition.aLigneSansPosition`, `core`, testée ; décision de Pascal, journal du
-  2026-11-10, « Je valide les 4 »). Parcelles + sans position = Statut (31,80 / 7,16 / 38,96 m³
-  relevés sur émulateur, journal du 2026-11-10, afficheur 021).
-- ✅ **Onglets lisibles** (mission 020, PR #44, 02fc671) : marge de 4 dp ; si un mot ne tient pas,
-  le texte est réduit par pas de 1 sp jusqu'à 9 sp (`LibelleOnglet.kt`, `coupeUnMot`) ; libellés
-  inchangés.
-- ✅ **Recevoir un `.marsync` : « Ouvrir avec » / « Partager »** (mission 016, PR #36, dbad43c).
-  - Voies d'entrée : `ACTION_VIEW` (notification Bluetooth, gestionnaire de fichiers) et
-    `ACTION_SEND` (courriel, messagerie), types `application/octet-stream`, `application/json` et
-    `text/plain` (`app/src/main/AndroidManifest.xml` l. 51-64 ; lecture dans `MainActivity.kt`
-    l. 192-193). Prix accepté par Pascal : Marculus apparaît dans « Ouvrir avec » de tout fichier
-    binaire (journal du 2026-11-09, 016).
-  - Une boîte « Fusionner ? » annonce le ou les contextes, le nombre **net** de tiges et
-    l'opérateur ; **Annuler n'écrit rien**. Le bouton Paramètres → « Fusionner » est inchangé.
-  - Le contenu décide : un fichier illisible est refusé, un JSON valide sous un autre nom est
-    accepté ; plafond de 50 Mo (`FichierMarsync.kt` l. 72) ; seul le schéma `content` est
-    accepté ; la relance depuis l'historique des applications récentes est ignorée.
-  - Une seule fonction de fusion : `SauvegardeRepository.fusionnerJson` (§ 8). `MainActivity` en
-    `launchMode="singleTask"` (manifeste l. 40) : Retour quitte Marculus.
-  - Non vérifié sur téléphone au 2026-11-10 : l'essai A -> B est à Pascal (journal du 2026-11-09,
-    v0.68.0).
 
 ## 6. Écrans
 
 1. ✅ **Liste des contextes** — cartes (nom, nb tiges, date, état Kanban) + bouton créer ;
    tri par date de martelage, filtre de recherche, **vue Kanban 5 colonnes** (glisser-déposer),
    partage `.marsync`.
+   - ✅ **Nombre net** (mission 018, PR #42, 07a2245) : la carte affiche le nombre **net** de tiges
+     (`ResumeContexte.nbTiges`, `MartelageRepository.kt` l. 28-32 ; calcul SQL dans `Daos.kt` l. 42-46),
+     même nombre que Statut ; le verrouillage et l'état Kanban restent sur le nombre d'événements du
+     journal (journal du 2026-11-09, 018).
 2. ✅ **Créer / éditer un contexte** — nom · diam/circ · min/max/pas · essences actives ·
    obligation hauteur/qualité · tarif de cubage · coefficient de forme · date de martelage ·
    **affouage** (volume maximal d'un lot).
@@ -224,6 +193,18 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 4. ✅ **Statut + Historique** — restitution par essence/classe et journal détaillé des tiges
    (horodatage, action, valeur cumulée) ; onglets Statut · **Par lot** (affouage seulement) ·
    Par parcelle · Historique. *(écran `StatutHistoriqueScreen`)*
+   - ✅ **Par parcelle** au net (mission 019, PR #43, 53e446c) : « Par parcelle » et le CSV foncier
+     partent de `JournalNet.tiges` (`ParParcelle.kt`) ; une annulation sans tige à retirer compte en
+     négatif dans « sans position » et n'apparaît pas au CSV foncier (décision de Pascal, journal du
+     2026-11-09, 019).
+   - ✅ **Ligne « sans position » avec volumes** (mission 021, PR #46, a800bb8) : volume, houppier,
+     total et stères sur la ligne ; affichée dès qu'il y a une tige sans position ou une annulation
+     orpheline (`Repartition.aLigneSansPosition`, `core`, testée ; décision de Pascal, journal du
+     2026-11-10, « Je valide les 4 »). Parcelles + sans position = Statut (31,80 / 7,16 / 38,96 m³
+     relevés sur émulateur, journal du 2026-11-10, afficheur 021).
+   - ✅ **Onglets lisibles** (mission 020, PR #44, 02fc671) : marge de 4 dp ; si un mot ne tient pas,
+     le texte est réduit par pas de 1 sp jusqu'à 9 sp (`LibelleOnglet.kt`, `coupeUnMot`) ; libellés
+     inchangés.
 5. ✅ **Carte** — affichage des parcelles importées (tuiles GPKG), position GNSS,
    rattachement spatial. *(écran `CarteScreen`, `GpkgTileModule`)*
 6. ✅ **Paramètres** — anti-veille, plein écran, vibration, son de clic, **annonce vocale**
@@ -239,6 +220,14 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 - **`+`** : ajoute une tige `PLUS`. Si hauteur/qualité **obligatoires** pour ce compteur →
   saisie demandée immédiatement. Si **GNSS ponctuel** actif → acquisition de la position.
 - **`−`** : enregistre une **annulation** (conservée au journal), décrémente le total.
+  - ✅ **Règle d'annulation unique** (mission 022, PR #49, 76bd939) : une annulation retire la dernière
+    tige de sa case (journal trié par horodatage puis UUID, pile par case ; paquet annulé en partie gardé
+    avec sa quantité restante ; annulation sans tige à retirer gardée). La pile d'annulation n'existe que
+    dans `JournalNet` (`core/src/main/kotlin/fr/marculus/core/JournalNet.kt` l. 18-40) : les volumes, les lots
+    d'affouage, « Par parcelle » et le CSV « tiges à comptabiliser » en partent. Les comptes (Statut,
+    `TotauxMartelage`, `MartelageRepository.kt` l. 261 et 390 ; liste des contextes, SQL de `Daos.kt` l. 42-46 ;
+    boîte « Ouvrir avec », `FichierMarsync.kt` l. 29 et 51) sont des sommes signées PLUS − ANNULATION,
+    égales au net par test (`JournalNetTest.kt` l. 58). Décision : ADR 0007.
 - **Bouton Hauteur / Qualité arbre** : annote la **dernière tige** ajoutée de la cellule
   (saisie hauteur en texte libre / sélection mono-choix de la qualité arbre).
 - **Export CSV** (`FormatCsv;7`) : feuille (totaux par essence × classe) **+** journal des
@@ -246,7 +235,7 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   en-tête `VolumeHouppierTotalM3`, `PartHouppier` (`essence=part|…`), `AffouageLotTotalM3`
   (avant `Journal`) ; colonne `AffouageLotM3` en fin de journal (vide hors affouage), 22
   colonnes. `VolumeHouppierM3` est rempli en Schaeffer via la part de houppier. À l'export, choix entre
-  **journal complet** et **tiges à comptabiliser** (`Journal;NET` : règle d'annulation unique de `JournalNet`, voir § 5 et ADR 0007 ;
+  **journal complet** et **tiges à comptabiliser** (`Journal;NET` : règle d'annulation unique de `JournalNet`, voir ci-dessus et ADR 0007 ;
   totaux identiques). Format 6 : `TarifsEssence`
   (`essence=TARIF:numéro|…`) et `SteresParM3` après `AffouageLotTotalM3` ; `Tarif` /
   `TarifNumero` restent le tarif par défaut. Format 7 : `CommuneInsee`, `Ser`, `MillesimeTarifs`
@@ -263,6 +252,21 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   fichier garde la valeur locale (`affouage`, `volumeMaxLotM3`, `tarif`, `tarifNumero`,
   `coefficientForme`, `cheminGpkg` ; `lot` des tiges) ; une clé présente l'emporte. Un réexport
   du plan Nemeton ne décoche donc plus l'affouage ni ne remet le tarif à `AUCUN`.
+- ✅ **Recevoir un `.marsync` : « Ouvrir avec » / « Partager »** (mission 016, PR #36, dbad43c).
+  - Voies d'entrée : `ACTION_VIEW` (notification Bluetooth, gestionnaire de fichiers) et
+    `ACTION_SEND` (courriel, messagerie), types `application/octet-stream`, `application/json` et
+    `text/plain` (`app/src/main/AndroidManifest.xml` l. 51-64 ; lecture dans `MainActivity.kt`
+    l. 192-193). Prix accepté par Pascal : Marculus apparaît dans « Ouvrir avec » de tout fichier
+    binaire (journal du 2026-11-09, 016).
+  - Une boîte « Fusionner ? » annonce le ou les contextes, le nombre **net** de tiges (`FichierMarsync.kt` l. 29 et 51, somme de `TotauxMartelage`) et
+    l'opérateur ; **Annuler n'écrit rien**. Le bouton Paramètres → « Fusionner » est inchangé.
+  - Le contenu décide : un fichier illisible est refusé, un JSON valide sous un autre nom est
+    accepté ; plafond de 50 Mo (`FichierMarsync.kt` l. 75) ; seul le schéma `content` est
+    accepté ; la relance depuis l'historique des applications récentes est ignorée.
+  - Une seule fonction de fusion : `SauvegardeRepository.fusionnerJson`. `MainActivity` en
+    `launchMode="singleTask"` (manifeste l. 40) : Retour quitte Marculus.
+  - Non vérifié sur téléphone au 2026-11-10 : l'essai A -> B est à Pascal (journal du 2026-11-09,
+    v0.68.0).
 - ✅ Partage via le **partage système** (pas de serveur).
 - 🔜 Synchro **temps réel / réseau** entre appareils (hors périmètre actuel).
 
