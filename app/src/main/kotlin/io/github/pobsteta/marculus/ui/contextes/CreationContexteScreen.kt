@@ -64,6 +64,7 @@ import fr.marculus.core.model.PartsLot
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -753,6 +754,10 @@ private fun LigneEssence(
         ) {
             Checkbox(checked = coche, onCheckedChange = { onToggle() })
             Text(nom, modifier = Modifier.weight(1f))
+            if (coche && lot != null) {
+                CaseLot("T", stringResource(R.string.creation_cd_lot_tige), lot.tige) { onLot(lot.copy(tige = it)) }
+                CaseLot("H", stringResource(R.string.creation_cd_lot_houppier), lot.houppier) { onLot(lot.copy(houppier = it)) }
+            }
             if (coche && surUneLigne) Reglages()
             Echantillon(couleur = fond, onClick = onPickFond)
             EchantillonTexte(fond = fond, texte = texte, onClick = onPickTexte)
@@ -765,29 +770,13 @@ private fun LigneEssence(
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) { Reglages() }
         }
-        if (coche && lot != null) {
-            FlowRow(
-                modifier = Modifier.padding(start = 40.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                itemVerticalAlignment = Alignment.CenterVertically,
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = lot.tige, onCheckedChange = { onLot(lot.copy(tige = it)) })
-                    Text(stringResource(R.string.creation_lot_tige))
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(checked = lot.houppier, onCheckedChange = { onLot(lot.copy(houppier = it)) })
-                    Text(stringResource(R.string.creation_lot_houppier))
-                }
-            }
-            if (!lot.tige && !lot.houppier) {
-                Text(
-                    stringResource(R.string.creation_lot_aucune),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 40.dp, bottom = 4.dp),
-                )
-            }
+        if (coche && lot != null && !compteAuLot(nom, tarif, lot, part)) {
+            Text(
+                stringResource(R.string.creation_lot_aucune),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 40.dp, bottom = 4.dp),
+            )
         }
         source?.let {
             Text(
@@ -797,6 +786,19 @@ private fun LigneEssence(
                 modifier = Modifier.padding(start = 40.dp, bottom = 4.dp),
             )
         }
+    }
+}
+
+/** Une case « T » ou « H » : la lettre à côté, la phrase entière pour le lecteur d'écran. */
+@Composable
+private fun CaseLot(lettre: String, description: String, coche: Boolean, onChange: (Boolean) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+            checked = coche,
+            onCheckedChange = onChange,
+            modifier = Modifier.semantics { contentDescription = description },
+        )
+        Text(lettre, modifier = Modifier.clearAndSetSemantics { }, style = MaterialTheme.typography.labelLarge)
     }
 }
 

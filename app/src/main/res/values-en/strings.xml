@@ -440,7 +440,7 @@
     <string name="creation_affouage_volume_max">Maximum volume per lot (m³)</string>
     <string name="creation_affouage_aide">Lots start at 1. Each stem\'s volume is added up; once the lot reaches the maximum volume, the next stem opens the next lot. The lot number is announced for every stem. For each species, the lot counts the ticked parts: the stem, the crown, or both. With EMERGE, a stem without height adds no volume.</string>
     <string name="creation_houppier_titre" formatted="false">Crown share per species (%)</string>
-    <string name="creation_houppier_aide" formatted="false">The Schaeffer tariff gives the merchantable stem volume. Enter the share of the total merchantable volume that is crown: 0 % = no crown; 30 % = crown is 30 % of the total, the stem 70 %. In an affouage, the species\' \"Stem\" and \"Crown\" boxes set what counts in the lot.</string>
+    <string name="creation_houppier_aide" formatted="false">The Schaeffer tariff gives the merchantable stem volume. Enter the share of the total merchantable volume that is crown: 0 % = no crown; 30 % = crown is 30 % of the total, the stem 70 %. In an affouage, the species\' T (stem) and H (crown) boxes set what counts in the lot.</string>
     <string name="creation_houppier_emerge">With EMERGE, the crown is computed by the model: these shares are not used.</string>
     <string name="creation_erreur_houppier" formatted="false">Invalid crown share (0 to 95 %).</string>
     <string name="creation_tarif_court_aucun">None</string>
@@ -452,10 +452,10 @@
     <string name="creation_tarif_court_intermediaire">Sch. interm.</string>
     <string name="creation_tarif_court_tres_lent">Sch. very slow</string>
     <string name="creation_tarif_numero_court">No.</string>
-    <string name="creation_lot_tige">Stem</string>
-    <string name="creation_lot_houppier">Crown</string>
+    <string name="creation_cd_lot_tige">Stem counted in the lot</string>
+    <string name="creation_cd_lot_houppier">Crown counted in the lot</string>
     <string name="creation_lot_aucune">This species does not count in the lot.</string>
-    <string name="creation_houppier_court">Crown</string>
+    <string name="creation_houppier_court" formatted="false">Crown %</string>
     <string name="creation_cd_tarif_essence">Tariff for %1$s</string>
     <string name="creation_essences_aide" formatted="false">For each ticked species: volume tariff, tariff number (Schaeffer, 1–20) and crown share in %. EMERGE = 2-input merchantable stem volume; it uses the entered height and computes the crown itself.</string>
     <string name="creation_essences_autres">Other available species</string>
