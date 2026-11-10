@@ -47,6 +47,11 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
   - Mission : les deux cases par essence à l'écran du contexte quand « Affouage » est coché
   - Moyens : `CreationContexteScreen.kt`, captures avant relecture ; après la 026
 
+- [030](missions/030-tarif-ifn-autres-feuillus-resineux.md) · depuis le cycle 7
+  - Homme : testeur puis dev (sonnet), appuyer
+  - Mission : proposition IFN pour « Autres feuillus » / « Autres résineux » = moyenne pondérée des feuillus / résineux de la SER hors essences du contexte ; lignes négatives écartées
+  - Moyens : `TarifsIfn`, table embarquée, note 029
+
 - [029](missions/029-ifn-autres-feuillus-resineux.md) · depuis le cycle 7
   - Homme : acquéreur (sonnet), appuyer
   - Mission : que valent les codes IFN `29AF` et `68CE`, pour une proposition de tarif aux « Autres feuillus » et « Autres résineux »

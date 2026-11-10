@@ -78,6 +78,7 @@
 | [027](missions/027-cases-tige-houppier-ecran.md) cases « tige » et « houppier » à l'écran du contexte | `afficheur` | sonnet | appuyer | oui · oui · après 026 | 8 |
 | [028](missions/028-doc-lot-par-essence.md) règle du lot écrite une fois, ADR 0009, brief à nemetonshiny | `archiviste` | sonnet | appuyer, plan d'abord | oui · oui · après 026 et 027 | 8 |
 | [029](missions/029-ifn-autres-feuillus-resineux.md) codes IFN `29AF` et `68CE` : sens et tarifs utilisables ? | `acquereur` | sonnet | appuyer | oui · oui · oui | 8 |
+| [030](missions/030-tarif-ifn-autres-feuillus-resineux.md) proposition IFN calculée pour Autres feuillus / Autres résineux | `testeur` puis `dev` | sonnet | appuyer | oui · oui · oui (testeur d'abord) | 8 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
