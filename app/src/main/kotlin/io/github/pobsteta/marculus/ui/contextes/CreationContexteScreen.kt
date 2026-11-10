@@ -60,9 +60,11 @@ import fr.marculus.core.TarifsIfn
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.produceState
 import fr.marculus.core.model.TarifEssence
+import fr.marculus.core.model.PartsLot
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -127,6 +129,10 @@ fun CreationContexteScreen(
         mutableStateMapOf<String, String>().apply {
             contexteExistant?.partHouppier?.forEach { (e, p) -> put(e, formatPourcent(p * 100.0)) }
         }
+    }
+    // Parties comptées au lot par essence (affouage) : absente = tige et houppier cochés.
+    val partsLot = remember {
+        mutableStateMapOf<String, PartsLot>().apply { contexteExistant?.partsLot?.let { putAll(it) } }
     }
     var datePickerOuvert by remember { mutableStateOf(false) }
 
@@ -368,6 +374,8 @@ fun CreationContexteScreen(
                         null
                     },
                     surUneLigne = paysageEssences,
+                    lot = if (affouage) partsLot[essence] ?: PartsLot() else null,
+                    onLot = { partsLot[essence] = it },
                     onToggle = {
                         if (essence in selection) {
                             selection.remove(essence)
@@ -521,6 +529,8 @@ fun CreationContexteScreen(
                                 val partsFinales = partsSaisies
                                     .filterValues { partValide(it) && it!! > 0.0 }
                                     .mapValues { it.value!! }
+                                // Seules les essences aux parties non par défaut sont écrites.
+                                val partsLotFinales = partsLot.filterValues { !(it.tige && it.houppier) }
                                 scope.launch {
                                     if (edition) {
                                         repository.modifierContexte(
@@ -528,7 +538,7 @@ fun CreationContexteScreen(
                                             AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg,
                                             defaut.tarif, defaut.numero, coef, dateMartelage,
                                             affouage, volumeLot, partsFinales, tarifsFinaux, steres,
-                                            communeInsee, ser, millesime,
+                                            communeInsee, ser, millesime, partsLotFinales,
                                         )
                                         onEnregistre(contexteExistant.id)
                                     } else {
@@ -541,6 +551,7 @@ fun CreationContexteScreen(
                                             partHouppier = partsFinales, tarifsEssence = tarifsFinaux,
                                             steresParM3 = steres,
                                             communeInsee = communeInsee, ser = ser, millesimeTarifs = millesime,
+                                            partsLot = partsLotFinales,
                                         )
                                         onEnregistre(id)
                                     }
@@ -697,6 +708,9 @@ private fun LigneEssence(
     /** Origine du numéro proposé (texte secondaire), ou null. */
     source: String?,
     surUneLigne: Boolean,
+    /** Parties comptées au lot, ou null hors affouage (cases masquées). */
+    lot: PartsLot?,
+    onLot: (PartsLot) -> Unit,
     onToggle: () -> Unit,
     onPickFond: () -> Unit,
     onPickTexte: () -> Unit,
@@ -736,10 +750,17 @@ private fun LigneEssence(
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            // 4 dp entre les éléments : à 360 dp, le nom d'essence garde la place de « feuillus ».
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Checkbox(checked = coche, onCheckedChange = { onToggle() })
             Text(nom, modifier = Modifier.weight(1f))
+            if (coche && lot != null) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CaseLot("T", stringResource(R.string.creation_cd_lot_tige), lot.tige) { onLot(lot.copy(tige = it)) }
+                    CaseLot("H", stringResource(R.string.creation_cd_lot_houppier), lot.houppier) { onLot(lot.copy(houppier = it)) }
+                }
+            }
             if (coche && surUneLigne) Reglages()
             Echantillon(couleur = fond, onClick = onPickFond)
             EchantillonTexte(fond = fond, texte = texte, onClick = onPickTexte)
@@ -752,6 +773,14 @@ private fun LigneEssence(
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) { Reglages() }
         }
+        if (coche && lot != null && !compteAuLot(nom, tarif, lot, part)) {
+            Text(
+                stringResource(R.string.creation_lot_aucune),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 40.dp, bottom = 4.dp),
+            )
+        }
         source?.let {
             Text(
                 it,
@@ -760,6 +789,19 @@ private fun LigneEssence(
                 modifier = Modifier.padding(start = 40.dp, bottom = 4.dp),
             )
         }
+    }
+}
+
+/** Une case « T » ou « H » : la lettre à côté, la phrase entière pour le lecteur d'écran. */
+@Composable
+private fun CaseLot(lettre: String, description: String, coche: Boolean, onChange: (Boolean) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(
+            checked = coche,
+            onCheckedChange = onChange,
+            modifier = Modifier.semantics { contentDescription = description },
+        )
+        Text(lettre, modifier = Modifier.clearAndSetSemantics { }, style = MaterialTheme.typography.labelLarge)
     }
 }
 
