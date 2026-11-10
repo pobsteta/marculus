@@ -60,6 +60,7 @@ import fr.marculus.core.TarifsIfn
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.produceState
 import fr.marculus.core.model.TarifEssence
+import fr.marculus.core.model.PartsLot
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
@@ -127,6 +128,10 @@ fun CreationContexteScreen(
         mutableStateMapOf<String, String>().apply {
             contexteExistant?.partHouppier?.forEach { (e, p) -> put(e, formatPourcent(p * 100.0)) }
         }
+    }
+    // Parties comptées au lot par essence (affouage) : absente = tige et houppier cochés.
+    val partsLot = remember {
+        mutableStateMapOf<String, PartsLot>().apply { contexteExistant?.partsLot?.let { putAll(it) } }
     }
     var datePickerOuvert by remember { mutableStateOf(false) }
 
@@ -368,6 +373,8 @@ fun CreationContexteScreen(
                         null
                     },
                     surUneLigne = paysageEssences,
+                    lot = if (affouage) partsLot[essence] ?: PartsLot() else null,
+                    onLot = { partsLot[essence] = it },
                     onToggle = {
                         if (essence in selection) {
                             selection.remove(essence)
@@ -521,6 +528,8 @@ fun CreationContexteScreen(
                                 val partsFinales = partsSaisies
                                     .filterValues { partValide(it) && it!! > 0.0 }
                                     .mapValues { it.value!! }
+                                // Seules les essences aux parties non par défaut sont écrites.
+                                val partsLotFinales = partsLot.filterValues { !(it.tige && it.houppier) }
                                 scope.launch {
                                     if (edition) {
                                         repository.modifierContexte(
@@ -528,7 +537,7 @@ fun CreationContexteScreen(
                                             AxeClasses(mi, ma, pa), essences, commentaireFinal, inc, cheminGpkg,
                                             defaut.tarif, defaut.numero, coef, dateMartelage,
                                             affouage, volumeLot, partsFinales, tarifsFinaux, steres,
-                                            communeInsee, ser, millesime,
+                                            communeInsee, ser, millesime, partsLotFinales,
                                         )
                                         onEnregistre(contexteExistant.id)
                                     } else {
@@ -541,6 +550,7 @@ fun CreationContexteScreen(
                                             partHouppier = partsFinales, tarifsEssence = tarifsFinaux,
                                             steresParM3 = steres,
                                             communeInsee = communeInsee, ser = ser, millesimeTarifs = millesime,
+                                            partsLot = partsLotFinales,
                                         )
                                         onEnregistre(id)
                                     }
@@ -697,6 +707,9 @@ private fun LigneEssence(
     /** Origine du numéro proposé (texte secondaire), ou null. */
     source: String?,
     surUneLigne: Boolean,
+    /** Parties comptées au lot, ou null hors affouage (cases masquées). */
+    lot: PartsLot?,
+    onLot: (PartsLot) -> Unit,
     onToggle: () -> Unit,
     onPickFond: () -> Unit,
     onPickTexte: () -> Unit,
@@ -751,6 +764,30 @@ private fun LigneEssence(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 itemVerticalAlignment = Alignment.CenterVertically,
             ) { Reglages() }
+        }
+        if (coche && lot != null) {
+            FlowRow(
+                modifier = Modifier.padding(start = 40.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = lot.tige, onCheckedChange = { onLot(lot.copy(tige = it)) })
+                    Text(stringResource(R.string.creation_lot_tige))
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(checked = lot.houppier, onCheckedChange = { onLot(lot.copy(houppier = it)) })
+                    Text(stringResource(R.string.creation_lot_houppier))
+                }
+            }
+            if (!lot.tige && !lot.houppier) {
+                Text(
+                    stringResource(R.string.creation_lot_aucune),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 40.dp, bottom = 4.dp),
+                )
+            }
         }
         source?.let {
             Text(

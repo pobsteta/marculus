@@ -12,6 +12,7 @@ import fr.marculus.core.model.EtatKanban
 import fr.marculus.core.model.ModeMesure
 import fr.nemeton.terrain.geo.Position
 import fr.marculus.core.model.TarifCubage
+import fr.marculus.core.model.PartsLot
 import fr.marculus.core.model.TarifEssence
 import fr.marculus.core.model.Tige
 import io.github.pobsteta.marculus.data.db.CompteurConfigDao
@@ -124,6 +125,8 @@ class MartelageRepository(
         communeInsee: String? = null,
         ser: String? = null,
         millesimeTarifs: String? = null,
+        /** Parties comptées au lot par essence (absente = tige et houppier). */
+        partsLot: Map<String, PartsLot> = emptyMap(),
     ): String {
         val id = UUID.randomUUID().toString()
         contexteDao.inserer(
@@ -154,6 +157,7 @@ class MartelageRepository(
                 communeInsee = communeInsee,
                 ser = ser,
                 millesimeTarifs = millesimeTarifs,
+                partsLot = encodePartsLot(partsLot),
             ),
         )
         return id
@@ -180,6 +184,8 @@ class MartelageRepository(
         communeInsee: String? = null,
         ser: String? = null,
         millesimeTarifs: String? = null,
+        /** null = garder les parties déjà enregistrées (jamais un effacement par défaut). */
+        partsLot: Map<String, PartsLot>? = null,
     ) {
         val existant = contexteDao.parId(id) ?: return
         contexteDao.inserer(
@@ -206,6 +212,7 @@ class MartelageRepository(
                 communeInsee = communeInsee,
                 ser = ser,
                 millesimeTarifs = millesimeTarifs,
+                partsLot = partsLot?.let { encodePartsLot(it) } ?: existant.partsLot,
             ),
         )
     }
