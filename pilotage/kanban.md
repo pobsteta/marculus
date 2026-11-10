@@ -37,7 +37,20 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
-_(vide depuis le cycle 7)_
+- [026](missions/026-lot-tige-houppier-par-essence.md) · depuis le cycle 7
+  - Homme : testeur (sonnet) puis dev (opus), tenir
+  - Mission : le lot d'affouage compte les parties cochées (tige, houppier) de chaque essence ; défaut les deux cochées
+  - Moyens : `:core`, `:data` (migration 17 → 18), `.marsync`, CSV format 8 ; plan du dev validé par Pascal
+
+- [027](missions/027-cases-tige-houppier-ecran.md) · depuis le cycle 7
+  - Homme : afficheur (sonnet), appuyer
+  - Mission : les deux cases par essence à l'écran du contexte quand « Affouage » est coché
+  - Moyens : `CreationContexteScreen.kt`, captures avant relecture ; après la 026
+
+- [028](missions/028-doc-lot-par-essence.md) · depuis le cycle 7
+  - Homme : archiviste (sonnet), appuyer, plan d'abord
+  - Mission : la règle écrite une fois (spec affouage, ADR 0009, format 8), brief à nemetonshiny
+  - Moyens : `docs/`, `~/dev/briefs/vers-nemetonshiny/` ; après 026 et 027
 
 ## Planifié
 
