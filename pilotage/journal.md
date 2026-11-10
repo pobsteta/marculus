@@ -261,3 +261,8 @@
 2026-11-10 · Claude (orchestrateur) · 030 · PR #62 fusionnée (609910f) : relecteur prêt, CI verte sur main à jour, fusion autorisée par Pascal ; v0.73.0 installée sur le téléphone de Pascal
 2026-11-10 · Claude (orchestrateur) · 030 · écart · attendu : être prévenu à la publication de v0.73.0 · vu : l'attente en arrière-plan n'a pas signalé la release (publiée 20:33, vue à 21:22 sur question de Pascal) · vérifié : gh release list · décision : garder ; vérifier soi-même l'état de la release quand Pascal attend
 2026-11-10 · Pascal · 030 · « tout fonctionne parfaitement » : propositions IFN pour Autres feuillus et Autres résineux vues sur le téléphone
+2026-11-10 · Pascal · 030 · « lance l'ADR 0010 maintenant » puis « fusionne-la dès qu'elle est prête »
+2026-11-10 · archiviste · 030 · ADR 0010 écrit (c14a521) : proposition IFN calculée pour Autres feuillus / Autres résineux et « ≤ 0 écarté » (PR #62, 609910f) ; README des ADR ; renvoi daté dans la spec des tarifs SER
+2026-11-10 · relecteur · ADR 0010 (c14a521) · à reprendre (mineur) : preuves recontrôlées exactes ; l. 60 renvoi à la fiche faux (alternatives non nommées), l. 66 « prêts à payer » sans preuve, plage de tests l. 356-474
+2026-11-10 · archiviste · ADR 0010 · reprise 1/3 (62acf91) : les trois points corrigés ; vérifiés par l'orchestrateur sur le diff (3 lignes, rien d'autre)
+2026-11-10 · Claude (orchestrateur) · 030 · écart · attendu : le brief à nemetonshiny sur l'origine des 276 lignes ≤ 0 (décision de Pascal, l. 229) écrit avec la mission · vu : jamais confié à un agent, absent de ~/dev/briefs/vers-nemetonshiny/ · vérifié : archiviste et relecteur de l'ADR 0010 · décision : à Pascal (le faire écrire par l'archiviste)
