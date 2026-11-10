@@ -1,0 +1,119 @@
+niveau;code;espar;essence_libelle;type;numero;n_arbres;cv;millesime;part_houppier
+SER;C20;03;Chêne sessile;SCHL;8.0;100;30.0;IFN test;
+SER;C20;09;Hêtre;SCHL;9.0;50;30.0;IFN test;
+SER;C20;11;Charme;SCHL;6.0;20;30.0;IFN test;
+SER;C20;24;Tremble;SCHL;10.0;10;30.0;IFN test;
+SER;C20;14;Robinier faux acacia;SCHL;3.0;10;30.0;IFN test;
+SER;C20;61;Sapin pectiné;SCHL;12.0;400;30.0;IFN test;
+SER;C20;62;Épicéa commun;SCHL;11.0;200;30.0;IFN test;
+SER;C20;52;Pin sylvestre;SCHL;7.0;12;30.0;IFN test;
+SER;C20;64;Douglas;SCHL;9.0;20;30.0;IFN test;
+SER;C20;68CL;Cyprès de Lawson;SCHL;14.0;8;30.0;IFN test;
+SER;C20;11;Charme;SCHR;4.0;20;30.0;IFN test;
+SER;C20;24;Tremble;SCHR;8.0;10;30.0;IFN test;
+SER;C20;14;Robinier faux acacia;SCHR;3.0;10;30.0;IFN test;
+SER;C51;11;Charme;SCHL;7.0;12;30.0;IFN test;
+SER;C51;24;Tremble;SCHL;9.0;10;30.0;IFN test;
+SER;C51;09;Hêtre;SCHL;9.4;871;30.0;IFN test;
+GRECO;C;11;Charme;SCHL;6.0;20;30.0;IFN test;
+GRECO;C;24;Tremble;SCHL;10.0;15;30.0;IFN test;
+GRECO;C;09;Hêtre;SCHL;9.0;500;30.0;IFN test;
+SER;C51;11;Charme;SCHR;4.0;15;30.0;IFN test;
+SER;C51;24;Tremble;SCHR;6.0;14;30.0;IFN test;
+GRECO;C;11;Charme;SCHR;5.0;40;30.0;IFN test;
+GRECO;C;24;Tremble;SCHR;7.0;10;30.0;IFN test;
+SER;B70;11;Charme;SCHL;5.0;15;30.0;IFN test;
+SER;B70;24;Tremble;SCHL;7.0;15;30.0;IFN test;
+FRANCE;FR;11;Charme;SCHL;5.0;100;30.0;IFN test;
+FRANCE;FR;24;Tremble;SCHL;9.0;100;30.0;IFN test;
+FRANCE;FR;09;Hêtre;SCHL;20.0;1000;30.0;IFN test;
+FRANCE;FR;52;Pin sylvestre;SCHL;7.0;60;30.0;IFN test;
+FRANCE;FR;64;Douglas;SCHL;11.0;20;30.0;IFN test;
+FRANCE;FR;52;Pin sylvestre;SCHTL;8.0;20;30.0;IFN test;
+SER;F10;12V;Bouleau verruqueux;SCHL;-2.0;500;30.0;IFN test;
+GRECO;F;12V;Bouleau verruqueux;SCHL;4.0;200;30.0;IFN test;
+SER;F11;15S;Érable sycomore;SCHL;-1.0;500;30.0;IFN test;
+SER;D30;11;Charme;SCHL;6.0;20;30.0;IFN test;
+SER;D30;24;Tremble;SCHL;8.0;15;30.0;IFN test;
+SER;D30;14;Robinier faux acacia;SCHL;-3.0;400;30.0;IFN test;
+SER;D30;52;Pin sylvestre;SCHL;7.0;20;30.0;IFN test;
+SER;D30;64;Douglas;SCHL;9.0;15;30.0;IFN test;
+SER;D30;62;Épicéa commun;SCHL;-5.0;300;30.0;IFN test;
+SER;D31;11;Charme;SCHL;6.0;20;30.0;IFN test;
+SER;D31;14;Robinier faux acacia;SCHL;-3.0;400;30.0;IFN test;
+GRECO;D;11;Charme;SCHL;5.0;40;30.0;IFN test;
+GRECO;E;11;Charme;SCHL;-4.0;300;30.0;IFN test;
+GRECO;E;24;Tremble;SCHL;8.0;10;30.0;IFN test;
+SER;P10;11;Charme;SCHR;5.0;20;30.0;IFN test;12.0
+SER;P10;11;Charme;SCHI;5.0;20;30.0;IFN test;12.0
+SER;P10;11;Charme;SCHL;5.0;20;30.0;IFN test;12.0
+SER;P10;11;Charme;SCHTL;5.0;20;30.0;IFN test;12.0
+SER;P10;24;Tremble;SCHR;5.0;10;30.0;IFN test;18.0
+SER;P10;24;Tremble;SCHI;5.0;10;30.0;IFN test;18.0
+SER;P10;24;Tremble;SCHL;5.0;10;30.0;IFN test;18.0
+SER;P10;24;Tremble;SCHTL;5.0;10;30.0;IFN test;18.0
+SER;P10;14;Robinier faux acacia;SCHR;5.0;10;30.0;IFN test;15.0
+SER;P10;14;Robinier faux acacia;SCHI;5.0;10;30.0;IFN test;15.0
+SER;P10;14;Robinier faux acacia;SCHL;5.0;10;30.0;IFN test;15.0
+SER;P10;14;Robinier faux acacia;SCHTL;5.0;10;30.0;IFN test;15.0
+SER;P10;09;Hêtre;SCHR;5.0;100;30.0;IFN test;30.0
+SER;P10;09;Hêtre;SCHI;5.0;100;30.0;IFN test;30.0
+SER;P10;09;Hêtre;SCHL;5.0;100;30.0;IFN test;30.0
+SER;P10;09;Hêtre;SCHTL;5.0;100;30.0;IFN test;30.0
+SER;P10;52;Pin sylvestre;SCHR;5.0;20;30.0;IFN test;10.0
+SER;P10;52;Pin sylvestre;SCHI;5.0;20;30.0;IFN test;10.0
+SER;P10;52;Pin sylvestre;SCHL;5.0;20;30.0;IFN test;10.0
+SER;P10;52;Pin sylvestre;SCHTL;5.0;20;30.0;IFN test;10.0
+SER;P10;64;Douglas;SCHR;5.0;10;30.0;IFN test;20.0
+SER;P10;64;Douglas;SCHI;5.0;10;30.0;IFN test;20.0
+SER;P10;64;Douglas;SCHL;5.0;10;30.0;IFN test;20.0
+SER;P10;64;Douglas;SCHTL;5.0;10;30.0;IFN test;20.0
+SER;P10;68CL;Cyprès de Lawson;SCHR;5.0;10;30.0;IFN test;25.0
+SER;P10;68CL;Cyprès de Lawson;SCHI;5.0;10;30.0;IFN test;25.0
+SER;P10;68CL;Cyprès de Lawson;SCHL;5.0;10;30.0;IFN test;25.0
+SER;P10;68CL;Cyprès de Lawson;SCHTL;5.0;10;30.0;IFN test;25.0
+SER;P10;61;Sapin pectiné;SCHR;5.0;300;30.0;IFN test;40.0
+SER;P10;61;Sapin pectiné;SCHI;5.0;300;30.0;IFN test;40.0
+SER;P10;61;Sapin pectiné;SCHL;5.0;300;30.0;IFN test;40.0
+SER;P10;61;Sapin pectiné;SCHTL;5.0;300;30.0;IFN test;40.0
+SER;P12;11;Charme;SCHR;5.0;12;30.0;IFN test;12.0
+SER;P12;11;Charme;SCHI;5.0;12;30.0;IFN test;12.0
+SER;P12;11;Charme;SCHL;5.0;12;30.0;IFN test;12.0
+SER;P12;11;Charme;SCHTL;5.0;12;30.0;IFN test;12.0
+SER;P12;24;Tremble;SCHR;5.0;10;30.0;IFN test;18.0
+SER;P12;24;Tremble;SCHI;5.0;10;30.0;IFN test;18.0
+SER;P12;24;Tremble;SCHL;5.0;10;30.0;IFN test;18.0
+SER;P12;24;Tremble;SCHTL;5.0;10;30.0;IFN test;18.0
+GRECO;P;11;Charme;SCHR;5.0;20;30.0;IFN test;10.0
+GRECO;P;11;Charme;SCHI;5.0;20;30.0;IFN test;10.0
+GRECO;P;11;Charme;SCHL;5.0;20;30.0;IFN test;10.0
+GRECO;P;11;Charme;SCHTL;5.0;20;30.0;IFN test;10.0
+GRECO;P;24;Tremble;SCHR;5.0;10;30.0;IFN test;20.0
+GRECO;P;24;Tremble;SCHI;5.0;10;30.0;IFN test;20.0
+GRECO;P;24;Tremble;SCHL;5.0;10;30.0;IFN test;20.0
+GRECO;P;24;Tremble;SCHTL;5.0;10;30.0;IFN test;20.0
+SER;T01;03;Chêne sessile;SCHL;7.0;50;30.0;IFN test;
+SER;T02;09;Hêtre;SCHL;7.0;50;30.0;IFN test;
+SER;T03;14;Robinier faux acacia;SCHL;7.0;50;30.0;IFN test;
+SER;T04;24;Tremble;SCHL;7.0;50;30.0;IFN test;
+SER;T05;28;Olivier d'Europe;SCHL;7.0;50;30.0;IFN test;
+SER;T06;36;Eucalyptus;SCHL;7.0;50;30.0;IFN test;
+SER;T07;40;Arbousier;SCHL;7.0;50;30.0;IFN test;
+SER;T08;41;Alisier torminal;SCHL;7.0;50;30.0;IFN test;
+SER;T09;49AM;Aubépine monogyne;SCHL;7.0;50;30.0;IFN test;
+SER;T10;49IA;Houx;SCHL;7.0;50;30.0;IFN test;
+SER;T11;12V;Bouleau verruqueux;SCHL;7.0;50;30.0;IFN test;
+SER;T12;51;Pin maritime;SCHL;7.0;50;30.0;IFN test;
+SER;T13;52;Pin sylvestre;SCHL;7.0;50;30.0;IFN test;
+SER;T14;58;Pin à crochets;SCHL;7.0;50;30.0;IFN test;
+SER;T15;59;Pin cembro;SCHL;7.0;50;30.0;IFN test;
+SER;T16;61;Sapin pectiné;SCHL;7.0;50;30.0;IFN test;
+SER;T17;62;Épicéa commun;SCHL;7.0;50;30.0;IFN test;
+SER;T18;63;Mélèze d'Europe;SCHL;7.0;50;30.0;IFN test;
+SER;T19;64;Douglas;SCHL;7.0;50;30.0;IFN test;
+SER;T20;65;Cèdre de l'Atlas;SCHL;7.0;50;30.0;IFN test;
+SER;T21;66;Cyprès de Provence;SCHL;7.0;50;30.0;IFN test;
+SER;T22;68CL;Cyprès de Lawson;SCHL;7.0;50;30.0;IFN test;
+SER;T23;71;Sapin de Nordmann;SCHL;7.0;50;30.0;IFN test;
+SER;T24;67;If;SCHL;7.0;50;30.0;IFN test;
+SER;T25;69JC;Genévrier commun;SCHL;7.0;50;30.0;IFN test;
