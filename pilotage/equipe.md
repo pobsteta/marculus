@@ -74,6 +74,9 @@
 | [023](missions/023-release-sans-pilotage.md) pas de release sans changement de l'application | `dev` | sonnet | lâcher | oui · oui · oui | 6 |
 | [024](missions/024-archivage-016-023.md) spec, README et ADR à jour du livré 016-023 | `archiviste` | sonnet | appuyer (plan d'abord) | oui · oui · oui | 7 |
 | [025](missions/025-egalite-des-totaux.md) test d'égalité des totaux entre écrans et CSV | `testeur` | sonnet | lâcher | oui · oui · oui | 7 |
+| [026](missions/026-lot-tige-houppier-par-essence.md) le lot d'affouage compte les parties cochées (tige, houppier) de chaque essence | `testeur` puis `dev` | sonnet puis opus | tenir | oui · oui · oui (testeur d'abord) | 8 |
+| [027](missions/027-cases-tige-houppier-ecran.md) cases « tige » et « houppier » à l'écran du contexte | `afficheur` | sonnet | appuyer | oui · oui · après 026 | 8 |
+| [028](missions/028-doc-lot-par-essence.md) règle du lot écrite une fois, ADR 0009, brief à nemetonshiny | `archiviste` | sonnet | appuyer, plan d'abord | oui · oui · après 026 et 027 | 8 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 

@@ -10,7 +10,7 @@ sans changer un seul résultat. Aujourd'hui la règle existe en deux copies équ
 2026-11-10) ; une correction future dans l'une oublierait l'autre, et Statut divergerait de Par
 lot, Par parcelle et des CSV. Décision de Pascal du 2026-11-10 : « Je valide les 4 ».
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-10 d'après le journal (2026-11-10, lignes 022), l'archiviste n'ayant pas rédigé de redite à l'époque._ Faire partir `VolumesMartelage.totaux`, puis `AffouageLots.etat` (extension « (a) » de Pascal), de `JournalNet.tiges`, pour qu'il ne reste qu'une règle d'annulation dans `:core`, sans changer un résultat. Livrée par la PR #49 (76bd939) ; décision : ADR 0007. Redite de l'agent d'origine : non retrouvée.
 
 **Extension (décision de Pascal du 2026-11-10, « (a) ») :** la troisième copie, trouvée par le
 dev dans `AffouageLots.etat` (`core/src/main/kotlin/fr/marculus/core/AffouageLots.kt` l. 91-104 à
