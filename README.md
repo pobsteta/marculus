@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/pobsteta/marculus/actions/workflows/ci.yml/badge.svg)](https://github.com/pobsteta/marculus/actions/workflows/ci.yml)
 [![Release](https://github.com/pobsteta/marculus/actions/workflows/release.yml/badge.svg)](https://github.com/pobsteta/marculus/actions/workflows/release.yml)
-[![Version](https://img.shields.io/github/v/release/pobsteta/marculus?sort=semver&label=version)](https://github.com/pobsteta/marculus/releases)
+[![Version](https://img.shields.io/github/v/release/pobsteta/marculus?label=version)](https://github.com/pobsteta/marculus/releases)
 ![Couverture](.github/badges/jacoco.svg)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-min%2026%20%C2%B7%20cible%2036-3DDC84?logo=android&logoColor=white)
@@ -137,16 +137,16 @@ Rapport de couverture : `core/build/reports/jacoco/html/index.html`.
 
 **Publier.** Jamais de push direct sur `main` : tout passe par une pull request. Au **merge de la PR**
 sur `main`, `ci.yml` lance les tests ; **seulement s'ils sont verts**, `release.yml` (déclenché par
-`workflow_run`, mission 015, PR #27) construit et tague le commit testé, calcule la version depuis les commits conventionnels (`feat:` -> mineur,
-`fix:` -> patch, `!` ou `BREAKING CHANGE` -> majeur, sinon patch) et publie l'APK signé sur GitHub
-Releases, sauf si l'application n'a pas changé (règle ci-dessous). Le titre de la PR doit donc être un commit conventionnel (`feat: ...`, `fix: ...`).
+`workflow_run`, mission 015, PR #27) construit et tague le commit testé, calcule la version calendaire `vAAAA.MM.N` (année, mois UTC, compteur du mois qui repart à 1
+chaque mois ; mission 036, `.github/scripts/version-calendaire.sh`) et publie l'APK signé sur GitHub
+Releases, sauf si l'application n'a pas changé (règle ci-dessous). Le titre de la PR reste un commit conventionnel (`feat: ...`, `fix: ...`), mais il ne fixe plus la version : les anciens tags `v0.*` restent, les nouveaux sont `v2026.11.1`, `v2026.11.2`…
 
 **Installer sur un téléphone.** Le téléphone de Pascal tourne sur l'APK **release** signé par la CI.
 Un build debug local ne s'installe pas par-dessus (signature différente, `versionCode` plus bas).
 
 ```bash
-gh release download vX.Y.Z -R pobsteta/marculus -p '*.apk'
-adb install -r marculus-vX.Y.Z-*.apk     # -r : mise à jour, données conservées
+gh release download vAAAA.MM.N -R pobsteta/marculus -p '*.apk'
+adb install -r marculus-vAAAA.MM.N-*.apk     # -r : mise à jour, données conservées
 ```
 
 Sur le téléphone de Pascal : `adb install` et captures d'écran seulement, jamais de taps `adb`
@@ -196,21 +196,18 @@ Au **merge d'une PR sur `main`**, la CI (GitHub Actions) :
    démarre qu'à la **réussite** de ce workflow sur un push vers `main` (`workflow_run`, depuis le
    2026-10-24, PR #27 ; avant, il partait en parallèle des tests) et construit le commit testé
    (`head_sha`) ;
-2. calcule la **prochaine version SemVer** à partir des messages de commit
-   ([Conventional Commits](https://www.conventionalcommits.org)) ;
+2. calcule la **prochaine version calendaire** `vAAAA.MM.N` d'après les tags existants ;
 3. compile l'**APK release** (version injectée) et publie une **release GitHub** avec l'APK.
 
 La règle « pas de release quand seuls pilotage, docs, `*.md` ou badge changent » est dite une fois,
 dans « Déployer et publier » ci-dessus.
 
-Le type de bump dépend du commit :
-
-| Préfixe de commit            | Incrément          | Exemple              |
-|------------------------------|--------------------|----------------------|
-| `fix: …`                     | **patch** (x.y.**z**) | `0.3.1 → 0.3.2`   |
-| `feat: …`                    | **minor** (x.**y**.0) | `0.3.1 → 0.4.0`   |
-| `feat!: …` / `BREAKING CHANGE` | **major** (**x**.0.0) | `0.3.1 → 1.0.0` |
-| autre                        | patch (défaut)     |                      |
+Version calendaire (mission 036, décision de Pascal du 2026-11-11) : `AAAA` et `MM` sont l'année et le
+mois UTC du jour de la release ; `N` est le compteur du mois, parmi les tags `vAAAA.MM.*` (`v2026.11.1`,
+`v2026.11.2`, … `v2026.11.10`), et repart à 1 au changement de mois (`v2026.12.1`). Le type de
+commit (`fix`, `feat`) n'y change rien. Les anciens tags `v0.*` restent en place ; la recherche du dernier
+tag (`--match 'v*'`) les trouve, anciens et nouveaux mélangés. Le `versionCode` Android reste le numéro
+d'exécution du workflow : les mises à jour par-dessus une `v0.73.x` restent possibles.
 
 > **Secrets / prérequis** : `GITHUB_TOKEN` (fourni automatiquement) suffit pour les tags et
 > releases. Le badge de couverture est généré et commité par la CI (aucun service externe requis).

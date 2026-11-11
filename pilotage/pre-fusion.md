@@ -4,7 +4,7 @@
 > l'orchestrateur, cochée **avant chaque merge** vers `main`, y compris les PR lâchées.
 
 1. **Titre de la PR en commit conventionnel** (`feat:`, `fix:`, `docs:`, `test:`, `ci:`…) : il
-   devient le message du squash et fixe la version de la release. Sinon `gh pr edit --title`.
+   devient le message du squash (la version, calendaire `vAAAA.MM.N`, ne dépend plus du titre). Sinon `gh pr edit --title`.
 2. **Rapport complet de l'agent** : redite, fait / pas fait, tests, échantillon terrain, ligne de
    journal. Un rapport vide ou tronqué = écart au journal, relecture sur pièces.
 3. **Relecteur « prêt »** sur la tête de la PR, et **CI verte** (`gh pr checks`).
