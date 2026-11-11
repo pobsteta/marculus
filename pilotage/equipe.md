@@ -84,6 +84,7 @@
 | [033](missions/033-tige-au-singulier.md) « 1 tige » au singulier sur la carte de la liste | `afficheur` | sonnet | appuyer | oui · oui · oui | 9 |
 | [034](missions/034-virgule-decimale.md) virgule décimale dans « % houpp. » | `afficheur` | sonnet | appuyer | oui · oui · oui | 9 |
 | [035](missions/035-fiche-izzyondroid.md) fiche Fastlane pour IzzyOnDroid | `afficheur` | sonnet | appuyer | oui · oui · oui | 9 |
+| [036](missions/036-version-calendaire.md) versions calendaires `vAAAA.MM.N` | `dev` | sonnet | lâcher | oui · oui · oui | 9 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
