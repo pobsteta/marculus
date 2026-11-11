@@ -1,0 +1,29 @@
+Marculus is a forest tree-marking app for phones and tablets. It replaces the notebook and the tally counter with a marking sheet: a species × diameter-class matrix where every tree is counted and stays traceable.
+
+Who it is for: marking foresters, forest experts, private managers, municipalities and firewood-lot holders (French "affouage"). The app is in French and English.
+
+<b>In the field</b>
+• Species × class sheet, one tap per tree, undo kept in the history
+• Height and quality for each tree
+• Offline voice dictation: "beech forty five windfall" (French vocabulary)
+• Append-only tree log: every tree has its own unique ID
+
+<b>Volumes</b>
+• Schaeffer volume tables (fast, intermediate, slow, very slow) and EMERGE (226 species)
+• Stem, crown and total volumes, basal area
+• Firewood lots: capped volume per lot, lot summary, stacked cubic metres
+
+<b>Map and GNSS</b>
+• GeoPackage import: parcels, forest roads, orthophoto
+• GNSS position for each tree, external RTK/NTRIP receiver supported
+• Each tree is automatically assigned to its parcel
+
+<b>Sharing without a server</b>
+• CSV export
+• .marsync files to merge the work of several markers
+• Import of a batch of worksites (.zip)
+
+<b>Network: what goes out, what does not</b>
+Marculus works offline, with no ads, no account and no tracking. Opening the map loads online tiles by default (IGN Plan; IGN orthophoto and OpenStreetMap on request). Otherwise, the network is used only when you start one of these features: the cadastre overlay (IGN Parcellaire Express, online tiles), the download of the French voice model (about 42 MB) from Settings, and the TCP connection to an NTRIP caster (RTK corrections) or to a network GNSS receiver. Marculus asks for no account; an NTRIP caster may ask for its own credentials.
+
+Free software under the GPL v3. Source code: https://github.com/pobsteta/marculus
