@@ -29,6 +29,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
   nemetonshiny : `~/dev/briefs/vers-nemetonshiny/2026-10-23-marculus-tarifs-proposes-niveau-foret.md`
   (§ 4 : combien d'essences atteignent la forêt ?) · depuis le cycle 0
 - Recettes terrain : affouage, dictée (7 cas, bruit, gants) · spec § 10 · depuis le cycle 0
+- `web/index.html` l. 44 (`sort=semver`) et spec l. 305 (« releases SemVer ») à aligner sur les versions calendaires ; tag sans release si le build échoue après l'envoi du tag (défaut hérité : supprimer le tag puis relancer) · relecteur de la 036, 2026-11-11 · depuis le cycle 8
 - Captures de la fiche IzzyOnDroid à refaire avec un chantier d'exemple (barre de titre coupée sur la liste et la carte, carte sans parcelles, badge « Sans position » sur la feuille) · décision de Pascal du 2026-11-11 · depuis le cycle 8
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
 - [006](missions/006-theme-terrain-style.md) · **suspendue** jusqu'à `terrain-style` v0.6.1 (ADR 0005 ; décision de Pascal du 2026-11-10, journal) : adopter la palette `terrain-style` = couleurs actuelles, sans changement visible · depuis le cycle 7
@@ -39,7 +40,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
-- [036](missions/036-version-calendaire.md) versions calendaires `vAAAA.MM.N` · `dev` · lâcher · demandée et validée par Pascal le 2026-11-11 · depuis le cycle 8
+_(vide depuis le cycle 8)_
 
 ## Planifié
 
@@ -50,6 +51,11 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Terminé
 
+- [036](missions/036-version-calendaire.md) · depuis le cycle 8
+  - Homme : dev (sonnet), lâcher
+  - Mission : versions calendaires `vAAAA.MM.N`, compteur par mois, comme nemeton
+  - Moyens : `.github/scripts/version-calendaire.sh` et ses 13 tests, branché dans `release.yml`
+  - Livré : PR #77 fusionnée (a28dc2d), v2026.11.1 (tag annoté sur a28dc2d), installée sur le téléphone
 - [035](missions/035-fiche-izzyondroid.md) · depuis le cycle 8
   - Homme : afficheur (sonnet), appuyer
   - Mission : fiche Fastlane (fr-FR, en-US) pour la demande d'inclusion sur IzzyOnDroid
