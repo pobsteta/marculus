@@ -38,7 +38,21 @@ class FicheFastlaneTest {
     fun descriptionCourteTientEn80Caracteres() {
         for (l in langues) {
             val court = File(dossier(l), "short_description.txt").readText().trim()
-            assertTrue("$l : ${court.length} caractères", court.codePointCount(0, court.length) <= 80)
+            assertTrue("$l : ${court.codePointCount(0, court.length)} caractères", court.codePointCount(0, court.length) <= 80)
+        }
+    }
+
+    /** IzzyOnDroid refuse une capture dont le grand côté dépasse deux fois le petit (« Image sizes »). */
+    @Test
+    fun chaqueCaptureRespecteLeRapportDeuxPourUn() {
+        for (l in langues) {
+            val captures = File(dossier(l), "images/phoneScreenshots").listFiles { f -> f.extension in listOf("png", "jpg") }.orEmpty()
+            for (f in captures) {
+                val img = ImageIO.read(f)
+                val grand = maxOf(img.width, img.height).toDouble()
+                val petit = minOf(img.width, img.height).toDouble()
+                assertTrue("$l/${f.name} : ${img.width}x${img.height}, rapport ${grand / petit} > 2", grand / petit <= 2.0)
+            }
         }
     }
 
