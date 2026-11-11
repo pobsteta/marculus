@@ -1,0 +1,29 @@
+Marculus est une application de martelage forestier pour smartphones et tablettes. Elle remplace le carnet et le compteur par une feuille de martelage : une matrice essences × classes de diamètre, où chaque tige compte et reste traçable.
+
+Pour qui : marteleurs de l'ONF, experts forestiers, gestionnaires privés, communes et affouagistes.
+
+<b>Sur le terrain</b>
+• Feuille essences × classes, saisie d'une tige d'un appui, annulation conservée dans l'historique
+• Hauteur et qualité de chaque tige
+• Dictée vocale hors ligne : « hêtre quarante cinq chablis »
+• Journal des tiges en ajout seul : chaque tige a son identifiant unique
+
+<b>Volumes</b>
+• Cubage Schaeffer (rapide, intermédiaire, lent, très lent) et EMERGE (226 essences)
+• Volumes tige, houppier et total, surface terrière
+• Affouage : lots de volume borné, bilan par lot, stères
+
+<b>Carte et GNSS</b>
+• Import d'un GeoPackage : parcelles, desserte, ortho
+• Position GNSS de chaque tige, récepteur externe RTK/NTRIP possible
+• Rattachement automatique de la tige à sa parcelle
+
+<b>Partage sans serveur</b>
+• Export CSV
+• Fichiers .marsync pour fusionner le travail de plusieurs marteleurs
+• Import d'un lot de chantiers (.zip)
+
+<b>Réseau : ce qui sort, ce qui ne sort pas</b>
+Marculus fonctionne hors ligne, sans publicité, sans compte et sans pistage. Deux usages demandent le réseau, uniquement quand vous les lancez : l'affichage des tuiles de carte en ligne (Plan IGN, ortho IGN, OpenStreetMap) et le téléchargement du modèle vocal français (environ 42 Mo), depuis les Paramètres.
+
+Logiciel libre sous licence GPL v3. Code source : https://github.com/pobsteta/marculus

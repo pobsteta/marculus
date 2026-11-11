@@ -232,6 +232,14 @@ L'APK release est signé avec une **clé stable** pour permettre les **mises à 
 n'est **pas** versionné (cf. `.gitignore`) : le perdre rend toute future mise à jour impossible —
 le sauvegarder hors dépôt.
 
+### Fiche pour IzzyOnDroid (mission 035)
+
+`fastlane/metadata/android/{fr-FR,en-US}/` : titre, descriptions courte (80 caractères au plus) et longue,
+icône 512 × 512 et quatre captures (liste, feuille, par lot, carte), au format Fastlane que lit
+[IzzyOnDroid](https://izzyondroid.org/docs/general/Fastlane/). Le test `FicheFastlaneTest` vérifie
+présence et longueurs. Captures prises sur émulateur, avec des données d'exemple : à refaire quand
+l'écran change.
+
 ---
 
 ## Site & documentation
