@@ -20,7 +20,6 @@ _Modèle de carte :_
 
 ## Bac à sable
 
-- Captures de la fiche IzzyOnDroid à refaire avec un chantier d'exemple (barre de titre coupée sur la liste et la carte, carte sans parcelles, badge « Sans position » sur la feuille) · décision de Pascal du 2026-11-11 · depuis le cycle 8
 _Relevé du 2026-10-23 dans les boîtes de briefs (`~/dev/briefs/vers-marculus/` est vide ; le
 travail en attente est arrivé par `~/dev/surculus/pilotage/briefs/vers-marculus/`) et dans la
 spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:mission`._
@@ -30,6 +29,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
   nemetonshiny : `~/dev/briefs/vers-nemetonshiny/2026-10-23-marculus-tarifs-proposes-niveau-foret.md`
   (§ 4 : combien d'essences atteignent la forêt ?) · depuis le cycle 0
 - Recettes terrain : affouage, dictée (7 cas, bruit, gants) · spec § 10 · depuis le cycle 0
+- Captures de la fiche IzzyOnDroid à refaire avec un chantier d'exemple (barre de titre coupée sur la liste et la carte, carte sans parcelles, badge « Sans position » sur la feuille) · décision de Pascal du 2026-11-11 · depuis le cycle 8
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
 - [006](missions/006-theme-terrain-style.md) · **suspendue** jusqu'à `terrain-style` v0.6.1 (ADR 0005 ; décision de Pascal du 2026-11-10, journal) : adopter la palette `terrain-style` = couleurs actuelles, sans changement visible · depuis le cycle 7
 - Champ « % houpp. » à 2 décimales, ligne de source à 1 (« 7,41 » / « 7,4 % ») ; coefficient de forme encore « 0.5 » en français · décision de Pascal du 2026-11-10 : au bac à sable · depuis le cycle 8
