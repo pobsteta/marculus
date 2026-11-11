@@ -29,6 +29,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
   nemetonshiny : `~/dev/briefs/vers-nemetonshiny/2026-10-23-marculus-tarifs-proposes-niveau-foret.md`
   (§ 4 : combien d'essences atteignent la forêt ?) · depuis le cycle 0
 - Recettes terrain : affouage, dictée (7 cas, bruit, gants) · spec § 10 · depuis le cycle 0
+- Captures de la fiche IzzyOnDroid à refaire avec un chantier d'exemple (barre de titre coupée sur la liste et la carte, carte sans parcelles, badge « Sans position » sur la feuille) · décision de Pascal du 2026-11-11 · depuis le cycle 8
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
 - [006](missions/006-theme-terrain-style.md) · **suspendue** jusqu'à `terrain-style` v0.6.1 (ADR 0005 ; décision de Pascal du 2026-11-10, journal) : adopter la palette `terrain-style` = couleurs actuelles, sans changement visible · depuis le cycle 7
 - Champ « % houpp. » à 2 décimales, ligne de source à 1 (« 7,41 » / « 7,4 % ») ; coefficient de forme encore « 0.5 » en français · décision de Pascal du 2026-11-10 : au bac à sable · depuis le cycle 8
@@ -38,7 +39,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
-- [035](missions/035-fiche-izzyondroid.md) fiche Fastlane pour IzzyOnDroid · `afficheur` · appuyer · validée par Pascal le 2026-11-11 · depuis le cycle 8
+_(vide depuis le cycle 8)_
 
 ## Planifié
 
@@ -48,6 +49,12 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · essai au soleil clos le 2026-10-24 (thèmes actuels conformes) : la carte attend la palette `terrain-style` · depuis le cycle 1
 
 ## Terminé
+
+- [035](missions/035-fiche-izzyondroid.md) · depuis le cycle 8
+  - Homme : afficheur (sonnet), appuyer
+  - Mission : fiche Fastlane (fr-FR, en-US) pour la demande d'inclusion sur IzzyOnDroid
+  - Moyens : émulateur, pages d'IzzyOnDroid, test `FicheFastlaneTest`
+  - Livré : PR #73 fusionnée (2afeef7), v0.73.3 (APK inchangé, fiche dans le tag) ; demande sur Codeberg à ouvrir par Pascal
 
 - [034](missions/034-virgule-decimale.md) · depuis le cycle 8
   - Homme : afficheur (sonnet), appuyer
