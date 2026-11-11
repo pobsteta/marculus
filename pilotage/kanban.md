@@ -38,7 +38,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
-_(vide depuis le cycle 8)_
+- [035](missions/035-fiche-izzyondroid.md) fiche Fastlane pour IzzyOnDroid · `afficheur` · appuyer · validée par Pascal le 2026-11-11 · depuis le cycle 8
 
 ## Planifié
 

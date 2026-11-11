@@ -83,6 +83,7 @@
 | [032](missions/032-proposition-au-changement-de-tarif.md) proposition IFN au changement de tarif | `testeur` puis `dev` | sonnet | appuyer | oui · non (à reproduire) · oui | 9 |
 | [033](missions/033-tige-au-singulier.md) « 1 tige » au singulier sur la carte de la liste | `afficheur` | sonnet | appuyer | oui · oui · oui | 9 |
 | [034](missions/034-virgule-decimale.md) virgule décimale dans « % houpp. » | `afficheur` | sonnet | appuyer | oui · oui · oui | 9 |
+| [035](missions/035-fiche-izzyondroid.md) fiche Fastlane pour IzzyOnDroid | `afficheur` | sonnet | appuyer | oui · oui · oui | 9 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
