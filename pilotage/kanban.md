@@ -39,7 +39,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
-_(vide depuis le cycle 8)_
+- [036](missions/036-version-calendaire.md) versions calendaires `vAAAA.MM.N` · `dev` · lâcher · demandée et validée par Pascal le 2026-11-11 · depuis le cycle 8
 
 ## Planifié
 
