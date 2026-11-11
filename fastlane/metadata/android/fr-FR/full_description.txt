@@ -24,6 +24,6 @@ Pour qui : marteleurs de l'ONF, experts forestiers, gestionnaires privés, commu
 • Import d'un lot de chantiers (.zip)
 
 <b>Réseau : ce qui sort, ce qui ne sort pas</b>
-Marculus fonctionne hors ligne, sans publicité, sans compte et sans pistage. Le réseau n'est utilisé que lorsque vous lancez l'une de ces fonctions : les tuiles de carte en ligne (Plan IGN, ortho IGN, OpenStreetMap), la surcouche cadastre (Parcellaire Express IGN, tuiles en ligne), le téléchargement du modèle vocal français (environ 42 Mo) depuis les Paramètres, et la connexion TCP à un caster NTRIP (corrections RTK) ou à un récepteur GNSS réseau. Marculus ne demande aucun compte ; un caster NTRIP peut, lui, demander ses propres identifiants.
+Marculus fonctionne hors ligne, sans publicité, sans compte et sans pistage. L'ouverture de la carte charge par défaut des tuiles en ligne (Plan IGN ; ortho IGN et OpenStreetMap au choix). Ailleurs, le réseau n'est utilisé que lorsque vous lancez l'une de ces fonctions : la surcouche cadastre (Parcellaire Express IGN, tuiles en ligne), le téléchargement du modèle vocal français (environ 42 Mo) depuis les Paramètres, et la connexion TCP à un caster NTRIP (corrections RTK) ou à un récepteur GNSS réseau. Marculus ne demande aucun compte ; un caster NTRIP peut, lui, demander ses propres identifiants.
 
 Logiciel libre sous licence GPL v3. Code source : https://github.com/pobsteta/marculus

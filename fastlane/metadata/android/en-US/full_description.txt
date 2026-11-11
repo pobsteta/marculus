@@ -24,6 +24,6 @@ Who it is for: marking foresters, forest experts, private managers, municipaliti
 • Import of a batch of worksites (.zip)
 
 <b>Network: what goes out, what does not</b>
-Marculus works offline, with no ads, no account and no tracking. The network is used only when you start one of these features: online map tiles (IGN Plan, IGN orthophoto, OpenStreetMap), the cadastre overlay (IGN Parcellaire Express, online tiles), the download of the French voice model (about 42 MB) from Settings, and the TCP connection to an NTRIP caster (RTK corrections) or to a network GNSS receiver. Marculus asks for no account; an NTRIP caster may ask for its own credentials.
+Marculus works offline, with no ads, no account and no tracking. Opening the map loads online tiles by default (IGN Plan; IGN orthophoto and OpenStreetMap on request). Otherwise, the network is used only when you start one of these features: the cadastre overlay (IGN Parcellaire Express, online tiles), the download of the French voice model (about 42 MB) from Settings, and the TCP connection to an NTRIP caster (RTK corrections) or to a network GNSS receiver. Marculus asks for no account; an NTRIP caster may ask for its own credentials.
 
 Free software under the GPL v3. Source code: https://github.com/pobsteta/marculus
