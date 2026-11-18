@@ -507,7 +507,7 @@ class TarifsIfnAutresTest {
         assertEquals(5.0, p.numeroBrut, 1e-9)
     }
 
-    // --- Part de houppier : ligne sans part écartée, ligne au numéro <= 0 écartée -----------------
+    // --- Part de houppier : ligne sans part écartée, ligne au numéro <= 0 gardée (mission 018) ---------------
 
     /**
      * Q10 (4 types) : Charme 12/20, Tremble 18/10, Robinier 15/10 ; Orme champêtre sans part, 500 arbres, écarté (ni total
@@ -532,16 +532,17 @@ class TarifsIfnAutresTest {
     }
 
     /**
-     * Q11 : Charme 12/20, Tremble 18/10 ; Robinier part 50 % mais numéro −3,0 (les quatre types), 400 arbres : écarté.
-     * (240+180)/30 = 14,0 %, 30 arbres → SER. Q12 : même chose avec numéro 0,0 : 14,0 %, 30 arbres.
+     * Q11 : Charme 12/20, Tremble 18/10 ; Robinier part 50 % mais numéro −3,0 (les quatre types), 400 arbres. Mission 018 :
+     * la part ne dépend pas du numéro, la ligne compte (nemeton 2026.11.31). (240+180+20000)/430 = 47,488… %, 430 arbres.
+     * Q12 : même chose avec numéro 0,0.
      */
     @Test
-    fun `part de houppier - ligne au numero negatif ou nul ecartee`() {
+    fun `part de houppier - ligne au numero negatif ou nul gardee`() {
         for (ser in listOf("Q11", "Q12")) {
             val p = assertNotNull(ifn.proposerPartHouppierAutres(ser, AUTRES_FEUILLUS, emptyList()), ser)
             assertEquals(Niveau.SER, p.niveau, ser)
-            assertEquals(30, p.nArbres, ser)
-            assertEquals(14.0, p.pourcent, 1e-9, ser)
+            assertEquals(430, p.nArbres, ser)
+            assertEquals(20420.0 / 430, p.pourcent, 1e-9, ser)
         }
     }
 
@@ -550,8 +551,7 @@ class TarifsIfnAutresTest {
     /**
      * Chêne, Hêtre, Autres feuillus, Sapin, Épicéa, Autres résineux (Referentiels.ESSENCES_DEFAUT) sur les SER C20 et B70
      * de la table embarquée : chacune reçoit une proposition. Invariants seulement (valeurs non calculables à la main sur
-     * 14 752 lignes) : numéro 1..20, au moins 30 arbres, brut non négatif. Les 44 lignes 29AF/68CE ont un libellé vide et
-     * ne sont pas chargées.
+     * 14 752 lignes) : numéro 1..20, au moins 30 arbres, brut non négatif. Les 44 lignes 29AF/68CE ont un libellé depuis nemeton 2026.11.31 (mission 018).
      */
     @Test
     fun `terrain - les six essences par defaut recoivent une proposition sur la table embarquee`() {

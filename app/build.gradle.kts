@@ -82,6 +82,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":data"))
     implementation(libs.terrain.carte)
+    implementation(libs.terrain.style)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

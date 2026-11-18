@@ -59,4 +59,17 @@ class TarifsIfnReelsTest {
         assertEquals(listOf("K11"), ifn.serDeCommune("2A004").map { it.ser })
         assertTrue(ifn.rechercherCommunes("ajaccio").any { it.insee == "2A004" })
     }
+
+    /** Mission 018 : table de nemeton 2026.11.31 (brief du 2026-11-15) : 1 590 numéros vides, aucun <= 0, 29AF/68CE libellés. */
+    @Test
+    fun `table de nemeton 2026-11-31 - numeros vides, aucun negatif, libelles 29AF et 68CE`() {
+        val lignes = table("tarifs_ser.csv").lineSequence().drop(1).filter { it.isNotBlank() }.map { it.split(';') }.toList()
+        assertEquals(14752, lignes.size)
+        assertEquals(1590, lignes.count { it[5].isEmpty() })
+        assertTrue(lignes.none { it[5].isNotEmpty() && it[5].toDouble() <= 0.0 })
+        assertTrue(lignes.filter { it[5].isEmpty() }.all { it[7].isEmpty() })
+        val exotiques = lignes.filter { it[2] == "29AF" || it[2] == "68CE" }
+        assertEquals(44, exotiques.size)
+        assertEquals(setOf("Autre feuillu exotique", "Autre conifère exotique"), exotiques.map { it[3] }.toSet())
+    }
 }
