@@ -15,13 +15,16 @@ import kotlin.math.roundToInt
  * ([Cubage.codeEssence]), appliqué aux deux côtés : pas de nouvelle table de noms.
  */
 class TarifsIfn private constructor(
+    /** Lignes au numéro renseigné (> 0), pour les numéros de tarif. */
     private val lignes: Map<Cle, LigneTarif>,
+    /** Lignes à part de houppier renseignée, numéro ou non (mission 018) : la part ne dépend pas du numéro. */
+    private val lignesPart: Map<Cle, LigneTarif>,
     /** Lignes brutes par (niveau, code), pour les regroupements « Autres » (mission 030). */
     private val brutes: Map<Pair<Niveau, String>, List<LigneBrute>>,
     private val communesParInsee: Map<String, List<SerPart>>,
     private val communes: List<Commune>,
     private val sers: Map<String, Ser>,
-    /** Millésime des tables (ex. `IFN 2005-2025`), plusieurs séparés par `, ` ; vide si aucun. */
+    /** Millésime des tables (ex. `2011-2025`, tel que publié par nemeton), plusieurs séparés par `, ` ; vide si aucun. */
     val millesime: String,
 ) {
     // Noms normalisés une fois pour toutes : la recherche tourne à chaque frappe sur ~35 000 communes.
@@ -73,7 +76,7 @@ class TarifsIfn private constructor(
      */
     data class PropositionPart(val pourcent: Double, val niveau: Niveau, val code: String, val nArbres: Int)
 
-    /** Ligne IFN telle que lue (libellé normalisé, ESPAR), numéro > 0 seulement. */
+    /** Ligne IFN telle que lue (libellé normalisé, ESPAR), numéro vide ou non. */
     private data class LigneBrute(
         val espar: String,
         val libelle: String,
@@ -105,7 +108,8 @@ class TarifsIfn private constructor(
     }
 
     private data class LigneTarif(
-        val numero: Double,
+        /** Null si le numéro est absent (publié vide depuis nemeton 2026.11.31) ou <= 0 (anciennes tables). */
+        val numero: Double?,
         val nArbres: Int,
         val cv: Double,
         val millesime: String,
@@ -152,9 +156,9 @@ class TarifsIfn private constructor(
         val greco = sers[ser]?.greco ?: ser.take(1)
         return listOf(Niveau.SER to ser, Niveau.GRECO to greco, Niveau.FRANCE to CODE_FRANCE)
             .firstNotNullOfOrNull { (niveau, c) ->
-                lignes[Cle(niveau, c, code, type)]?.takeIf { it.nArbres >= SEUIL_ARBRES }?.let { l ->
+                lignes[Cle(niveau, c, code, type)]?.takeIf { it.nArbres >= SEUIL_ARBRES && it.numero != null }?.let { l ->
                     PropositionTarif(
-                        numero = l.numero.roundToInt().coerceIn(NUMERO_MIN, NUMERO_MAX),
+                        numero = l.numero!!.roundToInt().coerceIn(NUMERO_MIN, NUMERO_MAX),
                         numeroBrut = l.numero,
                         niveau = niveau,
                         code = c,
@@ -178,7 +182,7 @@ class TarifsIfn private constructor(
         return listOf(Niveau.SER to ser, Niveau.GRECO to greco, Niveau.FRANCE to CODE_FRANCE)
             .firstNotNullOfOrNull { (niveau, c) ->
                 TypeIfn.entries
-                    .mapNotNull { t -> lignes[Cle(niveau, c, code, t)] }
+                    .mapNotNull { t -> lignesPart[Cle(niveau, c, code, t)] }
                     .filter { it.nArbres >= SEUIL_ARBRES && it.partHouppier != null }
                     .maxByOrNull { it.nArbres }
                     ?.let { PropositionPart(it.partHouppier!!, niveau, c, it.nArbres) }
@@ -217,10 +221,11 @@ class TarifsIfn private constructor(
     ): PropositionTarif? {
         val type = TypeIfn.de(tarif) ?: return null
         return niveaux(ser).firstNotNullOfOrNull { (niveau, c) ->
-            val l = lignesAutres(niveau, c, regroupement, essencesDuContexte).filter { it.type == type }.map { it.ligne }
+            val l = lignesAutres(niveau, c, regroupement, essencesDuContexte)
+                .filter { it.type == type && it.ligne.numero != null }.map { it.ligne }
             val total = l.sumOf { it.nArbres }
             if (total < SEUIL_ARBRES) return@firstNotNullOfOrNull null
-            val brut = l.sumOf { it.numero * it.nArbres } / total
+            val brut = l.sumOf { it.numero!! * it.nArbres } / total
             val cvs = l.filter { !it.cv.isNaN() }
             val poidsCv = cvs.sumOf { it.nArbres }
             PropositionTarif(
@@ -286,7 +291,8 @@ class TarifsIfn private constructor(
         /**
          * Lit les trois tables (séparateur `;`, en-tête obligatoire, colonnes trouvées par leur nom) :
          *  - [tarifsCsv] `niveau;code;espar;essence_libelle;type;numero;n_arbres;cv;millesime[;part_houppier]`
-         *    (`part_houppier` en %, vide ou absente = pas de part) ;
+         *    (`part_houppier` en %, vide ou absente = pas de part ; `numero` vide ou <= 0 = pas de tarif, la ligne
+         *    garde sa part) ;
          *  - [communesCsv] `insee;nom;departement;ser;part;greco` ;
          *  - [serCsv] `code;nom;greco`.
          * Les lignes illisibles sont ignorées. À deux lignes pour un même code ONF (deux espèces IFN
@@ -294,14 +300,16 @@ class TarifsIfn private constructor(
          */
         fun charger(tarifsCsv: String, communesCsv: String, serCsv: String): TarifsIfn {
             val lignes = mutableMapOf<Cle, LigneTarif>()
+            val lignesPart = mutableMapOf<Cle, LigneTarif>()
             val brutes = mutableMapOf<Pair<Niveau, String>, MutableMap<Triple<String, String, TypeIfn>, LigneBrute>>()
             val codes = mutableMapOf<String, String?>() // ~180 libellés pour ~15 000 lignes
             lire(tarifsCsv).forEach { r ->
                 val niveau = runCatching { Niveau.valueOf(r["niveau"].orEmpty()) }.getOrNull() ?: return@forEach
                 val type = runCatching { TypeIfn.valueOf(r["type"].orEmpty()) }.getOrNull() ?: return@forEach
                 val libelle = r["essence_libelle"].orEmpty()
-                // Mission 030 : un numéro <= 0 n'est pas un tarif, la ligne est écartée partout.
-                val numero = r["numero"]?.toDoubleOrNull()?.takeIf { it.isFinite() && it > 0.0 } ?: return@forEach
+                // Un numéro vide (nemeton 2026.11.31) ou <= 0 (anciennes tables) n'est pas un tarif (mission 030) ;
+                // la ligne reste, pour sa part de houppier (mission 018).
+                val numero = r["numero"]?.toDoubleOrNull()?.takeIf { it.isFinite() && it > 0.0 }
                 val n = r["n_arbres"]?.toIntOrNull() ?: return@forEach
                 val part = r["part_houppier"]?.toDoubleOrNull()?.takeIf { it.isFinite() && it in 0.0..100.0 }
                 val l = LigneTarif(numero, n, r["cv"]?.toDoubleOrNull() ?: Double.NaN, r["millesime"].orEmpty(), part)
@@ -314,7 +322,8 @@ class TarifsIfn private constructor(
                 }
                 val code = codes.getOrPut(libelle) { Cubage.codeEssence(libelle) } ?: return@forEach
                 val cle = Cle(niveau, r["code"].orEmpty(), code, type)
-                if ((lignes[cle]?.nArbres ?: -1) < n) lignes[cle] = l
+                if (numero != null && (lignes[cle]?.nArbres ?: -1) < n) lignes[cle] = l
+                if (part != null && (lignesPart[cle]?.nArbres ?: -1) < n) lignesPart[cle] = l
             }
             val parts = mutableMapOf<String, MutableList<SerPart>>()
             val communes = linkedMapOf<String, Commune>()
@@ -331,11 +340,12 @@ class TarifsIfn private constructor(
             }.toMap()
             return TarifsIfn(
                 lignes,
+                lignesPart,
                 brutes.mapValues { (_, m) -> m.values.toList() },
                 parts.mapValues { (_, l) -> l.sortedByDescending { it.part } },
                 communes.values.toList(),
                 sers,
-                lignes.values.map { it.millesime }.filter { it.isNotBlank() }.distinct().sorted().joinToString(", "),
+                (lignes.values + lignesPart.values).map { it.millesime }.filter { it.isNotBlank() }.distinct().sorted().joinToString(", "),
             )
         }
 

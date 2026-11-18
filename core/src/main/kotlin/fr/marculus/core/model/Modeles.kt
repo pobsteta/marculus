@@ -134,7 +134,7 @@ data class Contexte(
     val communeInsee: String? = null,
     /** Sylvoécorégion retenue pour les tarifs proposés (code IFN, ex. `C20`), ou null. */
     val ser: String? = null,
-    /** Millésime des tables IFN des numéros proposés (ex. `IFN 2005-2025`), pour la reproductibilité. */
+    /** Millésime des tables IFN des numéros proposés (ex. `2011-2025`, tel que publié par nemeton), pour la reproductibilité. */
     val millesimeTarifs: String? = null,
 ) {
     val essencesNoms: List<String> get() = essences.map { it.nom }
