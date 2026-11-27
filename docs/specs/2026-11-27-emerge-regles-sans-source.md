@@ -1,113 +1,129 @@
-# EMERGE : les trois règles de Marculus sans source (mission 040)
+# EMERGE : les trois règles de Marculus sans source (mission 040, version 2)
 
-> **Propriétaire :** Pascal Obstétar. **Rédigé par :** agent `acquereur`, mission 040, consultation du 2026-11-27.
+> **Propriétaire :** Pascal Obstétar. **Rédigé par :** agent `acquereur`, mission 040, consultation du 2026-11-27,
+> version 2 (aller-retour 2/3 : la copie locale de gftools a été lue ; la version 1 reposait sur un miroir rdrr.io
+> incomplet et se trompait sur la règle 2).
 > **Décision éclairée :** pour chacune des trois règles du calcul EMERGE de `Cubage.kt` (`emergeVolumes`), Pascal
 > décide de la garder, de la borner ou de la retirer. La mission ne corrige pas le code.
-> **Statut :** constat. **Aucune des trois règles n'est sourcée.** Une est contredite en partie (règle 3, seuil).
-> Pascal n'a pas relu ce document.
+> **Statut :** constat. Règles 1 et 2 **sourcées dans gftools** (code publié, avec l'aveu de son auteur que la
+> règle 2 est provisoire). Règle 3 : seuil 1,4 **introuvable** à la source. Pascal n'a pas relu ce document.
 
-## 1. Sources consultées, et ce qui n'a pas pu l'être
+## 1. Sources consultées
 
-| # | Source | Accès le 2026-11-27 | Valeur de la lecture |
+| # | Source | Accès le 2026-11-27 | Valeur |
 |---|---|---|---|
-| G1 | `gftools` (pobsteta), `R/TarifsEmerge.R`, fonction `TarEmerge`, miroir `https://rdrr.io/github/pobsteta/gftools/src/R/TarifsEmerge.R` | Lue par WebFetch (un petit modèle résume la page ; je n'ai pu obtenir que des lignes isolées de moins de 125 caractères, pas le source complet). Version : celle du miroir rdrr.io, sans numéro ni commit lisible. | Moyenne. À rejouer sur le dépôt par Pascal (point au sol 1). |
-| G2 | `gftools`, `https://rdrr.io/github/pobsteta/gftools/man/TarifsEmerge.html` (aide de `TarEmerge`) et `.../man/ListTarEmerge.html` (table : 93 lignes, 15 colonnes ; a1,b1,c1 = volume total ; a2,b2,c2,d2 = tige bois fort ; a3,b3 = houppier) | Lues par WebFetch (résumé). | Moyenne. |
-| G3 | `https://github.com/pobsteta/gftools` et `raw.githubusercontent.com/pobsteta/gftools/master/R/TarifsEmerge.R` | **HTTP 404** (dépôt privé ou renommé, comme déjà noté dans `fiche_emerge.md` S3). | Aucune. |
-| D1 | Deleuze et al. 2014, RDVT ONF n° 44, p. 22-32 (HAL hal-01143797) | **Non lue par moi** : `hal.science/hal-01143797/document`, `hal.science/hal-01143797v1/file/...` et `hal.inrae.fr/hal-01143797/document` répondent « Access Denied » (barrière Anubis). Le PDF local cité dans `fiche_emerge.md` (`donnees/nemeton_densite_sources/docs/deleuze2014_hal-01143797.pdf`) est **absent** de `/home/pascal/dev/tarif-nemeton` (dossier exclu de git). | Seconde main : je cite la lecture faite par la session NEMETON le 2026-11-26 dans `/home/pascal/dev/tarif-nemeton/donnees/referentiels/emerge/fiche_emerge.md` § 4, § 5 (lue sur images, 12 pages). |
-| N1 | `/home/pascal/dev/tarif-nemeton/code/emerge_reference.py` l. 10, l. 26, l. 49-50 | Lue en entier pour ces lignes. | Forte. |
-| M1 | `core/src/main/kotlin/fr/marculus/core/Cubage.kt` l. 157, 169, 170, 175, 191 (version de ce worktree, tête `6776e16`) | Relue. | Forte. |
+| G1 | **gftools**, copie locale `/media/pascal/data2/digital_ocean/gftools/R/TarifsEmerge.R`, fonction `TarEmerge` (l. 139-374). `DESCRIPTION` : Version 1.2.8.9000, Date 2021-12-06 (l. 4-5). L'orchestrateur donne le dernier commit 187ad39 du 20/06/2019 : je n'ai pas pu relire le commit (pas d'outil shell), écart de date noté. | Lue directement (Read), l. 130-380. | Forte. |
+| G2 | gftools, miroir `https://rdrr.io/github/pobsteta/gftools/src/R/TarifsEmerge.R` et `.../man/ListTarEmerge.html` (table 93 lignes, 15 colonnes) | WebFetch (résumés). **Version plus ancienne** : elle ne montrait aucune règle `FCT > 0.95`. Écartée comme preuve ; je ne la retiens que pour la taille de la table. | Faible, écart de version. |
+| G3 | `https://github.com/pobsteta/gftools` | HTTP 404 (privé ou supprimé). | Aucune. |
+| D1 | Deleuze et al. 2014, RDVT ONF n° 44, p. 22-32 (HAL hal-01143797) | **Non lue par moi** : trois URL HAL refusent l'accès (Anubis) ; le PDF local de NEMETON est absent. Je cite la lecture NEMETON du 2026-11-26, `/home/pascal/dev/tarif-nemeton/donnees/referentiels/emerge/fiche_emerge.md` § 3-5. | Seconde main. |
+| N1 | `/home/pascal/dev/tarif-nemeton/code/emerge_reference.py` l. 10, 26, 49-50 | Lue. | Forte. |
+| N2 | Port R `/home/pascal/dev/nemeton/R/ifn_tarifs.R` l. 129-143 (`htot > 1.4` l. 131 ; `fct[fct > 0.95] <- 0.8` l. 140) | Lue. Son commentaire l. 184 dit « as Marculus does » : **c'est un port dérivé de Marculus, pas une source indépendante**. | Dérivée. |
+| M1 | `core/src/main/kotlin/fr/marculus/core/Cubage.kt` l. 157, 169, 170, 172-175, 186, 191 (tête `6776e16`) | Relue. | Forte. |
 
-Les numéros de ligne de la spec `2026-11-27-correction-emerge-volumes.md` (l. 87, 97, 98) sont ceux de l'ancien commit
-`41a01f7` ; sur la version à jour ce sont **l. 157, 169, 170**.
+Les l. 87, 97, 98 de la spec `2026-11-27-correction-emerge-volumes.md` sont celles de l'ancien commit `41a01f7` ;
+sur la version à jour ce sont **l. 157, 169, 170**.
 
-## 2. Règle 1 — pas de borne basse sur la part de tige `fct`
+## 2. Règle 1 : pas de borne basse sur la part de tige `fct`
 
-**Code (M1 l. 169) :** `var fct = k.d + k.e * logisHdec + k.f * hdn + k.g * (1.0 / c13)`.
+**Marculus (M1 l. 169) :** `fct = d + e·logisHdec + f·hdn + g/c13`, sans borne basse.
 
-- **gftools (G1) :** la même somme, sans borne. Lignes lues : `FCT <- .rowSums(.XFCT, ...)` puis
-  `formTige <- formTot * FCT`. Aucun `pmin`, `pmax`, `if` ni `ifelse` sur `FCT` n'a été vu ; seuls `Cmax` et
-  `decHoup` utilisent `FCT`. **Marculus fait donc comme gftools : sourcée, au sens « fidèle au code publié ».**
-- **Ce que gftools fait en plus et que Marculus ne fait pas :** si aucun arbre n'atteint le diamètre de découpe (`dec`,
-  7 cm) et que `perchebrin = FALSE`, `volTige <- NA` avec un `warning()` ; Marculus rend 0 (`decTige = 0`, l. 172).
-- **Deleuze 2014 (D1, seconde main) :** la part de tige n'y figure pas. La tige est renvoyée à « un article distinct »
-  (p. 23, colonne de droite, d'après `fiche_emerge.md` § 5). Aucun domaine de validité chiffré par essence (§ 4 de la
-  fiche) ; plus petit arbre du calage : 2 m de haut, circonférence 6-7 cm (p. 24).
-- **Le négatif :** il vient donc des coefficients d, e, f, g de `ListTarEmerge`, calés sur des arbres plus grands ; pas
-  d'une règle de Marculus. Hêtre C = 0,628 m : −0,63 à 2 m, −0,08 à 3 m (valeurs du brief, **non recalculées ici**).
-- **Statut : sourcée (G1, absence de borne), hors domaine non documenté (D1).**
+**gftools (G1 l. 318-322) :** même somme, `FCT <- .rowSums(.XFCT, ...)`, sans borne basse ; le seul contrôle porte sur
+le haut (règle 2). **Sourcée : Marculus reprend gftools.** Hêtre C = 0,628 m : −0,63 à 2 m, −0,08 à 3 m (valeurs du
+brief, non recalculées ici).
 
-**Options pour Pascal :**
-- A. Garder (fidèle à gftools) ; le `coerceAtLeast(0)` de la tige (l. 173) rend déjà 0.
-- B. Borner `fct` à [0 ; 1] et dire « hors domaine » sous un seuil de hauteur ou de diamètre que Pascal fixe (aucune
-  valeur publiée à reprendre : la plus petite donnée de calage est 2 m, 6-7 cm).
-- C. Refuser le calcul de la tige sous la hauteur où `fct` devient négatif (comme gftools renvoie NA quand la découpe n'est pas atteinte).
+**Ce que gftools fait quand `FCT ≤ 0` (l. 333-361) :**
+- `formTige <- formTot * FCT` (l. 333) : négatif. `volTige` (l. 344/347/349) n'est **pas bornée à 0** : un volume de
+  tige négatif est rendu.
+- Houppier : `Cmax` (l. 336) contient `(1/FCT − 1)` élevé à 1/3 ; avec `FCT ≤ 0`, `1/FCT − 1` est négatif pour
+  `FCT < 0` (ou infini à 0), la puissance 1/3 d'un négatif donne `NaN` en R, donc `volHoup` est `NA`/`NaN` (déduction à
+  la lecture, **non exécutée en R**) et le total `volTige + volHoup` aussi.
+- Marculus diffère : tige bornée à 0 (l. 173, `coerceAtLeast(0.0)`), houppier 0 si `unSurFct ≤ 0` ou non fini
+  (l. 177, 186). Donc **plus prudent que gftools**, pas fidèle.
 
-## 3. Règle 2 — `if (fct > 0.95) fct = 0.8`
+**Quand la découpe n'est pas atteinte (l. 342-361) :** corrige la version 1. Ce n'est **pas** `NA` : `decTige <-
+ifelse(c13 > cDec, 1 − (cDec·corr130/c13)^3, 0)` (l. 342), identique à Marculus (l. 172). Avec `outrepasse = FALSE`, si
+aucun arbre ne vérifie `0.75 * c130/pi > dec`, `volTige` est calculé de la même façon (l. 349) et gftools émet
+seulement un `warning` (l. 350-359 : « dec is too large for valuable calculation »). Le 0 de Marculus pour un arbre
+sous la découpe coïncide donc avec gftools (`decTige = 0`) ; seul l'avertissement manque.
 
-**Code (M1 l. 170).**
+**Deleuze 2014 (D1, seconde main) :** pas de part de tige (« article distinct », p. 23) ; aucun domaine chiffré ; plus
+petit arbre du calage : 2 m, circonférence 6-7 cm (p. 24). **Statut : sourcée (G1), hors domaine non documenté (D1).**
 
-- **gftools (G1) :** **introuvable.** Ni `0.95` ni `0.8` comme constante de remplacement de `FCT` dans `TarEmerge` ;
-  l'extraction cible ne trouve aucun test de `FCT` contre une borne. Le seul `0.8` possible, `hdec`, n'est pas une
-  constante dans gftools (`hdec = NULL` par défaut, aucune ligne à 0.8 relevée). **Contredite ? Non : absente.**
-- **Deleuze 2014 (D1) :** part de tige hors de la publication (voir règle 1) ; **introuvable**.
-- **Dans Marculus :** le seul autre `0.95` du fichier est `PART_HOUPPIER_MAX` (l. 191), plafond du réglage « part de
-  houppier » saisi par l'utilisateur : autre chose, sans lien établi avec la règle.
-- **Effet constaté sur le code (lecture, non mesuré) :** fonction discontinue et non monotone : `fct = 0,95` reste
-  0,95, `fct = 0,951` devient 0,8 (la tige passe de 95 % à 80 % du total). Hypothèse non vérifiée : garde-fou contre
-  `1/fct − 1 ≤ 0` du houppier (l. 175), qui s'annule à `fct = 1`. Je n'ai trouvé aucune trace écrite de l'origine
-  (journal, spec, ADR : recherche `0.95` / `fct` dans `docs/` et `pilotage/`, rien d'autre que le brief). L'historique git n'a pas pu être interrogé (pas d'outil shell dans cette mission).
-- **Statut : introuvable.** Lu : G1 (fonction `TarEmerge`), G2, D1 (seconde main), `docs/` et `pilotage/` de Marculus.
+**Options :**
+- A. Garder tel quel (négatif conservé dans `fct`, tige et houppier ramenés à 0 par les gardes de Marculus).
+- B. Borner `fct` à [0 ; 1] et déclarer « hors domaine » sous un seuil que Pascal fixe (aucune valeur publiée : le calage
+  commence à 2 m, 6-7 cm).
+- C. Refuser le calcul de la tige là où `fct ≤ 0` et le dire (« non calculé »).
 
-**Options pour Pascal :**
-- A. Retirer la règle (aligner sur gftools) et traiter le houppier seul quand `fct ≥ 1` (houppier = 0).
-- B. Remplacer par une borne continue `fct = min(fct, 0.95)` (choix de Marculus, à nommer comme tel, sans source).
-- C. Garder tel quel et l'écrire dans la spec comme règle propre de Marculus, valeur provisoire, à mesurer sur des arbres où `fct > 0,95`.
+## 3. Règle 2 : `if (fct > 0.95) fct = 0.8`
 
-## 4. Règle 3 — `htotM <= 1.4 → 0` sans le dire
+**Sourcée dans gftools (G1 l. 324-332)** : commentaire de l'auteur « ajout ici de condi pour verifier que 0<FCT<1 (faut
+il tj un else ) ... je remonte la contrainte pour les pins… bon faudra qu'on fasse mieux », puis
+`if (any(FCT > 0.95)) { if (conditionel) { FCT[FCT > 0.95] <- 0.8 } else { FCT[FCT > 0.95] <- NA } }`.
+- `conditionel = TRUE` par défaut (l. 148) : c'est la branche que Marculus reprend. La branche `conditionel = FALSE`
+  (valeur `NA`) n'existe pas dans Marculus.
+- **Provisoire de l'aveu de son auteur** (« faudra qu'on fasse mieux ») ; la contrainte vise les pins. Pas dans
+  Deleuze 2014 (D1) : propre à gftools, sans justification publiée.
+- Dans Marculus, le seul autre `0.95` (l. 191, `PART_HOUPPIER_MAX`) est un autre objet.
+- **Effet** : fonction discontinue (0,95 reste 0,95 ; 0,951 devient 0,8) ; elle évite `1/FCT − 1 ≤ 0` du houppier.
+- Écart de version : le miroir rdrr.io (G2) ne montrait pas la règle ; la copie locale (1.2.8.9000) la contient.
 
-**Code (M1 l. 157) :** `if (htotM <= 1.4 || c130cm <= 0.0) return VolumesEmerge(0.0, 0.0, 0.0, 0.0)`.
+**Statut : sourcée (gftools, défaut `conditionel = TRUE`), non fondée scientifiquement (provisoire).**
 
-- **gftools (G1) :** pas de seuil sur la hauteur. Les seuls contrôles sur `htot` : erreur si non numérique ou
-  négative ; `warning` si `htot > 50`. Le `1.3` n'y est que la constante de `corr130 <- (1 - 1.3 / htot)`.
-  **Contredite :** gftools calcule pour `1,3 < H ≤ 1,4` (et pour `H ≤ 1,3` : division par zéro ou valeur négative,
-  non traité).
-- **NEMETON (N1 l. 10, 26, 49-50) :** `H ≤ 1,30 m` → `ValueError` (« décision Q2, 27/11/2026, par délégation de
-  Pascal »). Choix de NEMETON, pas de la publication.
-- **Deleuze 2014 (D1, seconde main) :** ne traite pas H → 1,30 m ; le plus petit arbre imprimé fait 2 m (p. 24,
-  `fiche_emerge.md` § 3 et § 4).
-- **Origine du 1,3 :** mathématique, `1 − 1,3/H` s'annule à H = 1,3 m (volCyl, l. 164-165). Le 1,4 de Marculus n'a pas
-  de source : c'est une marge au-dessus de la singularité. Entre 1,3 et 2 m, le modèle est hors du calage.
-- **Statut :** seuil 1,3 : **sourcé (formule)** ; seuil 1,4 : **introuvable** ; comportement « 0 silencieux » :
-  **contredit** par NEMETON (erreur) et par gftools (NA pour les valeurs manquantes, pas de 0).
+**Options :**
+- A. Garder, en citant G1 l. 324-332 dans la spec (règle héritée de gftools, provisoire).
+- B. Remplacer par un plafond continu `min(fct, 0.95)` : choix de Marculus, qui s'écarte de gftools ; à nommer.
+- C. Retirer et traiter `fct ≥ 1` comme houppier nul : s'écarte de gftools.
+- D. Mesurer d'abord : chercher un arbre réel où `fct > 0,95` (point au sol 2). Sans cas, A suffit.
 
-**Options pour Pascal :**
-- A. Garder 0 et dire « non calculé » dans l'interface (la carte du bac à sable « Statut dit combien de tiges EMERGE
-  n'ont pas de volume » compte alors ces tiges).
-- B. Passer à H ≤ 1,30 m comme NEMETON, avec refus déclaré.
-- C. Refuser sous la plus petite hauteur du calage (2 m) : plus prudent, mais exclut des semis que gftools calcule.
+## 4. Règle 3 : `htotM <= 1.4 → 0` sans le dire
+
+**Marculus (M1 l. 157) :** `if (htotM <= 1.4 || c130cm <= 0.0) return VolumesEmerge(0.0, 0.0, 0.0, 0.0)`.
+
+- **gftools (G1 l. 178-188) :** aucun seuil bas de hauteur. Contrôles : erreur si `c130` ou `htot` est non numérique
+  ou négatif (`any(htot < 0)`), avertissement si `htot > 50`. Le `1.3` n'y est que dans `corr130 <- (1 − 1.3/htot)`
+  (l. 303). Recherche de `1.4` dans tout `/media/pascal/data2/digital_ocean/gftools` (fichiers `.R`, `.Rd`, `.md`,
+  `.txt`) : seulement des coefficients de `TarifsONF3.R`, aucun seuil. Pour `htot = 1,3` : division par zéro dans
+  `corr130` (non exécuté).
+- **Port nemeton (N2 l. 131) :** `htot > 1.4`, mais ce port copie Marculus (N2 l. 184) : ce n'est pas une source.
+- **NEMETON (N1 l. 10, 49-50) :** `H ≤ 1,30` donne une erreur ; décision Q2 du 2026-11-27 « par délégation de Pascal »,
+  non issue de la publication.
+- **Deleuze 2014 (D1) :** ne traite pas H → 1,30 m ; plus petit arbre imprimé 2 m (p. 24).
+- **Statut :** 1,3 sourcé par la formule ; **1,4 introuvable** à la source (gftools, Deleuze) ; le « 0 silencieux » est
+  un choix de Marculus (gftools n'a pas de seuil, NEMETON lève une erreur).
+
+**Options :**
+- A. Garder 1,4 et 0, en disant « non calculé » à l'écran (la carte du bac à sable « Statut dit combien de tiges
+  EMERGE n'ont pas de volume » les compte).
+- B. Passer à `H ≤ 1,30` comme NEMETON, avec refus déclaré.
+- C. Refuser sous 2 m (plus petite hauteur du calage) : plus prudent, mais exclut des semis que gftools calcule.
 
 ## 5. Écarts entre sources, notés
 
-1. Règle 2 : ni gftools ni Deleuze ne contiennent la règle ; elle est propre à Marculus.
-2. Règle 3 : trois valeurs de seuil selon la source (gftools aucun ; NEMETON 1,30 ; Marculus 1,4) et trois comportements.
-3. Marculus rend 0 là où gftools rend `NA` (tige sous la découpe) : écart de comportement, pas de valeur.
-4. D1 n'a pu être relue ; tout ce que je dis de la publication vient de la fiche NEMETON du 2026-11-26.
+1. Règle 2 : G1 la contient (copie locale 1.2.8.9000), le miroir G2 non : écart de version de gftools. La version 1 de
+   ce document concluait « introuvable » sur G2 et était fausse.
+2. Règle 1 : Marculus borne tige et houppier là où gftools ne le fait pas ; en cas de `FCT < 0`, gftools rend un
+   volume de tige négatif et un houppier `NA` (déduction, non exécutée).
+3. Règle 3 : trois comportements (gftools sans seuil, NEMETON erreur à 1,30, Marculus 0 à 1,4).
+4. Date de gftools : `DESCRIPTION` dit 2021-12-06, le dernier commit annoncé est du 2019-06-20 ; non rapproché.
+5. D1 non relue ; tout ce qui touche la publication vient de la fiche NEMETON du 2026-11-26.
 
 ## 6. Trois points au sol (pour Pascal)
 
-1. **Hêtre C = 0,628 m à 2 m et 3 m** : lire dans l'application la tige affichée (attendue 0 selon le brief) et, dans R,
-   `gftools::ListTarEmerge` ligne hêtre : calculer `d2 + e·ln(4) + f·sqrt(c)/H + g/c` pour vérifier −0,63 et −0,08.
-2. **Un arbre où `fct` dépasse 0,95** : chercher dans R (`ListTarEmerge`, toutes essences, grille H × C) un cas ; mesurer
-   la tige avec et sans la règle. Sans cas réel, la règle ne sert à rien.
-3. **Un arbre de 1,35 m** (entre 1,3 et 1,4) : gftools donne-t-il un volume, et quel ordre de grandeur ? C'est ce qui
-   dira si le seuil 1,4 cache un volume aberrant.
+1. **Hêtre C = 0,628 m à 2 m et 3 m :** exécuter `gftools::TarEmerge(c130 = 62.8, htot = 2, ess = <code hêtre>,
+   typevol = "tige")` puis `"houp"` (et à 3 m) : confirmer −0,63 / −0,08 pour `fct`, le signe de la tige et le `NA`
+   du houppier ; comparer à Marculus (0).
+2. **Un arbre où `fct` dépasse 0,95 :** chercher sur une grille H × C130 dans `ListTarEmerge` ; mesurer la tige avec
+   `conditionel = TRUE` et `FALSE`. Sans cas réel, la règle ne compte pas.
+3. **Un arbre de 1,35 m :** `TarEmerge` rend-il un volume, et de quel ordre ? C'est ce qui dira si le seuil 1,4 cache
+   une valeur aberrante.
 
 ## 7. Liste de contrôle
 
-- 1. Sources et emplacements : cochée. Version de gftools non lisible (miroir rdrr.io, sans commit) : dit en § 1.
-- 2. Décomptes : les trois règles traitées ; ListTarEmerge = 93 lignes, 15 colonnes (rapport de G2, non recompté en R).
-- 3. Termes : bornes recopiées de `Cubage.kt` (relu), pas de mémoire.
-- 4. Statut : constat, rien tranché.
-- **Non cochés :** (a) le source complet de `TarifsEmerge.R` n'a pas été obtenu verbatim (résumés seulement) ;
-  (b) Deleuze 2014 non relue directement (accès refusé) ; (c) l'origine de la règle 2 dans l'historique git non
-  interrogée (pas d'outil shell). Dépôt gftools privé : Pascal peut lever (a) et (c) en deux minutes.
+- 1. Sources et emplacements : cochée (fichiers, lignes, version 1.2.8.9000 relues le 2026-11-27).
+- 2. Décomptes : trois règles traitées ; table `ListTarEmerge` 93 lignes × 15 colonnes (rapport rdrr.io, non recompté).
+- 3. Termes : lignes recopiées de G1 et M1 relus ; les effets sur `FCT ≤ 0` sont des **déductions non exécutées**.
+- 4. Statut : constat, rien tranché ; question de Pascal : quelle option pour chaque règle.
+- **Non cochés :** (a) gftools non exécuté (pas de R ici) ; (b) Deleuze 2014 non relue directement ; (c) commit de
+  gftools non relu (pas d'outil shell), date 2019 contre 2021 ; (d) historique git de Marculus non interrogé pour
+  l'origine du 1,4.
