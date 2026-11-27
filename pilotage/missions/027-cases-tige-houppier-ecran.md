@@ -6,7 +6,7 @@
 modification du contexte montre, pour chaque essence, deux cases « tige » et « houppier » (cochées
 par défaut), pour que le marteleur règle sur le terrain ce qui compte dans le lot (mission 026).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 238-240, 249-250, 252), l'agent n'ayant pas consigné sa redite à l'époque._ Montrer à l'écran du contexte d'affouage, pour chaque essence, les cases « T » et « H » (cochées par défaut), le champ renommé « % houpp. » et la ligne « Cette essence ne compte pas dans le lot » élargie aux cas qui ne peuvent rien ajouter. Livrée par la PR #60 (85030ff) après un aller-retour de l'afficheur. Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves, à 4dd7526)
 

@@ -7,7 +7,7 @@
 spec comme choix de Marculus, pour supprimer le saut de volume des tiges minces (9,9 % de la grille d'essai) décidé
 par Pascal le 2026-11-27.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 383-386, 389, 398), l'agent n'ayant pas consigné sa redite à l'époque._ Remplacer « fct > 0,95 → 0,8 » par `fct = min(fct, FCT_PLAFOND)` (0,95 provisoire) et écrire les trois règles EMERGE dans la spec comme choix de Marculus. Livrée par la PR #90 (795079e, v2026.11.6), commit 21fe2b3 ; le contrôle terrain de la fiche a été remplacé (ligne 386) puis la note de version corrigée (lignes 393-395). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves)
 

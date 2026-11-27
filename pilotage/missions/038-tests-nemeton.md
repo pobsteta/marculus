@@ -7,7 +7,7 @@ moteur NEMETON de Marculus recalcule les 1 032 sorties du jeu de contrôle du pa
 signale un arbre hors domaine sans refuser de le cuber, pour que l'intégration du tarif provisoire (décision de
 Pascal du 2026-11-27, option b) ne s'auto-évalue pas.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 329, 342, 350, 364, 366), l'agent n'ayant pas consigné sa redite à l'époque._ Écrire, sans lire le code, les tests du moteur NEMETON : 1 349 cas (1 032 du jeu de contrôle, 291 points de sorties absentes, 26 de chargement, refus, hors domaine). Livrée avec la 039 par la PR #87 (79d2f22, v2026.11.5) ; tolérance `max(1e-6 relatif, 5e-9 absolu)` validée par Pascal (ligne 364). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves)
 

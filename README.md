@@ -9,11 +9,17 @@
 ![Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=jetpackcompose&logoColor=white)
 [![Site](https://img.shields.io/badge/site-GitHub%20Pages-2e7d32?logo=github)](https://pobsteta.github.io/marculus/)
 [![Licence](https://img.shields.io/badge/licence-GPL--3.0-blue)](LICENSE)
+![Méthode](https://img.shields.io/badge/m%C3%A9thode-Imp%C3%A9ratrice-8d6e63)
 
 Application Android de **martelage forestier** (smartphones et tablettes), inspirée des
 compteurs multi-catégories mais transposée en véritable **feuille de martelage** : une
 matrice **essences × classes de diamètre/circonférence**, traçable via un journal
 d'événements *append-only* (chaque tige possède un UUID).
+
+**Où lire** : la spécification à jour est [`docs/spec.md`](docs/spec.md) ; l'avancement est dans
+[`pilotage/kanban.md`](pilotage/kanban.md) ; les décisions d'architecture dans [`docs/adr/`](docs/adr/README.md) ;
+la mémoire du projet dans [`pilotage/journal.md`](pilotage/journal.md) ; la version courante sur la page
+[Releases](https://github.com/pobsteta/marculus/releases).
 
 ---
 
@@ -55,7 +61,8 @@ d'événements *append-only* (chaque tige possède un UUID).
   numéro par essence**. Numéro **proposé** par sylvoécorégion à partir de la commune
   (données IFN © IGN, méthode PPtools, hors ligne) — voir `docs/specs/2026-10-16-tarifs-ser.md`.
 - **EMERGE** (deux entrées, projet ANR/IGN, d'après C. Deleuze – RDV Techniques ONF 44) :
-  **volume bois fort tige**, **houppier** et **total aérien** affichés séparément.
+  **volume bois fort tige**, **houppier**, **bois fort total** et **volume aérien total** affichés séparément
+  (`docs/spec.md` § 5.2).
   Table complète des **226 essences** (coefficients générés depuis le package R `gftools`),
   repli par groupe feuillus/résineux, puis **coefficient de forme** réglable par contexte.
 - **Surface terrière** (g = π/4·D²) à tous les niveaux.
@@ -249,7 +256,8 @@ l'écran change.
   (la source ; pas de numéro recopié ici). **Avancement** : [`pilotage/kanban.md`](pilotage/kanban.md).
 - **Site GitHub Pages** : <https://pobsteta.github.io/marculus/> — page d'accueil + lien APK +
   **rapport de couverture HTML** (`/coverage/`), republié à chaque push par `pages.yml`.
-- Spécification v1 : [`docs/specs/2026-06-21-marculus-v1-spec.md`](docs/specs/2026-06-21-marculus-v1-spec.md).
+- Spécification : [`docs/spec.md`](docs/spec.md) (consolidée le 2026-11-27) ; la spec de juin,
+  [`docs/specs/2026-06-21-marculus-v1-spec.md`](docs/specs/2026-06-21-marculus-v1-spec.md), reste en historique.
 
 > Pour activer la publication : **Settings → Pages → Source = GitHub Actions** (une fois).
 > Note : GitHub Pages sur un dépôt **privé** nécessite un plan payant (Pro/Team).

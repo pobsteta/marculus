@@ -9,7 +9,7 @@ n° 2 (journal du 2026-11-10) : 6 incidents, dont « Par parcelle » à 23 tiges
 (journal du 2026-11-09) et quatre missions (018, 019, 021, 022) pour y remédier. Décision de
 Pascal du 2026-11-10 : « je valide ».
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 196, 209-213), l'agent n'ayant pas consigné sa redite à l'époque._ Écrire des tests qui exigent le même nombre de tiges et les mêmes volumes partout où Marculus les affiche ou les exporte : 18 tests d'égalité des totaux (15 dans `:core`, 3 dans `:data`) sur 8 journaux et 3 contextes. Livrée par la PR #55 (7f66180) ; l'annulation orpheline, ignorée par « Par lot » et le CSV du bilan par lot, est une exception décidée par Pascal (ligne 210). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves)
 

@@ -6,7 +6,7 @@
 IFN, D, H) à partir du seul paquet embarqué, pour que Marculus puisse proposer le tarif NEMETON provisoire (décision de
 Pascal du 2026-11-27, option b) ; sans écran ni changement du modèle de données.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 343, 347-349, 365), l'agent n'ayant pas consigné sa redite à l'époque._ Coder dans `:core` le moteur NEMETON à partir du seul paquet embarqué, plan d'abord. Livrée par la PR #87 (79d2f22, v2026.11.5) : 1 032 sur 1 032 cas verts ; les entrées impossibles sont refusées (option « A » de Pascal, ligne 365). Pas d'écran : le branchement est au cycle 11. Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves)
 

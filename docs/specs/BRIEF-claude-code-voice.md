@@ -1,5 +1,10 @@
 # Brief Claude Code — Marculus : saisie vocale des tiges (Vosk)
 
+> **Brief d'origine, historique (ajout du 2026-11-27, mission 045).** Ce brief a servi à écrire la tranche de dictée
+> vocale, livrée le 2026-08-21 ; la description à jour de ce qui est livré est
+> `docs/specs/2026-08-21-tranche-dictee-vocale.md`, puis `docs/spec.md` § 12. Il n'est plus une source : ne pas s'y
+> fier pour l'état actuel (par exemple pour les essences et leurs codes, voir `docs/spec.md` § 5.7).
+
 ## Contexte
 
 Tu travailles dans le dépôt `pobsteta/marculus` : app Android native Kotlin (Compose Material 3, minSdk 26) de saisie de tiges en martelage forestier. Architecture 3 modules : `:core` (domaine pur Kotlin/JVM, couvert par JaCoCo, **zéro dépendance Android**), `:data` (Room + DataStore), `:app` (Compose UI + services).

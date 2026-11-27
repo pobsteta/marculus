@@ -8,7 +8,7 @@ sa source (commit ou tag, `git status` propre) et tout contrôle terrain est rej
 fiche du plugin `imperatrice`, parce que la cause n° 1 du bilan n° 3 (faits sans preuve relue à la source, 10 incidents
 sur 26) est revenue six fois avec des règles seulement locales.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _non retrouvée_ : le journal ne consigne que la commande (lignes 400 et 405), aucun rapport de l'agent ; reconstituée le 2026-11-27 seulement d'après la phrase de mission de la fiche. Ajouter à `pilotage/pre-fusion.md` les points 6 (source relue) et 7 (boîte des briefs relevée). Livrée par la PR #97 (branche `docs/044-source-relue`, dernier commit bda2eb7), **non fusionnée à a215c0a** (état relu : `git log origin/main..docs/044-source-relue`).
 
 ## Ce qui existe (preuves)
 

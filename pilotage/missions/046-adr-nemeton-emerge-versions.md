@@ -6,7 +6,7 @@
 0012 (plafond continu de la part de tige EMERGE) et 0013 (versions calendaires `vAAAA.MM.N`), parce que ces trois
 décisions de Pascal ne vivent aujourd'hui que dans le journal et des specs datées (trou G1 du bilan n° 3).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _non retrouvée_ : le journal ne consigne que la commande (lignes 400 et 405), aucun rapport de l'agent ; reconstituée le 2026-11-27 seulement d'après la phrase de mission de la fiche. Écrire les ADR 0011, 0012 et 0013 en texte proposé. Livrée par la PR #98 (branche `docs/046-adr-0011-0013`, dernier commit 92f62fb), **non fusionnée à a215c0a**.
 
 ## Ce qui existe (preuves)
 

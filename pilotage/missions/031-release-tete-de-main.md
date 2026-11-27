@@ -8,7 +8,7 @@ ancien commit ne publie jamais une version plus haute contenant moins de code, e
 seuls ne publie pas un APK identique. Décision de Pascal du 2026-11-10 (journal, ligne
 « Pascal · 024 · consigne nuancée … corriger le risque lui-même par une mission CI »).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 271-278, 286), l'agent n'ayant pas consigné sa redite à l'époque._ Ne publier une release que si le commit est encore la tête de `main` et que des fichiers qui comptent (hors tests) ont changé. Livrée par la PR #67 (fe01907) après une reprise (le commit de badge `[skip ci]` ne doit pas « dépasser » le commit) ; première release sous la règle : v0.73.1 (ligne 286). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves, à 1f66af4)
 

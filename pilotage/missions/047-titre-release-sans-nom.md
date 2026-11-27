@@ -6,7 +6,7 @@
 (`v2026.11.N`), comme les autres projets de la plateforme, en réponse au brief
 `~/dev/briefs/vers-marculus/2026-11-24-titre-release-sans-nom.md`.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _non retrouvée_ : le journal ne consigne que la commande (lignes 400 et 405), aucun rapport de l'agent ; reconstituée le 2026-11-27 seulement d'après la phrase de mission de la fiche. Titrer les releases par la version seule. Livrée par la PR #96 (a215c0a, tag v2026.11.7) : `release.yml` l. 115, `name: ${{ steps.tag.outputs.new_tag }}`.
 
 ## Ce qui existe (preuves)
 

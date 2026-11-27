@@ -7,7 +7,7 @@ courte et longue, icône, captures, en français et en anglais) qu'IzzyOnDroid e
 puisse demander l'inclusion de Marculus et qu'un affouagiste l'installe et le mette à jour depuis F-Droid
 sans manipuler d'APK. Décision de Pascal du 2026-11-11 : IzzyOnDroid plutôt que F-Droid officiel.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 296-312), l'agent n'ayant pas consigné sa redite à l'époque._ Ajouter les métadonnées Fastlane (fr-FR et en-US : titre, descriptions, icône, captures) qu'IzzyOnDroid exige, avec le test `FicheFastlaneTest`. Livrée par la PR #73 (2afeef7, v0.73.3) après une reprise (section « Réseau » complétée, captures au rapport 2:1), puis la PR #76 (309b83e, v2026.11.2) pour les captures de la carte sur Couchey. Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves, à c330d1c)
 

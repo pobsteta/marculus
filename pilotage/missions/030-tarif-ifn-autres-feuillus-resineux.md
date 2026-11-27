@@ -8,7 +8,7 @@ résineux ») un tarif IFN calculé comme la moyenne, pondérée par le nombre d
 numéro de tarif négatif, pour que ces deux regroupements reçoivent une proposition comme les autres
 essences. Décisions de Pascal du 2026-11-10 (journal, lignes `Pascal · 029` et `Pascal · 030`).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 228-229, 232-233, 241-248, 259-261, 263), l'agent n'ayant pas consigné sa redite à l'époque._ Calculer la proposition de tarif IFN de « Autres feuillus » et « Autres résineux » comme moyenne pondérée par le nombre d'arbres des feuillus (résineux) de la SER hors essences listées à part, lignes au numéro ≤ 0 écartées, même cascade SER → GRECO → France et seuil de 30 arbres. Livrée par la PR #62 (609910f, v0.73.0) après deux reprises ; décision de fond : ADR 0010. Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves, à 25b6314)
 
