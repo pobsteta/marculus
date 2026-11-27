@@ -6,7 +6,7 @@
 0012 (plafond continu de la part de tige EMERGE) et 0013 (versions calendaires `vAAAA.MM.N`), parce que ces trois
 décisions de Pascal ne vivent aujourd'hui que dans le journal et des specs datées (trou G1 du bilan n° 3).
 
-**Redite par l'agent :** _non retrouvée_ : le journal ne consigne que la commande (lignes 400 et 405), aucun rapport de l'agent ; reconstituée le 2026-11-27 seulement d'après la phrase de mission de la fiche. Écrire les ADR 0011, 0012 et 0013 en texte proposé. Livrée par la PR #98 (branche `docs/046-adr-0011-0013`, dernier commit 92f62fb), **non fusionnée à a215c0a**.
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (l. 413, le rendu de l'agent)._ Écrire les ADR 0011 (NEMETON embarqué, paquet `0.2.2-provisoire` ; PR #85, #87), 0012 (plafond EMERGE `min(fct, 0,95)`, provisoire ; PR #86, #90) et 0013 (versions calendaires ; PR #77), en texte proposé, branche `docs/046-adr-0011-0013` (879b123 au rendu). Trous nommés « non écrit » : raison de 0,95, raisons de « b » et du calendaire, questions ouvertes du branchement, spec v1 l. 314 « SemVer » (laissée à la 045), renvoi daté de l'ADR 0008. Livrée par la PR #98 (178275d), **fusionnée sur `main`** (état relu : 909b1dd).
 
 ## Ce qui existe (preuves)
 

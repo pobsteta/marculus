@@ -8,8 +8,11 @@
 > **détail** reste dans les specs de tranche (`docs/specs/*.md`), qu'elle cite et ne recopie pas.
 >
 > **Source relue, état dit** (`pilotage/pre-fusion.md`, point 6) : toutes les preuves de fichier et de ligne sont
-> relues sur le commit **`a215c0a`** (`origin/main`, 2026-11-27, tag `v2026.11.7`), copie de travail propre
-> (`git status` vide) ; « journal l. N » = `pilotage/journal.md` au même commit (405 lignes) ; les numéros de PR et de
+> relues sur le commit **`909b1dd`** (`origin/main`, 2026-11-27, PR #99), copie de travail propre (`git status` vide).
+> Le **code n'a pas changé** entre `a215c0a` (tag `v2026.11.7`, état d'une première relecture) et `909b1dd` : `git diff
+> --name-only a215c0a 909b1dd` ne liste que `docs/adr/`, `pilotage/journal.md`, `pilotage/pre-fusion.md` et la fiche 044.
+> « journal l. N » = `pilotage/journal.md` (les lignes citées, jusqu'à la l. 405, n'ont pas bougé : ajout seul ; le
+> fichier compte 427 lignes à `909b1dd`) ; les numéros de PR et de
 > commit viennent de `git log` et `git tag` du même état. **Non vérifié** = dit tel quel, à l'endroit du fait. Les
 > faits repris des specs antérieures sans nouvelle lecture portent la mention « repris » et renvoient à leur spec.
 > Rien du code n'est modifié par cette mission. Pour les fichiers que la mission 045 modifie (`README.md`, `CLAUDE.md`,
@@ -88,8 +91,8 @@
 - Modèle à deux entrées (circonférence à 1,30 m, hauteur totale) d'après Deleuze et al. 2014 ; coefficients de
   `gftools::ListTarEmerge` dans `core/.../EmergeCoefs.kt` (en-tête l. 3 : « Généré depuis gftools::ListTarEmerge […]
   Ne pas éditer à la main ») : **429 noms** (français et latin) dans `EMERGE_COEFS` (recompté le 2026-11-27 par
-  `grep -c '" to CoefEmerge'`). Le chiffre « 226 essences » vient de la liste `gftools` (`ListTarEmerge` 226 × 92,
-  journal l. 344, relevé par le relecteur dans R) : **non recompté dans le code**.
+  `grep -c '" to CoefEmerge'`). Le chiffre « 226 » est celui des **entrées EMERGE** de `gftools::ListTarEmerge` (226 × 92, journal l. 344, relevé
+  par le relecteur dans R ; copie de travail non commitée de `gftools`) : **non recompté dans le code**, qui en tire 429 noms.
 - **Quatre volumes** (mission 094, PR #82, `1e7c0a0`, tag `v2026.11.4`) : `tige`, `houppier`, `boisFortTotal` (= tige +
   houppier, découpe 7 cm ; c'est ce que Marculus appelait « total » avant le 2026-11-27) et `volumeAerienTotal`
   (= `formTot × volCyl`, sans découpe) (`Cubage.kt` l. 142-147 ; calcul l. 157-191). Hors EMERGE, `volumeAerienTotal` vaut 0
@@ -109,7 +112,7 @@
      **les classes de martelage courantes ne bougent pas** (hêtre D 27,5 cm : fct ≈ 0,8, journal l. 393) ;
   3. **hauteur ≤ 1,4 m ou C ≤ 0 : tout à 0** (`Cubage.kt` l. 158) ; décision « A », journal l. 372 ; l'écran
      « non calculé » est prévu au cycle 11 (§ 15).
-  Décision de fond : ADR 0012 (`docs/adr/0012-plafond-part-de-tige-emerge.md`, PR #98, **non fusionnée au 2026-11-27**).
+  Décision de fond : ADR 0012 (`docs/adr/0012-plafond-part-de-tige-emerge.md`, PR #98 `178275d`, fusionnée sur `main`).
 - EMERGE : la part de houppier saisie est **ignorée** (grisée), gardée pour un retour en Schaeffer (`Cubage.kt`
   l. 249-262 ; journal l. 394).
 - Repli : essence non couverte → coefficient de forme `V = f·π/4·D²·H`, `f` réglable par contexte, 0,5 par défaut
@@ -151,7 +154,7 @@
   (`core/src/main/resources/nemeton/datapackage.json` l. 4), constantes et jeu de contrôle de 1 032 lignes
   (`jeu_controle.csv`, 1 033 lignes avec l'en-tête). Il **refuse** un paquet dont l'empreinte SHA-256 ne correspond pas
   (`PaquetNemeton.kt` l. 11, 31-33). Missions 038 (tests) et 039 (moteur), PR #87 (`79d2f22`, tag `v2026.11.5`) ;
-  1 032 / 1 032 cas verts, tolérance `max(1e-6 relatif, 5e-9 absolu)` (`PaquetDeTest.kt` l. 10-11, validée par
+  1 032 / 1 032 cas verts, tolérance `max(1e-6 relatif, 5,0001e-9 absolu)` (`PaquetDeTest.kt` l. 10-11 : `TOL_ABSOLUE = 5.0001e-9`, validée par
   Pascal, journal l. 364).
 - **Entrées impossibles refusées** : D ≤ 0, H ≤ 0, résineux H ≤ 1,301 m → `IllegalArgumentException`
   (`TarifNemeton.kt` l. 57-64 et 179), option « A » de Pascal (journal l. 365). Écart connu au brief NEMETON (« pas de
@@ -160,7 +163,7 @@
   2026-11-27.
 - **Pas branché** : aucun fichier de `:app` ni de `:data` n'appelle `TarifNemeton` ni `PaquetNemeton` (`grep -rl`, vide).
   Le résultat reste **provisoire** tant que le paquet l'est. Le branchement (écran, exports, lots, « À propos ») est le
-  cycle 11 (§ 15). Décision : ADR 0011 (`docs/adr/0011-nemeton-embarque-provisoire.md`, PR #98, **non fusionnée**).
+  cycle 11 (§ 15). Décision : ADR 0011 (`docs/adr/0011-nemeton-embarque-provisoire.md`, PR #98 `178275d`, fusionnée sur `main`).
 - **Codes IFN des essences** (mission 037, PR #85, `04c5bf2`) : table de revue de 59 noms et onze décisions de Pascal
   (Chêne 3, Autres feuillus 49, Autres résineux 75 non couvert, Érable 15, Frêne 17, Peuplier 19, Sorbier 23, Pin nu sans code ;
   pins 51/53/54/57/58 repliés sur 52 et chêne rouge sur `Quercus_spec`, « l'essence réellement utilisée accompagne
@@ -184,7 +187,7 @@
   fermé par la tige qui atteint ou dépasse le maximum, **figé sur la tige** (`Tige.lot`), annoncé à chaque tige
   (« Chêne 35, lot numéro 3 », « lot 3 complet »). Exige au moins une essence cubée. ✅ Détail :
   `docs/specs/2026-10-07-contexte-affouage.md` ; code : `AffouageLots.kt` (`volumes` l. 30, `bilan` l. 56, `etat` l. 82).
-- **Règle du lot : les parties cochées** (missions 026 et 027, PR #58 `07b5870` et #60 `85030ff`, tag `v0.72.0`) : le lot
+- **Règle du lot : les parties cochées** (missions 026 et 027 : PR #58 `07b5870`, tag `v0.71.0`, et PR #60 `85030ff`, tag `v0.72.0`) : le lot
   d'une essence compte sa **tige**, son **houppier**, ou les deux, les deux cochées par défaut ; cases « T » et
   « H » sur la ligne de l'essence (`Modeles.kt` l. 55 `PartsLot` ; `AffouageLots.kt` l. 20, 32 ; `LotEssence.kt` l. 14).
   Remplace « houppier seul » (ADR 0004). Décision : ADR 0009. Un lot dont les deux cases sont décochées vaut 0 m³ ;
@@ -226,7 +229,7 @@
 - `+` ajoute une tige `PLUS` (hauteur et qualité demandées si obligatoires ; position GNSS si le ponctuel est actif).
   `−` enregistre une `ANNULATION` (spec de juin § 7, **repris**).
 - **Une seule règle d'annulation** (mission 022, PR #49, `76bd939`) : une annulation retire la dernière tige de sa case,
-  dans `JournalNet` seul (`core/.../JournalNet.kt` l. 16-18) ; les comptes (Statut, liste, boîte « Ouvrir avec ») sont des
+  dans `JournalNet` seul (`core/.../JournalNet.kt` : règle dite l. 8-14, code l. 18-41) ; les comptes (Statut, liste, boîte « Ouvrir avec ») sont des
   sommes signées égales au net par test (mission 025, PR #55, `7f66180`, `EgaliteDesTotauxTest`, 18 tests). Décision :
   ADR 0007.
 
@@ -243,7 +246,7 @@
 - **Contrat avec `nemetonshiny`** : tout changement de format se signale par brief, avec un numéro de format
   (`docs/brief.md`, « Contraintes connues »). Le format 9 : **aucun brief trouvé** (`grep -rli 'format 9\|VolumeAerienTotal\|FormatCsv;9' ~/dev/briefs`, vide le
   2026-11-27) ; le journal ne dit pas qu'il a été écrit (l. 319, 322) : **trou de mémoire, à Pascal** (§ 15).
-- Les exports sont écrits par `ExportFichier` dans `Download/Marculus`, par MediaStore (`app/.../ExportFichier.kt` l. 23, 31, 38).
+- Les exports sont écrits par `ExportFichier` dans `Download/Marculus`, par MediaStore (`app/.../ExportFichier.kt` l. 23, 31, 38) ; **Android 8-9** (pas d'`IS_PENDING`, `Build.VERSION_CODES.Q` l. 37) : repli vers le dossier de l'application, `Android/data/…/files/Download/Marculus/` (même fichier, l. 22-23, 40).
 
 ## 10. Synchronisation par fichier
 
@@ -299,7 +302,7 @@
   `fe01907`). Détail opérationnel : `README.md`, « Déployer et publier ».
 - **Versions calendaires** `vAAAA.MM.N` (année et mois UTC, compteur du mois repart à 1 ; `.github/scripts/version-calendaire.sh`
   l. 1-12 ; mission 036, PR #77 `a28dc2d`, tag `v2026.11.1`) ; les anciens `v0.*` restent. **Elles remplacent** les « releases
-  SemVer automatiques » de la spec de juin § 9 (l. 314, erratum). Décision : ADR 0013 (PR #98, **non fusionnée**).
+  SemVer automatiques » de la spec de juin § 9 (l. 314, erratum). Décision : ADR 0013 (`docs/adr/0013-versions-calendaires.md`, PR #98 `178275d`, fusionnée sur `main`).
   **Question ouverte** : le brief de `terrain` du 2026-11-20 annonce la notation `vAAAA.M.N` (mois sans zéro) de la
   plateforme ; Marculus écrit `vAAAA.MM.N` : à Pascal (§ 15).
 - **Titre de la release** = la version seule, sans « Marculus » (`release.yml` l. 115 ; mission 047, PR #96, `a215c0a`,
@@ -316,9 +319,9 @@
 
 ## 14. Décisions, règles, mémoire
 
-- **Décisions d'architecture** : `docs/adr/` (index : `docs/adr/README.md`). ADR 0001 à 0010 sur `main` ; **0011** (NEMETON
-  embarqué provisoire), **0012** (plafond de la part de tige EMERGE), **0013** (versions calendaires) : fichiers sur la
-  branche de la PR #98 (mission 046), **non fusionnés au 2026-11-27** ; liens écrits d'avance, à rouvrir à la fusion.
+- **Décisions d'architecture** : `docs/adr/` (index : `docs/adr/README.md`). ADR 0001 à 0013 sur `main` ; **0011** (NEMETON
+  embarqué provisoire), **0012** (plafond de la part de tige EMERGE), **0013** (versions calendaires) : mission 046, PR #98
+  (`178275d`), fusionnée.
 - **Décisions de Pascal** : `pilotage/journal.md` (ajout seul) ; une décision de fond se dit « décision » ou « cap »
   (journal l. 398).
 - **Sources de vérité** : table de `CLAUDE.md` ; avancement : `pilotage/kanban.md` ; missions : `pilotage/missions/` ;
@@ -329,8 +332,8 @@
   (`correction-emerge-volumes`, `emerge-regles-sans-source`, `essences-nemeton`, `rattachement-essences`).
 - **Specs historiques** (gardées, datées, non effacées) : `2026-06-21-marculus-v1-spec.md` (remplacée par ce document) ;
   `BRIEF-claude-code-voice.md` (brief d'origine de la dictée).
-- **Briefs entrants** : `~/dev/briefs/vers-marculus/`, relevée à chaque `/boucle` (point 7 de `pre-fusion.md`, branche de
-  la mission 044).
+- **Briefs entrants** : `~/dev/briefs/vers-marculus/`, relevée à chaque `/boucle` (point 7 de `pre-fusion.md`, en vigueur
+  sur `main` : mission 044, PR #97 `dc56377`).
 
 ## 15. Reste à faire
 

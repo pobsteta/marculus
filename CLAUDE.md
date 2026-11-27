@@ -54,7 +54,8 @@ EMERGE, essences NEMETON, rattachement des essences, règles sans source). Les r
   (`core/src/main/kotlin/fr/marculus/core/Cubage.kt`, `RATTACHEMENT_ESSENCES`) ; voir `docs/spec.md` § 5.7. (`docs/specs/BRIEF-claude-code-voice.md` est
   le brief d'origine de la dictée, historique.)
 - **Cubage** : tarifs **Schaeffer** rapide, intermédiaire, lent et très lent
-  (formules en `docs/spec.md` § 5.1 ; numéro de tarif entier) et **EMERGE** (226 essences,
+  (formules en `docs/spec.md` § 5.1 ; numéro de tarif entier) et **EMERGE** (226 entrées EMERGE
+  de `ListTarEmerge`, copie de travail non commitée de `gftools`, soit 429 noms français et latins dans `EMERGE_COEFS` ;
   `EmergeCoefs.kt` généré depuis `gftools::ListTarEmerge` : ne pas éditer à la main).
 - **EMERGE, quatre volumes, et NEMETON** : tige, houppier, bois fort total (tige + houppier), volume aérien total ;
   trois règles de calcul qui sont des choix de Marculus (`docs/spec.md` § 5.2) ; le tarif NEMETON est dans `:core`,

@@ -6,7 +6,7 @@
 (`v2026.11.N`), comme les autres projets de la plateforme, en réponse au brief
 `~/dev/briefs/vers-marculus/2026-11-24-titre-release-sans-nom.md`.
 
-**Redite par l'agent :** _non retrouvée_ : le journal ne consigne que la commande (lignes 400 et 405), aucun rapport de l'agent ; reconstituée le 2026-11-27 seulement d'après la phrase de mission de la fiche. Titrer les releases par la version seule. Livrée par la PR #96 (a215c0a, tag v2026.11.7) : `release.yml` l. 115, `name: ${{ steps.tag.outputs.new_tag }}`.
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (l. 410, le rendu du dev)._ Titrer les releases par la version seule : `release.yml` l. 115, `name: Marculus ${{ … }}` devient `name: ${{ steps.tag.outputs.new_tag }}` ; `grep -rn 'Marculus ${{' .github` vide après ; tests verts ; titre à vérifier à la prochaine release. Livrée par la PR #96 (a215c0a, tag v2026.11.7), **fusionnée sur `main`** (état relu : 909b1dd).
 
 ## Ce qui existe (preuves)
 

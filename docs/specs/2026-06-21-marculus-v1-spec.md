@@ -330,7 +330,7 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   *Erratum du 2026-11-27 (corrige, sans l'effacer, « releases SemVer automatiques » ci-dessus) : depuis le 2026-11-11
   les versions sont **calendaires**, `vAAAA.MM.N` (mission 036, PR #77, `a28dc2d`, tag `v2026.11.1` ;
   `.github/scripts/version-calendaire.sh` l. 1-12), relu sur `a215c0a` ; les anciens tags `v0.*` restent. Voir
-  `docs/spec.md` § 13 et l'ADR 0013 (PR #98, non fusionnée au 2026-11-27).*
+  `docs/spec.md` § 13 et l'ADR 0013 (PR #98 `178275d`, fusionnée sur `main`, relu sur `909b1dd`).*
 
 ## 10. Reste à faire
 

@@ -63,7 +63,7 @@ la mémoire du projet dans [`pilotage/journal.md`](pilotage/journal.md) ; la ver
 - **EMERGE** (deux entrées, projet ANR/IGN, d'après C. Deleuze – RDV Techniques ONF 44) :
   **volume bois fort tige**, **houppier**, **bois fort total** et **volume aérien total** affichés séparément
   (`docs/spec.md` § 5.2).
-  Table complète des **226 essences** (coefficients générés depuis le package R `gftools`),
+  Table complète : **226 entrées EMERGE** (`ListTarEmerge`, copie de travail non commitée du package R `gftools`), soit 429 noms français et latins dans `EMERGE_COEFS`,
   repli par groupe feuillus/résineux, puis **coefficient de forme** réglable par contexte.
 - **Surface terrière** (g = π/4·D²) à tous les niveaux.
 

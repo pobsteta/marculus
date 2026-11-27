@@ -8,7 +8,7 @@ sa source (commit ou tag, `git status` propre) et tout contrôle terrain est rej
 fiche du plugin `imperatrice`, parce que la cause n° 1 du bilan n° 3 (faits sans preuve relue à la source, 10 incidents
 sur 26) est revenue six fois avec des règles seulement locales.
 
-**Redite par l'agent :** _non retrouvée_ : le journal ne consigne que la commande (lignes 400 et 405), aucun rapport de l'agent ; reconstituée le 2026-11-27 seulement d'après la phrase de mission de la fiche. Ajouter à `pilotage/pre-fusion.md` les points 6 (source relue) et 7 (boîte des briefs relevée). Livrée par la PR #97 (branche `docs/044-source-relue`, dernier commit bda2eb7), **non fusionnée à a215c0a** (état relu : `git log origin/main..docs/044-source-relue`).
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (l. 407 le plan, l. 409 le rendu, l. 416 le second rendu après l'aller-retour 1/3)._ Ajouter à `pilotage/pre-fusion.md` le point 6 (source relue : preuve et état de la source dite, décompte, contrôle terrain dans l'unité de l'écran, avant de soumettre à Pascal) et le point 7 (boîte `vers-marculus` relevée, briefs sortants déposés), avec un en-tête « avant de soumettre et de dire prêt ». Rendu : ac823db (branche `docs/044-source-relue`), puis bda2eb7 après les reprises A à F du relecteur : point 6 en trois sous-cases (6a, 6b, 6c), 9 incidents sur 10 arrêtés, l. 299 non couverte (oubli de contenu) ; brief vers la méthode non déposé. Livrée par la PR #97 (dc56377), **fusionnée sur `main`** (état relu : 909b1dd).
 
 ## Ce qui existe (preuves)
 
