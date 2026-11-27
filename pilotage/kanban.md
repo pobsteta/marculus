@@ -6,7 +6,7 @@
 > colonne ; on change ce numéro chaque fois qu'elle change de colonne.
 > **Une carte qui ne bouge pas est souvent la mauvaise nouvelle à dire tout de suite.**
 
-**Dernier cycle :** 8 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
+**Dernier cycle :** 9 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
 rien lancé. Une carte est immobile quand dernier cycle − N ≥ 2.)_
 
 _Modèle de carte :_
@@ -37,22 +37,14 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Release en double possible si l'on relance la CI d'un ancien commit suivi de pilotage seul (même code, jamais moins ; relecteur de la 031) · depuis le cycle 8
 - GitHub Actions n'a pas déclenché la CI de la PR #67 ni du push fe01907 (2026-11-10) : à surveiller · depuis le cycle 8
 - Statut dit combien de tiges EMERGE n'ont pas de volume faute de hauteur (aujourd'hui 0 m³ sans le dire : `Cubage.kt` l. 250 et l. 279 ; seule « N tige(s) EMERGE sur M » le laisse deviner, `StatutHistoriqueScreen.kt` l. 283) · constat sur le téléphone, « Sombernon Test », 2026-11-27 ; décision de Pascal du 2026-11-27 : au bac à sable · depuis le cycle 8
+- Brancher NEMETON dans l'application (tarif d'un contexte, écran Statut, exports, lots d'affouage), à partir du moteur (039) et de la table des essences décidée (037) · questions de sens à Pascal : volumes montrés quand une sortie manque (pas de bois fort tige des feuillus, pas de bois fort total des résineux), parts tige / houppier d'un lot, mention « provisoire », « hauteur impossible » à l'écran ; ADR 0011 · depuis le cycle 9
+- Correction EMERGE des trois règles (fct négatif, 0,95 → 0,8 sans source connue, seuil 1,4 sans source) : testeur puis dev, sur les options de `docs/specs/2026-11-27-emerge-regles-sans-source.md` et l'erratum de la PR #86 ; arbre d'essai : hêtre C 25 cm H 20 m · décision de Pascal à prendre sur chaque option · depuis le cycle 9
+- Brief vers `tarif-nemeton` : Marculus refuse D ≤ 0, H ≤ 0 et résineux H ≤ 1,301 m (décision de Pascal du 2026-11-27, option A) alors que le brief NEMETON dit « pas de refus » hors domaine ; et le repli D5 retenu côté Marculus (pins → 52, chêne rouge → Quercus_spec) · depuis le cycle 9
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
 
-- [037](missions/037-essences-nemeton.md) · depuis le cycle 8
-  - Homme : acquereur (sonnet), donner
-  - Mission : table de revue essences de Marculus → codes IFN du paquet NEMETON, avec repli
-  - Moyens : paquet `tarif-nemeton/livrable` 0.2.2-provisoire, référentiel IFN ESS 2022
-- [038](missions/038-tests-nemeton.md) + [039](missions/039-moteur-nemeton.md) · depuis le cycle 8
-  - Homme : testeur (sonnet) puis dev (opus, plan d'abord), donner
-  - Mission : moteur NEMETON dans `:core`, prouvé sur les 1 032 sorties du jeu de contrôle ; une PR
-  - Moyens : paquet embarqué tel quel, méthodologie v2.25, `paquet_livrable.py` (dev seul)
-- [040](missions/040-emerge-points-secondaires.md) · depuis le cycle 8
-  - Homme : acquereur (sonnet), donner
-  - Mission : sources des trois règles EMERGE sans source (fct négatif, 0,95 → 0,8, H ≤ 1,4)
-  - Moyens : `gftools` en ligne, Deleuze et al. 2014
+_(vide depuis le cycle 9)_
 
 ## Planifié
 
@@ -62,6 +54,19 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · essai au soleil clos le 2026-10-24 (thèmes actuels conformes) : la carte attend la palette `terrain-style` · depuis le cycle 1
 
 ## Terminé
+
+- [037](missions/037-essences-nemeton.md) · depuis le cycle 9
+  - Homme : acquereur (sonnet), donner
+  - Mission : table de revue essences de Marculus → codes IFN pour NEMETON
+  - Livré : PR #85 fusionnée le 2026-11-27 (04c5bf2), 11 lignes ouvertes tranchées par Pascal une à une
+- [038](missions/038-tests-nemeton.md) + [039](missions/039-moteur-nemeton.md) · depuis le cycle 9
+  - Homme : testeur (sonnet) puis dev (opus, plan d'abord), donner
+  - Mission : moteur NEMETON dans `:core`, 1 032 sorties du jeu de contrôle recalculées
+  - Livré : PR #87 fusionnée le 2026-11-27 (79d2f22) ; tolérance max(1e-6 relatif, 5e-9 absolu) et refus des entrées impossibles décidés par Pascal ; pas encore branché à l'écran
+- [040](missions/040-emerge-points-secondaires.md) · depuis le cycle 9
+  - Homme : acquereur (sonnet), donner
+  - Mission : sources des trois règles EMERGE sans source
+  - Livré : PR #86 fusionnée le 2026-11-27, avec l'erratum du relecteur (3 allers-retours) ; règle 0,95 → 0,8 sans source connue (Pascal ne sait pas d'où elle vient)
 
 - [036](missions/036-version-calendaire.md) · depuis le cycle 8
   - Homme : dev (sonnet), lâcher
@@ -304,3 +309,4 @@ l'inscrit avec ce qu'elle nous apprend._
 - bilan du 2026-11-10 · Marculus v0.70.4 : fusion d'un `.marsync` d'un appui après confirmation, stères dans Statut / historique, mêmes nombres de tiges et mêmes volumes sur tous les écrans et CSV malgré les annulations · pour les marteleurs d'affouage et les équipes à plusieurs opérateurs · le bilan n° 1 changeait l'aspect (lisible au soleil), celui-ci change le travail à plusieurs et la confiance dans les chiffres ; retenue par Pascal (« je valide »)
 - cycle 7 · mauvaise nouvelle : rien de neuf en main pour un bénéficiaire du brief ; v0.70.5 est le même APK que v0.70.4 · pour les marteleurs d'affouage et les propriétaires · la CI tient maintenant l'égalité des totaux livrée au cycle 6 (025) et un successeur peut reprendre la doc (024), mais deux cycles de consolidation d'affilée sont la limite : le cycle 8 sort une carte du bac à sable vers le terrain, à partir de la phrase du problème du produit dans `docs/brief.md` ; lecture acceptée par Pascal (« j'accepte »)
 - cycle 8 · Marculus v0.72.0 → v0.73.2 : le lot d'affouage compte les parties cochées T et H de chaque essence ; proposition IFN pour Autres feuillus et Autres résineux ; « 1 tige » au singulier et virgule décimale ; plus de version fantôme (tests seuls, commit dépassé) · pour les marteleurs d'affouage et les communes · le cycle 7 n'avait rien livré en main ; celui-ci rend le partage du lot réglable par la commune et propose un tarif pour toutes les essences ; retenue par Pascal (« D'accord »)
+- cycle 9 · Marculus v2026.11.5 : moteur NEMETON 0.2.2-provisoire embarqué dans `:core`, prouvé sur les 1 032 sorties du jeu de contrôle, et table des essences de Marculus → codes IFN décidée ligne à ligne · pour Pascal, porteur du tarif NEMETON · premier calcul NEMETON dans Marculus (le cycle 8 livrait le lot d'affouage par parties) ; rien de visible pour les marteleurs dans ce cycle : leur seule nouveauté du jour, les quatre volumes EMERGE (v2026.11.4), vient d'une session hors boucle ; retenue par Pascal (« je valide »)

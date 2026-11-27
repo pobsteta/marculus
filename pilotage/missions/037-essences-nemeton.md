@@ -22,7 +22,7 @@ provisoire (option b, journal du 2026-11-27).
   (F. excelsior, oxyphylla et ornus) ; les codes rattachés au tarif par le seul genre ne sont pas dans le paquet et
   « le repli de la spec § 4 est à appliquer par Marculus, sur décision de Pascal (D5) » (`limites_connues`).
 - **Le référentiel IFN :** `~/dev/tarif-nemeton/donnees/referentiels/ifn/essences_ifn_ess.csv`.
-- **Les noms d'essence de Marculus :** essences par défaut et 38 noms courts rattachés à la main
+- **Les noms d'essence de Marculus :** essences par défaut et 39 noms courts rattachés à la main (38 écrit à la création de la fiche ; 39 comptés par l'acquereur et le relecteur, journal du 2026-11-27)
   (`core/src/main/kotlin/fr/marculus/core/Cubage.kt` l. 52, `RATTACHEMENT_ESSENCES`) ; leur table de revue EMERGE
   `docs/specs/2026-11-27-rattachement-essences.md` (même forme attendue ici) ; codes ONF à 3 caractères
   (`EmergeCoefs.kt`, table des codes).
