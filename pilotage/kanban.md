@@ -39,6 +39,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Statut dit combien de tiges EMERGE n'ont pas de volume faute de hauteur (aujourd'hui 0 m³ sans le dire : `Cubage.kt` l. 250 et l. 279 ; seule « N tige(s) EMERGE sur M » le laisse deviner, `StatutHistoriqueScreen.kt` l. 283) · constat sur le téléphone, « Sombernon Test », 2026-11-27 ; décision de Pascal du 2026-11-27 : au bac à sable · depuis le cycle 8
 - Brancher NEMETON dans l'application (tarif d'un contexte, écran Statut, exports, lots d'affouage), à partir du moteur (039) et de la table des essences décidée (037) · questions de sens à Pascal : volumes montrés quand une sortie manque (pas de bois fort tige des feuillus, pas de bois fort total des résineux), parts tige / houppier d'un lot, mention « provisoire », « hauteur impossible » à l'écran ; ADR 0011 ; « À propos » : citer la source d'EMERGE (Deleuze et al. 2014) et le tarif NEMETON (version du paquet, « provisoire ») — absentes en v2026.11.5, capture du 2026-11-27, décision de Pascal du 2026-11-27 · depuis le cycle 9
 - Brief vers `nemeton` : son port R (`~/dev/nemeton/R/ifn_tarifs.R` l. 131 et l. 140) copie les règles 1,4 m et 0,95 → 0,8 de Marculus ; à écrire après la fusion de 042 · depuis le cycle 10
+- EMERGE : volume aérien total négatif pour les perches très élancées (hêtre C 10 cm, H 45 m : −0,00488 m³ ; terme c·H/c13 de formTot, pas la règle 2) · testeur de la 041, 2026-11-27 · depuis le cycle 10
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
