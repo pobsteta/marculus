@@ -92,7 +92,8 @@
   `gftools::ListTarEmerge` dans `core/.../EmergeCoefs.kt` (en-tête l. 3 : « Généré depuis gftools::ListTarEmerge […]
   Ne pas éditer à la main ») : **429 noms** (français et latin) dans `EMERGE_COEFS` (recompté le 2026-11-27 par
   `grep -c '" to CoefEmerge'`). Le chiffre « 226 » est celui des **entrées EMERGE** de `gftools::ListTarEmerge` (226 × 92, journal l. 344, relevé
-  par le relecteur dans R ; copie de travail non commitée de `gftools`) : **non recompté dans le code**, qui en tire 429 noms.
+  par le relecteur dans R ; la table vient de `data/ListTarEmerge.rda`, **non suivi par git** dans la copie de `gftools`
+  (`git status` : `?? data/ListTarEmerge.rda` ; HEAD 187ad39 ne suit que `data/ListTarEmerge.R` ; vérifié par l'orchestrateur le 2026-11-27)) : **non recompté dans le code**, qui en tire 429 noms.
 - **Quatre volumes** (mission 094, PR #82, `1e7c0a0`, tag `v2026.11.4`) : `tige`, `houppier`, `boisFortTotal` (= tige +
   houppier, découpe 7 cm ; c'est ce que Marculus appelait « total » avant le 2026-11-27) et `volumeAerienTotal`
   (= `formTot × volCyl`, sans découpe) (`Cubage.kt` l. 142-147 ; calcul l. 157-191). Hors EMERGE, `volumeAerienTotal` vaut 0
