@@ -36,6 +36,7 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Champ « % houpp. » à 2 décimales, ligne de source à 1 (« 7,41 » / « 7,4 % ») ; coefficient de forme encore « 0.5 » en français · décision de Pascal du 2026-11-10 : au bac à sable · depuis le cycle 8
 - Release en double possible si l'on relance la CI d'un ancien commit suivi de pilotage seul (même code, jamais moins ; relecteur de la 031) · depuis le cycle 8
 - GitHub Actions n'a pas déclenché la CI de la PR #67 ni du push fe01907 (2026-11-10) : à surveiller · depuis le cycle 8
+- Statut dit combien de tiges EMERGE n'ont pas de volume faute de hauteur (aujourd'hui 0 m³ sans le dire : `Cubage.kt` l. 250 et l. 279 ; seule « N tige(s) EMERGE sur M » le laisse deviner, `StatutHistoriqueScreen.kt` l. 283) · constat sur le téléphone, « Sombernon Test », 2026-11-27 ; décision de Pascal du 2026-11-27 : au bac à sable · depuis le cycle 8
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
