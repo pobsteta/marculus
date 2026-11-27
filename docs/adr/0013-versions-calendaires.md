@@ -9,7 +9,7 @@ Règle du bilan n° 3 : chaque fait cité dit l'état de sa source. Journal lu d
 
 ## La décision en une phrase
 
-La CI de release numérote chaque version `vAAAA.MM.N` (année et mois UTC de la release, `N` = compteur du mois qui repart à 1 chaque mois), calculée à partir des tags existants, au lieu de déduire un numéro SemVer `v0.Y.Z` des types de commits ; ce cap « défait le SemVer » (journal l. 396, bilan n° 3 : « 220 et 307 défont des règles de Pascal, aucune décision déléguée défaite »).
+La CI de release numérote chaque version `vAAAA.MM.N` (année et mois UTC de la release, `N` = compteur du mois qui repart à 1 chaque mois), calculée à partir des tags existants, au lieu de déduire un numéro SemVer `v0.Y.Z` des types de commits ; ce cap défait le SemVer (journal l. 396, bilan n° 3 : « 220 et 307 défont des règles de Pascal, aucune décision déléguée défaite »).
 
 ## Contexte
 
@@ -22,7 +22,7 @@ La CI de release numérote chaque version `vAAAA.MM.N` (année et mois UTC de la
 
 Le script `.github/scripts/version-calendaire.sh` calcule le prochain tag (sur `main` à `0c6b889`) :
 
-- mois = `AAAA.MM` UTC du jour (ou argument) ; seuls comptent les tags `vAAAA.MM.<entier>` de ce mois ; tri numérique (`.9` puis `.10`) ; prochain `N` = plus grand + 1, ou 1 ; les anciens `v0.*` et les autres mois n'influent pas (script l. 3-5, 13-14).
+- mois = `AAAA.MM` UTC du jour (ou argument) ; seuls comptent les tags `vAAAA.MM.<entier>` de ce mois ; tri numérique (`.9` puis `.10`) ; prochain `N` = plus grand + 1, ou 1 ; les anciens `v0.*` et les autres mois n'influent pas (script, 12 lignes : en-tête l. 3-5, mois invalide l. 6-10, calcul l. 11-12).
 - `release.yml` l. 46-58 : le tag est **annoté**, posé sur `head_sha` du run de CI, poussé ; `versionName` = tag sans le `v` (l. 58, 99).
 - Test : `.github/scripts/test-version-calendaire.sh` (13 vérifications, dépôt temporaire et tags synthétiques), lancé par `ci.yml` l. 27.
 - Dite une fois pour les humains dans `README.md` l. 208-214.
@@ -37,7 +37,7 @@ Lien avec l'ADR 0008 (release conditionnelle) : `release-necessaire.sh` choisit 
 | Script et tests | `version-calendaire.sh`, 13 tests | PR #77 (a28dc2d) ; journal l. 309 (2026-11-11 · dev · 036, commit 2df9998) |
 | CI | remplace `github-tag-action` dans `release.yml` ; tag annoté sur `head_sha` ; notes générées | journal l. 309 ; `release.yml` l. 46-58 |
 | Documentation | README et `pilotage/pre-fusion.md` mis à jour | journal l. 309 ; README l. 208-214 |
-| Relecture | prêt ; à signaler : `web/index.html` l. 44 et spec l. 305 encore en SemVer (hors harnais) ; tag sans release si le build échoue après l'envoi du tag (défaut hérité) renvoyé au bac à sable | journal l. 310 (2026-11-11 · relecteur · 036) ; à `0c6b889`, `web/index.html` et le README ne disent plus « SemVer » ; la spec v1 l. 314 dit encore « releases SemVer automatiques » (trou de mémoire relevé, hors périmètre de la 046, à corriger par la 045) |
+| Relecture | prêt ; à signaler : `web/index.html` l. 44 et spec l. 305 encore en SemVer (hors harnais) ; tag sans release si le build échoue après l'envoi du tag (défaut hérité) renvoyé au bac à sable | journal l. 310 (2026-11-11 · relecteur · 036) ; à `0c6b889`, le README ne dit plus « SemVer », mais `web/index.html` l. 44 garde `?sort=semver` (paramètre du badge de version, non vérifié quant à son effet sur l'affichage des tags calendaires) ; la spec v1 l. 314 dit encore « releases SemVer automatiques » (trou de mémoire relevé, hors périmètre de la 046, à corriger par la 045) |
 | Première release | `Marculus v2026.11.1`, tag annoté sur a28dc2d ; installée sur le téléphone par-dessus v0.73.2 (`versionName=2026.11.1`, `versionCode=183`) | journal l. 311 (2026-11-11 · Claude (orchestrateur) · 036) |
 | Suite | v2026.11.2 (PR #76) ; tags `v2026.11.1` à `v2026.11.6` sur `main` à `0c6b889` (`git tag --list 'v2026*'`) | journal l. 312 ; commande lancée le 2026-11-27 |
 
@@ -49,7 +49,7 @@ Le dernier tag SemVer est `v0.73.3` (journal l. 304) : les `v0.*` restent en pla
 - **Le compteur est lu dans les tags** : un tag supprimé ou posé à la main change le prochain numéro. Le test couvre `.9` → `.10`, le changement de mois, les anciens tags `v0.*` ; la reprise après un tag supprimé n'est pas écrite.
 - **Tag sans release** si le build échoue après l'envoi du tag : défaut hérité, laissé au bac à sable (journal l. 310).
 - **Les ADR et specs écrites avant le 2026-11-11 citent des `v0.Y.Z`** (ex. ADR 0008, 0010) : ce sont les noms réels de ces versions, pas des erreurs ; elles ne se réécrivent pas.
-- **`versionName` « 2026.11.1 » est inférieur, en lecture SemVer, à « 0.73.2 »** : sans conséquence pour Android, qui compare `versionCode` (`run_number`), et c'est pourquoi le `versionCode` n'a pas changé de règle (README l. 213-214).
+- **Android compare `versionCode`** (`run_number`), pas `versionName` : c'est pourquoi le `versionCode` n'a pas changé de règle et que les mises à jour par-dessus `v0.73.x` restent possibles (README l. 213-214 ; installation de `v2026.11.1` par-dessus `v0.73.2`, journal l. 311).
 
 ## Alternatives
 
@@ -61,9 +61,9 @@ Le dernier tag SemVer est `v0.73.3` (journal l. 304) : les `v0.*` restent en pla
 
 | Lettre | Question | Réponse (une ligne) | Ce que ça coûte | Prêts à payer ? |
 |---|---|---|---|---|
-| **F** | La plus simple qui tienne ? | Un script shell de 14 lignes, un tag annoté | Le numéro ne porte plus la gravité | Oui (Pascal, l. 307) |
+| **F** | La plus simple qui tienne ? | Un script shell de 12 lignes, un tag annoté | Le numéro ne porte plus la gravité | Non écrit ; déduit du cap de Pascal (l. 307) |
 | **R** | Qui fait quoi ? | dev sonnet (036, lâché), relecteur ; Pascal tranche le cap | | |
-| **A** | Et si l'imprévu arrive ? | Mois invalide : sortie 2 ; aucun tag du mois : `N` = 1 ; `.9` → `.10` testé | Tag sans release si le build échoue ensuite (défaut hérité) | Oui (renvoyé au bac à sable, l. 310) |
+| **A** | Et si l'imprévu arrive ? | Mois invalide : sortie 2 (script l. 6-10) ; aucun tag du mois : `N` = 1 ; `.9` → `.10` testé | Tag sans release si le build échoue ensuite (défaut hérité) | Non écrit ; déduit du renvoi au bac à sable (l. 310) |
 | **N** | Idées étranges écoutées ? | Non écrit | | |
 | **C** | Coût pour l'ensemble ? | Une montée de version qui ne rompt aucune mise à jour (`versionCode` inchangé) | Documents anciens en `v0.*` à lire comme tels | Non écrit |
 | **É** | Que réutilisons-nous ? | Le modèle de nemeton ; le même genre de script testé que `release-necessaire.sh` (lâchers 023, 031) | | |

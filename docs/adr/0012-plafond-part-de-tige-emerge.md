@@ -23,7 +23,7 @@ Les trois règles se lisent dans `Cubage.kt` et n'avaient aucune source citée ;
 
 **L'origine de la règle 2 est inconnue.** La question a été posée à Pascal, qui a répondu : « je ne sais pas répondre à cette question » (journal 2026-11-27 · Pascal · 040, l. 352).
 
-L'effet de la règle 2 n'était pas marginal : `fct > 0,95` dans 59 435 cas sur 597 872 de la grille H 2-45 m × C 10-400 cm (9,9 %), sur des tiges minces (hêtre C 10-45 cm) ; mesure exécutée sous R par le relecteur, pourcentage calculé par l'acquéreur (spec règles sans source § 3). La règle faisait en outre **sauter** le volume : hêtre C 25 cm / H 20 m, tige 0,0177 m³ avec 0,8, 0,0210 m³ avec 0,95 (journal 2026-11-27 · testeur · 041, l. 382 ; relecteur, l. 385).
+L'effet de la règle 2 n'était pas marginal : `fct > 0,95` dans 59 435 cas sur 597 872 de la grille H 2-45 m × C 10-400 cm (9,9 %), sur des tiges minces (hêtre C 10-45 cm ; **C = circonférence à 1,30 m**, D = C/π, dans tout cet ADR sauf mention contraire) ; mesure exécutée sous R par le relecteur, pourcentage calculé par l'acquéreur (spec règles sans source § 3). La règle faisait en outre **sauter** le volume : hêtre C 25 cm / H 20 m, tige 0,0177 m³ avec 0,8, 0,0210 m³ avec 0,95 (journal 2026-11-27 · testeur · 041, l. 382 ; relecteur, l. 385).
 
 ## Les décisions de Pascal
 
@@ -52,27 +52,27 @@ Constante : `FCT_PLAFOND = 0.95` (`Cubage.kt` l. 195), appliquée à `Cubage.kt`
 | Code | `fct = min(fct, FCT_PLAFOND)` | PR #90 (795079e) ; `Cubage.kt` l. 174, 195 ; journal l. 384 (2026-11-27 · dev · 042) |
 | Tests | `EmergePlafondFctTest`, 14 cas ; rouge constaté 8 sur 14 avant le code (règle 2 seule), règles 1 et 3 et non-régression verts ; valeurs recalculées sous R | `core/src/test/kotlin/fr/marculus/core/EmergePlafondFctTest.kt` ; journal l. 382 (testeur · 041), l. 385 (relecteur · 041+042 : `test-command` exit 0, `core` 1790, `data` 86, `app` 29) |
 | Livraison | fusion de la PR #90 ; release v2026.11.6 ; note de version corrigée par Pascal (« seules les perches très élancées changent… ») | journal l. 389 (2026-11-27 · Pascal · 041+042), l. 395 (2026-11-27 · Pascal · cycle 10) |
-| Contrôle terrain | hêtre C 25 cm à H 18 m puis H 19 m (0,0203 → 0,0207 m³) et H 20 m (0,0210 m³) ; le contrôle d'abord prévu (C 24 / C 26 à H 20) ne montrait rien et a été remplacé | journal l. 386 (écart orchestrateur), l. 392 ; résultat du contrôle de Pascal : **non écrit dans le journal à `0c6b889`** |
+| Contrôle terrain | Prévu : hêtre C 25 cm (circonférence) à H 18 m puis H 19 m (0,0203 → 0,0207 m³) et H 20 m (0,0210 m³) ; le contrôle d'abord prévu (C 24 / C 26 à H 20) ne montrait rien et avait été remplacé (l. 386). **Contrôle réel de Pascal** : il a saisi la **classe de diamètre 25** (centre 27,5 cm), pas une circonférence de 25 cm (D ≈ 8 cm, une perche) ; à D 27,5 cm, `fct` ≈ 0,8 : la règle ne joue pas, volumes inchangés (tige 0,522 / 0,550 / 0,579 m³ à H 18 / 19 / 20, recalculés par l'orchestrateur, identiques à l'écran). Décision : un contrôle terrain s'écrit dans l'unité de l'écran. Le `% houpp.` grisé en EMERGE (12,6 % sur le hêtre) est ignoré en EMERGE, gardé pour un retour en Schaeffer. Note de version corrigée : « seules les perches très élancées changent (hêtre de 8 cm de diamètre à 20 m : tige 0,018 → 0,021 m³) ; les classes de martelage courantes ne bougent pas » | journal l. 386 (écart orchestrateur), l. 392 (installation), **l. 393** (écart : classe de diamètre contre circonférence), **l. 394** (% houpp. ignoré en EMERGE), **l. 395** (note de version corrigée) |
 
 ## Ce qui reste ouvert
 
 - **« Non calculé » à l'écran** pour les tiges sous 1,4 m (règle 3) : au cycle 11 (journal l. 372) ; la carte « Statut dit combien de tiges EMERGE n'ont pas de volume » du bac à sable les compte (journal l. 328).
 - **Valeur 0,95** : à mesurer sur des cubages réels de tiges minces ; qui mesure, quand : non écrit.
-- **Volume aérien total négatif** pour une perche très élancée (hêtre C 10 / H 45, −0,00488 m³) : porté au bac à sable (journal l. 383), non traité ; houppier de 0,054 m³ figé à C 10 / H 1,41, artefact de la règle 3 (journal l. 385).
+- **Volume aérien total négatif** pour une perche très élancée (hêtre C 10 cm / H 45 m, −0,00488 m³) : porté au bac à sable (journal l. 383), non traité ; houppier de 0,054 m³ figé à C 10 / H 1,41, artefact de la règle 3 (journal l. 385).
 - **Brief vers `nemeton`** : son port R copie les règles 1,4 m et 0,95 → 0,8 de Marculus (`~/dev/nemeton/R/ifn_tarifs.R` l. 131 et 140, cité par `pilotage/kanban.md` l. 41 sur `main` à `0c6b889`) ; à écrire, non écrit au `0c6b889`.
 - **Réserves de la mission 040 non levées** : source Deleuze et al. 2014 non lue directement (accès HAL refusé) ; faits git et R rapportés par le relecteur et non rejoués par l'acquéreur (spec règles sans source § 7, « Non cochés »).
 
 ## Alternatives
 
-Pour la règle 2, options présentées à Pascal (spec règles sans source § 3) : A garder `0,95 → 0,8` écrit comme règle propre ; **B plafond continu (retenue)** ; C retirer (houppier nul quand `fct ≥ 1`) ; D mesurer d'abord sur des tiges réelles. Raison de B contre A, C, D : le saut de volume (journal l. 398) ; contre C : s'écarte de gftools (spec § 3) ; contre D : non écrit. Pour la règle 3 : B passer à 1,30 avec refus, C refuser sous 2 m, écartées (journal l. 372, raison non écrite). Pour la règle 1 : B borner `fct` à [0 ; 1], C refuser le calcul, écartées (journal l. 370, raison non écrite).
+Pour la règle 2, options présentées à Pascal (spec règles sans source § 3) : A garder `0,95 → 0,8` écrit comme règle propre ; **B plafond continu (retenue)** ; C retirer (houppier nul quand `fct ≥ 1`) ; D mesurer d'abord sur des tiges réelles. Raison de B contre A, C, D : le saut de volume (journal l. 398) ; contre C : s'écarte de gftools (spec § 3) ; contre D : non écrit. Pour la règle 3 : B passer à 1,30 avec refus, C refuser sous 2 m (options de la spec règles sans source § 4), écartées par le choix « A » de Pascal (journal l. 372), raison non écrite. Pour la règle 1 : B borner `fct` à [0 ; 1], C refuser le calcul (options de la spec règles sans source § 2), écartées par le choix « A » (journal l. 370), raison non écrite.
 
 ## Le crible FRANCE
 
 | Lettre | Question | Réponse (une ligne) | Ce que ça coûte | Prêts à payer ? |
 |---|---|---|---|---|
-| **F** | La plus simple qui tienne ? | Une ligne de code (`min`), une constante nommée | 0,95 sans fondement mesuré | Oui (Pascal, l. 371) |
+| **F** | La plus simple qui tienne ? | Une ligne de code (`min`), une constante nommée | 0,95 sans fondement mesuré | Non écrit ; déduit du choix « B » de Pascal (l. 371) |
 | **R** | Qui fait quoi ? | acquereur (040), testeur (041), dev sonnet (042), relecteur ; Pascal tranche | | |
-| **A** | Et si l'imprévu arrive ? | Règles 1 et 3 gardent les volumes à 0 plutôt qu'un volume négatif ; contrôle sous R à chaque valeur attendue | Volumes de perches très élancées changés (note de version, l. 395) | Oui (l. 395) |
+| **A** | Et si l'imprévu arrive ? | Règles 1 et 3 gardent les volumes à 0 plutôt qu'un volume négatif ; contrôle sous R à chaque valeur attendue | Volumes de perches très élancées changés (note de version, l. 395) | Non écrit ; déduit de la note de version validée par Pascal (l. 395) |
 | **N** | Idées étranges écoutées ? | Non écrit | | |
 | **C** | Coût pour l'ensemble ? | Un cubage qui change pour les tiges minces, dit dans la note de version | Port R de `nemeton` copie encore l'ancienne règle (écart à signaler) | Non écrit |
 | **É** | Que réutilisons-nous ? | gftools (règle 1), la constante et le seuil existants (règle 2) | | |
@@ -84,7 +84,7 @@ Pour la règle 2, options présentées à Pascal (spec règles sans source § 3)
 
 ## Sources
 
-- `pilotage/journal.md` à `0c6b889` : l. 328, 334-345, 352, 370-372, 382-386, 389, 392, 395, 398.
+- `pilotage/journal.md` à `0c6b889` : l. 328, 334-345, 352, 370-372, 382-386, 389, 392-395, 398.
 - PR #86 (b4695ac, spec des règles sans source, fusionnée), PR #90 (795079e, plafond).
 - `docs/specs/2026-11-27-emerge-regles-sans-source.md`, `docs/specs/2026-06-21-marculus-v1-spec.md` § 5, `core/src/main/kotlin/fr/marculus/core/Cubage.kt` l. 158, 170-174, 195 (sur `main` à `0c6b889`).
 - Fiches `pilotage/missions/040-emerge-points-secondaires.md` à `042-plafond-fct-emerge.md`.
