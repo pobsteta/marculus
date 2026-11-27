@@ -304,8 +304,9 @@
 - **Versions calendaires** `vAAAA.MM.N` (année et mois UTC, compteur du mois repart à 1 ; `.github/scripts/version-calendaire.sh`
   l. 1-12 ; mission 036, PR #77 `a28dc2d`, tag `v2026.11.1`) ; les anciens `v0.*` restent. **Elles remplacent** les « releases
   SemVer automatiques » de la spec de juin § 9 (l. 314, erratum). Décision : ADR 0013 (`docs/adr/0013-versions-calendaires.md`, PR #98 `178275d`, fusionnée sur `main`).
-  **Question ouverte** : le brief de `terrain` du 2026-11-20 annonce la notation `vAAAA.M.N` (mois sans zéro) de la
-  plateforme ; Marculus écrit `vAAAA.MM.N` : à Pascal (§ 15).
+  **Notation tranchée** : le brief de `terrain` du 2026-11-20 annonce la notation `vAAAA.M.N` (mois sans zéro) de la
+  plateforme ; Marculus garde `vAAAA.MM.N`, mois sur deux chiffres (décision de Pascal du 2026-11-27, journal :
+  « On reste sur le mois sur 2 caractères »).
 - **Titre de la release** = la version seule, sans « Marculus » (`release.yml` l. 115 ; mission 047, PR #96, `a215c0a`,
   tag `v2026.11.7`). Les releases déjà publiées ne sont pas renommées sans l'accord de Pascal.
 - **Distribution** : APK signé sur GitHub Releases ; fiche **IzzyOnDroid** (`fastlane/metadata/android/{fr-FR,en-US}/`, 16
@@ -348,5 +349,4 @@
 - 🔜 Recettes terrain : affouage, dictée ; démo des tarifs SER en mode avion.
 - 🔜 Captures de la fiche IzzyOnDroid à refaire ; demande d'inclusion à suivre.
 - **Trous de mémoire ouverts** : brief du format CSV 9 vers `nemetonshiny` (§ 9) ; problème du produit en une phrase
-  (§ 1) ; réponse de `tarif-nemeton` (§ 5.6) ; sauvegarde de la clé de signature (§ 13) ; notation `vAAAA.M.N` contre
-  `vAAAA.MM.N` (§ 13).
+  (§ 1) ; réponse de `tarif-nemeton` (§ 5.6) ; sauvegarde de la clé de signature (§ 13).

@@ -50,6 +50,7 @@ _lit `docs/spec.md` § 15 (reste à faire)._
 - EMERGE : volume aérien total négatif pour les perches très élancées (hêtre C 10 cm, H 45 m : −0,00488 m³ ; terme c·H/c13 de formTot, pas la règle 2) · testeur de la 041, 2026-11-27 · depuis le cycle 10
 - Monter `terrain` (épinglé en v0.5.0, `gradle/libs.versions.toml` l. 18) : agent NTRIP obligatoire (`ClientNtrip.kt` l. 44 et 110) et versions calendaires de `terrain` · briefs `~/dev/briefs/vers-marculus/2026-11-20-terrain-*.md` · depuis le cycle 10
   - _Ajout du 2026-11-27 (045), question pour Pascal, **non tranchée** : le brief `~/dev/briefs/vers-marculus/2026-11-20-terrain-version-calendaire.md` annonce pour `terrain` la notation `vAAAA.M.N` de la plateforme (mois sans zéro, `v2026.11.1`), alors que Marculus écrit `vAAAA.MM.N` (mois sur deux chiffres, `.github/scripts/version-calendaire.sh` l. 1-12, ADR 0013). Les deux coïncident d'octobre à décembre et diffèrent de janvier à septembre (`v2027.1.1` contre `v2027.01.1`) : laquelle Marculus garde-t-il ?_
+  - _Ajout du 2026-11-27 : tranché par Pascal, « On reste sur le mois sur 2 caractères » : Marculus garde `vAAAA.MM.N` (ADR 0013)._
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
