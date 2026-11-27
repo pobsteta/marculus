@@ -42,10 +42,10 @@ class ExportCsvPartsLotTest {
     private fun f4(x: Double) = "%.4f".format(Locale.ROOT, x)
 
     @Test
-    fun `le format est 8`() {
-        assertEquals(8, ExportCsv.FORMAT)
+    fun `le format est 9`() {
+        assertEquals(9, ExportCsv.FORMAT)
         val lignes = ExportCsv.contexteCsv(ctx, emptyList()).split("\n")
-        assertEquals("FormatCsv;8", lignes[1])
+        assertEquals("FormatCsv;9", lignes[1])
     }
 
     @Test
@@ -80,7 +80,7 @@ class ExportCsvPartsLotTest {
             assertTrue("AffouageLotTotalM3;${f4(attendu)}" in lignes, "$p : " + lignes.first { it.startsWith("AffouageLotTotalM3") })
             val debut = lignes.indexOf("JOURNAL") + 2
             val colonne = lignes[debut].split(";")
-            assertEquals(22, colonne.size)
+            assertEquals(23, colonne.size)
             assertEquals(attendu, colonne[21].toDouble(), 1e-6, "$p")
             // les volumes tige, houppier et total du journal ne dépendent pas des cases
             assertEquals(v40, colonne[15].toDouble(), 1e-6)

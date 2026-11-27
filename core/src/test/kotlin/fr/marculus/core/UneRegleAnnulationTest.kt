@@ -39,17 +39,18 @@ class UneRegleAnnulationTest {
 
     /** Somme des cubages des tiges de JournalNet ; une annulation rendue (orpheline) soustrait. */
     private fun oracle(c: Contexte, j: List<Tige>): VolumesMartelage.Totaux {
-        var vt = 0.0; var vh = 0.0; var vtot = 0.0; var g = 0.0; var nc = 0
+        var vt = 0.0; var vh = 0.0; var vtot = 0.0; var vaer = 0.0; var g = 0.0; var nc = 0
         JournalNet.tiges(j).forEach { t ->
             val s = if (t.action == ActionTige.PLUS) 1 else -1
             val cu = VolumesMartelage.cubage(c, t)
             vt += s * cu.volumeTigeM3 * t.quantite
             vh += s * cu.volumeHouppierM3 * t.quantite
-            vtot += s * cu.volumeTotalM3 * t.quantite
+            vtot += s * cu.volumeBoisFortTotalM3 * t.quantite
+            vaer += s * cu.volumeAerienTotalM3 * t.quantite
             g += s * cu.surfaceTerriereM2 * t.quantite
             if (cu.nonCubee) nc += s * t.quantite
         }
-        return VolumesMartelage.Totaux(vt, vh, vtot, g, nc.coerceAtLeast(0))
+        return VolumesMartelage.Totaux(vt, vh, vtot, vaer, g, nc.coerceAtLeast(0))
     }
 
     private fun verifie(c: Contexte, j: List<Tige>) {
@@ -57,7 +58,8 @@ class UneRegleAnnulationTest {
         val b = oracle(c, j)
         assertEquals(b.volumeTigeM3, a.volumeTigeM3, eps, "tige")
         assertEquals(b.volumeHouppierM3, a.volumeHouppierM3, eps, "houppier")
-        assertEquals(b.volumeTotalM3, a.volumeTotalM3, eps, "total")
+        assertEquals(b.volumeBoisFortTotalM3, a.volumeBoisFortTotalM3, eps, "bois fort total")
+        assertEquals(b.volumeAerienTotalM3, a.volumeAerienTotalM3, eps, "aérien total")
         assertEquals(b.surfaceTerriereM2, a.surfaceTerriereM2, eps, "surface terrière")
         assertEquals(b.nbTigesNonCubees, a.nbTigesNonCubees, "non cubées")
     }
@@ -150,7 +152,7 @@ class UneRegleAnnulationTest {
     @Test
     fun `emerge - l'annulation sans hauteur retire le volume de la tige annulee`() {
         val j = listOf(plus("a", 1, h = "27"), moins("x", 2))
-        assertEquals(0.0, VolumesMartelage.totaux(emerge, j).volumeTotalM3, eps)
+        assertEquals(0.0, VolumesMartelage.totaux(emerge, j).volumeBoisFortTotalM3, eps)
         verifie(emerge, j)
     }
 
@@ -159,14 +161,14 @@ class UneRegleAnnulationTest {
         val j = listOf(plus("a", 1, q = 4), moins("x", 2, q = 1))
         val t = VolumesMartelage.totaux(schaefferHouppier, j)
         assertTrue(t.volumeHouppierM3 > 0.0)
-        assertEquals(t.volumeTigeM3 + t.volumeHouppierM3, t.volumeTotalM3, eps)
+        assertEquals(t.volumeTigeM3 + t.volumeHouppierM3, t.volumeBoisFortTotalM3, eps)
         verifie(schaefferHouppier, j)
     }
 
     @Test
     fun `contexte sans tarif - volumes nuls, surface terriere nette`() {
         val t = VolumesMartelage.totaux(sansTarif, listOf(plus("a", 1, q = 3), moins("x", 2)))
-        assertEquals(0.0, t.volumeTotalM3, eps)
+        assertEquals(0.0, t.volumeBoisFortTotalM3, eps)
         assertEquals(2 * Cubage.surfaceTerriereUnitaire(sansTarif, 40), t.surfaceTerriereM2, eps)
     }
 

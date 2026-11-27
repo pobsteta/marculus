@@ -111,7 +111,7 @@ class ExportCsvTest {
         assertEquals(
             listOf(
                 "Contexte;Parcelle 12",
-                "FormatCsv;8",
+                "FormatCsv;9",
                 "ContexteId;act_20260923155141_xyz123",
                 "Statut;REALISEE",
                 "DateMartelage;2027-10-15",
@@ -120,7 +120,7 @@ class ExportCsvTest {
                 "TarifNumero;0",
                 "CoefficientForme;0.5",
                 "VolumeTigeTotalM3;0.0000",
-                "VolumeTotalM3;0.0000",
+                "VolumeBoisFortTotalM3;0.0000",
                 "SurfaceTerriereTotaleM2;0.0000",
                 "NbTigesNonCubees;0",
                 "Mode;DIAMETRE",
@@ -177,7 +177,7 @@ class ExportCsvTest {
     }
 
     @Test
-    fun `le journal compte 22 colonnes dont les 15 du format 2 inchangees`() {
+    fun `le journal compte 23 colonnes dont les 15 du format 2 inchangees`() {
         val tige = Tige(
             uuid = "6f1c-uuid", contexteId = "c1", essence = "Chêne", classe = 20,
             action = ActionTige.PLUS, horodatage = 1000L, hauteurTexte = "27-6AB", qualiteArbre = "B",
@@ -187,18 +187,18 @@ class ExportCsvTest {
         val csv = ExportCsv.contexteCsv(contexte, listOf(tige))
         val lignes = csv.split("\n")
         val entete = cellules(lignes[lignes.indexOf("JOURNAL") + 1])
-        assertEquals(22, entete.size)
+        assertEquals(23, entete.size)
         assertEquals(colonnesFormat1, entete.take(12))
         assertEquals(listOf("Uuid", "Parcelle", "Modifie"), entete.subList(12, 15))
         assertEquals(
             listOf(
-                "VolumeTigeM3", "VolumeHouppierM3", "VolumeTotalM3", "SurfaceTerriereM2", "Cubage", "Lot",
-                "AffouageLotM3",
+                "VolumeTigeM3", "VolumeHouppierM3", "VolumeBoisFortTotalM3", "SurfaceTerriereM2", "Cubage", "Lot",
+                "AffouageLotM3", "VolumeAerienTotalM3",
             ),
             entete.drop(15),
         )
         val ligne = lignesJournal(csv).single()
-        assertEquals(22, ligne.size)
+        assertEquals(23, ligne.size)
         assertEquals("", ligne[20]) // hors affouage, pas de lot
         assertEquals(
             listOf(
@@ -272,10 +272,10 @@ class ExportCsvTest {
         // Mission 026 : par défaut tige et houppier comptent (Chêne T + H, Hêtre T).
         assertTrue("AffouageLotTotalM3;${"%.4f".format(Locale.ROOT, h + 2 * vTige)}" in lignes)
         val j = lignesJournal(csv)
-        assertEquals(22, j[0].size)
+        assertEquals(23, j[0].size)
         assertEquals(vTige, j[0][15].toDouble(), 1e-6) // VolumeTigeM3
         assertEquals(h, j[0][16].toDouble(), 1e-6) // VolumeHouppierM3
-        assertEquals(vTige + h, j[0][17].toDouble(), 1e-6) // VolumeTotalM3
+        assertEquals(vTige + h, j[0][17].toDouble(), 1e-6) // VolumeBoisFortTotalM3
         assertEquals(vTige + h, j[0][21].toDouble(), 1e-6) // AffouageLotM3 : tige + houppier (mission 026)
         assertEquals(0.0, j[1][16].toDouble(), 1e-6)
         assertEquals(vTige, j[1][21].toDouble(), 1e-6) // Hêtre sans part : l'arbre entier
@@ -322,16 +322,19 @@ class ExportCsvTest {
         val lignes = csv.split("\n")
         val attendu = VolumesMartelage.totaux(ctx, journal)
         assertTrue("VolumeTigeTotalM3;${"%.4f".format(Locale.ROOT, attendu.volumeTigeM3)}" in lignes)
-        assertTrue("VolumeTotalM3;${"%.4f".format(Locale.ROOT, attendu.volumeTotalM3)}" in lignes)
+        assertTrue("VolumeBoisFortTotalM3;${"%.4f".format(Locale.ROOT, attendu.volumeBoisFortTotalM3)}" in lignes)
+        assertTrue("VolumeAerienTotalM3;${"%.4f".format(Locale.ROOT, attendu.volumeAerienTotalM3)}" in lignes)
         assertTrue("NbTigesNonCubees;1" in lignes)
         lignesJournal(csv).forEach { c ->
             val t = journal.single { it.uuid == c[12] }
             val v = VolumesMartelage.cubage(ctx, t)
             assertEquals(v.volumeTigeM3, c[15].toDouble(), 1e-6)
             assertEquals(v.volumeHouppierM3, c[16].toDouble(), 1e-6)
-            assertEquals(v.volumeTotalM3, c[17].toDouble(), 1e-6)
+            assertEquals(v.volumeBoisFortTotalM3, c[17].toDouble(), 1e-6)
             assertEquals(v.surfaceTerriereM2, c[18].toDouble(), 1e-6)
             assertEquals(v.cubage, c[19])
+            // Format 9 : aérien total unitaire en dernière colonne, seulement pour une tige cubée par EMERGE.
+            if (v.cubage == VolumesMartelage.Methode.EMERGE) assertEquals(v.volumeAerienTotalM3, c[22].toDouble(), 1e-6) else assertEquals("", c[22])
         }
         assertEquals("NON_CUBABLE", lignesJournal(csv).single { it[12] == "u-c" }[19])
     }

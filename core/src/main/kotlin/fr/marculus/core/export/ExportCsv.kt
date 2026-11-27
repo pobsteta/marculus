@@ -54,7 +54,7 @@ object ExportCsv {
     private const val SEP = ";"
 
     /** Version du format, lue par Nemeton : son absence désigne le format 1, non réimportable. */
-    const val FORMAT = 8
+    const val FORMAT = 9
 
     fun contexteCsv(contexte: Contexte, journal: List<Tige>, net: Boolean = false): String {
         val sb = StringBuilder()
@@ -71,7 +71,8 @@ object ExportCsv {
         sb.appendLine("TarifNumero${SEP}${TarifEssence(contexte.tarif, contexte.tarifNumero).normalise().numero}")
         sb.appendLine("CoefficientForme${SEP}${contexte.coefficientForme}")
         sb.appendLine("VolumeTigeTotalM3${SEP}${decimal(totauxVolumes.volumeTigeM3, DECIMALES_TOTAL)}")
-        sb.appendLine("VolumeTotalM3${SEP}${decimal(totauxVolumes.volumeTotalM3, DECIMALES_TOTAL)}")
+        // Format 9 : « VolumeTotalM3 » devient VolumeBoisFortTotalM3 (tige + houppier, découpe 7 cm) ; voir [LectureVolumes].
+        sb.appendLine("VolumeBoisFortTotalM3${SEP}${decimal(totauxVolumes.volumeBoisFortTotalM3, DECIMALES_TOTAL)}")
         sb.appendLine("SurfaceTerriereTotaleM2${SEP}${decimal(totauxVolumes.surfaceTerriereM2, DECIMALES_TOTAL)}")
         sb.appendLine("NbTigesNonCubees${SEP}${totauxVolumes.nbTigesNonCubees}")
         sb.appendLine("Mode${SEP}${contexte.mode}")
@@ -93,6 +94,11 @@ object ExportCsv {
         sb.appendLine("MillesimeTarifs${SEP}${champ(contexte.millesimeTarifs.orEmpty())}")
         // Format 8 : parties comptées au lot d'affouage, par essence.
         sb.appendLine("PartsLot${SEP}${champ(partsLot(contexte))}")
+        // Format 9 : volume aérien total EMERGE (sans découpe) ; vide si aucune essence n'est en EMERGE.
+        sb.appendLine("VolumeAerienTotalM3${SEP}${if (Cubage.aEmerge(contexte)) decimal(totauxVolumes.volumeAerienTotalM3, DECIMALES_TOTAL) else ""}")
+        // Contexte mixte : le volume aérien total ne somme que les tiges cubées par EMERGE ; leur nombre est donné ici
+        // (les autres tiges ont une cellule vide dans le journal). Vide si aucune essence n'est en EMERGE.
+        sb.appendLine("NbTigesVolumeAerien${SEP}${if (Cubage.aEmerge(contexte)) totauxVolumes.nbTigesAerien.toString() else ""}")
         sb.appendLine("Journal${SEP}${if (net) "NET" else "COMPLET"}")
         contexte.commentaire?.let { sb.appendLine("Commentaire${SEP}${champ(it)}") }
         sb.appendLine()
@@ -117,11 +123,13 @@ object ExportCsv {
                 // Format 2 : ajoutées en fin de ligne, les douze premières colonnes ne bougent pas.
                 "Uuid", "Parcelle", "Modifie",
                 // Format 3 : valeurs unitaires (une tige), après les quinze colonnes du format 2.
-                "VolumeTigeM3", "VolumeHouppierM3", "VolumeTotalM3", "SurfaceTerriereM2", "Cubage",
+                "VolumeTigeM3", "VolumeHouppierM3", "VolumeBoisFortTotalM3", "SurfaceTerriereM2", "Cubage",
                 // Format 4 : lot d'affouage figé au martelage.
                 "Lot",
                 // Format 5 : volume unitaire compté au lot d'affouage.
                 "AffouageLotM3",
+                // Format 9 : volume aérien total unitaire (EMERGE seulement, vide sinon).
+                "VolumeAerienTotalM3",
             ).joinToString(SEP),
         )
         (if (net) JournalNet.tiges(journal) else journal).sortedBy { it.horodatage }.forEach { t ->
@@ -146,11 +154,12 @@ object ExportCsv {
                     t.modifie.toString(),
                     decimal(c.volumeTigeM3, DECIMALES_UNITAIRE),
                     decimal(c.volumeHouppierM3, DECIMALES_UNITAIRE),
-                    decimal(c.volumeTotalM3, DECIMALES_UNITAIRE),
+                    decimal(c.volumeBoisFortTotalM3, DECIMALES_UNITAIRE),
                     decimal(c.surfaceTerriereM2, DECIMALES_UNITAIRE),
                     c.cubage,
                     t.lot?.toString() ?: "",
                     a?.let { decimal(it.lotM3, DECIMALES_UNITAIRE) } ?: "",
+                    if (c.cubage == VolumesMartelage.Methode.EMERGE) decimal(c.volumeAerienTotalM3, DECIMALES_UNITAIRE) else "",
                 ).joinToString(SEP) { champ(it) },
             )
         }

@@ -28,8 +28,8 @@ import kotlin.test.assertEquals
  *         ): String
  *     }
  *
- * Colonnes inchangées : Proprietaire;Foret;Commune;Parcelle;Surface_ha;Essence;Classe;Nombre;
- * Tiges_ha;G_m2;G_ha;Volume_m3;Volume_ha;Houppier_m3;Total_m3. Comme aujourd'hui, seules les tiges
+ * Colonnes (Total_m3 devient BoisFortTotal_m3, AerienTotal_m3 s'y ajoute, mission 094) : Proprietaire;Foret;Commune;Parcelle;Surface_ha;Essence;Classe;Nombre;
+ * Tiges_ha;G_m2;G_ha;Volume_m3;Volume_ha;Houppier_m3;BoisFortTotal_m3;AerienTotal_m3. Comme aujourd'hui, seules les tiges
  * avec position figurent au CSV (les tiges sans position n'y sont pas).
  */
 class CsvFoncierTest {
@@ -68,7 +68,7 @@ class CsvFoncierTest {
     @Test
     fun `l en-tete ne change pas`() {
         assertEquals(
-            "Proprietaire;Foret;Commune;Parcelle;Surface_ha;Essence;Classe;Nombre;Tiges_ha;G_m2;G_ha;Volume_m3;Volume_ha;Houppier_m3;Total_m3",
+            "Proprietaire;Foret;Commune;Parcelle;Surface_ha;Essence;Classe;Nombre;Tiges_ha;G_m2;G_ha;Volume_m3;Volume_ha;Houppier_m3;BoisFortTotal_m3;AerienTotal_m3",
             csv(emptyList()).lines().first(),
         )
     }

@@ -29,7 +29,7 @@ class VolumesMartelageTest {
         val ctx = contexte(TarifCubage.SCHAEFFER_RAPIDE, 8)
         val c = VolumesMartelage.cubage(ctx, tige("a", 1))
         assertEquals(Cubage.volume(TarifCubage.SCHAEFFER_RAPIDE, 8, 42.5), c.volumeTigeM3, eps)
-        assertEquals(c.volumeTigeM3, c.volumeTotalM3, eps)
+        assertEquals(c.volumeTigeM3, c.volumeBoisFortTotalM3, eps)
         assertEquals(0.0, c.volumeHouppierM3, eps)
         assertEquals("SCHAEFFER_RAPIDE:8", c.cubage)
         assertEquals(Math.PI / 4 * 0.425 * 0.425, c.surfaceTerriereM2, eps)
@@ -39,7 +39,7 @@ class VolumesMartelageTest {
     fun `emerge avec hauteur - total = tige + houppier`() {
         val c = VolumesMartelage.cubage(contexte(TarifCubage.EMERGE), tige("a", 1, hauteur = "27"))
         assertEquals("EMERGE", c.cubage)
-        assertEquals(c.volumeTigeM3 + c.volumeHouppierM3, c.volumeTotalM3, eps)
+        assertEquals(c.volumeTigeM3 + c.volumeHouppierM3, c.volumeBoisFortTotalM3, eps)
         assertTrue(c.volumeTigeM3 > 0.0)
     }
 
@@ -48,7 +48,7 @@ class VolumesMartelageTest {
         val ctx = contexte(TarifCubage.EMERGE)
         val c = VolumesMartelage.cubage(ctx, tige("a", 1))
         assertEquals("NON_CUBABLE", c.cubage)
-        assertEquals(0.0, c.volumeTotalM3, eps)
+        assertEquals(0.0, c.volumeBoisFortTotalM3, eps)
         assertEquals(1, VolumesMartelage.totaux(ctx, listOf(tige("a", 1), tige("b", 2, hauteur = "25"))).nbTigesNonCubees)
     }
 
@@ -62,7 +62,7 @@ class VolumesMartelageTest {
     fun `tarif aucun`() {
         val c = VolumesMartelage.cubage(contexte(TarifCubage.AUCUN), tige("a", 1, hauteur = "20"))
         assertEquals("AUCUN", c.cubage)
-        assertEquals(0.0, c.volumeTotalM3, eps)
+        assertEquals(0.0, c.volumeBoisFortTotalM3, eps)
     }
 
     @Test
@@ -75,7 +75,7 @@ class VolumesMartelageTest {
         val t = VolumesMartelage.totaux(ctx, listOf(a, b, annul))
         val va = VolumesMartelage.cubage(ctx, a)
         assertEquals(va.volumeTigeM3, t.volumeTigeM3, eps)
-        assertEquals(va.volumeTotalM3, t.volumeTotalM3, eps)
+        assertEquals(va.volumeBoisFortTotalM3, t.volumeBoisFortTotalM3, eps)
         assertEquals(va.surfaceTerriereM2, t.surfaceTerriereM2, eps)
         assertEquals(0, t.nbTigesNonCubees)
     }
@@ -85,7 +85,7 @@ class VolumesMartelageTest {
         val ctx = contexte(TarifCubage.EMERGE)
         val t = VolumesMartelage.totaux(ctx, listOf(tige("a", 1), tige("x", 2, action = ActionTige.ANNULATION)))
         assertEquals(0, t.nbTigesNonCubees)
-        assertEquals(0.0, t.volumeTotalM3, eps)
+        assertEquals(0.0, t.volumeBoisFortTotalM3, eps)
         assertEquals(0.0, t.surfaceTerriereM2, eps)
     }
 
@@ -109,6 +109,6 @@ class VolumesMartelageTest {
         val b = tige("b", 2, hauteur = "30")
         val t = VolumesMartelage.totaux(ctx, listOf(a, b, tige("x", 3, action = ActionTige.ANNULATION, quantite = 2)))
         // Il reste une unité de « a ».
-        assertEquals(VolumesMartelage.cubage(ctx, a).volumeTotalM3, t.volumeTotalM3, eps)
+        assertEquals(VolumesMartelage.cubage(ctx, a).volumeBoisFortTotalM3, t.volumeBoisFortTotalM3, eps)
     }
 }

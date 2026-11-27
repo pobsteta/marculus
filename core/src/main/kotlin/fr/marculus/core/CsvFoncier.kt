@@ -33,7 +33,9 @@ object CsvFoncier {
         val tarif = Cubage.aTarif(contexte)
         // Houppier : modèle EMERGE, ou part de houppier en Schaeffer.
         val avecHouppier = Cubage.aHouppier(contexte)
-        sb.append("Proprietaire;Foret;Commune;Parcelle;Surface_ha;Essence;Classe;Nombre;Tiges_ha;G_m2;G_ha;Volume_m3;Volume_ha;Houppier_m3;Total_m3\n")
+        // Volume aérien total : seulement en EMERGE (colonne vide sinon).
+        val aerien = tarif && Cubage.aEmerge(contexte)
+        sb.append("Proprietaire;Foret;Commune;Parcelle;Surface_ha;Essence;Classe;Nombre;Tiges_ha;G_m2;G_ha;Volume_m3;Volume_ha;Houppier_m3;BoisFortTotal_m3;AerienTotal_m3\n")
         plus.groupBy(parcelleDe).forEach { (pcl, tiges) ->
             val ha = pcl?.surfaceHa ?: 0.0
             val totalParcelle = tiges.sumOf { it.quantite }
@@ -49,16 +51,17 @@ object CsvFoncier {
                     val n = lot.sumOf { it.quantite }
                     if (n > 0) {
                         val gRow = String.format(locale, "%.3f", lot.sumOf { Cubage.surfaceTerriereUnitaire(contexte, it.classe) * it.quantite })
-                        var vTige = 0.0; var vHoup = 0.0; var vTot = 0.0
+                        var vTige = 0.0; var vHoup = 0.0; var vTot = 0.0; var vAer = 0.0
                         if (tarif) {
                             lot.forEach {
                                 val v = Cubage.volumesUnitaire(contexte, it.essence, it.classe, it.hauteurTexte)
-                                vTige += v.tige * it.quantite; vHoup += v.houppier * it.quantite; vTot += v.total * it.quantite
+                                vTige += v.tige * it.quantite; vHoup += v.houppier * it.quantite; vTot += v.boisFortTotal * it.quantite; vAer += v.volumeAerienTotal * it.quantite
                             }
                         }
                         val volRow = if (tarif) String.format(locale, "%.3f", vTige) else ""
                         val houpRow = if (avecHouppier) String.format(locale, "%.3f", vHoup) else ""
                         val totRow = if (avecHouppier) String.format(locale, "%.3f", vTot) else ""
+                        val aerRow = if (aerien) String.format(locale, "%.3f", vAer) else ""
                         sb.append(champ(pcl?.proprietaire ?: "")).append(';')
                             .append(champ(pcl?.foret ?: "")).append(';')
                             .append(champ(pcl?.commune ?: "")).append(';')
@@ -73,7 +76,8 @@ object CsvFoncier {
                             .append(volRow).append(';')
                             .append(volHaStr).append(';')
                             .append(houpRow).append(';')
-                            .append(totRow).append('\n')
+                            .append(totRow).append(';')
+                            .append(aerRow).append('\n')
                     }
                 }
             }

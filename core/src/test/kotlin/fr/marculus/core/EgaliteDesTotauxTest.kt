@@ -159,13 +159,13 @@ class EgaliteDesTotauxTest {
         tiges.forEach {
             val cu = VolumesMartelage.cubage(c, it)
             val n = it.quantite
-            v += Vol(cu.volumeTigeM3 * n, cu.volumeHouppierM3 * n, cu.volumeTotalM3 * n)
+            v += Vol(cu.volumeTigeM3 * n, cu.volumeHouppierM3 * n, cu.volumeBoisFortTotalM3 * n)
         }
         return v
     }
 
     private fun statut(c: Contexte, j: List<Tige>) =
-        VolumesMartelage.totaux(c, j).let { Vol(it.volumeTigeM3, it.volumeHouppierM3, it.volumeTotalM3) }
+        VolumesMartelage.totaux(c, j).let { Vol(it.volumeTigeM3, it.volumeHouppierM3, it.volumeBoisFortTotalM3) }
 
     private fun egal(attendu: Vol, obtenu: Vol, eps: Double, msg: String) {
         assertEquals(attendu.tige, obtenu.tige, eps, "$msg : volume tige")
@@ -204,7 +204,7 @@ class EgaliteDesTotauxTest {
     fun `Par parcelle - parcelles plus sans position egalent les volumes de Statut`() = chaque { cas, c ->
         val r = ParParcelle.repartir(cas.journal, parcelleDe)
         val parcelles = vol(c, r.parcelles.values.flatten())
-        val sans = r.volumesSansPosition(c).let { Vol(it.volumeTigeM3, it.volumeHouppierM3, it.volumeTotalM3) }
+        val sans = r.volumesSansPosition(c).let { Vol(it.volumeTigeM3, it.volumeHouppierM3, it.volumeBoisFortTotalM3) }
         egal(statut(c, cas.journal), parcelles + sans, eps, "${cas.nom} ${c.tarif}")
     }
 
@@ -245,7 +245,7 @@ class EgaliteDesTotauxTest {
         egal(vol(c, net), f.vol, 5e-4 * f.lignes + eps, "${cas.nom} ${c.tarif}")
         if (cas.orphelines == 0) {
             val r = ParParcelle.repartir(cas.journal, parcelleDe)
-            val sans = r.volumesSansPosition(c).let { Vol(it.volumeTigeM3, it.volumeHouppierM3, it.volumeTotalM3) }
+            val sans = r.volumesSansPosition(c).let { Vol(it.volumeTigeM3, it.volumeHouppierM3, it.volumeBoisFortTotalM3) }
             egal(statut(c, cas.journal) - sans, f.vol, 5e-4 * f.lignes + eps, "${cas.nom} ${c.tarif} : Statut moins sans position")
         }
     }
@@ -331,7 +331,7 @@ class EgaliteDesTotauxTest {
             // En-tête : 4 décimales.
             assertEquals(s.tige, entete.getValue("VolumeTigeTotalM3").toDouble(), 5e-5, "$n : tige")
             assertEquals(s.houppier, entete.getValue("VolumeHouppierTotalM3").toDouble(), 5e-5, "$n : houppier")
-            assertEquals(s.total, entete.getValue("VolumeTotalM3").toDouble(), 5e-5, "$n : total")
+            assertEquals(s.total, entete.getValue("VolumeBoisFortTotalM3").toDouble(), 5e-5, "$n : total")
         }
         // Journal NET : valeurs unitaires (6 décimales) × quantité, signées.
         val (_, _, journal) = csvJournal(c, cas.journal, true)

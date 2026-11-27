@@ -57,8 +57,8 @@ class CubageTest {
         val v = Cubage.volumesUnitaire(contexte(TarifCubage.EMERGE), "Chêne", 40, "20")
         assertTrue(v.tige > 0.0, "tige > 0, obtenu ${v.tige}")
         assertTrue(v.houppier > 0.0, "houppier > 0, obtenu ${v.houppier}")
-        proche(v.tige + v.houppier, v.total, 1e-6)
-        assertTrue(v.total > v.tige, "total aérien > tige")
+        proche(v.tige + v.houppier, v.boisFortTotal, 1e-6)
+        assertTrue(v.boisFortTotal > v.tige, "bois fort total > tige")
     }
 
     @Test
@@ -66,7 +66,7 @@ class CubageTest {
         val v = Cubage.volumesUnitaire(contexte(TarifCubage.SCHAEFFER_RAPIDE, numero = 8), "Chêne", 40, null)
         assertTrue(v.tige > 0.0)
         assertEquals(0.0, v.houppier)
-        assertEquals(v.tige, v.total)
+        assertEquals(v.tige, v.boisFortTotal)
     }
 
     @Test
@@ -110,10 +110,10 @@ class CubageTest {
         val tige = Cubage.volume(TarifCubage.SCHAEFFER_RAPIDE, 8, 42.5)
         val sans = Cubage.volumesUnitaire(base, "Chêne", 40, null)
         assertEquals(0.0, sans.houppier)
-        assertEquals(tige, sans.total, 1e-12)
+        assertEquals(tige, sans.boisFortTotal, 1e-12)
         val avec = Cubage.volumesUnitaire(base.copy(partHouppier = mapOf("Chêne" to 0.3)), "Chêne", 40, null)
         assertEquals(tige, avec.tige, 1e-12)
-        assertEquals(0.3, avec.houppier / avec.total, 1e-12) // 30 % du bois fort total
+        assertEquals(0.3, avec.houppier / avec.boisFortTotal, 1e-12) // 30 % du bois fort total
         assertTrue(Cubage.aHouppier(base.copy(partHouppier = mapOf("Chêne" to 0.3))))
         assertTrue(!Cubage.aHouppier(base))
     }
@@ -121,7 +121,7 @@ class CubageTest {
     @Test
     fun `sans tarif la part de houppier ne sert pas`() {
         val ctx = contexte(TarifCubage.AUCUN).copy(partHouppier = mapOf("Chêne" to 0.3))
-        assertEquals(0.0, Cubage.volumesUnitaire(ctx, "Chêne", 40, null).total)
+        assertEquals(0.0, Cubage.volumesUnitaire(ctx, "Chêne", 40, null).boisFortTotal)
     }
 
     @Test

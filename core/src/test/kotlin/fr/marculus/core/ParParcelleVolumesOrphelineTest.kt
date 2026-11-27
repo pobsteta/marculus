@@ -29,17 +29,17 @@ class ParParcelleVolumesOrphelineTest {
         val r = ParParcelle.repartir(j) { "A" }
         val sans = r.volumesSansPosition(ctx)
         val geo = r.parcelles.values.flatten().sumOf {
-            VolumesMartelage.cubage(ctx, it).let { c -> c.volumeTotalM3 * it.quantite }
+            VolumesMartelage.cubage(ctx, it).let { c -> c.volumeBoisFortTotalM3 * it.quantite }
         }
         val geoTige = r.parcelles.values.flatten().sumOf { VolumesMartelage.cubage(ctx, it).volumeTigeM3 * it.quantite }
         val geoHoup = r.parcelles.values.flatten().sumOf { VolumesMartelage.cubage(ctx, it).volumeHouppierM3 * it.quantite }
         val attendu = VolumesMartelage.totaux(ctx, j)
-        assertEquals(attendu.volumeTotalM3, geo + sans.volumeTotalM3, 1e-9)
+        assertEquals(attendu.volumeBoisFortTotalM3, geo + sans.volumeBoisFortTotalM3, 1e-9)
         assertEquals(attendu.volumeTigeM3, geoTige + sans.volumeTigeM3, 1e-9)
         assertEquals(attendu.volumeHouppierM3, geoHoup + sans.volumeHouppierM3, 1e-9)
         // Le volume de l'annulation orpheline est bien retiré (sans lui, l'écart serait non nul).
-        val sansOrpheline = VolumesMartelage.cubage(ctx, j[1]).volumeTotalM3
-        assertEquals(true, sans.volumeTotalM3 < sansOrpheline - 1e-9)
+        val sansOrpheline = VolumesMartelage.cubage(ctx, j[1]).volumeBoisFortTotalM3
+        assertEquals(true, sans.volumeBoisFortTotalM3 < sansOrpheline - 1e-9)
     }
 
     @Test
