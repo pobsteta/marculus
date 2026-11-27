@@ -133,3 +133,23 @@ Source de chaque ligne : colonne « Code IFN » = IGN OCRE PRO v2.2 p. 40 (codes
 - Les repli indigène/exotique (29 ou 49) et les codes de classe proposés pour Sureau, Thuya, Genévrier, Marronnier, Mûrier, Houx, Buis sont des propositions de l'agent (les genres sont absents de la liste IFN, relue p. 40-41), pas une règle IGN.
 - Non fait : aucun branchement, aucun test, aucune modification de `Cubage.kt` ; le paquet n'est pas compilé dans Marculus, donc rien ici n'est vérifié par un vert.
 - L'abondance relative des espèces (qui fait choisir « l'essence la plus courante ») vient de la table EMERGE du même jour, non rejouée.
+
+## Décisions de Pascal (2026-11-27)
+
+Tranchées une à une avec l'orchestrateur (`pilotage/journal.md`, lignes « 037 · ligne N/11 » du 2026-11-27). Elles priment sur les propositions de la table ci-dessus.
+
+| N° | Nom saisi | Décision | Effet NEMETON (paquet 0.2.2-provisoire) |
+|---|---|---|---|
+| 1 | Chêne | code 3 (chêne rouvre / sessile) | `Quercus_spec` |
+| 2 | Autres feuillus | code 49 (autre feuillu indigène) | `Autres_feuillus` (aérien total seul) |
+| 3 | Autres résineux | code 75 (autre conifère indigène) | non couvert : pas de calcul NEMETON, repli actuel de Marculus |
+| 4 | Érable | code 15 (grand érable) | `Acer_pseudoplatanus` |
+| 5 | Frêne | code 17 | `Fraxinus_excelsior` |
+| 6 | Peuplier | code 19 (peuplier cultivé) | repli classe → 49 |
+| 7 | Sorbier | code 23 (autre fruitier) | repli classe → 49 |
+| 8 | Pin (nu) | aucun code | pas de calcul NEMETON, repli actuel de Marculus |
+| 9 | Pin maritime (51), Pin laricio et Laricio (53), Pin noir (54), Pin d'Alep et Alep (57), Pin à crochets (58) | repli par le genre accepté (D5 côté Marculus) | cubés comme `Pinus_sylvestris` (52), essence utilisée affichée |
+| 10 | Chêne rouge (4) | repli par le genre accepté | cubé comme `Quercus_spec`, essence utilisée affichée |
+| 11 | Arbre, Autre, Inconnu, Hêtres, Chênes | aucun code | pas de calcul NEMETON |
+| 11 | Feuillus | code 49 | `Autres_feuillus` (aérien total seul) |
+| 11 | Résineux | code 75 | non couvert : pas de calcul NEMETON |
