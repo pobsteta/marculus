@@ -1,0 +1,143 @@
+{
+  "name": "nemeton-tarif",
+  "title": "NEMETON — tarif de cubage multi-essences (paquet livrable vers Marculus)",
+  "version": "0.2.2-provisoire",
+  "methodologie": "v2.24",
+  "tarif": "v5",
+  "created": "2026-11-27",
+  "format_numerique": {
+    "decimalChar": ".",
+    "groupChar": "",
+    "encoding": "utf-8",
+    "separator": ","
+  },
+  "cle_essence": "code_ifn (code ESS IFN 2022, clé de calcul, un code par ligne) ; essence = nom d'essence du dépôt, libellé",
+  "essences_non_couvertes": [
+    {
+      "code_ifn": "68",
+      "libelle": "Autre conifère exotique",
+      "motif": "essence non couverte"
+    },
+    {
+      "code_ifn": "75",
+      "libelle": "Autre conifère indigène",
+      "motif": "essence non couverte"
+    }
+  ],
+  "ecarts_coherence": [],
+  "limites_connues": [
+    "Version provisoire (0.2.2-provisoire ; un code IFN par ligne). Clé de calcul : code_ifn = code ESS de l'IFN (nomenclature 2022, donnees/referentiels/ifn/essences_ifn_ess.csv) ; la colonne essence garde le nom d'essence du dépôt comme libellé. L'ADR D5 reste à rédiger sur cette base.",
+    "Un code IFN par ligne : une essence ou une classe qui couvre plusieurs codes (Quercus_spec : 2 et 3 ; Autres_feuillus : 29 et 49) a une ligne par code, constantes identiques ; clé unique des constantes = (code_ifn, modele, terme) pour les lignes d'essence, (essence, modele, terme) pour les lignes de groupe (feuillu, conifere, tous), dont le code_ifn est vide.",
+    "Quercus_spec : codes IFN 2 et 3 (chênes pédonculé et rouvre). Le code 1 (chêne indifférencié) est une modalité arrêtée en 2005 et n'est pas listé ; les chênes 4 à 8 et 34 ne sont rattachés que par le genre (repli de la spec § 4, à décider avec D5) et ne sont pas dans ce paquet.",
+    "Rattachement non univoque, à trancher avec les codes Marculus : code 15 (grand érable : A. pseudoplatanus ET platanoides, Acer_pseudoplatanus) et code 17 (frêne : F. excelsior, oxyphylla ET ornus, Fraxinus_excelsior).",
+    "Les codes IFN rattachés à une essence du tarif par le seul genre (pins, sapins, épicéa de Sitka, mélèzes exotiques, petit érable...) ou à une classe « autres » autre que 29 et 49 ne sont pas dans ce paquet : le repli de la spec § 4 est à appliquer par Marculus, sur décision de Pascal (D5).",
+    "Autres feuillus (codes IFN 29 et 49, essence « Autres_feuillus ») : forme moyenne de population du modèle bayésien (mu de resultats/bayes/resume_parametres.csv : a = -0,5493, b = -0,0401, c = -0,1758), incertitude élargie de l'écart entre essences (tau_a, tau_b, tau_c). sigma_log de la classe = le plus grand des six sigma_log des feuillus calés (Betula_spec, 0,2417 ; décision de Pascal du 26/11/2026, et non la moyenne 0,1711) ; domaine = enveloppe des domaines de calage des six feuillus (D 7-87 cm, H 8-37 m ; décision de Pascal du 26/11/2026).",
+    "Usage de tau pour les autres feuillus (décision de Pascal du 26/11/2026, ADR 0002 : part paramètre) : tau_a, tau_b et tau_c n'entrent que dans l'intervalle, comme une part commune à tout le lot (elle ne se moyenne pas d'un arbre à l'autre) ; la valeur centrale reste mu (a, b, c) avec la correction sigma^2/2 du sigma retenu (0,2417). Marculus n'ajoute pas tau à la valeur centrale.",
+    "Autres feuillus : valeur centrale 1,47 % au-dessus de la 0.2.0 (×1,0147), à cause du sigma maximal retenu (sigma maximal décidé par Pascal le 26/11/2026 ; rapport nouveau / ancien = exp((0,2417^2 - 0,1711^2) / 2) = 1,01468, écriture de ce rapport décidée par Pascal le 27/11/2026). Seule la valeur centrale de la classe change ; les coefficients a, b, c, tau et le domaine sont ceux de la 0.2.0.",
+    "Autres conifères (code_ifn 68, 75) : aucune constante, essence non couverte (voir essences_non_couvertes).",
+    "Carbone des résineux : tables_tarif_v5.csv donne carbone_t sur la tige seule ; ce paquet livre le carbone AÉRIEN (biomasse aérienne × fraction de carbone), 0,91 à 1,38 fois carbone_t.",
+    "Pin sylvestre : E(D) < 1 sous 14 cm environ ; le volume aérien total y est inférieur à la tige entière (non livrée). La tige jusqu'à la découpe 7 cm reste inférieure à l'aérien total sur tout le jeu de contrôle, y compris de 7,5 à 14 cm ; tout cas qui ne le serait pas est listé dans la clé ecarts_coherence du manifeste, jamais masqué.",
+    "D_plafond de E(D) au-delà de la grille du tarif (mélèze, 200 cm) : signifie « sans plafond en pratique » (Pascal, 26/11/2026).",
+    "Bois fort des feuillus : fractions f7 arrondies, à 0,13 % près de la table v5 (tables_tarif_v5.csv).",
+    "Bois fort tige des résineux = tige jusqu'à la découpe 7 cm (choix du paquet, pas une sortie de la v5).",
+    "Bornes de calage des feuillus : celles du v0 arrondies à l'entier, non garanties égales à celles du v5.",
+    "Jeu de contrôle : de D = 7,5 cm (seuil IFN) au D maximal de calage de l'essence (feuillus) ou de la grille (résineux), H > 1,3 m ; sous le D minimal de calage des feuillus c'est une extrapolation de la formule, vérifiée seulement pour la cohérence tige <= bois fort total <= aérien ; extension aux petites hauteurs après la mission 004.",
+    "Résineux : aucun D maximal de calage propre ; le jeu de contrôle s'arrête à 80 cm (fin de la grille 10-80 cm de la table v5), décision de Pascal du 26/11/2026 ; au-delà de 80 cm le paquet ne garantit rien. Domaine en hauteur = rapport H/D de 40 à 160 (le seuil de la spec est D ≥ 7,5 cm).",
+    "Sapin, mélèze, douglas PROVISOIRES ; infradensités de l'érable, du charme et du bouleau issues de la littérature.",
+    "Sorties hors liste fermée, absentes (créer plus tard, hors mission) : souterrain (spec § 3, à créer), menu bois (se déduit : aérien total - bois fort total).",
+    "Le jeu de contrôle est calculé par les formules du paquet ; il n'est pas indépendant de ces formules, seulement des tables publiées (confrontation faite dans tests/test_paquet_livrable.py).",
+    "Sorties absentes pour Acer_pseudoplatanus (code_ifn 15) : V_bois_fort_tige_m3 (bois fort tige des feuillus : définition de la tige d'un feuillu fourchu à sourcer (décision D3)).",
+    "Sorties absentes pour Autres_feuillus (code_ifn 29 et 49) : V_bois_fort_total_m3 (fractions de découpe 7 cm de la classe non calées, non inventées) ; V_bois_fort_tige_m3 (bois fort tige des feuillus : décision D3) ; biomasse_aerienne_t (infradensité de la classe non sourcée, non inventée) ; carbone_aerien_t (pas de biomasse, donc pas de carbone (infradensité non sourcée)).",
+    "Sorties absentes pour Betula_spec (code_ifn 12) : V_bois_fort_tige_m3 (bois fort tige des feuillus : définition de la tige d'un feuillu fourchu à sourcer (décision D3)).",
+    "Sorties absentes pour Carpinus_betulus (code_ifn 11) : V_bois_fort_tige_m3 (bois fort tige des feuillus : définition de la tige d'un feuillu fourchu à sourcer (décision D3)).",
+    "Sorties absentes pour Fagus_sylvatica (code_ifn 9) : V_bois_fort_tige_m3 (bois fort tige des feuillus : définition de la tige d'un feuillu fourchu à sourcer (décision D3)).",
+    "Sorties absentes pour Fraxinus_excelsior (code_ifn 17) : V_bois_fort_tige_m3 (bois fort tige des feuillus : définition de la tige d'un feuillu fourchu à sourcer (décision D3)).",
+    "Sorties absentes pour Quercus_spec (code_ifn 2 et 3) : V_bois_fort_tige_m3 (bois fort tige des feuillus : définition de la tige d'un feuillu fourchu à sourcer (décision D3)).",
+    "Sorties absentes pour Abies_alba (code_ifn 61) : V_bois_fort_total_m3 (bois fort total des résineux : à vérifier (spec § 3)).",
+    "Sorties absentes pour Larix_decidua (code_ifn 63) : V_bois_fort_total_m3 (bois fort total des résineux : à vérifier (spec § 3)).",
+    "Sorties absentes pour Picea_abies (code_ifn 62) : V_bois_fort_total_m3 (bois fort total des résineux : à vérifier (spec § 3)).",
+    "Sorties absentes pour Pinus_sylvestris (code_ifn 52) : V_bois_fort_total_m3 (bois fort total des résineux : à vérifier (spec § 3)).",
+    "Sorties absentes pour Pseudotsuga_menziesii (code_ifn 64) : V_bois_fort_total_m3 (bois fort total des résineux : à vérifier (spec § 3)).",
+    "Écarts de cohérence constatés dans le jeu de contrôle : 0 cas (clé ecarts_coherence du manifeste)."
+  ],
+  "resources": [
+    {
+      "name": "constantes",
+      "path": "constantes.csv",
+      "format": "csv",
+      "mediatype": "text/csv",
+      "hash": "sha256:b724ee83267c373402af40b1bee574ed471e797a45b687cee44b100b0882cf8a",
+      "schema": {
+        "fields": [
+          {
+            "name": "essence",
+            "type": "string"
+          },
+          {
+            "name": "code_ifn",
+            "type": "string"
+          },
+          {
+            "name": "modele",
+            "type": "string"
+          },
+          {
+            "name": "terme",
+            "type": "string"
+          },
+          {
+            "name": "valeur",
+            "type": "number"
+          },
+          {
+            "name": "unite",
+            "type": "string"
+          },
+          {
+            "name": "source",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "jeu_controle",
+      "path": "jeu_controle.csv",
+      "format": "csv",
+      "mediatype": "text/csv",
+      "hash": "sha256:0b06dd1f39ff22d608fcfc4879679fc5c9dbda6d42530c42fedea9412e731341",
+      "schema": {
+        "fields": [
+          {
+            "name": "essence",
+            "type": "string"
+          },
+          {
+            "name": "code_ifn",
+            "type": "string"
+          },
+          {
+            "name": "D_cm",
+            "type": "number"
+          },
+          {
+            "name": "H_m",
+            "type": "number"
+          },
+          {
+            "name": "sortie",
+            "type": "string"
+          },
+          {
+            "name": "valeur",
+            "type": "number"
+          },
+          {
+            "name": "unite",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}

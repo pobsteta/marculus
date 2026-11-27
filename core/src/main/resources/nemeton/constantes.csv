@@ -1,0 +1,248 @@
+essence,code_ifn,modele,terme,valeur,unite,source
+Fagus_sylvatica,9,volume_feuillu,a,-0.5308,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:2#a ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Fagus_sylvatica,9,volume_feuillu,b_logD,0.0896,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:2#b_logD ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015) ; δ : non citée (estimation du dépôt sur arbres pesés ou cubés : Hesse INRA, PANGAEA, Demol, EFM ; code/controle_pente_hetre.py, code/controle_pente_chenes.py)"
+Fagus_sylvatica,9,volume_feuillu,c_logH,-0.2142,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:2#c_logH ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Fagus_sylvatica,9,volume_feuillu,sigma_log,0.1482,ln(m3),"resultats/tarif_v5/coefficients_feuillus_v5.csv:2#sigma_log ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Quercus_spec,2,volume_feuillu,a,-0.5321,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:3#a ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Quercus_spec,3,volume_feuillu,a,-0.5321,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:3#a ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Quercus_spec,2,volume_feuillu,b_logD,0.0594,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:3#b_logD ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015) ; δ : non citée (estimation du dépôt sur arbres pesés ou cubés : Hesse INRA, PANGAEA, Demol, EFM ; code/controle_pente_hetre.py, code/controle_pente_chenes.py)"
+Quercus_spec,3,volume_feuillu,b_logD,0.0594,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:3#b_logD ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015) ; δ : non citée (estimation du dépôt sur arbres pesés ou cubés : Hesse INRA, PANGAEA, Demol, EFM ; code/controle_pente_hetre.py, code/controle_pente_chenes.py)"
+Quercus_spec,2,volume_feuillu,c_logH,-0.2463,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:3#c_logH ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Quercus_spec,3,volume_feuillu,c_logH,-0.2463,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:3#c_logH ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Quercus_spec,2,volume_feuillu,sigma_log,0.146,ln(m3),"resultats/tarif_v5/coefficients_feuillus_v5.csv:3#sigma_log ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Quercus_spec,3,volume_feuillu,sigma_log,0.146,ln(m3),"resultats/tarif_v5/coefficients_feuillus_v5.csv:3#sigma_log ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Acer_pseudoplatanus,15,volume_feuillu,a,-0.5468,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:4#a ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Acer_pseudoplatanus,15,volume_feuillu,b_logD,-0.0437,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:4#b_logD ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Acer_pseudoplatanus,15,volume_feuillu,c_logH,-0.1413,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:4#c_logH ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Acer_pseudoplatanus,15,volume_feuillu,sigma_log,0.143,ln(m3),"resultats/tarif_v5/coefficients_feuillus_v5.csv:4#sigma_log ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Carpinus_betulus,11,volume_feuillu,a,-0.5433,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:5#a ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Carpinus_betulus,11,volume_feuillu,b_logD,-0.033,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:5#b_logD ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Carpinus_betulus,11,volume_feuillu,c_logH,-0.1927,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:5#c_logH ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Carpinus_betulus,11,volume_feuillu,sigma_log,0.1701,ln(m3),"resultats/tarif_v5/coefficients_feuillus_v5.csv:5#sigma_log ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Fraxinus_excelsior,17,volume_feuillu,a,-0.5468,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:6#a ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Fraxinus_excelsior,17,volume_feuillu,b_logD,-0.0305,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:6#b_logD ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Fraxinus_excelsior,17,volume_feuillu,c_logH,-0.0836,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:6#c_logH ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Fraxinus_excelsior,17,volume_feuillu,sigma_log,0.1774,ln(m3),"resultats/tarif_v5/coefficients_feuillus_v5.csv:6#sigma_log ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Betula_spec,12,volume_feuillu,a,-0.5978,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:7#a ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Betula_spec,12,volume_feuillu,b_logD,-0.0622,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:7#b_logD ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Betula_spec,12,volume_feuillu,c_logH,-0.1575,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv:7#c_logH ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+Betula_spec,12,volume_feuillu,sigma_log,0.2417,ln(m3),"resultats/tarif_v5/coefficients_feuillus_v5.csv:7#sigma_log ; non citée (estimation du dépôt : modèle bayésien hiérarchique, code/nemeton_bayes.py, sur QSM BioDiv-3DTrees et arbres abattus Demol et al., Hackenberg et al. 2015)"
+feuillu,,volume_feuillu,D_ref,30,cm,code/tarif_v0_src/nemeton_tarif_v0.py:88 ; non citée
+feuillu,,volume_feuillu,H_ref,25,m,code/tarif_v0_src/nemeton_tarif_v0.py:88 ; non citée
+feuillu,,volume_feuillu,facteur_biais_sigma2,0.5,sans unité,code/tarif_v0_src/nemeton_tarif_v0.py:89 ; non citée
+Picea_abies,62,profil_tige_resineux,k0,0.5918,sans unité,"code/nemeton_tarif_v5.py:80 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Picea_abies,62,profil_tige_resineux,k1,2.2288,sans unité,"code/nemeton_tarif_v5.py:80 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Picea_abies,62,profil_tige_resineux,beta,0.0933,sans unité,"code/nemeton_tarif_v5.py:80 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Picea_abies,62,profil_tige_resineux,lam,2,m,"code/nemeton_tarif_v5.py:80 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Picea_abies,62,profil_tige_resineux,a,0.2206,sans unité,"code/nemeton_tarif_v5.py:80 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Picea_abies,62,profil_tige_resineux,x0,1,sans unité (hauteur relative),"code/nemeton_tarif_v5.py:80 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Picea_abies,62,profil_tige_resineux,sx,0.3023,sans unité (hauteur relative),"code/nemeton_tarif_v5.py:80 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pinus_sylvestris,52,profil_tige_resineux,k0,0.9544,sans unité,"code/nemeton_tarif_v5.py:81 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pinus_sylvestris,52,profil_tige_resineux,k1,1.491,sans unité,"code/nemeton_tarif_v5.py:81 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pinus_sylvestris,52,profil_tige_resineux,beta,0.1207,sans unité,"code/nemeton_tarif_v5.py:81 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pinus_sylvestris,52,profil_tige_resineux,lam,2,m,"code/nemeton_tarif_v5.py:81 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pinus_sylvestris,52,profil_tige_resineux,a,0.0773,sans unité,"code/nemeton_tarif_v5.py:81 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pinus_sylvestris,52,profil_tige_resineux,x0,0.8787,sans unité (hauteur relative),"code/nemeton_tarif_v5.py:81 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pinus_sylvestris,52,profil_tige_resineux,sx,0.045,sans unité (hauteur relative),"code/nemeton_tarif_v5.py:81 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Abies_alba,61,profil_tige_resineux,k0,0.7379,sans unité,"code/nemeton_tarif_v5.py:82 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Abies_alba,61,profil_tige_resineux,k1,1.578,sans unité,"code/nemeton_tarif_v5.py:82 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Abies_alba,61,profil_tige_resineux,beta,0.082,sans unité,"code/nemeton_tarif_v5.py:82 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Abies_alba,61,profil_tige_resineux,lam,2,m,"code/nemeton_tarif_v5.py:82 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Abies_alba,61,profil_tige_resineux,a,0.2301,sans unité,"code/nemeton_tarif_v5.py:82 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Abies_alba,61,profil_tige_resineux,x0,0.8912,sans unité (hauteur relative),"code/nemeton_tarif_v5.py:82 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Abies_alba,61,profil_tige_resineux,sx,0.1156,sans unité (hauteur relative),"code/nemeton_tarif_v5.py:82 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Larix_decidua,63,profil_tige_resineux,k0,0.9195,sans unité,"code/nemeton_tarif_v5.py:83 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Larix_decidua,63,profil_tige_resineux,k1,1.8396,sans unité,"code/nemeton_tarif_v5.py:83 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Larix_decidua,63,profil_tige_resineux,beta,0.1183,sans unité,"code/nemeton_tarif_v5.py:83 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Larix_decidua,63,profil_tige_resineux,lam,2,m,"code/nemeton_tarif_v5.py:83 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Larix_decidua,63,profil_tige_resineux,a,0.2418,sans unité,"code/nemeton_tarif_v5.py:83 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Larix_decidua,63,profil_tige_resineux,x0,0.9388,sans unité (hauteur relative),"code/nemeton_tarif_v5.py:83 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Larix_decidua,63,profil_tige_resineux,sx,0.1164,sans unité (hauteur relative),"code/nemeton_tarif_v5.py:83 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pseudotsuga_menziesii,64,profil_tige_resineux,k0,1.2081,sans unité,"code/nemeton_tarif_v5.py:84 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pseudotsuga_menziesii,64,profil_tige_resineux,k1,1.5112,sans unité,"code/nemeton_tarif_v5.py:84 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pseudotsuga_menziesii,64,profil_tige_resineux,beta,0.0703,sans unité,"code/nemeton_tarif_v5.py:84 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pseudotsuga_menziesii,64,profil_tige_resineux,lam,2,m,"code/nemeton_tarif_v5.py:84 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pseudotsuga_menziesii,64,profil_tige_resineux,a,0.2313,sans unité,"code/nemeton_tarif_v5.py:84 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pseudotsuga_menziesii,64,profil_tige_resineux,x0,0.8764,sans unité (hauteur relative),"code/nemeton_tarif_v5.py:84 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+Pseudotsuga_menziesii,64,profil_tige_resineux,sx,0.0543,sans unité (hauteur relative),"code/nemeton_tarif_v5.py:84 ; EFM, WSL (Didion et al. 2024, cité code/tarif_sapin_meleze.py:5 et code/controle_resineux_peses.py:9) : sections de tiges d'arbres abattus"
+conifere,,profil_tige_resineux,h_ref,1.3,m,code/nemeton_tarif_v5.py:116-120 ; non citée
+conifere,,profil_tige_resineux,D_ref,30,cm,code/nemeton_tarif_v5.py:118 ; non citée
+conifere,,integration_tige_resineux,n_points,400,points,code/nemeton_tarif_v5.py:111 ; non citée
+conifere,,integration_tige_resineux,marge_sommet,0.001,m,code/nemeton_tarif_v5.py:116 ; non citée
+conifere,,integration_tige_resineux,u_min,1e-09,sans unité,code/nemeton_tarif_v5.py:117 ; non citée
+Picea_abies,62,expansion_resineux,a,0.0397,sans unité,"code/nemeton_tarif_v5.py:86 ; non citée en référence publiée : 6 918 épicéas mesurés EFM (Didion et al. 2024), PANGAEA, Luke (VAPU)"
+Picea_abies,62,expansion_resineux,b,-0.1878,sans unité,"code/nemeton_tarif_v5.py:86 ; non citée en référence publiée : 6 918 épicéas mesurés EFM (Didion et al. 2024), PANGAEA, Luke (VAPU)"
+Picea_abies,62,expansion_resineux,D_plafond,20,cm,"code/nemeton_tarif_v5.py:86 ; non citée en référence publiée : 6 918 épicéas mesurés EFM (Didion et al. 2024), PANGAEA, Luke (VAPU)"
+Pinus_sylvestris,52,expansion_resineux,a,0.2236,sans unité,"code/nemeton_tarif_v5.py:87 ; non citée en référence publiée : volume total de 30 pins abattus, Demol et al. (année non citée à cette ligne)"
+Pinus_sylvestris,52,expansion_resineux,b,0.2847,sans unité,"code/nemeton_tarif_v5.py:87 ; non citée en référence publiée : volume total de 30 pins abattus, Demol et al. (année non citée à cette ligne)"
+Pinus_sylvestris,52,expansion_resineux,D_plafond,33,cm,"code/nemeton_tarif_v5.py:87 ; non citée en référence publiée : volume total de 30 pins abattus, Demol et al. (année non citée à cette ligne)"
+Abies_alba,61,expansion_resineux,a,0.0568,sans unité,"code/nemeton_tarif_v5.py:88 ; non citée en référence publiée : EFM (Didion et al. 2024), 3 383 sapins, et 43 sapins PANGAEA"
+Abies_alba,61,expansion_resineux,b,-0.2397,sans unité,"code/nemeton_tarif_v5.py:88 ; non citée en référence publiée : EFM (Didion et al. 2024), 3 383 sapins, et 43 sapins PANGAEA"
+Abies_alba,61,expansion_resineux,D_plafond,20,cm,"code/nemeton_tarif_v5.py:88 ; non citée en référence publiée : EFM (Didion et al. 2024), 3 383 sapins, et 43 sapins PANGAEA"
+Larix_decidua,63,expansion_resineux,a,0.0689,sans unité,"code/nemeton_tarif_v5.py:89 ; non citée en référence publiée : EFM (Didion et al. 2024), 1 061 mélèzes"
+Larix_decidua,63,expansion_resineux,b,0.0055,sans unité,"code/nemeton_tarif_v5.py:89 ; non citée en référence publiée : EFM (Didion et al. 2024), 1 061 mélèzes"
+Larix_decidua,63,expansion_resineux,D_plafond,200,cm,"code/nemeton_tarif_v5.py:89 ; non citée en référence publiée : EFM (Didion et al. 2024), 1 061 mélèzes"
+Pseudotsuga_menziesii,64,expansion_resineux,a,0.0968,sans unité,"code/nemeton_tarif_v5.py:90 ; non citée en référence publiée : EFM (Didion et al. 2024), 89 douglas, et 6 PANGAEA"
+Pseudotsuga_menziesii,64,expansion_resineux,b,-0.1287,sans unité,"code/nemeton_tarif_v5.py:90 ; non citée en référence publiée : EFM (Didion et al. 2024), 89 douglas, et 6 PANGAEA"
+Pseudotsuga_menziesii,64,expansion_resineux,D_plafond,30,cm,"code/nemeton_tarif_v5.py:90 ; non citée en référence publiée : EFM (Didion et al. 2024), 89 douglas, et 6 PANGAEA"
+conifere,,expansion_resineux,D_ref,30,cm,code/nemeton_tarif_v5.py:129 ; non citée
+Fagus_sylvatica,9,infradensite,rho_moyenne,613,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:33 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Fagus_sylvatica,9,infradensite,rho_pente_10cm,-4,kg/m3 par 10 cm,"code/tarif_v0_src/nemeton_tarif_v0.py:33 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Quercus_spec,2,infradensite,rho_moyenne,600,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:34 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Quercus_spec,3,infradensite,rho_moyenne,600,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:34 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Quercus_spec,2,infradensite,rho_pente_10cm,-8.5,kg/m3 par 10 cm,"code/tarif_v0_src/nemeton_tarif_v0.py:34 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Quercus_spec,3,infradensite,rho_pente_10cm,-8.5,kg/m3 par 10 cm,"code/tarif_v0_src/nemeton_tarif_v0.py:34 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Fraxinus_excelsior,17,infradensite,rho_moyenne,594,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:35 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Fraxinus_excelsior,17,infradensite,rho_pente_10cm,-5.1,kg/m3 par 10 cm,"code/tarif_v0_src/nemeton_tarif_v0.py:35 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Acer_pseudoplatanus,15,infradensite,rho_moyenne,510,kg/m3,code/tarif_v0_src/nemeton_tarif_v0.py:36 ; « littérature (GCubeR) » : référence primaire non citée
+Acer_pseudoplatanus,15,infradensite,rho_pente_10cm,0,kg/m3 par 10 cm,code/tarif_v0_src/nemeton_tarif_v0.py:36 ; « littérature (GCubeR) » : référence primaire non citée
+Carpinus_betulus,11,infradensite,rho_moyenne,610,kg/m3,code/tarif_v0_src/nemeton_tarif_v0.py:37 ; « littérature (GCubeR) » : référence primaire non citée
+Carpinus_betulus,11,infradensite,rho_pente_10cm,0,kg/m3 par 10 cm,code/tarif_v0_src/nemeton_tarif_v0.py:37 ; « littérature (GCubeR) » : référence primaire non citée
+Betula_spec,12,infradensite,rho_moyenne,520,kg/m3,code/tarif_v0_src/nemeton_tarif_v0.py:38 ; « littérature (GCubeR) » : référence primaire non citée
+Betula_spec,12,infradensite,rho_pente_10cm,0,kg/m3 par 10 cm,code/tarif_v0_src/nemeton_tarif_v0.py:38 ; « littérature (GCubeR) » : référence primaire non citée
+Picea_abies,62,infradensite,rho_moyenne,391,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:39 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Picea_abies,62,infradensite,rho_pente_10cm,-2.5,kg/m3 par 10 cm,"code/tarif_v0_src/nemeton_tarif_v0.py:39 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Pinus_sylvestris,52,infradensite,rho_moyenne,468,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:40 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Pinus_sylvestris,52,infradensite,rho_pente_10cm,6.3,kg/m3 par 10 cm,"code/tarif_v0_src/nemeton_tarif_v0.py:40 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Abies_alba,61,infradensite,rho_moyenne,418,kg/m3,"code/nemeton_tarif_v5.py:94 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Abies_alba,61,infradensite,rho_pente_10cm,-0.8,kg/m3 par 10 cm,"code/nemeton_tarif_v5.py:94 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Larix_decidua,63,infradensite,rho_moyenne,511,kg/m3,"code/nemeton_tarif_v5.py:94 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Larix_decidua,63,infradensite,rho_pente_10cm,0,kg/m3 par 10 cm,"code/nemeton_tarif_v5.py:94 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Pseudotsuga_menziesii,64,infradensite,rho_moyenne,436,kg/m3,"code/nemeton_tarif_v5.py:95 ; « équivalente TapeS » (paquet R TapeS ; référence non citée à cette ligne, donnees/arbres_peses_sources.md:14 nomme Vonderach 2018 / TapeS)"
+Pseudotsuga_menziesii,64,infradensite,rho_pente_10cm,0,kg/m3 par 10 cm,"code/nemeton_tarif_v5.py:95 ; « équivalente TapeS » (paquet R TapeS ; référence non citée à cette ligne, donnees/arbres_peses_sources.md:14 nomme Vonderach 2018 / TapeS)"
+tous,,infradensite,D_ref,30,cm,code/tarif_v0_src/nemeton_tarif_v0.py:124 ; code/nemeton_tarif_v5.py:103 ; non citée
+tous,,infradensite,pas_D,10,cm,code/tarif_v0_src/nemeton_tarif_v0.py:124 ; code/nemeton_tarif_v5.py:103 ; non citée
+Fagus_sylvatica,9,facteur_arbre_entier,facteur,0.923,sans unité,"code/nemeton_tarif_v5.py:140 ; resultats/bayes/coefficients_forme.csv:2#c_densite ; non citée (estimation du dépôt : modèle bayésien, code/nemeton_bayes.py, avec effet site et une étude de littérature par source ; resultats/densite/carotte_vs_arbre.csv)"
+Quercus_spec,2,facteur_arbre_entier,facteur,0.944,sans unité,"code/nemeton_tarif_v5.py:140 ; resultats/bayes/coefficients_forme.csv:3#c_densite ; non citée (estimation du dépôt : modèle bayésien, code/nemeton_bayes.py, avec effet site et une étude de littérature par source ; resultats/densite/carotte_vs_arbre.csv)"
+Quercus_spec,3,facteur_arbre_entier,facteur,0.944,sans unité,"code/nemeton_tarif_v5.py:140 ; resultats/bayes/coefficients_forme.csv:3#c_densite ; non citée (estimation du dépôt : modèle bayésien, code/nemeton_bayes.py, avec effet site et une étude de littérature par source ; resultats/densite/carotte_vs_arbre.csv)"
+Fraxinus_excelsior,17,facteur_arbre_entier,facteur,0.93,sans unité,"code/nemeton_tarif_v5.py:140 ; resultats/bayes/coefficients_forme.csv:4#c_densite ; non citée (estimation du dépôt : modèle bayésien, code/nemeton_bayes.py, avec effet site et une étude de littérature par source ; resultats/densite/carotte_vs_arbre.csv)"
+Picea_abies,62,facteur_arbre_entier,facteur,1.06,sans unité,"code/tarif_v0_src/nemeton_tarif_v0.py:42 ; Billard 2020 (Billard et al. 2020, Ann. For. Sci. 77:103 d'après documents/notes/sources-infradensite-point1.md:11)"
+Acer_pseudoplatanus,15,facteur_arbre_entier,facteur,1,sans unité,"code/nemeton_tarif_v5.py:140,304 ; non citée"
+Carpinus_betulus,11,facteur_arbre_entier,facteur,1,sans unité,"code/nemeton_tarif_v5.py:140,304 ; non citée"
+Betula_spec,12,facteur_arbre_entier,facteur,1,sans unité,"code/nemeton_tarif_v5.py:140,304 ; non citée"
+Pinus_sylvestris,52,facteur_arbre_entier,facteur,1,sans unité,"code/tarif_v0_src/nemeton_tarif_v0.py:42,124 ; code/nemeton_tarif_v5.py:92-93,103 ; non citée"
+Abies_alba,61,facteur_arbre_entier,facteur,1,sans unité,"code/tarif_v0_src/nemeton_tarif_v0.py:42,124 ; code/nemeton_tarif_v5.py:92-93,103 ; non citée"
+Larix_decidua,63,facteur_arbre_entier,facteur,1,sans unité,"code/tarif_v0_src/nemeton_tarif_v0.py:42,124 ; code/nemeton_tarif_v5.py:92-93,103 ; non citée"
+Pseudotsuga_menziesii,64,facteur_arbre_entier,facteur,1,sans unité,"code/tarif_v0_src/nemeton_tarif_v0.py:42,124 ; code/nemeton_tarif_v5.py:92-93,103 ; non citée"
+feuillu,,carbone,fraction_carbone,0.488,t C / t matière sèche,code/tarif_v0_src/nemeton_tarif_v0.py:43 ; Thomas & Martin 2012 (« tempérées »)
+conifere,,carbone,fraction_carbone,0.508,t C / t matière sèche,code/tarif_v0_src/nemeton_tarif_v0.py:43 ; Thomas & Martin 2012 (« tempérées »)
+tous,,conversion,masse_molaire_CO2,44,g/mol,code/nemeton_tarif_v5.py:318 ; code/tarif_v0_src/nemeton_tarif_v0.py:14 ; non citée
+tous,,conversion,masse_molaire_C,12,g/mol,code/nemeton_tarif_v5.py:318 ; code/tarif_v0_src/nemeton_tarif_v0.py:14 ; non citée
+tous,,conversion,kg_par_t,1000,kg/t,"code/nemeton_tarif_v5.py:307,316 ; non citée"
+Fagus_sylvatica,9,domaine_feuillu,D_min_calage,8,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:2#domaine_DBH_cm ; non citée
+Fagus_sylvatica,9,domaine_feuillu,D_max_calage,76,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:2#domaine_DBH_cm ; non citée
+Fagus_sylvatica,9,domaine_feuillu,H_min_calage,8,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:2#domaine_H_m ; non citée
+Fagus_sylvatica,9,domaine_feuillu,H_max_calage,37,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:2#domaine_H_m ; non citée
+Quercus_spec,2,domaine_feuillu,D_min_calage,12,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:3#domaine_DBH_cm ; non citée
+Quercus_spec,3,domaine_feuillu,D_min_calage,12,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:3#domaine_DBH_cm ; non citée
+Quercus_spec,2,domaine_feuillu,D_max_calage,87,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:3#domaine_DBH_cm ; non citée
+Quercus_spec,3,domaine_feuillu,D_max_calage,87,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:3#domaine_DBH_cm ; non citée
+Quercus_spec,2,domaine_feuillu,H_min_calage,10,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:3#domaine_H_m ; non citée
+Quercus_spec,3,domaine_feuillu,H_min_calage,10,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:3#domaine_H_m ; non citée
+Quercus_spec,2,domaine_feuillu,H_max_calage,36,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:3#domaine_H_m ; non citée
+Quercus_spec,3,domaine_feuillu,H_max_calage,36,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:3#domaine_H_m ; non citée
+Acer_pseudoplatanus,15,domaine_feuillu,D_min_calage,12,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:4#domaine_DBH_cm ; non citée
+Acer_pseudoplatanus,15,domaine_feuillu,D_max_calage,58,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:4#domaine_DBH_cm ; non citée
+Acer_pseudoplatanus,15,domaine_feuillu,H_min_calage,16,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:4#domaine_H_m ; non citée
+Acer_pseudoplatanus,15,domaine_feuillu,H_max_calage,31,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:4#domaine_H_m ; non citée
+Carpinus_betulus,11,domaine_feuillu,D_min_calage,12,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:5#domaine_DBH_cm ; non citée
+Carpinus_betulus,11,domaine_feuillu,D_max_calage,34,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:5#domaine_DBH_cm ; non citée
+Carpinus_betulus,11,domaine_feuillu,H_min_calage,11,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:5#domaine_H_m ; non citée
+Carpinus_betulus,11,domaine_feuillu,H_max_calage,27,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:5#domaine_H_m ; non citée
+Fraxinus_excelsior,17,domaine_feuillu,D_min_calage,7,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:6#domaine_DBH_cm ; non citée
+Fraxinus_excelsior,17,domaine_feuillu,D_max_calage,41,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:6#domaine_DBH_cm ; non citée
+Fraxinus_excelsior,17,domaine_feuillu,H_min_calage,11,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:6#domaine_H_m ; non citée
+Fraxinus_excelsior,17,domaine_feuillu,H_max_calage,33,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:6#domaine_H_m ; non citée
+Betula_spec,12,domaine_feuillu,D_min_calage,10,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:7#domaine_DBH_cm ; non citée
+Betula_spec,12,domaine_feuillu,D_max_calage,40,cm,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:7#domaine_DBH_cm ; non citée
+Betula_spec,12,domaine_feuillu,H_min_calage,10,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:7#domaine_H_m ; non citée
+Betula_spec,12,domaine_feuillu,H_max_calage,28,m,code/tarif_v0_src/tarif_v0/coefficients_tarif_v0.csv:7#domaine_H_m ; non citée
+feuillu,,domaine_feuillu,facteur_D_min,0.9,sans unité,code/nemeton_tarif_v5.py:294 ; non citée
+feuillu,,domaine_feuillu,facteur_D_max,1.1,sans unité,code/nemeton_tarif_v5.py:294 ; non citée
+feuillu,,domaine_feuillu,marge_H,2,m,code/nemeton_tarif_v5.py:294 ; non citée
+conifere,,domaine_resineux,HD_min,40,m/m,code/nemeton_tarif_v5.py:300 ; non citée
+conifere,,domaine_resineux,HD_max,160,m/m,code/nemeton_tarif_v5.py:300 ; non citée
+tous,,grille_table,D_debut,10,cm,code/nemeton_tarif_v5.py:290-291 ; non citée
+tous,,grille_table,D_fin,80,cm,code/nemeton_tarif_v5.py:290-291 ; non citée
+tous,,grille_table,D_pas,5,cm,code/nemeton_tarif_v5.py:290-291 ; non citée
+tous,,grille_table,H_debut,10,m,code/nemeton_tarif_v5.py:290-291 ; non citée
+tous,,grille_table,H_fin,40,m,code/nemeton_tarif_v5.py:290-291 ; non citée
+tous,,grille_table,H_pas,2,m,code/nemeton_tarif_v5.py:290-291 ; non citée
+Fagus_sylvatica,9,incertitude,rho_ecart_type,46,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:33 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Quercus_spec,2,incertitude,rho_ecart_type,69,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:34 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Quercus_spec,3,incertitude,rho_ecart_type,69,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:34 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Fraxinus_excelsior,17,incertitude,rho_ecart_type,57,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:35 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Acer_pseudoplatanus,15,incertitude,rho_ecart_type,50,kg/m3,code/tarif_v0_src/nemeton_tarif_v0.py:36 ; « littérature (GCubeR) » : référence primaire non citée
+Carpinus_betulus,11,incertitude,rho_ecart_type,55,kg/m3,code/tarif_v0_src/nemeton_tarif_v0.py:37 ; « littérature (GCubeR) » : référence primaire non citée
+Betula_spec,12,incertitude,rho_ecart_type,50,kg/m3,code/tarif_v0_src/nemeton_tarif_v0.py:38 ; « littérature (GCubeR) » : référence primaire non citée
+Picea_abies,62,incertitude,rho_ecart_type,45,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:39 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Pinus_sylvestris,52,incertitude,rho_ecart_type,54,kg/m3,"code/tarif_v0_src/nemeton_tarif_v0.py:40 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Abies_alba,61,incertitude,rho_ecart_type,46,kg/m3,"code/nemeton_tarif_v5.py:94 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Larix_decidua,63,incertitude,rho_ecart_type,61,kg/m3,"code/nemeton_tarif_v5.py:94 ; XyloDensMap (Leban et al. 2025, Sci. Data ; cité code/nemeton_fetch_densite.py:244,276), « corrigée » du retrait (méthode non détaillée à cette ligne)"
+Pseudotsuga_menziesii,64,incertitude,rho_ecart_type,46,kg/m3,"code/nemeton_tarif_v5.py:95 ; « équivalente TapeS » (paquet R TapeS ; référence non citée à cette ligne, donnees/arbres_peses_sources.md:14 nomme Vonderach 2018 / TapeS)"
+conifere,,incertitude,sigma_log_tige,0.07,ln(m3),code/nemeton_tarif_v5.py:302 ; non citée
+Fagus_sylvatica,9,incertitude,sigma_log_supplement,0,ln(m3),code/nemeton_tarif_v5.py:297 ; non citée
+Quercus_spec,2,incertitude,sigma_log_supplement,0,ln(m3),code/nemeton_tarif_v5.py:297 ; non citée
+Quercus_spec,3,incertitude,sigma_log_supplement,0,ln(m3),code/nemeton_tarif_v5.py:297 ; non citée
+Acer_pseudoplatanus,15,incertitude,sigma_log_supplement,0.1,ln(m3),code/nemeton_tarif_v5.py:297 ; non citée
+Carpinus_betulus,11,incertitude,sigma_log_supplement,0.1,ln(m3),code/nemeton_tarif_v5.py:297 ; non citée
+Fraxinus_excelsior,17,incertitude,sigma_log_supplement,0.1,ln(m3),code/nemeton_tarif_v5.py:297 ; non citée
+Betula_spec,12,incertitude,sigma_log_supplement,0.1,ln(m3),code/nemeton_tarif_v5.py:297 ; non citée
+tous,,incertitude,z_IP90,1.645,sans unité,code/nemeton_tarif_v5.py:319-320 ; non citée
+Picea_abies,62,incertitude,E_sd_log,0.056,ln,"code/nemeton_tarif_v5.py:86 ; non citée en référence publiée : 6 918 épicéas mesurés EFM (Didion et al. 2024), PANGAEA, Luke (VAPU)"
+Pinus_sylvestris,52,incertitude,E_sd_log,0.093,ln,"code/nemeton_tarif_v5.py:87 ; non citée en référence publiée : volume total de 30 pins abattus, Demol et al. (année non citée à cette ligne)"
+Abies_alba,61,incertitude,E_sd_log,0.077,ln,"code/nemeton_tarif_v5.py:88 ; non citée en référence publiée : EFM (Didion et al. 2024), 3 383 sapins, et 43 sapins PANGAEA"
+Larix_decidua,63,incertitude,E_sd_log,0.031,ln,"code/nemeton_tarif_v5.py:89 ; non citée en référence publiée : EFM (Didion et al. 2024), 1 061 mélèzes"
+Pseudotsuga_menziesii,64,incertitude,E_sd_log,0.067,ln,"code/nemeton_tarif_v5.py:90 ; non citée en référence publiée : EFM (Didion et al. 2024), 89 douglas, et 6 PANGAEA"
+Fagus_sylvatica,9,fraction_decoupe,f7_fmax,0.9252,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Fagus_sylvatica,9,fraction_decoupe,f7_m,2.1945,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Fagus_sylvatica,9,fraction_decoupe,f7_s,0.4703,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Fagus_sylvatica,9,correction_menu_bois,delta_pente,0.11,sans unité,code/nemeton_tarif_v5.py:152 (PENTE_CORR) et 159-161 (corr_menu_bois)
+Quercus_spec,2,fraction_decoupe,f7_fmax,0.9558,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Quercus_spec,3,fraction_decoupe,f7_fmax,0.9558,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Quercus_spec,2,fraction_decoupe,f7_m,2.1973,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Quercus_spec,3,fraction_decoupe,f7_m,2.1973,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Quercus_spec,2,fraction_decoupe,f7_s,0.5057,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Quercus_spec,3,fraction_decoupe,f7_s,0.5057,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Quercus_spec,2,correction_menu_bois,delta_pente,0.11,sans unité,code/nemeton_tarif_v5.py:152 (PENTE_CORR) et 159-161 (corr_menu_bois)
+Quercus_spec,3,correction_menu_bois,delta_pente,0.11,sans unité,code/nemeton_tarif_v5.py:152 (PENTE_CORR) et 159-161 (corr_menu_bois)
+Acer_pseudoplatanus,15,fraction_decoupe,f7_fmax,0.9202,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Acer_pseudoplatanus,15,fraction_decoupe,f7_m,2.2254,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Acer_pseudoplatanus,15,fraction_decoupe,f7_s,0.3958,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Acer_pseudoplatanus,15,correction_menu_bois,delta_pente,0,sans unité,code/nemeton_tarif_v5.py:152 (PENTE_CORR) et 159-161 (corr_menu_bois)
+Carpinus_betulus,11,fraction_decoupe,f7_fmax,0.9178,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Carpinus_betulus,11,fraction_decoupe,f7_m,2.0867,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Carpinus_betulus,11,fraction_decoupe,f7_s,0.5501,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Carpinus_betulus,11,correction_menu_bois,delta_pente,0,sans unité,code/nemeton_tarif_v5.py:152 (PENTE_CORR) et 159-161 (corr_menu_bois)
+Fraxinus_excelsior,17,fraction_decoupe,f7_fmax,0.9487,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Fraxinus_excelsior,17,fraction_decoupe,f7_m,2.102,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Fraxinus_excelsior,17,fraction_decoupe,f7_s,0.6197,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Fraxinus_excelsior,17,correction_menu_bois,delta_pente,0,sans unité,code/nemeton_tarif_v5.py:152 (PENTE_CORR) et 159-161 (corr_menu_bois)
+Betula_spec,12,fraction_decoupe,f7_fmax,0.944,sans unité,"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Betula_spec,12,fraction_decoupe,f7_m,2.0102,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Betula_spec,12,fraction_decoupe,f7_s,0.4443,ln(cm),"resultats/tarif_v5/coefficients_feuillus_v5.csv (colonnes f7_*) ; frac(), code/nemeton_tarif_v5.py:207-209"
+Betula_spec,12,correction_menu_bois,delta_pente,0,sans unité,code/nemeton_tarif_v5.py:152 (PENTE_CORR) et 159-161 (corr_menu_bois)
+feuillu,,correction_menu_bois,D_ref_pente,30,cm,code/nemeton_tarif_v5.py:152 (PENTE_CORR) et 159-161 (corr_menu_bois)
+tous,,bois_fort,diametre_decoupe_cm,7,cm,docs/spec.md § 3 (bois fort = découpe 7 cm) ; code/nemeton_tarif_v5.py:56 (CUTS)
+Autres_feuillus,29,volume_feuillu,a,-0.5493,sans unité,"resultats/bayes/resume_parametres.csv#mu[0] ; forme moyenne de population ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,49,volume_feuillu,a,-0.5493,sans unité,"resultats/bayes/resume_parametres.csv#mu[0] ; forme moyenne de population ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,29,volume_feuillu,b_logD,-0.0401,sans unité,"resultats/bayes/resume_parametres.csv#mu[1] ; forme moyenne de population, δ = 0 comme pour les feuillus autres que hêtre et chênes ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,49,volume_feuillu,b_logD,-0.0401,sans unité,"resultats/bayes/resume_parametres.csv#mu[1] ; forme moyenne de population, δ = 0 comme pour les feuillus autres que hêtre et chênes ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,29,volume_feuillu,c_logH,-0.1758,sans unité,"resultats/bayes/resume_parametres.csv#mu[2] ; forme moyenne de population ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,49,volume_feuillu,c_logH,-0.1758,sans unité,"resultats/bayes/resume_parametres.csv#mu[2] ; forme moyenne de population ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,29,volume_feuillu,sigma_log,0.2417,ln(m3),"plus grand des six sigma_log des feuillus du tarif v5 (Betula_spec ; décision de Pascal du 26/11/2026, la population n'a pas de sigma propre)"
+Autres_feuillus,49,volume_feuillu,sigma_log,0.2417,ln(m3),"plus grand des six sigma_log des feuillus du tarif v5 (Betula_spec ; décision de Pascal du 26/11/2026, la population n'a pas de sigma propre)"
+Autres_feuillus,29,incertitude_classe_autres,tau_a,0.0517,sans unité,"resultats/bayes/resume_parametres.csv#tau[0] ; écart entre essences sur a ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,49,incertitude_classe_autres,tau_a,0.0517,sans unité,"resultats/bayes/resume_parametres.csv#tau[0] ; écart entre essences sur a ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,29,incertitude_classe_autres,tau_b,0.0577,sans unité,"resultats/bayes/resume_parametres.csv#tau[1] ; écart entre essences sur b ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,49,incertitude_classe_autres,tau_b,0.0577,sans unité,"resultats/bayes/resume_parametres.csv#tau[1] ; écart entre essences sur b ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,29,incertitude_classe_autres,tau_c,0.1182,sans unité,"resultats/bayes/resume_parametres.csv#tau[2] ; écart entre essences sur c ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,49,incertitude_classe_autres,tau_c,0.1182,sans unité,"resultats/bayes/resume_parametres.csv#tau[2] ; écart entre essences sur c ; resultats/bayes/resume_parametres.csv (modèle bayésien hiérarchique, code/nemeton_bayes.py) ; classe « autres feuillus », codes IFN 29 et 49"
+Autres_feuillus,29,domaine_feuillu,D_min_calage,7,cm,enveloppe des domaines de calage des six feuillus du tarif v5 (décision de Pascal du 26/11/2026)
+Autres_feuillus,49,domaine_feuillu,D_min_calage,7,cm,enveloppe des domaines de calage des six feuillus du tarif v5 (décision de Pascal du 26/11/2026)
+Autres_feuillus,29,domaine_feuillu,D_max_calage,87,cm,enveloppe des domaines de calage des six feuillus du tarif v5 (décision de Pascal du 26/11/2026)
+Autres_feuillus,49,domaine_feuillu,D_max_calage,87,cm,enveloppe des domaines de calage des six feuillus du tarif v5 (décision de Pascal du 26/11/2026)
+Autres_feuillus,29,domaine_feuillu,H_min_calage,8,m,enveloppe des domaines de calage des six feuillus du tarif v5 (décision de Pascal du 26/11/2026)
+Autres_feuillus,49,domaine_feuillu,H_min_calage,8,m,enveloppe des domaines de calage des six feuillus du tarif v5 (décision de Pascal du 26/11/2026)
+Autres_feuillus,29,domaine_feuillu,H_max_calage,37,m,enveloppe des domaines de calage des six feuillus du tarif v5 (décision de Pascal du 26/11/2026)
+Autres_feuillus,49,domaine_feuillu,H_max_calage,37,m,enveloppe des domaines de calage des six feuillus du tarif v5 (décision de Pascal du 26/11/2026)
