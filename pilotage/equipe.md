@@ -85,6 +85,10 @@
 | [034](missions/034-virgule-decimale.md) virgule décimale dans « % houpp. » | `afficheur` | sonnet | appuyer | oui · oui · oui | 9 |
 | [035](missions/035-fiche-izzyondroid.md) fiche Fastlane pour IzzyOnDroid | `afficheur` | sonnet | appuyer | oui · oui · oui | 9 |
 | [036](missions/036-version-calendaire.md) versions calendaires `vAAAA.MM.N` | `dev` | sonnet | lâcher | oui · oui · oui | 9 |
+| [037](missions/037-essences-nemeton.md) essences de Marculus → codes IFN pour NEMETON (table de revue) | `acquereur` | sonnet | donner | oui · oui · oui | 9 |
+| [038](missions/038-tests-nemeton.md) tests d'acceptation du moteur NEMETON (jeu de contrôle, empreinte, hors domaine) | `testeur` | sonnet | donner | oui · oui · oui | 9 |
+| [039](missions/039-moteur-nemeton.md) moteur NEMETON dans `:core` (paquet 0.2.2-provisoire) | `dev` | opus | donner, plan d'abord | oui · à moitié · oui après 038 | 9 |
+| [040](missions/040-emerge-points-secondaires.md) EMERGE : sources des trois règles sans source | `acquereur` | sonnet | donner | oui · oui · à vérifier (réseau) | 9 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
@@ -96,4 +100,5 @@
 | Unité d'un lot d'affouage, repli sans réseau, appareil perdu | 1 (sens) | décisions de Pascal (brief) |
 | Recettes terrain affouage et dictée | — | Pascal sur le terrain, pas un agent |
 | Hauteurs estimées contre mesurées | 1 (sens) | décider si la distinction est nécessaire |
+| Branchement de NEMETON (tarif d'un contexte, écran, exports, lots d'affouage) | 1 (sens) | décisions de Pascal : volumes affichés quand une sortie manque (pas de bois fort tige des feuillus, pas de bois fort total des résineux), part « tige » et « houppier » d'un lot, mention « provisoire » ; ADR 0011 ; après 037 et 039 |
 

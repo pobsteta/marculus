@@ -41,7 +41,18 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 
 ## Validé
 
-_(vide depuis le cycle 8)_
+- [037](missions/037-essences-nemeton.md) · depuis le cycle 8
+  - Homme : acquereur (sonnet), donner
+  - Mission : table de revue essences de Marculus → codes IFN du paquet NEMETON, avec repli
+  - Moyens : paquet `tarif-nemeton/livrable` 0.2.2-provisoire, référentiel IFN ESS 2022
+- [038](missions/038-tests-nemeton.md) + [039](missions/039-moteur-nemeton.md) · depuis le cycle 8
+  - Homme : testeur (sonnet) puis dev (opus, plan d'abord), donner
+  - Mission : moteur NEMETON dans `:core`, prouvé sur les 1 032 sorties du jeu de contrôle ; une PR
+  - Moyens : paquet embarqué tel quel, méthodologie v2.25, `paquet_livrable.py` (dev seul)
+- [040](missions/040-emerge-points-secondaires.md) · depuis le cycle 8
+  - Homme : acquereur (sonnet), donner
+  - Mission : sources des trois règles EMERGE sans source (fct négatif, 0,95 → 0,8, H ≤ 1,4)
+  - Moyens : `gftools` en ligne, Deleuze et al. 2014
 
 ## Planifié
 
