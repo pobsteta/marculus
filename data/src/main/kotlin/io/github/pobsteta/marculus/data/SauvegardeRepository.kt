@@ -192,8 +192,10 @@ class SauvegardeRepository(
             },
         )
         volumes?.let {
-            put("volumeTigeTotalM3", it.volumeTigeM3); put("volumeTotalM3", it.volumeTotalM3)
+            put("volumeTigeTotalM3", it.volumeTigeM3); put("volumeBoisFortTotalM3", it.volumeBoisFortTotalM3)
             put("volumeHouppierTotalM3", it.volumeHouppierM3)
+            // Volume aérien total EMERGE (sans découpe) : absent quand aucune tige n'est cubée par EMERGE.
+            if (it.volumeAerienTotalM3 > 0.0) put("volumeAerienTotalM3", it.volumeAerienTotalM3)
             put("surfaceTerriereTotaleM2", it.surfaceTerriereM2); put("nbTigesNonCubees", it.nbTigesNonCubees)
         }
         affouageNet?.let { put("affouageLotTotalM3", it.lotM3) }
@@ -269,8 +271,9 @@ class SauvegardeRepository(
         put("modifie", modifie); putOpt("lot", lot)
         cubage?.let {
             put("volumeTigeM3", it.volumeTigeM3); put("volumeHouppierM3", it.volumeHouppierM3)
-            put("volumeTotalM3", it.volumeTotalM3); put("surfaceTerriereM2", it.surfaceTerriereM2)
+            put("volumeBoisFortTotalM3", it.volumeBoisFortTotalM3); put("surfaceTerriereM2", it.surfaceTerriereM2)
             put("cubage", it.cubage)
+            if (it.cubage == VolumesMartelage.Methode.EMERGE) put("volumeAerienTotalM3", it.volumeAerienTotalM3)
         }
         affouage?.let { put("affouageLotM3", it.lotM3) }
     }

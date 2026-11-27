@@ -161,10 +161,10 @@ class ParParcelleTest {
         )
         val r = ParParcelle.repartir(j, parcelleDe)
         val geo = r.parcelles.values.flatten().sumOf {
-            Cubage.volumesUnitaire(ctx, it.essence, it.classe, it.hauteurTexte).total * it.quantite
+            Cubage.volumesUnitaire(ctx, it.essence, it.classe, it.hauteurTexte).boisFortTotal * it.quantite
         }
-        val sansPosition = Cubage.volumesUnitaire(ctx, "Hêtre", 25, null).total * r.sansPosition
+        val sansPosition = Cubage.volumesUnitaire(ctx, "Hêtre", 25, null).boisFortTotal * r.sansPosition
         assertEquals(1, r.sansPosition)
-        assertEquals(VolumesMartelage.totaux(ctx, j).volumeTotalM3, geo + sansPosition, eps)
+        assertEquals(VolumesMartelage.totaux(ctx, j).volumeBoisFortTotalM3, geo + sansPosition, eps)
     }
 }

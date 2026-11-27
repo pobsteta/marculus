@@ -31,17 +31,17 @@ object ParParcelle {
          * ceux des parcelles, il donne les volumes de Statut.
          */
         fun volumesSansPosition(contexte: Contexte): VolumesMartelage.Totaux {
-            var vt = 0.0; var vh = 0.0; var vtot = 0.0; var g = 0.0; var nc = 0
+            var vt = 0.0; var vh = 0.0; var vtot = 0.0; var vaer = 0.0; var g = 0.0; var nc = 0
             fun ajouter(t: Tige, signe: Int) {
                 val c = VolumesMartelage.cubage(contexte, t)
                 val n = signe * t.quantite
                 vt += c.volumeTigeM3 * n; vh += c.volumeHouppierM3 * n
-                vtot += c.volumeTotalM3 * n; g += c.surfaceTerriereM2 * n
+                vtot += c.volumeBoisFortTotalM3 * n; vaer += c.volumeAerienTotalM3 * n; g += c.surfaceTerriereM2 * n
                 if (c.nonCubee) nc += n
             }
             tigesSansPosition.forEach { ajouter(it, 1) }
             annulationsOrphelines.forEach { ajouter(it, -1) }
-            return VolumesMartelage.Totaux(vt, vh, vtot, g, nc)
+            return VolumesMartelage.Totaux(vt, vh, vtot, vaer, g, nc)
         }
 
         /**

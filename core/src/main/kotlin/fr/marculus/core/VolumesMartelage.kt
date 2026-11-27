@@ -26,11 +26,16 @@ object VolumesMartelage {
         fun forme(f: Double) = "FORME:$f"
     }
 
-    /** Valeurs **unitaires** d'une tige (pour une tige, avant multiplication par `quantite`). */
+    /**
+     * Valeurs **unitaires** d'une tige (pour une tige, avant multiplication par `quantite`).
+     * [volumeBoisFortTotalM3] = tige + houppier (découpe 7 cm) ; [volumeAerienTotalM3] = volume aérien
+     * total EMERGE (sans découpe), 0 hors méthode EMERGE.
+     */
     data class CubageTige(
         val volumeTigeM3: Double,
         val volumeHouppierM3: Double,
-        val volumeTotalM3: Double,
+        val volumeBoisFortTotalM3: Double,
+        val volumeAerienTotalM3: Double,
         val surfaceTerriereM2: Double,
         val cubage: String,
     ) {
@@ -41,7 +46,8 @@ object VolumesMartelage {
     data class Totaux(
         val volumeTigeM3: Double,
         val volumeHouppierM3: Double,
-        val volumeTotalM3: Double,
+        val volumeBoisFortTotalM3: Double,
+        val volumeAerienTotalM3: Double,
         val surfaceTerriereM2: Double,
         val nbTigesNonCubees: Int,
     )
@@ -62,7 +68,7 @@ object VolumesMartelage {
             }
         }
         val v = Cubage.volumesUnitaire(contexte, tige.essence, tige.classe, tige.hauteurTexte)
-        return CubageTige(v.tige, v.houppier, v.total, g, methode)
+        return CubageTige(v.tige, v.houppier, v.boisFortTotal, v.volumeAerienTotal, g, methode)
     }
 
     /** Totaux nets du journal, à partir de [JournalNet.tiges] (voir en-tête). */
@@ -70,12 +76,14 @@ object VolumesMartelage {
         var vTige = 0.0
         var vHoup = 0.0
         var vTot = 0.0
+        var vAer = 0.0
         var g = 0.0
         var nonCubees = 0
         fun ajouter(c: CubageTige, n: Int) {
             vTige += c.volumeTigeM3 * n
             vHoup += c.volumeHouppierM3 * n
-            vTot += c.volumeTotalM3 * n
+            vTot += c.volumeBoisFortTotalM3 * n
+            vAer += c.volumeAerienTotalM3 * n
             g += c.surfaceTerriereM2 * n
             if (c.nonCubee) nonCubees += n
         }
@@ -85,6 +93,6 @@ object VolumesMartelage {
             val c = cubage(contexte, t)
             ajouter(c, if (t.action == ActionTige.PLUS) t.quantite else -t.quantite)
         }
-        return Totaux(vTige, vHoup, vTot, g, nonCubees.coerceAtLeast(0))
+        return Totaux(vTige, vHoup, vTot, vAer, g, nonCubees.coerceAtLeast(0))
     }
 }

@@ -234,7 +234,8 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
     val volumes = VolumesMartelage.totaux(contexte, journal)
     val volTige = volumes.volumeTigeM3
     val volHoup = volumes.volumeHouppierM3
-    val volTot = volumes.volumeTotalM3
+    val volBoisFort = volumes.volumeBoisFortTotalM3
+    val volAerien = volumes.volumeAerienTotalM3
     val surfaceTotale = volumes.surfaceTerriereM2
 
     LazyColumn(
@@ -266,7 +267,15 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
                             fontWeight = FontWeight.Bold,
                         )
                         Text(
-                            stringResource(R.string.statut_volume_aerien, volumeTexte(volTot, contexte, locale)),
+                            stringResource(R.string.statut_volume_bois_fort_total, volumeTexte(volBoisFort, contexte, locale)),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                    }
+                    // Volume aérien total : seulement quand une essence est cubée par le modèle EMERGE.
+                    if (Cubage.aEmerge(contexte)) {
+                        Text(
+                            stringResource(R.string.statut_volume_aerien, volumeTexte(volAerien, contexte, locale)),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                         )
@@ -469,12 +478,12 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
     val tarifActif = Cubage.aTarif(contexte)
     // Houppier : modèle EMERGE, ou part de houppier en Schaeffer.
     val avecHouppier = Cubage.aHouppier(contexte)
-    // (tige, houppier, total) sommés sur un lot de tiges.
+    // (tige, houppier, bois fort total) sommés sur un lot de tiges.
     fun vols(l: List<Pair<Tige, ParcelleGpkg?>>): Triple<Double, Double, Double> {
         var t = 0.0; var h = 0.0; var tot = 0.0
         for ((tg, _) in l) {
             val v = Cubage.volumesUnitaire(contexte, tg.essence, tg.classe, tg.hauteurTexte)
-            t += v.tige * tg.quantite; h += v.houppier * tg.quantite; tot += v.total * tg.quantite
+            t += v.tige * tg.quantite; h += v.houppier * tg.quantite; tot += v.boisFortTotal * tg.quantite
         }
         return Triple(t, h, tot)
     }
@@ -587,7 +596,7 @@ private fun OngletParcelles(contexte: Contexte, journal: List<Tige>, parcelles: 
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.outline,
                         )
-                        if (avecHouppier) LigneVolumesEmerge(vs.volumeHouppierM3, vs.volumeTotalM3, 0, locale, contexte)
+                        if (avecHouppier) LigneVolumesEmerge(vs.volumeHouppierM3, vs.volumeBoisFortTotalM3, 0, locale, contexte)
                     }
                 }
             }

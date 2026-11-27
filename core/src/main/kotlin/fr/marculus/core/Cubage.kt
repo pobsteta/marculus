@@ -15,11 +15,13 @@ import kotlin.math.sqrt
  *
  *  - **Schaeffer** (une entrée, diamètre) : V = (M/1400)(D−5)(D−10) [rapide] / (M/1800)·D·(D−5) [lent],
  *    M = 0,8 + 0,1·N. Vérifié contre les tables ONF.
- *  - **EMERGE** (deux entrées, projet ANR/IGN) : **volume bois fort tige** (découpe 7 cm) calculé selon
- *    le modèle de C. Deleuze (RDV Techniques ONF 44, 2014 ; portage R `gftools::TarEmerge`). Entrées :
- *    circonférence à 1,30 m + hauteur totale ; hdec (décrochement) = 0,8·htot par défaut. Coefficients
- *    par essence (a,b,c pour le volume total ; d,e,f,g pour la part de tige). Repli **coefficient de
- *    forme** (f = 0,5) si essence non couverte ; tige sans hauteur → non cubable (0).
+ *  - **EMERGE** (deux entrées, projet ANR/IGN) : quatre volumes selon le modèle de C. Deleuze (RDV
+ *    Techniques ONF 44, 2014 ; portage R `gftools::TarEmerge`) : **bois fort tige** et **houppier**
+ *    (découpe 7 cm), leur somme le **bois fort total**, et le **volume aérien total** publié
+ *    (`formTot · volCyl`, sans découpe, menu bois compris). Entrées : circonférence à 1,30 m + hauteur
+ *    totale ; hdec (décrochement) = 0,8·htot par défaut. Coefficients par essence (a,b,c pour le volume
+ *    aérien total ; d,e,f,g pour la part de tige). Repli **coefficient de forme** (f = 0,5) si essence
+ *    non couverte ; tige sans hauteur → non cubable (0).
  */
 object Cubage {
 
@@ -37,14 +39,32 @@ object Cubage {
             .replace(Regex(" +"), " ")
             .trim()
 
+    /**
+     * Rattachement **explicite** d'un nom saisi (normalisé) à une clé de [EMERGE_COEFS] et [EMERGE_CODES],
+     * écrit à la main (mission 094) : aucune correspondance par préfixe ni par sous-chaîne, car elle
+     * dépendait de l'ordre de la table (« Chêne » tombait sur le chêne rouge). Un nom absent d'ici et de
+     * la table n'a aucune essence.
+     *  - « Chêne » → chêne sessile / pédonculé (décision de Pascal, 2026-11-27, comme NEMETON) ; les
+     *    autres chênes ne sont pris que saisis en toutes lettres (« Chêne rouge », « Chêne vert »…).
+     *  - « Sapin » et « Épicéa », essences par défaut de l'application (`Referentiels.ESSENCES_DEFAUT`),
+     *    gardent la ligne qu'ils recevaient : sapin pectiné, épicéa commun.
+     */
+    internal val RATTACHEMENT_ESSENCES: Map<String, String> = mapOf(
+        "chene" to "chene sessile",
+        "sapin" to "sapin pectine",
+        "epicea" to "epicea commun",
+        // Noms latins courts : la table n'a que le nom complet de la sous-espèce nominale.
+        "quercus petraea" to "quercus petraea subsp petraea",
+        "quercus robur" to "quercus robur subsp robur",
+    )
+
+    private fun cleEmerge(n: String): String = RATTACHEMENT_ESSENCES[n] ?: n
+
     private fun coefEmerge(essence: String): CoefEmerge? {
         val n = normaliser(essence)
         if (n.isEmpty()) return null
-        EMERGE_COEFS[n]?.let { return it }
-        // Correspondance partielle : l'essence saisie commence par / est préfixe d'un nom de la table.
-        EMERGE_COEFS.entries.firstOrNull { it.key.startsWith(n) || n.startsWith(it.key) }?.let { return it.value }
-        EMERGE_COEFS.entries.firstOrNull { it.key.contains(n) || n.contains(it.key) }?.let { return it.value }
-        // Repli par grand groupe.
+        EMERGE_COEFS[cleEmerge(n)]?.let { return it }
+        // Repli par grand groupe, déclaré (modèle gris feuillus / résineux) : seul repli sur un nom inconnu.
         if (n.contains("resineux") || n.contains("conifere")) return EMERGE_RESINEUX
         if (n.contains("feuillu")) return EMERGE_FEUILLUS
         return null
@@ -53,14 +73,11 @@ object Cubage {
     /** L'essence a des coefficients EMERGE (sinon, repli par coefficient de forme). */
     fun estCouverteEmerge(essence: String): Boolean = coefEmerge(essence) != null
 
-    /** Code ONF (3 caractères) de l'essence si reconnue (nom français ou latin), sinon null. */
+    /** Code ONF (3 caractères) de l'essence si reconnue (nom français ou latin, rattachement explicite), sinon null. */
     fun codeEssence(essence: String): String? {
         val n = normaliser(essence)
         if (n.isEmpty()) return null
-        EMERGE_CODES[n]?.let { return it }
-        EMERGE_CODES.entries.firstOrNull { it.key.startsWith(n) || n.startsWith(it.key) }?.let { return it.value }
-        EMERGE_CODES.entries.firstOrNull { it.key.contains(n) || n.contains(it.key) }?.let { return it.value }
-        return null
+        return EMERGE_CODES[cleEmerge(n)]
     }
 
     /** Volume (m³) Schaeffer d'une tige de diamètre `dCm` selon le tarif et son numéro. */
@@ -76,15 +93,32 @@ object Cubage {
         return v.coerceAtLeast(0.0)
     }
 
-    /** Volumes EMERGE (m³) d'une tige : bois fort tige, houppier, total aérien (tige + houppier). */
-    data class VolumesEmerge(val tige: Double, val houppier: Double, val total: Double)
+    /**
+     * Les quatre volumes (m³) d'une tige, chacun sous son nom :
+     *  - [tige] : bois fort tige, découpe 7 cm ;
+     *  - [houppier] : bois fort du houppier, découpe 7 cm ;
+     *  - [boisFortTotal] : [tige] + [houppier] (ce que Marculus appelait « total ») ;
+     *  - [volumeAerienTotal] : volume aérien total EMERGE publié, `formTot · volCyl`, sans découpe.
+     * Hors modèle EMERGE (Schaeffer, repli coefficient de forme), il n'existe pas de volume aérien
+     * total : [volumeAerienTotal] vaut 0 et n'est ni affiché ni exporté.
+     */
+    data class VolumesEmerge(
+        val tige: Double,
+        val houppier: Double,
+        val boisFortTotal: Double,
+        val volumeAerienTotal: Double = 0.0,
+    )
+
+    /** Les quatre volumes EMERGE de [essence] (null si elle n'a pas de coefficients), à C130 en cm et hauteur en m. */
+    fun volumesEmerge(essence: String, c130cm: Double, htotM: Double): VolumesEmerge? =
+        coefEmerge(essence)?.let { emergeVolumes(it, c130cm, htotM) }
 
     /** Volume bois fort tige (m³, découpe 7 cm) — modèle EMERGE pour une essence couverte. */
     fun volumeEmergeTige(essence: String, c130cm: Double, htotM: Double): Double =
         coefEmerge(essence)?.let { emergeVolumes(it, c130cm, htotM).tige } ?: 0.0
 
     private fun emergeVolumes(k: CoefEmerge, c130cm: Double, htotM: Double): VolumesEmerge {
-        if (htotM <= 1.4 || c130cm <= 0.0) return VolumesEmerge(0.0, 0.0, 0.0)
+        if (htotM <= 1.4 || c130cm <= 0.0) return VolumesEmerge(0.0, 0.0, 0.0, 0.0)
         val hdec = 0.8 * htotM
         val logisHdec = ln(hdec / (htotM - hdec)) // = ln(4) avec hdec = 0,8·htot
         val c13 = c130cm / 100.0 // circonférence à 1,30 m, en m
@@ -94,6 +128,8 @@ object Cubage {
         val corr130 = 1.0 - 1.3 / htotM
         val volCyl = c13 * c13 * htotM / (4.0 * PI * corr130 * corr130)
         val formTot = k.a + k.b * hdn + k.c * hsurd
+        // Volume aérien total publié (Deleuze 2014, p. 26) : sans découpe, menu bois compris.
+        val volumeAerienTotal = formTot * volCyl
         var fct = k.d + k.e * logisHdec + k.f * hdn + k.g * (1.0 / c13)
         if (fct > 0.95) fct = 0.8
         val formTige = formTot * fct
@@ -112,7 +148,7 @@ object Cubage {
             houppier = ((formTot - formTige) * volCyl * decHoup)
         }
         if (!houppier.isFinite() || houppier < 0.0) houppier = 0.0
-        return VolumesEmerge(tige, houppier, tige + houppier)
+        return VolumesEmerge(tige, houppier, tige + houppier, volumeAerienTotal)
     }
 
     /** Part de houppier saisissable maximale : au-delà, V_tige·p/(1 − p) n'a plus de sens. */
@@ -162,7 +198,7 @@ object Cubage {
     }
 
     /**
-     * Volumes (m³) d'une tige selon le contexte : tige bois fort, houppier, total.
+     * Volumes (m³) d'une tige selon le contexte : tige bois fort, houppier, bois fort total (et aérien total en EMERGE).
      * - **EMERGE** : houppier du modèle (0 pour une essence non couverte, repli coefficient de forme).
      * - **Schaeffer** : le tarif donne le bois fort **tige**, soit (1 − p) du total quand p est la
      *   part de houppier de l'essence ([Contexte.partHouppier]) : houppier = V_tige·p/(1 − p).
