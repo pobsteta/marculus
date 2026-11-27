@@ -89,6 +89,9 @@
 | [038](missions/038-tests-nemeton.md) tests d'acceptation du moteur NEMETON (jeu de contrôle, empreinte, hors domaine) | `testeur` | sonnet | donner | oui · oui · oui | 9 |
 | [039](missions/039-moteur-nemeton.md) moteur NEMETON dans `:core` (paquet 0.2.2-provisoire) | `dev` | opus | donner, plan d'abord | oui · à moitié · oui après 038 | 9 |
 | [040](missions/040-emerge-points-secondaires.md) EMERGE : sources des trois règles sans source | `acquereur` | sonnet | donner | oui · oui · à vérifier (réseau) | 9 |
+| [041](missions/041-tests-plafond-fct-emerge.md) tests du plafond continu de `fct` EMERGE | `testeur` | sonnet | donner | oui · oui · oui (0,95 provisoire) | 10 |
+| [042](missions/042-plafond-fct-emerge.md) plafond continu `min(fct, 0,95)` dans `Cubage` | `dev` | sonnet | donner (PR à Pascal : règle métier) | oui · oui · oui | 10 |
+| [043](missions/043-brief-tarif-nemeton.md) brief vers `tarif-nemeton` : refus et repli D5 | `archiviste` | sonnet | donner (brief vu par Pascal avant dépôt) | oui · oui · oui | 10 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
