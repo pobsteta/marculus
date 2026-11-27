@@ -158,3 +158,15 @@ Les deux premiers ont été **exécutés par le relecteur sous R** ; Pascal peut
 - **Non cochés :** (a) gftools et `grid.R` non exécutés par moi (pas de R ni de shell) ; (b) Deleuze 2014 non relue
   directement ; (c) `git status`, `git show HEAD:…` et le commit 57fb18b relus par le relecteur ou l'orchestrateur, pas
   par moi ; (d) origine de la règle 2 dans la copie de travail : **ouverte, remonte à Pascal**.
+
+## 8. Décisions de Pascal (2026-11-27)
+
+Source : `pilotage/journal.md`, lignes « 2026-11-27 · Pascal · EMERGE règle 1 / 2 / 3 ».
+
+| Règle | Décision | Conséquence |
+|---|---|---|
+| 1. `fct` sans borne basse | **A** : garder ; tige et houppier ramenés à 0, écrit comme choix de Marculus | aucun changement de code |
+| 2. `fct > 0,95` → 0,8 | **B** : plafond continu `min(fct, 0,95)`, choix de Marculus, **0,95 provisoire** | mission 042 (`Cubage.kt`) |
+| 3. H ≤ 1,4 m → 0 | **A** : garder ; « non calculé » à l'écran au cycle 11, avec « hauteur impossible » de NEMETON | aucun changement de code |
+
+Les trois règles sont écrites dans la spec v1 § 5 comme choix de Marculus.

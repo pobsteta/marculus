@@ -137,6 +137,15 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   `millesimeTarifs` ; base v17 ; CSV format 7. **Code et tables livrés** (tables
   reçues de nemeton, v0.62.0 ; `data/src/main/assets/tarifs-ifn/`, brief
   `vers-nemeton/2026-10-16-tarifs-schaeffer-ser.md`) ; sans tables, la section n'apparaît pas.
+- **Trois règles du calcul EMERGE : des choix de Marculus** (décidés par Pascal le 2026-11-27 ; aucune n'est
+  une règle publiée, voir `docs/specs/2026-11-27-emerge-regles-sans-source.md`, `Cubage.emergeVolumes`) :
+  1. **Part de tige `fct` sans borne basse** : on garde ; une tige ou un houppier négatif est ramené à 0
+     (gftools, lui, rend un volume négatif ou `NA`).
+  2. **Plafond continu `fct = min(fct, 0,95)`** (mission 042). **0,95 est provisoire** : à mesurer sur des
+     cubages réels de tiges minces. Remplace l'ancien « si `fct` > 0,95 alors 0,8 », qui faisait sauter le
+     volume des tiges minces (hêtre C 25 cm / H 20 m : tige 0,0177 → 0,0210 m³).
+  3. **Hauteur ≤ 1,4 m : volumes à 0.** On garde ; l'écran « non calculé » viendra au cycle 11, avec
+     « hauteur impossible » de NEMETON.
 
 ## 5 bis. Affouage (livré 2026-10-07)
 
