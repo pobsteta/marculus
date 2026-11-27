@@ -389,3 +389,4 @@
 2026-11-27 · Pascal · 041+042 · porte n° 3 : « oui » · fait : PR #90 fusionnée (795079e), CI verte, release v2026.11.6 publiée ; téléphone non branché, installation à faire
 2026-11-27 · Claude (orchestrateur) · 041-043 · cycle 10 clos : kanban dernier cycle 10, cartes 041-043 en Terminé ; note de version de v2026.11.6 générée sans la phrase sur les volumes EMERGE des tiges minces (fiche 042) : à proposer à Pascal
 2026-11-27 · Pascal · cycle 10 · livraison : « oui » (v2026.11.6 pour les marteleurs EMERGE, phrase sur les volumes des tiges minces ajoutée en tête de la note de version) · fait : note de version éditée, ligne « cycle 10 » aux Livraisons du kanban
+2026-11-27 · Claude (orchestrateur) · 041+042 · v2026.11.6 installée sur le téléphone de Pascal (adb install -r, versionName 2026.11.6) ; contrôle terrain à faire par Pascal : hêtre C 25 cm en EMERGE, H 18 m puis H 19 m (0,0203 → 0,0207 m³) et H 20 m (0,0210 m³)
