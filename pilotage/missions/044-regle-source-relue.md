@@ -66,6 +66,8 @@ _Rempli par Pascal seul, avant de lire le travail de l'agent._
 
 - **Comment saura-t-on que c'est juste :** chacun des 10 incidents de la cause n° 1 est arrêté par l'un des points
   (tableau incident → point dans le rapport) ; le relecteur rejoue le tableau.
+  _Ligne du 2026-11-27 (aller-retour 2/3) : 9 sur 10 sont arrêtés ; l. 299 (oubli de contenu, mission 035) n'est pas
+  une preuve fausse et reste non couverte, dit tel quel plutôt que forcé._
 
 ## Terrain
 
