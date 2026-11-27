@@ -81,3 +81,45 @@ class LectureVolumesTest {
         assertNull(LectureVolumes.aerienTotal(champs))
     }
 }
+
+/** Contexte mixte (décision de Pascal, 2026-11-27) : l'aérien total somme les seules tiges EMERGE, et le dit. */
+class ContexteMixteAerienTest {
+    private val ctx = Contexte(
+        id = "c1", nom = "Mixte", mode = ModeMesure.CIRCONFERENCE, axe = AxeClasses(20, 140, 5),
+        essences = emptyList(), tarif = TarifCubage.SCHAEFFER_RAPIDE, tarifNumero = 8,
+        tarifsEssence = mapOf("Hêtre" to fr.marculus.core.model.TarifEssence(TarifCubage.EMERGE, 0)),
+    )
+    private val journal = listOf(
+        Tige("a", "c1", "Hêtre", 60, ActionTige.PLUS, horodatage = 1L, quantite = 2, hauteurTexte = "10"),
+        Tige("b", "c1", "Chêne", 60, ActionTige.PLUS, horodatage = 2L, quantite = 3),
+        Tige("x", "c1", "Hêtre", 60, ActionTige.ANNULATION, horodatage = 3L),
+    )
+
+    @Test
+    fun `l aerien total ne somme que les tiges EMERGE et compte celles-ci`() {
+        val t = VolumesMartelage.totaux(ctx, journal)
+        val hetre = VolumesMartelage.cubage(ctx, journal[0])
+        assertEquals(1, t.nbTigesAerien) // 2 hêtres moins 1 annulé
+        assertEquals(4, t.nbTiges) // 1 hêtre + 3 chênes
+        assertEquals(hetre.volumeAerienTotalM3, t.volumeAerienTotalM3, 1e-9)
+        assertTrue(t.volumeAerienTotalM3 > 0.0)
+        assertTrue(t.nbTigesAerien < t.nbTiges)
+    }
+
+    @Test
+    fun `l export donne le nombre de tiges couvertes, le journal laisse vide les autres`() {
+        val csv = ExportCsv.contexteCsv(ctx, journal)
+        val champs = LectureVolumes.entete(csv)
+        assertEquals("1", champs["NbTigesVolumeAerien"])
+        val lignes = csv.lines()
+        val cellules = lignes.drop(lignes.indexOf("JOURNAL") + 2).takeWhile { it.isNotBlank() }.map { it.split(";") }
+        assertTrue(cellules.first { it[1] == "Hêtre" && it[3] == "PLUS" }[22].toDouble() > 0.0)
+        assertEquals("", cellules.first { it[1] == "Chêne" }[22])
+    }
+
+    @Test
+    fun `sans EMERGE le nombre de tiges couvertes est vide`() {
+        val s = ctx.copy(tarifsEssence = emptyMap())
+        assertEquals("", LectureVolumes.entete(ExportCsv.contexteCsv(s, journal))["NbTigesVolumeAerien"])
+    }
+}

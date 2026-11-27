@@ -96,6 +96,9 @@ object ExportCsv {
         sb.appendLine("PartsLot${SEP}${champ(partsLot(contexte))}")
         // Format 9 : volume aérien total EMERGE (sans découpe) ; vide si aucune essence n'est en EMERGE.
         sb.appendLine("VolumeAerienTotalM3${SEP}${if (Cubage.aEmerge(contexte)) decimal(totauxVolumes.volumeAerienTotalM3, DECIMALES_TOTAL) else ""}")
+        // Contexte mixte : le volume aérien total ne somme que les tiges cubées par EMERGE ; leur nombre est donné ici
+        // (les autres tiges ont une cellule vide dans le journal). Vide si aucune essence n'est en EMERGE.
+        sb.appendLine("NbTigesVolumeAerien${SEP}${if (Cubage.aEmerge(contexte)) totauxVolumes.nbTigesAerien.toString() else ""}")
         sb.appendLine("Journal${SEP}${if (net) "NET" else "COMPLET"}")
         contexte.commentaire?.let { sb.appendLine("Commentaire${SEP}${champ(it)}") }
         sb.appendLine()

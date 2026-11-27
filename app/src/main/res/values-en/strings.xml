@@ -190,6 +190,7 @@
     <string name="statut_volume_houppier">Crown volume (7 cm cut-off): %1$s</string>
     <string name="statut_volume_bois_fort_total">Merchantable total volume = stem + crown: %1$s</string>
     <string name="statut_volume_aerien">Total aboveground volume (no cut-off, published EMERGE): %1$s</string>
+    <string name="statut_volume_aerien_couverture">aboveground total over %1$d EMERGE stem(s) out of %2$d</string>
     <string name="statut_volume_parcelle">%1$s m³ · %2$s m³/ha</string>
 
     <!-- Map -->

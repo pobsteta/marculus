@@ -192,6 +192,7 @@
     <string name="statut_volume_houppier">Volume houppier (découpe 7 cm) : %1$s</string>
     <string name="statut_volume_bois_fort_total">Volume bois fort total = tige + houppier : %1$s</string>
     <string name="statut_volume_aerien">Volume aérien total (sans découpe, EMERGE publié) : %1$s</string>
+    <string name="statut_volume_aerien_couverture">aérien total sur %1$d tige(s) EMERGE sur %2$d</string>
     <string name="statut_volume_parcelle">%1$s m³ · %2$s m³/ha</string>
 
     <!-- Carte -->

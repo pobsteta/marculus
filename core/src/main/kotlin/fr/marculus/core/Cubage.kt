@@ -32,7 +32,7 @@ object Cubage {
 
     // Normalisation identique à celle utilisée pour générer EMERGE_COEFS (EmergeCoefs.kt) :
     // minuscules, sans accent, caractères non alphanumériques → espace, espaces compactés.
-    private fun normaliser(s: String): String =
+    internal fun normaliser(s: String): String =
         Normalizer.normalize(s.trim().lowercase(), Normalizer.Form.NFD)
             .replace(Regex("\\p{M}+"), "")
             .replace(Regex("[^a-z0-9 ]"), " ")
@@ -46,13 +46,49 @@ object Cubage {
      * la table n'a aucune essence.
      *  - « Chêne » → chêne sessile / pédonculé (décision de Pascal, 2026-11-27, comme NEMETON) ; les
      *    autres chênes ne sont pris que saisis en toutes lettres (« Chêne rouge », « Chêne vert »…).
-     *  - « Sapin » et « Épicéa », essences par défaut de l'application (`Referentiels.ESSENCES_DEFAUT`),
-     *    gardent la ligne qu'ils recevaient : sapin pectiné, épicéa commun.
+     *  - Les autres noms courts (Mélèze, Érable, Pin, Frêne, Tilleul…) sont rattachés à l'essence la plus
+     *    courante, liste soumise à Pascal : `docs/specs/2026-11-27-rattachement-essences.md`.
      */
     internal val RATTACHEMENT_ESSENCES: Map<String, String> = mapOf(
         "chene" to "chene sessile",
         "sapin" to "sapin pectine",
         "epicea" to "epicea commun",
+        "meleze" to "meleze d europe",
+        "erable" to "erable sycomore",
+        "pin" to "pin generique",
+        "pin noir" to "pin noir d autriche",
+        "pin laricio" to "pin laricio de corse",
+        "laricio" to "pin laricio de corse",
+        "alep" to "pin d alep",
+        "frene" to "frene commun",
+        "tilleul" to "tilleul a petites feuilles",
+        "bouleau" to "bouleau verruqueux",
+        "peuplier" to "peuplier autre cultive",
+        "peuplier tremble" to "tremble",
+        "aulne" to "aulne glutineux",
+        "robinier" to "robinier faux acacia",
+        "noyer" to "noyer commun",
+        "orme" to "orme champetre",
+        "cedre" to "cedre de l atlas",
+        "saule" to "saule generique",
+        "platane" to "platane a feuilles d erable",
+        "sorbier" to "sorbier des oiseleurs",
+        "alisier" to "alisier torminal",
+        "noisetier" to "noisetier coudrier",
+        "sureau" to "sureau noir",
+        "cypres" to "cypres de provence",
+        "thuya" to "thuya geant",
+        "genevrier" to "genevrier commun",
+        "pommier" to "pommier sauvage",
+        "poirier" to "poirier commun",
+        "marronnier" to "marronnier d inde",
+        "tulipier" to "tulipier de virginie",
+        "prunier" to "prunier domestique",
+        "murier" to "murier blanc",
+        "olivier" to "olivier d europe",
+        "fruitier" to "fruitiers divers",
+        "fruitiers" to "fruitiers divers",
+        "charme commun" to "charme",
         // Noms latins courts : la table n'a que le nom complet de la sous-espèce nominale.
         "quercus petraea" to "quercus petraea subsp petraea",
         "quercus robur" to "quercus robur subsp robur",

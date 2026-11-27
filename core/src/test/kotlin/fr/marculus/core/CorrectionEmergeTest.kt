@@ -94,13 +94,13 @@ class CorrectionEmergeTest {
 
     @Test
     fun `un nom generique inconnu ne retombe sur aucune essence`() {
-        for (e in listOf("Pin", "Érable", "Peuplier", "Essence inconnue", "Xyzzy", "Chen", "Hetres", "")) {
+        for (e in listOf("Arbre", "Essence inconnue", "Xyzzy", "Chen", "Hetres", "Pins", "")) {
             assertNull(Cubage.volumesEmerge(e, 125.0, 20.0), "« $e » ne doit pas recevoir une essence arbitraire")
             assertFalse(Cubage.estCouverteEmerge(e), "« $e »")
             assertEquals(0.0, Cubage.volumeEmergeTige(e, 125.0, 20.0))
         }
-        assertNull(Cubage.codeEssence("Érable"))
-        assertNull(Cubage.codeEssence("Pin"))
+        assertNull(Cubage.codeEssence("Arbre"))
+        assertNull(Cubage.codeEssence("Hetres"))
     }
 
     @Test

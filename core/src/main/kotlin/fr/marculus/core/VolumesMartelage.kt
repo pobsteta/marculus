@@ -40,6 +40,8 @@ object VolumesMartelage {
         val cubage: String,
     ) {
         val nonCubee: Boolean get() = cubage == Methode.NON_CUBABLE
+        /** Cubée par EMERGE, donc porteuse d'un volume aérien total. */
+        val aerien: Boolean get() = cubage == Methode.EMERGE
     }
 
     /** Totaux **nets** d'un contexte, annulations déduites. */
@@ -50,6 +52,13 @@ object VolumesMartelage {
         val volumeAerienTotalM3: Double,
         val surfaceTerriereM2: Double,
         val nbTigesNonCubees: Int,
+        /**
+         * Tiges nettes cubées par EMERGE : seules elles entrent dans [volumeAerienTotalM3] (contexte mixte
+         * EMERGE + Schaeffer : somme EMERGE seule, signalée « sur [nbTiges] »).
+         */
+        val nbTigesAerien: Int = 0,
+        /** Toutes les tiges nettes, cubées ou non. */
+        val nbTiges: Int = 0,
     )
 
     /** Cubage d'une tige sur **sa propre saisie** (classe, essence, hauteur), avec le tarif de son essence. */
@@ -79,6 +88,8 @@ object VolumesMartelage {
         var vAer = 0.0
         var g = 0.0
         var nonCubees = 0
+        var nbAerien = 0
+        var nbTiges = 0
         fun ajouter(c: CubageTige, n: Int) {
             vTige += c.volumeTigeM3 * n
             vHoup += c.volumeHouppierM3 * n
@@ -86,6 +97,8 @@ object VolumesMartelage {
             vAer += c.volumeAerienTotalM3 * n
             g += c.surfaceTerriereM2 * n
             if (c.nonCubee) nonCubees += n
+            if (c.aerien) nbAerien += n
+            nbTiges += n
         }
         // Une seule règle d'annulation : JournalNet. Une tige PLUS compte ; une annulation
         // restante (orpheline) retire le cubage de sa propre saisie.
@@ -93,6 +106,6 @@ object VolumesMartelage {
             val c = cubage(contexte, t)
             ajouter(c, if (t.action == ActionTige.PLUS) t.quantite else -t.quantite)
         }
-        return Totaux(vTige, vHoup, vTot, vAer, g, nonCubees.coerceAtLeast(0))
+        return Totaux(vTige, vHoup, vTot, vAer, g, nonCubees.coerceAtLeast(0), nbAerien.coerceAtLeast(0), nbTiges.coerceAtLeast(0))
     }
 }

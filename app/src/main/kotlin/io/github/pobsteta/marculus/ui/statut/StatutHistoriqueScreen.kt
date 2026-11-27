@@ -279,6 +279,14 @@ private fun OngletStatut(contexte: Contexte, totaux: Map<CompteurCle, Int>, jour
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                         )
+                        // Contexte mixte : l'aérien total ne somme que les tiges EMERGE, on le dit.
+                        if (volumes.nbTigesAerien < volumes.nbTiges) {
+                            Text(
+                                stringResource(R.string.statut_volume_aerien_couverture, volumes.nbTigesAerien, volumes.nbTiges),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.outline,
+                            )
+                        }
                     }
                 }
             }

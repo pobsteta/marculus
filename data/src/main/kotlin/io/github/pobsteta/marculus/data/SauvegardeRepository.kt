@@ -195,7 +195,9 @@ class SauvegardeRepository(
             put("volumeTigeTotalM3", it.volumeTigeM3); put("volumeBoisFortTotalM3", it.volumeBoisFortTotalM3)
             put("volumeHouppierTotalM3", it.volumeHouppierM3)
             // Volume aérien total EMERGE (sans découpe) : absent quand aucune tige n'est cubée par EMERGE.
-            if (it.volumeAerienTotalM3 > 0.0) put("volumeAerienTotalM3", it.volumeAerienTotalM3)
+            if (it.nbTigesAerien > 0) {
+                put("volumeAerienTotalM3", it.volumeAerienTotalM3); put("nbTigesVolumeAerien", it.nbTigesAerien)
+            }
             put("surfaceTerriereTotaleM2", it.surfaceTerriereM2); put("nbTigesNonCubees", it.nbTigesNonCubees)
         }
         affouageNet?.let { put("affouageLotTotalM3", it.lotM3) }
