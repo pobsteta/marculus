@@ -32,6 +32,10 @@
     - **fiche qui touche un nombre de tiges ou un volume** : l'orchestrateur y tranche « net ou lignes
       du journal ? » (avec `JournalNet`, ADR 0007 à écrire) avant de confier le testeur.
 
+  - **bilan n° 3 (validé par Pascal le 2026-11-27)** : délégation gardée telle quelle (aucune décision déléguée
+    défaite, journal, ligne de l'analyste) ; la boîte `~/dev/briefs/vers-marculus/` est relevée à chaque `/boucle` ;
+    l'ambition ne monte pas avant que la cause « fait sans preuve relue à la source » ait sa règle (044).
+
 ## Le vivier (catalogue, pas une équipe)
 
 | Agent | A / plan | Modèle | Écrit du code ? |
@@ -92,6 +96,10 @@
 | [041](missions/041-tests-plafond-fct-emerge.md) tests du plafond continu de `fct` EMERGE | `testeur` | sonnet | donner | oui · oui · oui (0,95 provisoire) | 10 |
 | [042](missions/042-plafond-fct-emerge.md) plafond continu `min(fct, 0,95)` dans `Cubage` | `dev` | sonnet | donner (PR à Pascal : règle métier) | oui · oui · oui | 10 |
 | [043](missions/043-brief-tarif-nemeton.md) brief vers `tarif-nemeton` : refus et repli D5 | `archiviste` | sonnet | donner (brief vu par Pascal avant dépôt) | oui · oui · oui | 10 |
+| [044](missions/044-regle-source-relue.md) règle « source relue » et « briefs relevés » | `archiviste` | sonnet | donner (plan d'abord) | oui · à moitié · oui | bilan n° 3 |
+| [045](missions/045-spec-consolidee.md) `docs/spec.md` consolidée, archivage du bilan n° 3 | `archiviste` | sonnet | donner (plan d'abord, validé par Pascal) | oui · à moitié · oui | bilan n° 3 |
+| [046](missions/046-adr-nemeton-emerge-versions.md) ADR 0011-0013 | `archiviste` | sonnet | donner | oui · oui · oui | bilan n° 3 |
+| [047](missions/047-titre-release-sans-nom.md) titre des releases sans le nom | `dev` | sonnet | lâcher (genre CI) | oui · oui · oui | bilan n° 3 |
 
 **Pas encore de mission** (n'ont pas passé les trois questions) :
 
