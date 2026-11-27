@@ -7,6 +7,7 @@ import fr.marculus.core.model.TarifEssence
 import java.text.Normalizer
 import kotlin.math.PI
 import kotlin.math.ln
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -167,7 +168,10 @@ object Cubage {
         // Volume aérien total publié (Deleuze 2014, p. 26) : sans découpe, menu bois compris.
         val volumeAerienTotal = formTot * volCyl
         var fct = k.d + k.e * logisHdec + k.f * hdn + k.g * (1.0 / c13)
-        if (fct > 0.95) fct = 0.8
+        // Règle 2 : plafond continu de la part de tige (choix de Marculus, décidé par Pascal le 2026-11-27 ;
+        // sans source publiée). 0,95 est PROVISOIRE : à mesurer sur des cubages réels de tiges minces.
+        // Remplace l'ancien « si fct > 0,95 alors 0,8 », qui faisait un saut de volume.
+        fct = min(fct, FCT_PLAFOND)
         val formTige = formTot * fct
         val decTige = if (c13 > cDec) 1.0 - (cDec * corr130 / c13).pow(3) else 0.0
         val tige = (formTige * volCyl * decTige).coerceAtLeast(0.0)
@@ -186,6 +190,9 @@ object Cubage {
         if (!houppier.isFinite() || houppier < 0.0) houppier = 0.0
         return VolumesEmerge(tige, houppier, tige + houppier, volumeAerienTotal)
     }
+
+    /** Plafond provisoire de la part de tige EMERGE (`fct`), choix de Marculus (spec §5). */
+    private const val FCT_PLAFOND = 0.95
 
     /** Part de houppier saisissable maximale : au-delà, V_tige·p/(1 − p) n'a plus de sens. */
     const val PART_HOUPPIER_MAX = 0.95
