@@ -14,3 +14,6 @@ Une ligne par ADR. La décision est acceptée par Pascal ; le texte de chaque AD
 | [0008](0008-release-conditionnelle.md) | Pas de release quand seuls pilotage, docs, `*.md` ou badge changent | décision acceptée, livrée ; texte proposé |
 | [0009](0009-lot-par-essence-parties-cochees.md) | Lot d'affouage : les parties cochées (tige, houppier) de chaque essence ; remplace 0004 | décision acceptée, livrée ; texte proposé |
 | [0010](0010-proposition-ifn-autres-feuillus-resineux.md) | Proposition IFN calculée (moyenne pondérée) pour « Autres feuillus » / « Autres résineux » ; lignes au numéro ≤ 0 écartées | décision acceptée, livrée ; texte proposé |
+| [0011](0011-nemeton-embarque-provisoire.md) | Tarif NEMETON embarqué dans `:core`, paquet 0.2.2-provisoire ; branchement à l'écran non tranché | décision acceptée, moteur livré, branchement ouvert ; texte proposé |
+| [0012](0012-plafond-part-de-tige-emerge.md) | Part de tige EMERGE : plafond continu `min(fct, 0,95)`, 0,95 provisoire ; deux autres règles gardées comme choix de Marculus | décision acceptée, livrée (v2026.11.6) ; texte proposé |
+| [0013](0013-versions-calendaires.md) | Versions calendaires `vAAAA.MM.N`, compteur par mois, à la place du SemVer | décision acceptée, livrée (v2026.11.1) ; texte proposé |
