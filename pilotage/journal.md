@@ -371,3 +371,5 @@
 2026-11-27 · Pascal · EMERGE règle 2 (fct > 0,95 → 0,8) : « B » (plafond continu `min(fct, 0,95)`, choix de Marculus, 0,95 provisoire)
 2026-11-27 · Pascal · EMERGE règle 3 (H ≤ 1,4 m → 0) : « A » (garder ; « non calculé » à l'écran au cycle 11, avec « hauteur impossible » de NEMETON)
 2026-11-27 · Claude (orchestrateur) · 041-043 · /imperatrice:mission : fiches 041 (testeur, tests du plafond), 042 (dev, plafond dans Cubage + spec § 5), 043 (archiviste, brief vers tarif-nemeton) ; périmètres disjoints (041 → 042 empilées, 043 hors dépôt) ; carte « brief vers nemeton » ajoutée au bac à sable · attend la porte n° 2
+2026-11-27 · Pascal · 041-043 · porte n° 2 : « Je valide » · fait : équipe du cycle 10 validée
+2026-11-27 · Claude (orchestrateur) · 041, 043 · cycle 10 lancé : testeur 041 (worktree, branche test/041-plafond-fct) et archiviste 043 (brouillon hors dépôt) en parallèle, périmètres disjoints ; 042 attend la fin de 041 ; PR #89 (fiches) fusionnée, CI verte ; rappel des 15 minutes posé
