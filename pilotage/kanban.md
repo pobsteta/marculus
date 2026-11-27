@@ -40,11 +40,15 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Brancher NEMETON dans l'application (tarif d'un contexte, écran Statut, exports, lots d'affouage), à partir du moteur (039) et de la table des essences décidée (037) · questions de sens à Pascal : volumes montrés quand une sortie manque (pas de bois fort tige des feuillus, pas de bois fort total des résineux), parts tige / houppier d'un lot, mention « provisoire », « hauteur impossible » à l'écran ; ADR 0011 ; « À propos » : citer la source d'EMERGE (Deleuze et al. 2014) et le tarif NEMETON (version du paquet, « provisoire ») — absentes en v2026.11.5, capture du 2026-11-27, décision de Pascal du 2026-11-27 · depuis le cycle 9
 - Brief vers `nemeton` : son port R (`~/dev/nemeton/R/ifn_tarifs.R` l. 131 et l. 140) copie les règles 1,4 m et 0,95 → 0,8 de Marculus ; à écrire après la fusion de 042 · depuis le cycle 10
 - EMERGE : volume aérien total négatif pour les perches très élancées (hêtre C 10 cm, H 45 m : −0,00488 m³ ; terme c·H/c13 de formTot, pas la règle 2) · testeur de la 041, 2026-11-27 · depuis le cycle 10
+- Monter `terrain` (épinglé en v0.5.0, `gradle/libs.versions.toml` l. 18) : agent NTRIP obligatoire (`ClientNtrip.kt` l. 44 et 110) et versions calendaires de `terrain` · briefs `~/dev/briefs/vers-marculus/2026-11-20-terrain-*.md` · depuis le cycle 10
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
 
-_(vide depuis le cycle 10)_
+- [044](missions/044-regle-source-relue.md) · [045](missions/045-spec-consolidee.md) · [046](missions/046-adr-nemeton-emerge-versions.md) · [047](missions/047-titre-release-sans-nom.md) · depuis le cycle 10 (bilan n° 3)
+  - Homme : archiviste ×3 (sonnet), dev (sonnet)
+  - Mission : règle de preuve, `docs/spec.md` consolidée, ADR 0011-0013, titre des releases
+  - Moyens : Pareto et test du successeur du bilan n° 3 ; 045 après 046, plafond de 3 PR
 
 ## Planifié
 
@@ -320,3 +324,4 @@ l'inscrit avec ce qu'elle nous apprend._
 - cycle 8 · Marculus v0.72.0 → v0.73.2 : le lot d'affouage compte les parties cochées T et H de chaque essence ; proposition IFN pour Autres feuillus et Autres résineux ; « 1 tige » au singulier et virgule décimale ; plus de version fantôme (tests seuls, commit dépassé) · pour les marteleurs d'affouage et les communes · le cycle 7 n'avait rien livré en main ; celui-ci rend le partage du lot réglable par la commune et propose un tarif pour toutes les essences ; retenue par Pascal (« D'accord »)
 - cycle 9 · Marculus v2026.11.5 : moteur NEMETON 0.2.2-provisoire embarqué dans `:core`, prouvé sur les 1 032 sorties du jeu de contrôle, et table des essences de Marculus → codes IFN décidée ligne à ligne · pour Pascal, porteur du tarif NEMETON · premier calcul NEMETON dans Marculus (le cycle 8 livrait le lot d'affouage par parties) ; rien de visible pour les marteleurs dans ce cycle : leur seule nouveauté du jour, les quatre volumes EMERGE (v2026.11.4), vient d'une session hors boucle ; retenue par Pascal (« je valide »)
 - cycle 10 · v2026.11.6 · marteleurs qui cubent en EMERGE · le volume de tige des perches et tiges minces ne fait plus de saut quand l'arbre grandit (plafond continu 0,95 provisoire au lieu de 0,8) ; phrase ajoutée en tête de la note de version
+- bilan du 2026-11-27 · Marculus v2026.11.6 : lot d'affouage par parties cochées (tige, houppier) de chaque essence, tarif proposé pour toutes les essences (IFN Autres feuillus / résineux), quatre volumes EMERGE et tige des perches sans saut · pour les marteleurs d'affouage, les communes et les marteleurs en EMERGE · le bilan n° 2 rendait les chiffres sûrs à plusieurs ; celui-ci rend le partage du lot réglable et le cubage complet sur toutes les essences ; retenue par Pascal (« Oui »)

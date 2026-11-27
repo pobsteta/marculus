@@ -48,6 +48,9 @@
     délibère ; ni la commune ni l'affouagiste ne tiennent le téléphone.
   - **Consommateur des données** : `nemetonshiny` (lots `.zip` en entrée, CSV et `.marsync`
     en retour).
+  - **Tarif NEMETON** (ligne du 2026-11-27, bilan n° 3, recopiée sur décision de Pascal) : Marculus cube
+    aussi avec le tarif NEMETON (provisoire), dont Pascal est le porteur ; Marculus en est le premier
+    utilisateur sur le terrain.
 - **Question de terrain** : faut-il signaler une tige qui dépasse le diamètre délivrable en
   affouage ? Le plafond ONF (instruction INS-17-T-90) varie selon les sources, 30 ou 45 cm :
   à vérifier sur le texte avant toute règle.
