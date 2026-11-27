@@ -31,7 +31,7 @@ Valeur provisoire, mesurée par Pascal à la revue de cette table, gelée avant 
 
 ## Table de revue (59 noms)
 
-Statut : **S** rattachement sûr (le code IFN nomme l'essence, ou son nom latin figure dans la liste du code) ; **A** ambigu, Pascal tranche ; **C** pas de code IFN propre, la seule modalité possible est une classe ; **X** aucun code proposé.
+Statut : **S** rattachement sûr **pour le code IFN seulement** (le code nomme l'essence, ou son nom latin figure dans la liste du code) ; un repli par le genre reste « à décider, D5 » même en S (mention dans la colonne Remarque) ; **A** ambigu, Pascal tranche ; **C** pas de code IFN propre, la seule modalité possible est une classe ; **X** aucun code proposé.
 Colonne « Paquet » : `couvert` = le code est dans le paquet ; `repli genre → N` ; `repli classe → 49` ; `non couvert`, aucun repli.
 Source de chaque ligne : colonne « Code IFN » = IGN OCRE PRO v2.2 p. 40 (codes 1 à 42, 49) ou p. 41 (51 à 77) ; colonne « Paquet » = `datapackage.json` et `constantes.csv` comme ci-dessus ; colonne « Clé EMERGE » = `Cubage.kt` l. 52-95 (nom saisi normalisé).
 
@@ -39,7 +39,7 @@ Source de chaque ligne : colonne « Code IFN » = IGN OCRE PRO v2.2 p. 40 (codes
 
 | Nom saisi | Code IFN | Libellé IFN | Paquet | Statut | Remarque |
 |---|---|---|---|---|---|
-| Chêne | 3 (ou 2) | Chêne rouvre / Chêne pédonculé | couvert : `Quercus_spec` (l. 6-7) | A | Décision de Pascal du 2026-11-27 : « Chêne » = sessile / pédonculé. Les codes 2 et 3 ont des constantes identiques (`limites_connues`) : 3 proposé pour accorder avec « Chêne sessile » côté EMERGE ; sans effet sur le calcul |
+| Chêne | 3 (ou 2) | Chêne rouvre / Chêne pédonculé | couvert : `Quercus_spec` (l. 6-7) | A | Décision de Pascal du 2026-11-27 : « Chêne » = sessile / pédonculé (`pilotage/journal.md` l. 318 : brief « Chêne » rattaché au chêne sessile / pédonculé ; l. 324 : décision de Pascal, clé de « Chêne » = chene sessile gardée ; cette décision porte sur la clé EMERGE, le choix du code IFN 3 plutôt que 2 reste à valider). Les codes 2 et 3 ont des constantes identiques (`limites_connues`) : 3 proposé pour accorder avec « Chêne sessile » côté EMERGE ; sans effet sur le calcul |
 | Hêtre | 9 | Hêtre | couvert : `Fagus_sylvatica` (l. 2) | S | |
 | Autres feuillus | 49 (ou 29) | Autre feuillu indigène / exotique | couvert : `Autres_feuillus` (l. 227-228) | A | Classe, pas une essence ; 29 et 49 mêmes constantes ; 49 proposé |
 | Sapin | 61 | Sapin pectiné | couvert : `Abies_alba` (l. 47) | S | |
@@ -55,10 +55,10 @@ Source de chaque ligne : colonne « Code IFN » = IGN OCRE PRO v2.2 p. 40 (codes
 | Mélèze | mélèze d'Europe | 63 | Mélèze d'Europe | couvert : `Larix_decidua` (l. 54) | S | |
 | Érable | érable sycomore | 15 | Grand érable (A. pseudoplatanus ou platanoides) | couvert : `Acer_pseudoplatanus` (l. 14) | A | Le paquet signale le rattachement non univoque du code 15 ; érable champêtre, de Montpellier, à feuilles d'obier = code 21 « Petit érable » (hors paquet, repli genre → 15, à décider D5) |
 | Pin | pin générique | (aucun) | pas de modalité « Pin » seule | repli genre Pinus → 52, ou aucun | X | Pas d'espèce dominante (voir la table EMERGE) ; code 52 en repli seulement si Pascal l'accepte |
-| Pin noir | pin noir d'Autriche | 54 | Pin noir (P. nigra ssp. nigricans ou clusiana) | repli genre → 52 | S | |
-| Pin laricio | pin laricio de Corse | 53 | Pin laricio | repli genre → 52 | S | |
-| Laricio | pin laricio de Corse | 53 | Pin laricio | repli genre → 52 | S | |
-| Alep | pin d'Alep | 57 | Pin d'Alep | repli genre → 52 | S | |
+| Pin noir | pin noir d'Autriche | 54 | Pin noir (P. nigra ssp. nigricans ou clusiana) | repli genre → 52 | S | **Repli à décider, D5** (copie IFN l. 59 ; `limites_connues`) ; le S vaut pour le code seul |
+| Pin laricio | pin laricio de Corse | 53 | Pin laricio | repli genre → 52 | S | **Repli à décider, D5** (copie IFN l. 58) ; le S vaut pour le code seul |
+| Laricio | pin laricio de Corse | 53 | Pin laricio | repli genre → 52 | S | **Repli à décider, D5** (copie IFN l. 58) ; le S vaut pour le code seul |
+| Alep | pin d'Alep | 57 | Pin d'Alep | repli genre → 52 | S | **Repli à décider, D5** (copie IFN l. 62) ; le S vaut pour le code seul |
 | Frêne | frêne commun | 17 | Frêne (F. excelsior, oxyphylla ou ornus) | couvert : `Fraxinus_excelsior` (l. 22) | A | Rattachement non univoque signalé par le paquet ; le frêne commun saisi est F. excelsior, donc le tarif du paquet convient, le frêne à fleurs (ornus) y est aussi |
 | Tilleul | tilleul à petites feuilles | 20 | Tilleul | repli classe → 49 | S | |
 | Bouleau | bouleau verruqueux | 12 | Bouleau | couvert : `Betula_spec` (l. 26) | S | |
@@ -74,16 +74,16 @@ Source de chaque ligne : colonne « Code IFN » = IGN OCRE PRO v2.2 p. 40 (codes
 | Sorbier | sorbier des oiseleurs | 23 | Autre fruitier (liste latine : sorbus aria ou aucuparia ou domestica…) | repli classe → 49 | A | Le sorbier des oiseleurs n'est pas un fruitier, mais son nom latin est dans la liste du code 23 (pas de code propre) ; sorbier torminal = 41 |
 | Alisier | alisier torminal | 41 | Alisier torminal | repli classe → 49 | S | |
 | Noisetier | noisetier coudrier | 31 | Noisetier | repli classe → 49 | S | |
-| Sureau | sureau noir | 49 | Autre feuillu indigène | couvert : `Autres_feuillus` | C | Aucun Sambucus dans la liste IFN (relue p. 40) |
+| Sureau | sureau noir | 49 | Autre feuillu indigène | couvert : `Autres_feuillus` (l. 228) | C | Aucun Sambucus dans la liste IFN (relue p. 40) |
 | Cyprès | cyprès de Provence | 66 | Cyprès (C. sempervirens) | non couvert | S | |
 | Thuya | thuya géant | 68 | Autre conifère exotique | non couvert | C | Aucun Thuja dans la liste IFN |
 | Genévrier | genévrier commun | 75 | Autre conifère indigène | non couvert | C | Le code 69 ne vaut que pour J. thurifera |
 | Pommier | pommier sauvage | 23 | Autre fruitier (Pirus malus…) | repli classe → 49 | S | |
 | Poirier | poirier commun | 23 | Autre fruitier (Pirus communis…) | repli classe → 49 | S | |
-| Marronnier | marronnier d'Inde | 29 | Autre feuillu exotique | couvert : `Autres_feuillus` | C | Aucun Aesculus dans la liste IFN ; 29 (exotique) proposé, 49 équivalent pour le calcul |
+| Marronnier | marronnier d'Inde | 29 | Autre feuillu exotique | couvert : `Autres_feuillus` (l. 227) | C | Aucun Aesculus dans la liste IFN ; 29 (exotique) proposé, 49 équivalent pour le calcul |
 | Tulipier | tulipier de Virginie | 42 | Tulipier de Virginie | repli classe → 49 | S | |
 | Prunier | prunier domestique | 23 | Autre fruitier (prunus domestica) | repli classe → 49 | S | |
-| Mûrier | mûrier blanc | 29 | Autre feuillu exotique | couvert : `Autres_feuillus` | C | Aucun Morus dans la liste IFN ; 29 proposé |
+| Mûrier | mûrier blanc | 29 | Autre feuillu exotique | couvert : `Autres_feuillus` (l. 227) | C | Aucun Morus dans la liste IFN ; 29 proposé |
 | Olivier | olivier d'Europe | 28 | Olivier | repli classe → 49 | S | |
 | Fruitier | fruitiers divers | 23 | Autre fruitier | repli classe → 49 | S | |
 | Fruitiers | fruitiers divers | 23 | Autre fruitier | repli classe → 49 | S | Pluriel |
@@ -106,14 +106,14 @@ Source de chaque ligne : colonne « Code IFN » = IGN OCRE PRO v2.2 p. 40 (codes
 | Merisier | 22 | Cerisier ou merisier | repli classe → 49 | S | |
 | Cerisier | 22 | Cerisier ou merisier | repli classe → 49 | S | |
 | Châtaignier | 10 | Châtaignier | repli classe → 49 | S | |
-| Houx | 49 | Autre feuillu indigène | couvert : `Autres_feuillus` | C | Aucun Ilex dans la liste IFN |
+| Houx | 49 | Autre feuillu indigène | couvert : `Autres_feuillus` (l. 228) | C | Aucun Ilex dans la liste IFN |
 | If | 67 | If | non couvert | S | |
-| Buis | 49 | Autre feuillu indigène | couvert : `Autres_feuillus` | C | Aucun Buxus dans la liste IFN |
+| Buis | 49 | Autre feuillu indigène | couvert : `Autres_feuillus` (l. 228) | C | Aucun Buxus dans la liste IFN |
 | Pin sylvestre | 52 | Pin sylvestre | couvert : `Pinus_sylvestris` (l. 40) | S | |
-| Pin maritime | 51 | Pin maritime | repli genre → 52 | S | |
-| Pin d'Alep | 57 | Pin d'Alep | repli genre → 52 | S | |
-| Pin à crochets | 58 | Pin à crochets | repli genre → 52 | S | |
-| Chêne rouge | 4 | Chêne rouge d'Amérique | repli genre Quercus → 2/3 (`Quercus_spec`) | S | Repli genre à décider (D5) |
+| Pin maritime | 51 | Pin maritime | repli genre → 52 | S | **Repli à décider, D5** (copie IFN l. 56) ; le S vaut pour le code seul |
+| Pin d'Alep | 57 | Pin d'Alep | repli genre → 52 | S | **Repli à décider, D5** (copie IFN l. 62) ; le S vaut pour le code seul |
+| Pin à crochets | 58 | Pin à crochets | repli genre → 52 | S | **Repli à décider, D5** (copie IFN l. 63) ; le S vaut pour le code seul |
+| Chêne rouge | 4 | Chêne rouge d'Amérique | repli genre Quercus → 2/3 (`Quercus_spec`) | S | **Repli à décider, D5** (copie IFN l. 18) ; le S vaut pour le code seul |
 | Chêne sessile | 3 | Chêne rouvre | couvert : `Quercus_spec` (l. 7) | S | |
 
 ### E. Noms sans code proposé (7), hors des 59
@@ -123,7 +123,7 @@ Source de chaque ligne : colonne « Code IFN » = IGN OCRE PRO v2.2 p. 40 (codes
 ## Décomptes (relancés avant le rendu)
 
 - Noms avec ligne dans la table : 6 + 36 + 2 + 15 = **59** ; sans code proposé (E) : 7.
-- Statuts sur les 59 : **S 44**, **A 7** (Chêne, Autres feuillus, Autres résineux, Érable, Frêne, Peuplier, Sorbier), **C 7** (Sureau, Thuya, Genévrier, Marronnier, Mûrier, Houx, Buis), **X 1** (Pin) ; 44 + 7 + 7 + 1 = 59.
+- Statuts sur les 59 : **S 44**, **A 7** (Chêne, Autres feuillus, Autres résineux, Érable, Frêne, Peuplier, Sorbier), **C 7** (Sureau, Thuya, Genévrier, Marronnier, Mûrier, Houx, Buis), **X 1** (Pin) ; 44 + 7 + 7 + 1 = 59. **Parmi les 44 S, 8 portent un repli par le genre « à décider, D5 »** (Pin noir, Pin laricio, Laricio, Alep, Pin d'Alep, Pin maritime, Pin à crochets, Chêne rouge) : seuls 36 S sont sûrs sans réserve D5 sur le repli. Hors S, « Pin » (X) a aussi un repli genre à décider, et l'érable champêtre (code 21) n'a pas de ligne propre.
 - Colonne « Paquet » sur les 59 : couvert 21 ; repli genre 8 (Pin noir, Pin laricio, Laricio, Alep, Pin d'Alep, Pin maritime, Pin à crochets, Chêne rouge) ; repli classe → 49 : 23 ; non couvert 6 (Autres résineux, Cèdre, Cyprès, Thuya, Genévrier, If) ; sans code 1 (Pin) ; 21 + 8 + 23 + 6 + 1 = 59.
 - Clés de `RATTACHEMENT_ESSENCES` : 41 (39 noms courts, dont 3 déjà en A, + 2 noms latins) ; 38 annoncés par la fiche : **écart d'un relevé** (comptage manuel des lignes 53 à 91).
 - Codes IFN de la référence : 68 modalités (lignes 15 à 82 de la copie locale).
