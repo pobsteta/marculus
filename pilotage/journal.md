@@ -388,3 +388,4 @@
 2026-11-27 · Pascal · 043 · dépôt du brief : « Oui » · fait : brief déposé dans ~/dev/briefs/vers-tarif-nemeton/2026-11-27-marculus-refus-et-repli-d5.md (boîte créée, ajoutée à ~/dev/briefs/README.md) ; mission 043 terminée, réponse attendue dans ~/dev/briefs/vers-marculus/
 2026-11-27 · Pascal · 041+042 · porte n° 3 : « oui » · fait : PR #90 fusionnée (795079e), CI verte, release v2026.11.6 publiée ; téléphone non branché, installation à faire
 2026-11-27 · Claude (orchestrateur) · 041-043 · cycle 10 clos : kanban dernier cycle 10, cartes 041-043 en Terminé ; note de version de v2026.11.6 générée sans la phrase sur les volumes EMERGE des tiges minces (fiche 042) : à proposer à Pascal
+2026-11-27 · Pascal · cycle 10 · livraison : « oui » (v2026.11.6 pour les marteleurs EMERGE, phrase sur les volumes des tiges minces ajoutée en tête de la note de version) · fait : note de version éditée, ligne « cycle 10 » aux Livraisons du kanban
