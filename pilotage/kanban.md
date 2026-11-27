@@ -6,7 +6,7 @@
 > colonne ; on change ce numéro chaque fois qu'elle change de colonne.
 > **Une carte qui ne bouge pas est souvent la mauvaise nouvelle à dire tout de suite.**
 
-**Dernier cycle :** 9 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
+**Dernier cycle :** 10 _(augmenté de 1 à la fin de chaque `/boucle`, même quand elle n'a
 rien lancé. Une carte est immobile quand dernier cycle − N ≥ 2.)_
 
 _Modèle de carte :_
@@ -39,18 +39,12 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Statut dit combien de tiges EMERGE n'ont pas de volume faute de hauteur (aujourd'hui 0 m³ sans le dire : `Cubage.kt` l. 250 et l. 279 ; seule « N tige(s) EMERGE sur M » le laisse deviner, `StatutHistoriqueScreen.kt` l. 283) · constat sur le téléphone, « Sombernon Test », 2026-11-27 ; décision de Pascal du 2026-11-27 : au bac à sable · depuis le cycle 8
 - Brancher NEMETON dans l'application (tarif d'un contexte, écran Statut, exports, lots d'affouage), à partir du moteur (039) et de la table des essences décidée (037) · questions de sens à Pascal : volumes montrés quand une sortie manque (pas de bois fort tige des feuillus, pas de bois fort total des résineux), parts tige / houppier d'un lot, mention « provisoire », « hauteur impossible » à l'écran ; ADR 0011 ; « À propos » : citer la source d'EMERGE (Deleuze et al. 2014) et le tarif NEMETON (version du paquet, « provisoire ») — absentes en v2026.11.5, capture du 2026-11-27, décision de Pascal du 2026-11-27 · depuis le cycle 9
 - Brief vers `nemeton` : son port R (`~/dev/nemeton/R/ifn_tarifs.R` l. 131 et l. 140) copie les règles 1,4 m et 0,95 → 0,8 de Marculus ; à écrire après la fusion de 042 · depuis le cycle 10
+- EMERGE : volume aérien total négatif pour les perches très élancées (hêtre C 10 cm, H 45 m : −0,00488 m³ ; terme c·H/c13 de formTot, pas la règle 2) · testeur de la 041, 2026-11-27 · depuis le cycle 10
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé
 
-- [041](missions/041-tests-plafond-fct-emerge.md) + [042](missions/042-plafond-fct-emerge.md) · depuis le cycle 10 _(attend la porte n° 2)_
-  - Homme : testeur (sonnet) puis dev (sonnet), donner
-  - Mission : EMERGE, `fct = min(fct, 0,95)` au lieu de 0,8 au-delà de 0,95 ; règles 1 et 3 gardées (décisions de Pascal du 2026-11-27)
-  - Moyens : `EmergePlafondFctTest.kt`, hêtre C 25 cm H 20 m, une PR à Pascal
-- [043](missions/043-brief-tarif-nemeton.md) · depuis le cycle 10 _(attend la porte n° 2)_
-  - Homme : archiviste (sonnet), donner
-  - Mission : brief vers `tarif-nemeton` (refus des entrées impossibles, repli D5)
-  - Moyens : brouillon rendu, vu par Pascal avant dépôt dans `~/dev/briefs/vers-tarif-nemeton/`
+_(vide depuis le cycle 10)_
 
 ## Planifié
 
@@ -60,6 +54,15 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Couleurs écrites en dur hors du thème (19 `Color(0x…)`) : à passer aux jetons ou à `reussi`/`alerte` · décision de Pascal du 2026-10-24 : hors de 006 · essai au soleil clos le 2026-10-24 (thèmes actuels conformes) : la carte attend la palette `terrain-style` · depuis le cycle 1
 
 ## Terminé
+
+- [041](missions/041-tests-plafond-fct-emerge.md) + [042](missions/042-plafond-fct-emerge.md) · depuis le cycle 10
+  - Homme : testeur (sonnet) puis dev (sonnet), donner
+  - Mission : EMERGE, plafond continu `min(fct, 0,95)` (provisoire) au lieu de 0,8 ; règles 1 et 3 gardées
+  - Livré : PR #90 fusionnée le 2026-11-27 (795079e) sur accord de Pascal, release v2026.11.6 ; relecteur « prêt avec réserves », contrôle terrain corrigé (C 25 à H 18 puis H 19)
+- [043](missions/043-brief-tarif-nemeton.md) · depuis le cycle 10
+  - Homme : archiviste (sonnet), donner
+  - Mission : brief vers `tarif-nemeton` (refus des entrées impossibles, repli D5 à confirmer)
+  - Livré : déposé le 2026-11-27 dans `~/dev/briefs/vers-tarif-nemeton/` (boîte créée) après 2 allers-retours et l'accord de Pascal ; réponse attendue
 
 - [037](missions/037-essences-nemeton.md) · depuis le cycle 9
   - Homme : acquereur (sonnet), donner
