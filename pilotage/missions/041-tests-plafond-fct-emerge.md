@@ -7,7 +7,7 @@ cubage EMERGE plafonne la part de tige à `fct = min(fct, 0,95)` au lieu de la r
 qu'il garde les règles 1 et 3 telles quelles, pour que la décision de Pascal du 2026-11-27 (règle 2 : option B) ne
 s'auto-évalue pas.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 369-373, 382, 385), l'agent n'ayant pas consigné sa redite à l'époque._ Écrire, sans lire le code, les tests du plafond `min(fct, 0,95)` et de la non-régression des règles 1 et 3 : `EmergePlafondFctTest`, 14 cas, 8 rouges avant le code (règle 2 seule). Livrée avec la 042 par la PR #90 (795079e, v2026.11.6). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves)
 

@@ -1,5 +1,14 @@
 # Marculus — Spécification
 
+> **Remplacée par [`docs/spec.md`](../spec.md) à compter du 2026-11-27** (mission 045, plan validé par Pascal). Cette
+> spec reste, datée et sans effacement, comme historique ; **pour tout fait postérieur au 2026-10-24 ou en désaccord
+> avec elle, `docs/spec.md` fait foi.** Désaccords connus au 2026-11-27 (état `a215c0a`) : la version de la base
+> (§ 9, erratum daté plus bas) ; les « releases SemVer » (§ 9, erratum daté plus bas) ; le « volume total aérien »
+> d'EMERGE (§ 5), qui s'appelle depuis le 2026-11-27 « bois fort total » (tige + houppier) et se distingue du
+> « volume aérien total » (`docs/spec.md` § 5.2) ; les missions 029 à 043, que cette spec ne décrit pas.
+> *Numéros de ligne : les renvois du dépôt à cette spec (`l. N`) visent l'état d'avant cet ajout ; les lignes
+> ajoutées le 2026-11-27 décalent la suite.*
+
 > Application Android (smartphones + tablettes) de **martelage forestier**, inspirée de
 > l'app de référence « Compteur Intelligent » (multicounter), transposée en
 > **feuille de martelage**. Écrans de référence : `docs/ecran/`.
@@ -305,6 +314,10 @@ Tige (journal)  : uuid, contexteId, essence, classe,
   **journal net** → **testée en JVM, TDD**.
 - **Room** (journal + config + synchro ; schéma **v17** (`MarculusDatabase.kt`), migrations depuis la v12),
   **DataStore** (réglages).
+  *Erratum du 2026-11-27 (corrige, sans l'effacer, « schéma **v17** » ci-dessus, vrai le 2026-10-16) : le schéma Room est en
+  **version 18** (`data/src/main/kotlin/io/github/pobsteta/marculus/data/db/MarculusDatabase.kt` l. 63, `version = 18` ;
+  `MIGRATION_17_18` l. 55, mission 026), relu sur `a215c0a`. La « l. 57 » citée au § 7 (« Base v18 (`MarculusDatabase.kt`
+  l. 57) ») est décalée : c'est la l. 63. Voir `docs/spec.md` § 3.*
 - `:data` : `MartelageRepository`, `ReglagesRepository`, `ReferentielsRepository`,
   `SauvegardeRepository` (export/import/fusion), `GpkgRepository`.
 - **minSdk 26 / targetSdk 36** ; smartphone **et** tablette ; portrait + paysage.
@@ -314,6 +327,10 @@ Tige (journal)  : uuid, contexteId, essence, classe,
 - ✅ **CI/CD** : couverture de tests (badge), **releases SemVer automatiques**, APK release
   horodaté (`marculus-<version>-<UTC>.apk`), **site GitHub Pages** (accueil + galerie + rapport
   de couverture).
+  *Erratum du 2026-11-27 (corrige, sans l'effacer, « releases SemVer automatiques » ci-dessus) : depuis le 2026-11-11
+  les versions sont **calendaires**, `vAAAA.MM.N` (mission 036, PR #77, `a28dc2d`, tag `v2026.11.1` ;
+  `.github/scripts/version-calendaire.sh` l. 1-12), relu sur `a215c0a` ; les anciens tags `v0.*` restent. Voir
+  `docs/spec.md` § 13 et l'ADR 0013 (PR #98 `178275d`, fusionnée sur `main`, relu sur `909b1dd`).*
 
 ## 10. Reste à faire
 

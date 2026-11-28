@@ -7,7 +7,7 @@ et specs de tranche, livraisons 029 à 043 comprises, chaque fait avec sa preuve
 bilan n° 3 (Redite, README, kanban, `CLAUDE.md`, briefs entrants marqués), pour qu'un successeur sache enfin où lire
 (décision de Pascal du 2026-11-27, option A).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** Écrire `docs/spec.md`, la spec consolidée de Marculus (une ligne par fonction livrée, chacune avec sa preuve relue sur `a215c0a`, le détail restant dans les specs de tranche), et solder les trous de mémoire du bilan n° 3 (Redite vides, README, kanban, `CLAUDE.md`, briefs entrants marqués), pour qu'un successeur sache où lire ; plan d'abord, validé par Pascal le 2026-11-27. _Rédigée par l'archiviste le 2026-11-27, avant d'agir._
 
 ## Ce qui existe (preuves)
 

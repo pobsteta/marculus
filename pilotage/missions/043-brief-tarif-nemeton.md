@@ -7,7 +7,7 @@ son brief, le refus de D ≤ 0, H ≤ 0 et des résineux à H ≤ 1,301 m, et le
 paquet et du chêne rouge, pour que le propriétaire du tarif les connaisse et les accepte ou les conteste avant le
 branchement de NEMETON à l'écran.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 373, 375-381, 387-388), l'agent n'ayant pas consigné sa redite à l'époque._ Écrire le brief à `tarif-nemeton` sur deux écarts de Marculus (refus des entrées impossibles, repli D5). Livrée **sans PR** : brief déposé hors dépôt dans `~/dev/briefs/vers-tarif-nemeton/2026-11-27-marculus-refus-et-repli-d5.md` (ligne 388), après deux relectures ; Pascal a fait retirer la phrase « Marculus s'alignera sur votre réponse » (ligne 387). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves)
 

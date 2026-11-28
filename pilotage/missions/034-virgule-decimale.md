@@ -7,7 +7,7 @@
 marteleur lise et saisisse les nombres comme partout ailleurs. Vu aux captures de la 030 (journal du
 2026-11-10) ; choisie par Pascal pour le cycle 8.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 287-292), l'agent n'ayant pas consigné sa redite à l'époque._ Afficher et accepter la virgule décimale en français dans « % houpp. », stères et volume maximal (`FormatNombre.kt`). Livrée par la PR #69 (ad3103d, v0.73.2) après une reprise : la langue de l'écran est passée aux 8 appels. Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves, à 1f66af4)
 

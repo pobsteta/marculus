@@ -24,12 +24,20 @@ _Relevé du 2026-10-23 dans les boîtes de briefs (`~/dev/briefs/vers-marculus/`
 travail en attente est arrivé par `~/dev/surculus/pilotage/briefs/vers-marculus/`) et dans la
 spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:mission`._
 
+_Mise à jour du 2026-11-27 (mission 045 ; corrige, sans l'effacer, le relevé ci-dessus, « vide » en date du 2026-10-23) :_
+_`~/dev/briefs/vers-marculus/` contenait 4 briefs en attente depuis le 2026-11-20 et le 2026-11-24 (journal l. 399) ; chacun_
+_porte maintenant en tête une ligne « vu le 2026-11-27 par Marculus » : le badge « méthode » est traité (README) et son brief_
+_déplacé dans `~/dev/briefs/traites/` ; le titre des releases est traité (mission 047, PR #96) ; les deux briefs de `terrain` sont_
+_portés par la carte « Monter `terrain` » ci-dessous. La spec est `docs/spec.md` : « spec § 10 » dans les cartes ci-dessous se_
+_lit `docs/spec.md` § 15 (reste à faire)._
+
 - Lire l'échelon **forêt** de `tarifsProposes` (lots Nemeton) : il prime sur la table
   embarquée, tout autre niveau est ignoré · décision de Pascal du 2026-10-23 · réponse à
   nemetonshiny : `~/dev/briefs/vers-nemetonshiny/2026-10-23-marculus-tarifs-proposes-niveau-foret.md`
   (§ 4 : combien d'essences atteignent la forêt ?) · depuis le cycle 0
 - Recettes terrain : affouage, dictée (7 cas, bruit, gants) · spec § 10 · depuis le cycle 0
 - `web/index.html` l. 44 (`sort=semver`) et spec l. 305 (« releases SemVer ») à aligner sur les versions calendaires ; tag sans release si le build échoue après l'envoi du tag (défaut hérité : supprimer le tag puis relancer) · relecteur de la 036, 2026-11-11 · depuis le cycle 8
+  - _Ajout du 2026-11-27 (045) : la spec de juin porte maintenant un erratum daté sur les « releases SemVer » (`docs/specs/2026-06-21-marculus-v1-spec.md` § 9) et `docs/spec.md` § 13 dit les versions calendaires ; `web/index.html` l. 44 (`sort=semver`) relu à `a215c0a` : toujours là, non corrigé._
 - Captures de la fiche IzzyOnDroid à refaire avec un chantier d'exemple (barre de titre coupée sur la liste et la carte, carte sans parcelles, badge « Sans position » sur la feuille) · décision de Pascal du 2026-11-11 · depuis le cycle 8
 - Traçabilité des hauteurs estimées (MNH) contre mesurées · spec § 10 · depuis le cycle 0
 - [006](missions/006-theme-terrain-style.md) · **suspendue** jusqu'à `terrain-style` v0.6.1 (ADR 0005 ; décision de Pascal du 2026-11-10, journal) : adopter la palette `terrain-style` = couleurs actuelles, sans changement visible · depuis le cycle 7
@@ -41,6 +49,8 @@ spec, § 10. Pas encore de fiche de mission : elles viendront de `/imperatrice:m
 - Brief vers `nemeton` : son port R (`~/dev/nemeton/R/ifn_tarifs.R` l. 131 et l. 140) copie les règles 1,4 m et 0,95 → 0,8 de Marculus ; à écrire après la fusion de 042 · depuis le cycle 10
 - EMERGE : volume aérien total négatif pour les perches très élancées (hêtre C 10 cm, H 45 m : −0,00488 m³ ; terme c·H/c13 de formTot, pas la règle 2) · testeur de la 041, 2026-11-27 · depuis le cycle 10
 - Monter `terrain` (épinglé en v0.5.0, `gradle/libs.versions.toml` l. 18) : agent NTRIP obligatoire (`ClientNtrip.kt` l. 44 et 110) et versions calendaires de `terrain` · briefs `~/dev/briefs/vers-marculus/2026-11-20-terrain-*.md` · depuis le cycle 10
+  - _Ajout du 2026-11-27 (045), question pour Pascal, **non tranchée** : le brief `~/dev/briefs/vers-marculus/2026-11-20-terrain-version-calendaire.md` annonce pour `terrain` la notation `vAAAA.M.N` de la plateforme (mois sans zéro, `v2026.11.1`), alors que Marculus écrit `vAAAA.MM.N` (mois sur deux chiffres, `.github/scripts/version-calendaire.sh` l. 1-12, ADR 0013). Les deux coïncident d'octobre à décembre et diffèrent de janvier à septembre (`v2027.1.1` contre `v2027.01.1`) : laquelle Marculus garde-t-il ?_
+  - _Ajout du 2026-11-27 : tranché par Pascal, « On reste sur le mois sur 2 caractères » : Marculus garde `vAAAA.MM.N` (ADR 0013)._
 - Synchro réseau, foncier structuré, bouton Flic 2 · spec § 10 · hors périmètre actuel
 
 ## Validé

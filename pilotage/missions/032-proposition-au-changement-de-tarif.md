@@ -7,7 +7,7 @@ essence après avoir choisi la commune doit proposer son numéro IFN et sa part 
 choix de la commune, pour que le marteleur n'ait pas à appuyer sur « Reproposer ». Carte du bac à
 sable du 2026-11-10 (vu par le dev de la 030, journal) ; choisie par Pascal pour le cycle 8.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 271, 279-280), l'agent n'ayant pas consigné sa redite à l'époque._ Faire proposer le numéro IFN et la part de houppier quand on change le tarif d'une essence après la commune. **Close sans code** : le testeur n'a pas reproduit le défaut à l'émulateur (Dijon, SER C51) et Pascal a décidé « Clore, non reproduit » (ligne 280). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves, à 1f66af4)
 

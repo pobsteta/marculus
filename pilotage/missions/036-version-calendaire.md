@@ -7,7 +7,7 @@
 Marculus se numérote comme nemeton et qu'on lise d'un coup d'œil de quand date une version.
 Décision de Pascal du 2026-11-11 (compteur par mois).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 307, 309-311), l'agent n'ayant pas consigné sa redite à l'époque._ Numéroter les releases `vAAAA.MM.N` (compteur du mois) par `version-calendaire.sh` à la place de `github-tag-action`. Livrée par la PR #77 (a28dc2d), première version v2026.11.1 ; 13 tests du script. Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves, à 44ca151)
 

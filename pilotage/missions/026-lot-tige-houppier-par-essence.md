@@ -8,7 +8,7 @@ essence, pour que la commune choisisse ce qu'elle donne aux affouagistes au lieu
 Décision de Pascal du 2026-11-10 (journal, ligne `Pascal · 026`) ; elle remplace la règle du
 2026-10-24 (journal l. 73 : « houppier seul s'il y a une part de houppier, sinon le volume total »).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 220, 230-231, 234-237, 251), l'agent n'ayant pas consigné sa redite à l'époque._ Faire compter au lot d'affouage les parties cochées (tige, houppier) de chaque essence, les deux cochées par défaut : `PartsLot`, base v18, clé `.marsync` `partsLot`, ligne `PartsLot` du CSV format 8. Livrée par la PR #58 (07b5870), en brouillon jusqu'à la 027 ; version : v0.71.0 (tag sur 07b5870, la PR #58 ; v0.72.0 est le tag de 85030ff, la 027). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves, à 4dd7526)
 

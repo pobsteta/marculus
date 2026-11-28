@@ -6,7 +6,7 @@
 « 1 essence » (FR), « 1 stem » et « 1 species » (EN) au singulier, pour une lecture juste sur le
 terrain. Vu à l'essai A → B du 2026-11-10 (journal) ; choisie par Pascal pour le cycle 8.
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 281-286), l'agent n'ayant pas consigné sa redite à l'époque._ Écrire « 1 tige » et « 1 essence » au singulier (FR) et « 1 stem » (EN) sur la carte de la liste, par des `plurals`. Livrée par la PR #68 (b7aafc8, v0.73.1) après une reprise : test de la phrase complète FR et EN, séparateurs protégés. Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves, à 1f66af4)
 

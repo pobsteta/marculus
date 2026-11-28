@@ -7,7 +7,7 @@ Deleuze et al. 2014 la source des trois règles du calcul EMERGE de Marculus que
 source, pour que Pascal décide de les garder, de les borner ou de les retirer. « Oui c'est une prochaine mission »
 (Pascal, 2026-11-27).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 329, 334-336, 340, 344-346, 352), l'agent n'ayant pas consigné sa redite à l'époque._ Chercher la source des trois règles EMERGE sans source (fct sans borne basse, fct > 0,95 → 0,8, H ≤ 1,4 m → 0). Livrée par la PR #86 (b4695ac) après trois allers-retours et un erratum du relecteur en tête, plutôt qu'un quatrième : règle 2 sans source publiée (copie de travail non commitée de gftools), Pascal « ne sait pas répondre » (ligne 352). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves)
 

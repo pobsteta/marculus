@@ -8,7 +8,7 @@ NEMETON (genre, puis classe « autres »). Le paquet NEMETON prend un code IFN c
 travaille sur des noms (« Chêne », « Hêtre »…). Décision de Pascal du 2026-11-27 : intégrer NEMETON dès le paquet
 provisoire (option b, journal du 2026-11-27).
 
-**Redite par l'agent :** _à compléter par l'agent avant d'agir — s'il n'y arrive pas, il s'arrête._
+**Redite par l'agent :** _reconstituée le 2026-11-27 d'après le journal (lignes 329, 333, 337-339, 353-363, 366), l'agent n'ayant pas consigné sa redite à l'époque._ Proposer à Pascal une table de revue du code IFN de chaque nom d'essence de Marculus, avec le repli prévu : 59 noms traités. Livrée par la PR #85 (04c5bf2), `docs/specs/2026-11-27-essences-nemeton.md`, après un aller-retour ; Pascal a tranché les onze lignes ouvertes (lignes 353-363). Redite de l'agent d'origine : non retrouvée.
 
 ## Ce qui existe (preuves)
 

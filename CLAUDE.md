@@ -25,7 +25,7 @@ l'effort.**
 | Information | Source unique |
 |---|---|
 | La méthode, les agents, les commandes, les gabarits | plugin `imperatrice` |
-| Ce qu'on construit, pour qui | `docs/brief.md` puis `docs/spec.md` (écrite à l'étape 5 de `/brief` ; d'ici là, `docs/specs/2026-06-21-marculus-v1-spec.md`) |
+| Ce qu'on construit, pour qui | `docs/brief.md` (pour qui, pourquoi) puis `docs/spec.md` (consolidée le 2026-11-27, mission 045 ; le détail est dans `docs/specs/*.md`, et la spec de juin `docs/specs/2026-06-21-marculus-v1-spec.md` est en historique) |
 | Les décisions d'architecture | `docs/adr/NNNN-titre.md` |
 | L'équipe validée, le plafond humain | `pilotage/equipe.md` |
 | Les missions | `pilotage/missions/NNN-titre.md` |
@@ -45,21 +45,28 @@ Le plugin `imperatrice` (pobsteta) porte la méthode, les agents et les hooks ; 
 
 ## Règles métier du projet
 
-La description à jour du produit est dans `docs/specs/2026-06-21-marculus-v1-spec.md`
-(et les specs de tranche voisines). Les référentiels, avec leurs sources :
+La description à jour du produit est `docs/spec.md` (une ligne par fonction livrée, avec sa
+preuve) ; le détail est dans les specs de tranche de `docs/specs/` (dont les quatre du 2026-11-27 :
+EMERGE, essences NEMETON, rattachement des essences, règles sans source). Les référentiels, avec leurs sources :
 
-- **Essences** : codes ONF à 3 caractères ; table générée depuis `gftools`
-  (spec §3, `docs/specs/BRIEF-claude-code-voice.md`).
+- **Essences** : codes ONF à 3 caractères ; table `EMERGE_CODES` de `core/src/main/kotlin/fr/marculus/core/EmergeCoefs.kt` (l. 447 ; en-tête du
+  fichier : « généré depuis `gftools::ListTarEmerge` »), rattachement des noms courts à la main
+  (`core/src/main/kotlin/fr/marculus/core/Cubage.kt`, `RATTACHEMENT_ESSENCES`) ; voir `docs/spec.md` § 5.7. (`docs/specs/BRIEF-claude-code-voice.md` est
+  le brief d'origine de la dictée, historique.)
 - **Cubage** : tarifs **Schaeffer** rapide, intermédiaire, lent et très lent
-  (formules en spec §5 ; numéro de tarif entier) et **EMERGE** (226 essences,
+  (formules en `docs/spec.md` § 5.1 ; numéro de tarif entier) et **EMERGE** (226 entrées EMERGE
+  de `ListTarEmerge`, copie de travail non commitée de `gftools`, soit 429 noms français et latins dans `EMERGE_COEFS` ;
   `EmergeCoefs.kt` généré depuis `gftools::ListTarEmerge` : ne pas éditer à la main).
+- **EMERGE, quatre volumes, et NEMETON** : tige, houppier, bois fort total (tige + houppier), volume aérien total ;
+  trois règles de calcul qui sont des choix de Marculus (`docs/spec.md` § 5.2) ; le tarif NEMETON est dans `:core`,
+  provisoire, **pas encore branché** à l'application (`docs/spec.md` § 5.6).
 - **Tarifs IFN par SER** : commune INSEE → SER, puis repli GRECO → France sous
   30 arbres (`docs/specs/2026-10-16-tarifs-ser.md`).
 - **Référentiel ONF** : RDVT (`docs/ONF_RDVT_39-40.pdf`, `docs/ONF_RDVT_44.pdf`).
 - **Géographie** : GeoPackage OGC ; tout CRS déclaré est reprojeté en WGS84 / EPSG:4326
   (`docs/specs/couches-gpkg.md`, `docs/specs/couche-houppier-mnh.md`).
 - **Vocabulaire** : dire « GNSS », jamais « GPS ». Un contexte est une opération de
-  martelage (spec §2).
+  martelage (`docs/spec.md` § 2).
 - **Contraintes** : hors ligne total, sans publicité ; partage par fichier
   (`.marsync`, CSV), sans serveur. Le journal des tiges est en ajout seul (UUID par tige).
 
