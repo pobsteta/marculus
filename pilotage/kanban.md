@@ -55,10 +55,6 @@ _lit `docs/spec.md` § 15 (reste à faire)._
 
 ## Validé
 
-- [044](missions/044-regle-source-relue.md) · [045](missions/045-spec-consolidee.md) · [046](missions/046-adr-nemeton-emerge-versions.md) · [047](missions/047-titre-release-sans-nom.md) · depuis le cycle 10 (bilan n° 3)
-  - Homme : archiviste ×3 (sonnet), dev (sonnet)
-  - Mission : règle de preuve, `docs/spec.md` consolidée, ADR 0011-0013, titre des releases
-  - Moyens : Pareto et test du successeur du bilan n° 3 ; 045 après 046, plafond de 3 PR
 
 ## Planifié
 
@@ -69,6 +65,10 @@ _lit `docs/spec.md` § 15 (reste à faire)._
 
 ## Terminé
 
+- [044](missions/044-regle-source-relue.md) · [045](missions/045-spec-consolidee.md) · [046](missions/046-adr-nemeton-emerge-versions.md) · [047](missions/047-titre-release-sans-nom.md) · depuis le cycle 10 (bilan n° 3)
+  - Homme : archiviste ×3 (sonnet), dev (sonnet)
+  - Mission : règle de preuve, `docs/spec.md` consolidée, ADR 0011-0013, titre des releases
+  - Livré : PR #97 (044), #98 (046), #96 (047, release v2026.11.7 titrée sans « Marculus »), #100 (045, afca80e) fusionnées le 2026-11-27/28 sur accord de Pascal ; brief vers la méthode déposé
 - [041](missions/041-tests-plafond-fct-emerge.md) + [042](missions/042-plafond-fct-emerge.md) · depuis le cycle 10
   - Homme : testeur (sonnet) puis dev (sonnet), donner
   - Mission : EMERGE, plafond continu `min(fct, 0,95)` (provisoire) au lieu de 0,8 ; règles 1 et 3 gardées
